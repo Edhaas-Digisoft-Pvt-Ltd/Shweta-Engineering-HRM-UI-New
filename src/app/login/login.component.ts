@@ -33,26 +33,26 @@ export class LoginComponent {
         Validators.minLength(6),
         Validators.pattern(this.NoWhitespaceRegExp),
       ]), // Min length validation
-      role: new FormControl('',[
+      role: new FormControl('', [
         Validators.required,]), // Required field
     });
   }
 
   login() {
-    const body = {
-      Username: this.loginForm.get('email')?.value,
-      PasswordHash: this.loginForm.get('password')?.value,
-      User_Role: this.loginForm.get('role')?.value,
-    };
-    this.service.post('/loginemp', body).subscribe((res: any) => {
-      if (res.status == 'success') {
-        console.log('Form Submitted:', this.loginForm.value);
-        this.toastr.success('Login successful !!!');
-        this.router.navigate(['/authPanal/Dashboard']);
-      } else {
-        this.toastr.error('Please Check Detail !!!');
-      }
-    });
+    // const body = {
+    //   Username: this.loginForm.get('email')?.value,
+    //   PasswordHash: this.loginForm.get('password')?.value,
+    //   User_Role: this.loginForm.get('role')?.value,
+    // };
+    // this.service.post('/loginemp', body).subscribe((res: any) => {
+    //   if (res.status == 'success') {
+    //     console.log('Form Submitted:', this.loginForm.value);
+    //     this.toastr.success('Login successful !!!');
+    //     this.router.navigate(['/authPanal/Dashboard']);
+    //   } else {
+    //     this.toastr.error('Please Check Detail !!!');
+    //   }
+    // });
   }
 
   // onSubmit() {
@@ -67,9 +67,6 @@ export class LoginComponent {
   //   }
   // }
 
-  // onRegisterSubmit() {
-  //   alert("Working on register");
-  // }
   employeID: any;
   onSubmit() {
     if (this.loginForm.valid) {
