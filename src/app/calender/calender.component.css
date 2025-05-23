@@ -1,0 +1,29 @@
+
+::ng-deep .fc .fc-col-header thead {
+    background-color: #578FCA !important;
+    height: 30px !important;
+  }
+  
+  ::ng-deep .fc .fc-col-header thead th a {
+    color: white !important; 
+
+  }
+  ::ng-deep .fc .fc-toolbar-title {
+    font-size: 1.5rem;
+  }
+  
+  ::ng-deep .fc-daygrid-day-number {
+    font-weight: bold;
+    color: #007bff;
+  }
+  
+  ::ng-deep .fc-h-event .fc-event-title-container {
+    flex-grow: 1;
+    flex-shrink: 1;
+    min-width: 0px;
+    padding: 5px  10px;
+}
+::ng-deep th.fc-col-header-cell.fc-day {
+  padding: 10px;
+}
+

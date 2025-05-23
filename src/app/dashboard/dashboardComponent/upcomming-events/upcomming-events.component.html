@@ -1,0 +1,30 @@
+<div class="row align-items-center p-3">
+
+    <div class="col-10">
+        <h6 class="upcommingEvents pb-0"><i class="bi bi-calendar-check me-2 text-primary mb-0"></i> Upcomming Events
+        </h6>
+    </div>
+    <div class="col-2">
+        <div class=" rounded-2 btn viewCalender " (click)="viewCalender()" >
+          <i class="bi bi-calendar-check  mb-0"></i>
+        </div>
+    </div>
+
+</div>
+
+<div class="row border-top border-2 border-primary m-2 pt-3">
+    <div class="row mb-2 mt-2 eventBox" *ngFor="let event of dateEvents">
+        <div class="col-3 p-2 text-center eventDate" style="background-color: #C8E3FF;border-radius: 5px;height: 58px ; width: 58px;">
+            <h5 class="mb-0 fw-bold">{{ event.date | date: 'dd' }} </h5>
+            <span style="font-size: 15px;">{{ event.date | date: 'MMM' }}</span>
+        </div>
+        <div class="col-9">
+          <p class="mb-0 text-primary">{{ event.title }}</p>
+          <p class="mb-0" style="font-size: 13px;">
+            Scheduled on: {{ event.date | date: 'fullDate' }}
+          </p>
+        </div>
+      </div>
+      
+      
+</div>

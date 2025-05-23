@@ -1,0 +1,114 @@
+.search-box {
+    /* border-right : 1px dashed gray;padding-right:25px; */
+}
+
+.devider {
+    display: inline-block;
+    width: 2px;
+    border-right: 1px dashed black;
+    height: 60px;
+}
+
+.search-box input {
+    background-color: white;
+    box-shadow: rgba(0, 0, 0, 0.16) 0px 1px 4px;
+
+}
+
+.attendanceButtons {
+    /* border-right : 1px dashed gray; */
+    position: relative;
+}
+
+.attendanceButtons button.btn.btn-light.border-secondary {
+    box-shadow: rgba(0, 0, 0, 0.16) 0px 1px 4px;
+    border: none;
+    padding: 7px 20px;
+    background-color: white;
+}
+
+.search-box {
+    display: flex;
+    justify-content: space-between;
+
+}
+
+.list ul {
+    display: flex;
+    gap: 20px;
+
+}
+
+.list ul li {
+    list-style: none;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.list ul li .dot {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    /* background-color: rgb(8, 62, 109); */
+}
+
+.list ul li:nth-of-type(1) .dot {
+    background-color: #11FFA1;
+}
+
+.list ul li:nth-of-type(2) .dot {
+    background-color: #F90004;
+}
+
+.list ul li:nth-of-type(3) .dot {
+    background-color: #EDD000;
+}
+
+.list ul li:nth-of-type(4) .dot {
+    background-color: #9FFF04;
+}
+
+.list ul li:nth-of-type(5) .dot {
+    background-color: #04BCFF;
+}
+
+.list ul li:nth-of-type(6) .dot {
+    background-color: #0066EB;
+}
+
+.list ul li:nth-of-type(7) .dot {
+    background-color: #E000B0;
+}
+
+.list ul li:nth-of-type(8) .dot {
+    background-color: #880021;
+}
+
+label {
+    font-weight: 600;
+    margin-bottom: 10px;
+}
+
+.selectdata {
+    width: 165px;
+}
+
+.selectdata2,
+.selectdata3 {
+    width: 130px;
+    position: relative;
+}
+
+/* .attendanceButtons::after {
+    position: absolute;
+    content: "";
+    height: 2px;
+    width: 37px;
+    top: 54px;
+    background-color: #578fca;
+} */
+
+.exportExcelBtn {
+    background-color: #3674B5;
+}

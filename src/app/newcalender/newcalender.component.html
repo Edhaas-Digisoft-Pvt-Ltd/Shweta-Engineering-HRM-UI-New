@@ -1,0 +1,19 @@
+<div class="calendar-wrapper">
+    <div class="calendar-header">
+      <button (click)="prevMonth()">&#8592;</button>
+      <h2>{{ monthNames[currentDate.getMonth()] }} {{ currentDate.getFullYear() }}</h2>
+      <button (click)="nextMonth()">&#8594;</button>
+    </div>
+  
+    <div class="calendar-grid">
+      <div class="day-name" *ngFor="let day of dayNames">{{ day }}</div>
+  
+      <ng-container *ngFor="let day of days">
+        <div class="calendar-day" (click)="addTask(day.fullDate)">
+          <strong>{{ day.date }}</strong>
+          <div class="task" *ngFor="let task of day.tasks">{{ task }}</div>
+        </div>
+      </ng-container>
+    </div>
+  </div>
+  

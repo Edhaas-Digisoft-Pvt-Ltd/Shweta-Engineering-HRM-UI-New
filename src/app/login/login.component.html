@@ -1,0 +1,68 @@
+<div class="container d-flex justify-content-center align-items-center vh-100">
+    <div class="login-container shadow-lg">
+        <div class="row g-0 h-100">
+            <!-- Signup Section -->
+            <div class="col-md-6 d-lg-flex h-full align-items-center justify-content-center text-white">
+                <!-- <div class="text-center p-5">
+                    <h2>Shweta Engineers </h2>
+                    <h3> Payroll Model</h3>
+
+                </div> -->
+
+                <div class="loginImage">
+                    <img src="../../assets/img/login.webp" style="height: 100%;width: 100%;object-fit: fill;" alt="">
+                </div>
+            </div>
+
+            <!-- Login Section -->
+            <div class="col-md-6 d-flex align-items-center justify-content-center login-box p-4">
+                <div class="text-center w-100">
+                    <h2 class="mb-4 fw-bold">Login </h2>
+                    <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+                        <!-- Email Field -->
+                        <div class="mt-4 input-group">
+                            <span class="input-group-text"><i class="bi bi-envelope"></i></span>
+                            <input type="email" class="form-control" formControlName="email" placeholder="Enter Email">
+                        </div>
+                        <small class="text-danger "
+                            *ngIf="loginForm.get('email')?.invalid && loginForm.get('email')?.touched">
+                            * This Field is Required
+                        </small>
+
+                        <!-- Password Field -->
+                        <div class="mt-4 input-group">
+                            <span class="input-group-text"><i class="bi bi-key-fill"></i></span>
+                            <input type="password" class="form-control" formControlName="password"
+                                placeholder="Input your password">
+                        </div>
+                        <small class="text-danger  text-left mb-4"
+                            *ngIf="loginForm.get('password')?.invalid && loginForm.get('password')?.touched">
+                            * This Field is required
+                        </small>
+
+                        <!-- Role Dropdown -->
+                        <select id="roleSelect" formControlName="role" class="form-select mt-4 ">
+                            <option value="" disabled selected>Select Role</option>
+                            <option value="admin">Admin</option>
+                            <option value="employee">Employee</option>
+                            <option value="accountant">Accountant</option>
+                        </select>
+                        <small class="text-danger my-4"
+                            *ngIf="loginForm.get('role')?.invalid && loginForm.get('role')?.touched">
+                            * This Field is required
+                        </small>
+
+                        <!-- Login Button -->
+                        <input class="btn btn-primary w-50 login-btn mt-5 " type="submit" value="Log In">
+                        <!-- <button class="btn btn-primary w-50 login-btn mt-5" [disabled]="loginForm.invalid">
+                            <i class="fa-solid fa-sign-in-alt"></i> LOG IN
+                        </button> -->
+                    </form><br>
+                    <p class="my-2">Don't have an account? <a href="#">Create Account</a></p>
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>

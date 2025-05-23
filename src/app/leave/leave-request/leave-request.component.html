@@ -1,0 +1,240 @@
+
+    <div class="container-fluid ">
+        <div class="row gx-3  align-items-center p-2 rounded-2">
+           
+            <div class="col-12 text-end d-flex justify-content-end align-items-center">
+                <!-- <div class="">
+                    <input class="py-1 px-3 form-control" type="text" #searchBox placeholder="Search Here"
+                        [(ngModel)]="searchInputValue" (ngModelChange)="onFilterBoxChange()" />
+                </div> -->
+
+                <div class=" text-start select-company ">
+                  <label class="fw-bold">Select Company </label>
+                  <br>
+                  <select class="form-select" (change)="onCompanyChange($event)">
+                    <!-- <option value="" selected>Select Company</option> -->
+                    <option *ngFor="let item of CompanyNames" [value]="item.company_id">
+                        {{ item.company_name }}
+                    </option>
+                </select>
+              </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-12 mt-4 p-0">
+                <ag-grid-angular style="width: 100%; height: 60vh;" class="ag-theme-alpine" [rowData]="rowData"
+                    [columnDefs]="columnDefs" [defaultColDef]="defaultColDef" (gridReady)="onGridReady($event)">
+                </ag-grid-angular>
+            </div>
+        </div>
+    </div>
+
+
+
+
+<!-- Modal  -->
+
+    <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" >
+        <div class="modal-dialog modal-dialog-centered modal-xl">
+            <div class="modal-content">
+                <div class="modal-header " style="padding: 20px 40px !important">
+                    <h1 class="modal-title fs-5" id="exampleModalLabel">Leave Request Info</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form [formGroup]="leaveRequestForm">
+                    <div class="modal-body" style="padding: 5px 40px !important">
+                        <div class="row">
+                            <div class="col-lg-7   " style="border-right : 1px dashed gray; padding-right: 20px;">
+                                <div class="row my-3">
+                                    <div class="col-md-6">
+                                        <label for="employeeName">Employee Name</label>
+                                        <input type="text" id="employeeName" class="form-control"
+                                            formControlName="employeeName" placeholder="Enter Employee Name" readonly>
+                                        <div *ngIf="leaveRequestForm.get('employeeName')?.invalid && leaveRequestForm.get('employeeName')?.touched"
+                                            class="text-danger">
+                                            Employee Name is required
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-3">
+                                        <label for="startDate">Start Date</label>
+                                        <input type="date" id="startDate" class="form-control"  readonly formControlName="startDate">
+                                        <div *ngIf="leaveRequestForm.get('startDate')?.invalid && leaveRequestForm.get('startDate')?.touched"
+                                            class="text-danger">
+                                            Start Date is required
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-3">
+                                        <label for="endDate">End Date</label>
+                                        <input type="date" id="endDate" class="form-control" readonly formControlName="endDate">
+                                        <div *ngIf="leaveRequestForm.get('endDate')?.invalid && leaveRequestForm.get('endDate')?.touched"
+                                            class="text-danger">
+                                            End Date is required
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row my-3">
+                                    <div class="col-lg-3 col-md-6">
+                                        <label for="leaveType">Leave Type</label>
+                                        <input type="text" id="leaveType" class="form-control" readonly formControlName="leaveType"
+                                            placeholder="Enter Leave Type">
+                                        <div *ngIf="leaveRequestForm.get('leaveType')?.invalid && leaveRequestForm.get('leaveType')?.touched"
+                                            class="text-danger">
+                                            Leave Type is required
+                                        </div>
+                                    </div>
+
+                                    <div class="col-lg-3 col-md-6">
+                                        <label for="status">Status</label>
+                                        <input
+                                        type="text"
+                                        id="status"
+                                        class="form-control "
+                                        [ngClass]="{
+                                            'custom-bg-warning': leaveRequestData.status === 'Pending',
+                                            'custom-bg-success': leaveRequestData.status === 'Approved',
+                                            'custom-bg-danger': leaveRequestData.status === 'Rejected'
+                                        }"
+                                        [value]="leaveRequestData.status"
+                                        readonly
+                                        />
+                                        <div *ngIf="leaveRequestForm.get('status')?.invalid && leaveRequestForm.get('status')?.touched"
+                                            class="text-danger">
+                                            Status is required
+                                        </div>
+                                    </div>
+
+                                    <div class="col-lg-3 col-md-6">
+                                        <label for="noOfDays">No. Of Days</label>
+                                        <input type="text" id="noOfDays" class="form-control" readonly formControlName="noOfDays"
+                                            placeholder="Enter No. Of Days">
+                                        <div *ngIf="leaveRequestForm.get('noOfDays')?.invalid && leaveRequestForm.get('noOfDays')?.touched"
+                                            class="text-danger">
+                                            No. Of Days is required
+                                        </div>
+                                    </div>
+
+                                    <div class="col-lg-3 col-md-6">
+                                        <label for="department">Department</label>
+                                        <input type="text" id="department" class="form-control" readonly formControlName="department"
+                                            placeholder="Enter Department">
+                                        <div *ngIf="leaveRequestForm.get('department')?.invalid && leaveRequestForm.get('department')?.touched"
+                                            class="text-danger">
+                                            Department is required
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row my-3">
+                                    <div class="col-12">
+                                        <label for="leavereason">Reason</label>
+                                        <textarea id="leavereason" rows="2" class="form-control"  readonly formControlName="leavereason" placeholder="Enter Reason"></textarea>
+                                        <div *ngIf="leaveRequestForm.get('leavereason')?.invalid && leaveRequestForm.get('leavereason')?.touched" class="text-danger">
+                                        Reason is required
+                                        </div>
+                                    </div>
+                                    
+                                </div>
+                            </div>
+                            <div class="col-lg-5 p-4">
+                                <div class="leavesSchedule p-0" style="border-radius: 10px; border:1px solid rgb(188, 188, 188); overflow:hidden">
+                                  <div class="row">
+                                    <p class="py-2 px-4 leaveBalance">Leave Balance</p>
+                                  </div>
+                              
+                                  <div class="row gx-3 px-3 pb-3">
+                                    <!-- Casual Leaves -->
+                                    <div class="col-12 text-dark fw-semibold">
+                                      Casual Leaves
+                                      <hr class="m-0">
+                                    </div>
+                              
+                                    <div class="col-md-4 col-sm-6 my-2" *ngIf="leaveBalance.casual">
+                                      <div class="leaveStatusCard text-center border" style="border-radius: 5px">
+                                        <div class="heading p-2" style="background-color: #C8E3FF; border-radius: 5px 5px 0px 0px; font-size: 13px;">
+                                          Total Leaves
+                                        </div>
+                                        <div class="content p-2">
+                                          {{ leaveBalance.casual.total }}
+                                        </div>
+                                      </div>
+                                    </div>
+                              
+                                    <div class="col-md-4 col-sm-6 my-2">
+                                      <div class="leaveStatusCard text-center border" style="border-radius: 5px">
+                                        <div class="heading p-2" style="background-color: #C8E3FF; border-radius: 5px 5px 0px 0px; font-size: 13px;">
+                                          Taken Leaves
+                                        </div>
+                                        <div class="content p-2">
+                                          {{ leaveBalance.casual.taken }}
+                                        </div>
+                                      </div>
+                                    </div>
+                              
+                                    <div class="col-md-4 col-sm-6 my-2">
+                                      <div class="leaveStatusCard text-center border" style="border-radius: 5px">
+                                        <div class="heading p-2" style="background-color: #C8E3FF; border-radius: 5px 5px 0px 0px; font-size: 13px;">
+                                          Balance Leaves
+                                        </div>
+                                        <div class="content p-2">
+                                          {{ leaveBalance.casual.balance }}
+                                        </div>
+                                      </div>
+                                    </div>
+                              
+                                    <!-- Sick Leaves -->
+                                    <div class="col-12 mt-2 text-dark fw-semibold">
+                                      Sick Leaves
+                                      <hr class="m-0">
+                                    </div>
+                              
+                                    <div class="col-md-4 col-sm-6 my-2">
+                                      <div class="leaveStatusCard text-center border" style="border-radius: 5px">
+                                        <div class="heading p-2" style="background-color: #C8E3FF; border-radius: 5px 5px 0px 0px; font-size: 13px;">
+                                          Total Leaves
+                                        </div>
+                                        <div class="content p-2">
+                                          {{ leaveBalance.sick.total }}
+                                        </div>
+                                      </div>
+                                    </div>
+                              
+                                    <div class="col-md-4 col-sm-6 my-2">
+                                      <div class="leaveStatusCard text-center border" style="border-radius: 5px">
+                                        <div class="heading p-2" style="background-color: #C8E3FF; border-radius: 5px 5px 0px 0px; font-size: 13px;">
+                                          Taken Leaves
+                                        </div>
+                                        <div class="content p-2">
+                                          {{ leaveBalance.sick.taken }}
+                                        </div>
+                                      </div>
+                                    </div>
+                              
+                                    <div class="col-md-4 col-sm-6 my-2">
+                                      <div class="leaveStatusCard text-center border" style="border-radius: 5px">
+                                        <div class="heading p-2" style="background-color: #C8E3FF; border-radius: 5px 5px 0px 0px; font-size: 13px;">
+                                          Balance Leaves
+                                        </div>
+                                        <div class="content p-2">
+                                          {{ leaveBalance.sick.balance }}
+                                        </div>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                              
+                        </div>
+
+                    </div>
+                </form>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn approveBtn" (click)="updateStatus('Approved')">Approve Leave</button>
+                    <button type="button" class="btn declineBtn" (click)="updateStatus('Rejected')">Decline Leave</button>
+                    <button type="button" class="btn btn-outline-dark fw-semobild " data-bs-dismiss="modal">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>

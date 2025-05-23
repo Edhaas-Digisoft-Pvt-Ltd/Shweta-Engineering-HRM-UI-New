@@ -1,0 +1,177 @@
+<!-- Navbar Starts -->
+<nav class="navbar mt-2 h-75 d-flex flex-column">
+
+    <div class="w-100 flex-grow-1 d-flex flex-column">
+
+        <!-- Navbar toggler for small screens -->
+        <button class="resp-btn cutom-text btn text-white btn-light" type="button" data-bs-toggle="collapse"
+            data-bs-target="#navbarScroll" aria-controls="navbarScroll" aria-expanded="false"
+            aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon text-white"></span>
+        </button>
+
+        <div class="nav-content flex-grow-1 d-flex flex-column">
+            <ul class="navbar-nav gap-2 vertical-nav flex-grow-1">
+                <li [routerLink]="['Dashboard']" class="nav-item" *ngIf="role === 'admin'">
+                    <a type="button" routerLinkActive="active-link" (click)="closeAccordion()"
+                        class="nav-link btn-like d-flex align-items-center">
+                        <i class="bi bi-house ms-2 me-2"></i>Dashboard
+                    </a>
+                </li>
+                <li [routerLink]="['Attendance']" class="nav-item" *ngIf="role === 'admin'">
+                    <a type="button" routerLinkActive="active-link" (click)="closeAccordion()"
+                        class="nav-link btn-like d-flex align-items-center">
+                        <i class="bi bi-alarm ms-2 me-2"></i>Attendances
+                    </a>
+                </li>
+                <li [routerLink]="['Leave']" class="nav-item" *ngIf="role === 'admin'">
+                    <a type="button" routerLinkActive="active-link" (click)="closeAccordion()"
+                        class="nav-link btn-like d-flex align-items-center">
+                        <i class="bi bi-calendar-week ms-2 me-2"></i>Leave
+                    </a>
+                </li>
+
+
+                <li [routerLink]="['AdvancePayment']" class="nav-item" *ngIf="role === 'admin'">
+                    <a type="button" routerLinkActive="active-link" (click)="closeAccordion()"
+                        class="nav-link btn-like d-flex align-items-center">
+                        <i class="bi bi-currency-rupee ms-1 me-0" style="font-size: 1.3rem;"></i>Advance Payment
+                    </a>
+                </li>
+
+                <div class="accordion accordion-flush rounded-2 overflow-hidden bg-transparent" id="accordionFlushExample" *ngIf="role === 'admin' || role === 'accountant'">
+                    <div class="accordion-item ">
+                        <h2 class="accordion-header ">
+                            <button class="accordion-button collapsed px-2" type="button" data-bs-toggle="collapse"
+                                data-bs-target="#flush-collapseOne" aria-expanded="false"
+                                aria-controls="flush-collapseOne">
+                                <i class="bi bi-currency-rupee" style="font-size: 1.3rem;"></i> Payroll
+                            </button>
+                        </h2>
+                        <div id="flush-collapseOne" class="accordion-collapse collapse"
+                            data-bs-parent="#accordionFlushExample">
+                            <div class="accordion-body">
+                                <ul class="gap-3 py-2 d-flex flex-column">
+                                    <li >
+                                        <a type="button" [routerLink]="['payrollProcess']"  routerLinkActive="active-link" (click)="closeAccordion()"
+                                            class="d-flex align-items-center">
+                                            Process Payroll
+                                        </a>
+                                    </li>
+                                    <li [routerLink]="['payrollList']" >
+                                        <a type="button" routerLinkActive="active-link" (click)="closeAccordion()"
+                                            class="d-flex align-items-center">
+                                           Payroll List
+                                        </a>
+                                    </li>
+                                    <li >
+                                        <a type="button"  [routerLink]="['salaryRevision']"  routerLinkActive="active-link" (click)="closeAccordion()"
+                                            class="d-flex align-items-center">
+                                            Salary Revisions
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+
+
+                    </div>
+
+                </div>
+
+                <li [routerLink]="['Calender']" class="nav-item" *ngIf="role === 'admin' || role === 'employee' || role === 'accountant'">
+
+                    <a type="button" routerLinkActive="active-link" (click)="closeAccordion()"
+                        class="nav-link btn-like d-flex align-items-center">
+                        <i class="bi bi-calendar-event ms-2 me-2"></i>Calender
+                    </a>
+                </li>
+
+
+
+
+                <li [routerLink]="['Employee']" class="nav-item" *ngIf="role === 'admin'">
+                    <a type="button" routerLinkActive="active-link" (click)="closeAccordion()"
+                        class="nav-link btn-like d-flex align-items-center">
+                        <i class="bi bi-people-fill ms-2 me-2"></i>Employee
+                    </a>
+                </li>
+
+
+
+                 <!-- <li [routerLink]="['CompanySetup']" class="nav-item">
+
+                    <a type="button" routerLinkActive="active-link" (click)="closeAccordion()"
+                        class="nav-link btn-like d-flex align-items-center">
+                        <i class="bi bi-gear ms-2 me-2"></i>Company Setup
+                    </a>
+                </li> -->
+                 <div class="accordion accordion-flush rounded-2 overflow-hidden bg-transparent mb-2" id="accordionFlushExample2" *ngIf="role === 'admin'">
+                    <div class="accordion-item ">
+                        <h2 class="accordion-header ">
+                            <button class="accordion-button collapsed px-2" type="button" data-bs-toggle="collapse"
+                                data-bs-target="#flush-collapseTwo" aria-expanded="false"
+                                aria-controls="flush-collapseOne">
+                                <i class="bi bi-gear ms-1  me-2"></i> Company Settings
+                            </button>
+                        </h2>
+                        <div id="flush-collapseTwo" class="accordion-collapse collapse"
+                            data-bs-parent="#accordionFlushExample2">
+                            <div class="accordion-body">
+                                <ul class="gap-3 py-2 d-flex flex-column">
+                                    <li >
+                                        <a type="button" [routerLink]="['companyList']"  routerLinkActive="active-link" (click)="closeAccordion()"
+                                            class="d-flex align-items-center">
+                                            Company List
+                                        </a>
+                                    </li>
+                                    <li [routerLink]="['comMange&Plolicies']" >
+                                        <a type="button" routerLinkActive="active-link" (click)="closeAccordion()"
+                                            class="d-flex align-items-center">
+                                           manage & Policies
+                                        </a>
+                                    </li>
+                                    <li >
+                                        <a type="button"  [routerLink]="['LeaveSetup']"  routerLinkActive="active-link" (click)="closeAccordion()"
+                                            class="d-flex align-items-center">
+                                            Leave Config
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+
+
+                    </div>
+
+                </div>
+                 <!-- <li [routerLink]="['demo']" class="nav-item">
+
+                    <a type="button" routerLinkActive="active-link" (click)="closeAccordion()"
+                        class="nav-link btn-like d-flex align-items-center">
+                        <i class="bi bi-gear ms-2 me-2"></i>demo
+                    </a>
+                </li> -->
+                 <!-- <li [routerLink]="['demo2']" class="nav-item">
+
+                    <a type="button" routerLinkActive="active-link" (click)="closeAccordion()"
+                        class="nav-link btn-like d-flex align-items-center">
+                        <i class="bi bi-gear ms-2 me-2"></i>demo2
+                    </a>
+                </li> -->
+            </ul>
+            <!-- Logout Button at the Bottom -->
+            <div class="d-flex flex-column align-items-start gap-1 flex-nowrap userLogin">
+                <div>
+                    <h5>User</h5>
+                </div>
+                <div>
+                    <button class="btn fw-medium text-white" (click)="logout()">
+                        <i class="bi bi-box-arrow-right me-2"></i> Logout
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</nav>

@@ -1,0 +1,111 @@
+.intro_card i {
+  font-size: 25px;
+}
+
+.intro_card {
+  /* background: #80808026; */
+  padding: 20px;
+  border-radius: 10px;
+  width: 48%;
+}
+
+.chart-container {
+  width: 100%;
+  height: 300px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.bg-lightblue {
+  background-color: #EAF4FF;
+}
+
+.companyCount {
+  font-size: 25px;
+  font-weight: 600;
+}
+
+.companyTitle {
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.upcommingEvents {
+  font-size: 20px;
+  font-weight: 600;
+}
+
+/* .upcoming_events {
+  height: 100% !important;
+  overflow: scroll !important;
+} */
+.highlighted {
+  border: 2px solid #3674B5;
+  background-color: #3674B5;
+  color: #fff;
+}
+
+.highlighted i {
+  color: white !important;
+}
+
+canvas {
+  display: block;
+  box-sizing: border-box;
+  height: 250px;
+  width: 100% !important;
+}
+
+.leaveAttendanceWrapper {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+}
+
+@media(max-width:430px) {
+  .companyCount {
+    font-size: 21px;
+  }
+
+  .leaveAttendanceWrapper {
+    grid-template-columns: repeat(1, 1fr);
+  }
+
+  canvas {
+    /* height: 300px !important; */
+    width: 100%;
+  }
+}
+
+.companyCard {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+}
+
+.companyCard::before {
+  content: '';
+  position: absolute;
+  background-image: url("../../assets/img/vector.png");
+  width: 100%;
+  height: 100%;
+  top: 15px;
+  left: 0;
+  background-size: 100% 100%;
+  background-position: center;
+  z-index: -1;
+}
+
+.highlighted::before {
+  content: '';
+  position: absolute;
+  background-image: url("../../assets/img/VectorActive.png");
+  width: 100%;
+  height: 100%;
+  top: 15px;
+  left: 0;
+  background-size: 100% 100%;
+  background-position: center;
+  z-index: -1;
+}

@@ -1,0 +1,67 @@
+/* modal styling */
+.modal-header {
+    background:  #3674B5;
+    color: white;
+   
+}
+label{
+    font-size:18px;
+    font-weight: 500;
+    margin-bottom:5px;
+}
+.modal-body{
+    padding: 10px 20px !important;
+}
+
+/* modal footer btn */
+.approveBtn{
+    background-color: #3674B5;
+    color: white ;
+    border-radius: 5px ;
+    width: 204px ;
+    height: 40px;
+    font-size: 18px;
+}
+.declineBtn{
+    background-color: #88304E;
+    color: white ;
+    border-radius: 5px ;
+    width: 204px ;
+    height: 40px;
+    font-size: 18px;
+}
+
+.leaveBalance{
+    font-size: 20px;
+    color:white;
+    background-color: #578FCA;
+}
+
+.custom-bg-warning{
+    background-color: #FFF291;
+    border-radius: 20px;
+    text-align: center;
+    color: #716300;
+}
+.custom-bg-success{
+    background-color: #CAFFEA;
+    border-radius: 20px;
+    text-align: center;
+    color: black;
+}
+.custom-bg-danger{
+    background-color: #FFAFAF;
+    border-radius: 20px;
+    text-align: center;
+    color: black;
+}
+.select-company{
+    width: 30%;
+}
+
+
+@media(max-width:430px){
+    .select-company{
+        width: 100%;
+    }
+}

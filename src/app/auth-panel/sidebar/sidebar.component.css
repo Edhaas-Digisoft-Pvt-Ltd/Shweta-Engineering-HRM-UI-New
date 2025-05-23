@@ -1,0 +1,228 @@
+/* nav {
+    background-color: #f2f7ff;
+    height: 60px;
+  } */
+
+.logo img {
+    max-height: 55px;
+}
+
+.logo h4 {
+    font-family: Poppins;
+    font-weight: 500;
+    font-size: 28px;
+    color: #13275C;
+}
+
+.session-time {
+    width: 250px;
+}
+
+.accordion-button:not(.collapsed) {
+    background-color: var(--agGrid-Header) !important;
+    color: white;
+    box-shadow: none;
+}
+
+.accordion-button {
+    position: static;
+}
+
+.login-right-side img {
+    width: 24px;
+    height: 24px;
+}
+
+.session-time img {
+    width: 20px;
+    height: 20px;
+}
+
+.session-time span,
+#timer {
+    font-size: 0.85rem;
+}
+
+.last-log-in-date span {
+    font-size: 0.8rem;
+}
+
+
+
+.login-right-side p {
+    font-weight: 400;
+    font-size: 0.8rem;
+}
+
+.login-right-side p span {
+    font-weight: 400;
+}
+
+.logfance {
+    display: inline-block;
+    width: 2px;
+    background-color: #06113C;
+}
+
+.navbar-nav {
+    width: 100%;
+    margin-top: 0;
+}
+
+
+.btn-like[_ngcontent-ng-c3823116284][_ngcontent-ng-c3823116284] {
+    background-color: #2e6bbf;
+    width: 100%;
+    height: 50px;
+    border-radius: 6px;
+    font-weight: 500;
+    padding: 15px 0px;
+    line-height: 17px;
+    letter-spacing: 0em;
+    text-align: left;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    padding-left: 20px;
+}
+
+ul {
+    padding: 0;
+}
+
+ul li {
+    list-style: none;
+}
+
+ul li a {
+    text-decoration: none;
+    padding: 0.5rem;
+
+}
+
+.active-link {
+    background-color: #EC9F06;
+}
+
+.btn-like:hover {
+    /* transition: transform 0.5s, background-color 0.5s;
+    transform: translateX(10px); */
+    background-color: rgb(33 150 243 / 20%);
+    border-radius: 4px;
+}
+
+.navbar img {
+    height: 40px;
+    /* width: 60%; */
+    margin-right: auto;
+}
+
+.navbar-nav .nav-link {
+    /* color: #f8f9fa; */
+    font-size: 16px;
+    padding: 10px 3px;
+    display: block;
+    font-weight: 600;
+    color: white;
+}
+
+.nav-item i,
+.accordion-button i {
+    font-weight: 500 !important;
+
+}
+
+.accordion-button {
+    font-weight: 600 !important;
+    color: #111;
+}
+
+.vertical-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.company_heading {
+    font-size: 18px;
+    font-weight: 500;
+}
+
+.navbar-nav .nav-link:hover {
+    background-color: #a3a4a675;
+    color: #fff;
+}
+
+.active-link {
+    background-color: rgb(33 37 41 / 39%) !important;
+    border-radius: 5px;
+    color: white !important
+}
+
+.active-link i {
+    color: white !important
+}
+
+.btn-like i,
+.accordion-button i {
+    margin-right: 24px !important;
+}
+
+.accordion-body .nav-link {
+    margin-left: 14px !important;
+    width: 96%;
+}
+
+.accordion-body {
+    background-color: #003b7a !important;
+    padding: 5px 20px !important;
+}
+
+.accordion-body ul li a {
+    color: white;
+}
+
+
+.accordion-collapse {
+    transition: all 0.5s ease-in-out;
+    overflow: hidden;
+}
+
+.accordion-collapse.collapse {
+    height: 0;
+    opacity: 0;
+}
+
+.accordion-collapse.show {
+    height: auto;
+    opacity: 1;
+}
+
+button.resp-btn {
+    display: none !important;
+}
+
+button.accordion-button.p-2.btn-bold.active-link {
+    background: rgb(33 37 41 / 39%) !important;
+    padding: 10px 10px !important;
+    border-radius: 5px;
+}
+
+button.accordion-button.p-2.btn-bold.active-link i {
+    color: white !important;
+}
+
+.accordion-body .active-link {
+    background-color: var(--primary-color) !important;
+}
+
+button.accordion-button.collapsed {
+    background: rgb(54 116 181);
+    color: white;
+}
+
+@media(max-width:425px) {
+    .accordion-body .nav-link {
+        margin-left: 0px !important;
+        width: 96%;
+    }
+}

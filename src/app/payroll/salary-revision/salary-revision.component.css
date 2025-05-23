@@ -1,0 +1,20 @@
+.revision-section{
+    margin-top: 2rem;
+    box-shadow: 0px 0px 2px #000000;
+    border-radius: 10px;
+}
+.vertical-line{
+    margin: 1rem 0;
+    color: inherit;
+    border: 0;
+    border-right: var(--bs-border-width) solid;
+    opacity: .25;
+    border-style: dashed;
+}
+.info span{
+    font-size: 0.8rem;
+}
+.compound h4,
+.employeeName h4{
+    color: var(--primary-color);
+}

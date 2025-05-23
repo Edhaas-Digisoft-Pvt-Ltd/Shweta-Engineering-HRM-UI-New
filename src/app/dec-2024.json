@@ -1,0 +1,43 @@
+[
+    {
+      "Employee Id": 1,
+      "Employee Name": "John Doe",
+      "1/Dec": "P", "2/Dec": "P", "3/Dec": "P", "4/Dec": "P", "5/Dec": "A",
+      "6/Dec": "P", "7/Dec": "P", "8/Dec": "P", "9/Dec": "P", "10/Dec": "P",
+      "11/Dec": "P", "12/Dec": "P", "13/Dec": "P", "14/Dec": "P", "15/Dec": "A",
+      "16/Dec": "P", "17/Dec": "P", "18/Dec": "P", "19/Dec": "A"
+    },
+    {
+      "Employee Id": 2,
+      "Employee Name": "Priya Sharma",
+      "1/Dec": "P", "2/Dec": "A", "3/Dec": "P", "4/Dec": "P", "5/Dec": "P",
+      "6/Dec": "P", "7/Dec": "P", "8/Dec": "A", "9/Dec": "P", "10/Dec": "P",
+      "11/Dec": "P", "12/Dec": "P", "13/Dec": "P", "14/Dec": "P", "15/Dec": "P",
+      "16/Dec": "P", "17/Dec": "A", "18/Dec": "P", "19/Dec": "P"
+    },
+    {
+      "Employee Id": 3,
+      "Employee Name": "Rahul Patel",
+      "1/Dec": "A", "2/Dec": "P", "3/Dec": "P", "4/Dec": "P", "5/Dec": "P",
+      "6/Dec": "P", "7/Dec": "A", "8/Dec": "P", "9/Dec": "P", "10/Dec": "P",
+      "11/Dec": "A", "12/Dec": "P", "13/Dec": "P", "14/Dec": "P", "15/Dec": "P",
+      "16/Dec": "P", "17/Dec": "P", "18/Dec": "P", "19/Dec": "A"
+    },
+    {
+      "Employee Id": 4,
+      "Employee Name": "Sneha Reddy",
+      "1/Dec": "P", "2/Dec": "P", "3/Dec": "P", "4/Dec": "A", "5/Dec": "P",
+      "6/Dec": "P", "7/Dec": "P", "8/Dec": "P", "9/Dec": "P", "10/Dec": "A",
+      "11/Dec": "P", "12/Dec": "P", "13/Dec": "A", "14/Dec": "P", "15/Dec": "P",
+      "16/Dec": "P", "17/Dec": "P", "18/Dec": "P", "19/Dec": "P"
+    },
+    {
+      "Employee Id": 5,
+      "Employee Name": "Amit Verma",
+      "1/Dec": "P", "2/Dec": "P", "3/Dec": "P", "4/Dec": "P", "5/Dec": "P",
+      "6/Dec": "P", "7/Dec": "P", "8/Dec": "A", "9/Dec": "A", "10/Dec": "P",
+      "11/Dec": "P", "12/Dec": "P", "13/Dec": "P", "14/Dec": "P", "15/Dec": "P",
+      "16/Dec": "A", "17/Dec": "P", "18/Dec": "P", "19/Dec": "P"
+    }
+  ]
+  

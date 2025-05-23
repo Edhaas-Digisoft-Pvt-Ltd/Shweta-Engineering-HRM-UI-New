@@ -1,0 +1,47 @@
+<div class="col-lg-12 col-md-6 border  mb-3 attendance p-0 " style="border-radius: 10px;">
+    <div class="row align-items-center p-3 border-bottom border-primary">
+
+      <div class="col-lg-8 ">
+        <h6><i class="bi bi-person-check me-2 text-primary"></i> Total Attendance</h6>
+      </div>
+      <div class="col-lg-4 text-end">
+        <div class="btn btn-outline-primary rounded-2 " style="padding: 5px 20px;">
+          Today
+        </div>
+      </div>
+
+
+    </div>
+    <div class="row">
+      <div class="col-12 text-center py-3">
+        <h6 class="text-center mb-0">Department Of Employee</h6>
+
+      </div>
+
+
+    </div>
+    <div class="row justify-content-center mb-2">
+      <div class="col-9">
+        <div class="d-flex border  rounded-2 mb-2 justify-content-between align-items-center">
+          <!-- Previous Button -->
+          <button class="btn btn-primary" style="padding: 2px 10px;"><i class="bi bi-arrow-left"></i></button>
+
+          <!-- Centered Text -->
+          <h6 class="m-0">Operator</h6>
+
+          <!-- Next Button -->
+          <button class="btn btn-primary" style="padding: 2px 10px;"><i class="bi bi-arrow-right"></i></button>
+        </div>
+
+        <div class="chart-container">
+          <div class="chart">
+            <canvas baseChart [data]="chartData" [options]="chartOptions" [type]="chartType">
+            </canvas>
+          </div>
+
+        </div>
+
+
+      </div>
+    </div>
+  </div>

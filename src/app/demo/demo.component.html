@@ -1,0 +1,23 @@
+<!-- daily summary html Start-->
+<div>
+    <h1>Daily Summary</h1>
+    <div class="controls">
+        <label>Year:
+            <select [(ngModel)]="selectedYear" (change)="onMonthYearChange()">
+                <option *ngFor="let year of years" [value]="year">{{ year }}</option>
+            </select>
+        </label>
+
+        <label>Month:
+            <select [(ngModel)]="selectedMonth" (change)="onMonthYearChange()">
+                <option *ngFor="let month of months" [value]="month.value">{{ month.name }}</option>
+            </select>
+        </label>
+    </div>
+
+    <ag-grid-angular style="width: 100%; height: 80vh;" id="specualGrid" class="ag-theme-alpine" [columnDefs]="columnDefs"
+    [rowData]="rowData"  [suppressMovableColumns]="true" [rowHeight]="50"
+    [defaultColDef]="{ resizable: true, sortable: true, width: 100 }">
+</ag-grid-angular>
+</div>
+<!-- daily summary html end -->

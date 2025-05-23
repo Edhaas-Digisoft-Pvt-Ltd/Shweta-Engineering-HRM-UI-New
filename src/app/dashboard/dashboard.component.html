@@ -1,0 +1,152 @@
+<div class="company-setup mt-3 ">
+  <div class="container-fluid ">
+    <!-- Dashboard heading -->
+    <div class="row gx-3 mb-3 align-items-center ">
+      <div class="col-md-8">
+        <h2><span><i class="bi bi-house-door me-3"></i></span>Dashboard</h2>
+      </div>
+    </div>
+
+    <div class="row justify-content-between gap-3 mb-3 ">
+      <div class="col border p-3 companyCard" *ngFor="let stat of dashboardStats"
+        [ngClass]="{'highlighted': selectedCompany === stat.title}"  style="border-radius: 10px; cursor: pointer;"
+        (click)="selectCompany(stat.title)">
+        <div class="d-flex justify-content-center gap-3">
+          <div>
+            <i class="bi" [ngClass]="stat.icon + ' text-primary'" style="font-size: 22px;"></i>
+          </div>
+          <div>
+            <h6 class="companyTitle">{{ stat.title }}</h6>
+            <p class="mb-0 companyCount">{{ stat.value }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row my-4">
+      <div class="col-6">
+        <h2  style="color : #3674B5">{{ selectedCompany }}</h2>
+      </div>
+
+      <div class="col-6 text-end ">
+        <button class="btn " style="border-radius:5px;background-color: #578FCA;color:white"
+          (click)="viewEmployee()">
+          View Employee
+        </button>
+      </div>
+    </div>
+    <!-- Payment Statistics  -->
+    <div class="row gx-5 flex-wrap justify-content-between mb-2 ">
+      <div class="col-lg-8">
+        <div class=" row border align-items-center p-3 " style="border-radius: 10px;">
+          <div class="col-12">
+            <div class="row">
+              <div class="col-md-8">
+                <h5><span class="pe-2"><i class="bi bi-currency-rupee"></i></span> Payroll Statistics</h5>
+              </div>
+              <div class="col-md-4">
+                <div class="mb-3 d-flex gap-2">
+                  <!-- <label for="financialYear" class="form-label">Select Financial Year</label> -->
+                  <select class="form-select" [(ngModel)]="selectedYear" id="financialYear">
+                    <option *ngFor="let year of financialYears" [value]="year">{{ year }}</option>
+                  </select>
+                  <button class="btn " style="border-radius:5px;background-color: #578FCA;color:white"
+                    (click)="paymentStatistics()">
+                    <i class="bi bi-eye-fill"></i>
+                  </button>
+                </div>
+
+              </div>
+            </div>
+          </div>
+          <div class="col-12 border-top border-2 border-primary m-2 pt-3">
+            <div style="display: block;">
+              <canvas baseChart [data]="barChartData" [options]="barChartOptions" [type]="'bar'">
+              </canvas>
+            </div>
+          </div>
+          <div class="col-12"></div>
+
+        </div>
+        <!-- Leave Request Details -->
+        <div class="row mt-3">
+          <div class="col leaveAttendanceWrapper p-0">
+            <!-- leave requestdashboard -->
+            <div class="border p-3" style="border-radius: 10px;">
+              <div class="row align-items-center">
+                <div class="col-8">
+                  <h5><span class="ps-2"><i class="bi bi-calendar-event ps-2 pe-2"></i></span> Leave Request</h5>
+                </div>
+                <div class="col-4 text-end pe-4">
+                  <button class="btn " style="border-radius:5px;background-color: #578FCA;color:white"
+                    (click)="leaveRequest()">
+                    <i class="bi bi-eye-fill"></i>
+                  </button>
+                </div>
+              </div>
+              <div class="row border-top border-2 border-primary m-2 pt-3">
+                <div class="col-12 mb-2 d-flex leaveDetails border align-items-center justify-content-between p-0"
+                  *ngFor="let card of leaveCards" style="border-radius: 10px;">
+                  <div>
+                    <button class="btn px-3 py-2 me-2" style="border-radius:10px;height: 50px;width:50px"
+                      [ngStyle]="{ 'background-color': card.bgColor, color: 'white' }">
+                      <i class="bi" [ngClass]="card.icon"></i>
+                    </button>
+                    {{ card.title }}
+                  </div>
+                  <div class="pe-3">
+                   <h5 class="mb-0"> {{ card.count }}</h5>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+
+            <!--  Total Attendance Details  -->
+            <div class="border p-3" style="border-radius: 10px;">
+              <div class="row align-items-center ">
+                <div class="col-8">
+                  <h5><span class="ps-2"><i class="bi bi-person-fill-check ps-2 pe-3"></i></span> Total Attendances</h5>
+                </div>
+                <div class="col-4 text-end pe-4">
+                  <button class="btn " style="border-radius:5px;background-color: #578FCA;color:white"
+                    (click)="totalAttendance()">
+                    <i class="bi bi-eye-fill"></i>
+                  </button>
+                </div>
+              </div>
+              <div class="row border-top border-2 border-primary m-2 pt-3">
+                <div class="col">
+                  <div style="position: relative; width: 250px; margin: auto;">
+                    <canvas baseChart [data]="doughnutChartData" [type]="'doughnut'" [options]="doughnutChartOptions">
+                    </canvas>
+                    <!-- Centered Text -->
+                    <div
+                      style="position:absolute;top:42%;left:50%;transform:translate(-50%,-50%);font-size:20px;font-weight:bold;text-align:center">
+                      <div>Total Attendance</div>
+                      <div>500</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <!-- upcomming events  -->
+      <div class="col-lg-4   border-primary">
+        <div class="row">
+          <div class=" col-md-12 border  upcoming_events" style="border-radius: 10px;">
+            <app-upcomming-events></app-upcomming-events>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+

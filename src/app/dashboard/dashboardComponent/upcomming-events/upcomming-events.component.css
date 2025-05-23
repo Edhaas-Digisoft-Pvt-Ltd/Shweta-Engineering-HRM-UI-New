@@ -1,0 +1,29 @@
+.companyCount{
+    font-size: 30px;
+    font-weight: 600;
+  }
+  .companyTitle{
+    font-size: 20px;
+    font-weight: 600;
+  }
+  .upcommingEvents{
+    font-size: 20px;
+    font-weight: 600;
+  }
+
+  .eventBox{
+    border:1px solid rgb(222, 222, 222);
+    padding: 10px;
+    margin: auto;
+    border-radius:5px;
+  }
+
+  .viewCalender{
+    background-color: #3674B5;
+    padding: 5px 10px ;
+    color: white;
+  }
+  .upcoming_events {
+    height:350px  ;
+    overflow: scroll;
+}

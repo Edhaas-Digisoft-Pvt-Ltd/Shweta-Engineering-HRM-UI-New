@@ -1,0 +1,45 @@
+.search-box {
+    border-right : 1px dashed gray;padding-right:25px;
+}
+.search-box input{
+    background-color: white;
+    box-shadow: rgba(0, 0, 0, 0.16) 0px 1px 4px;
+
+}
+.attendanceButtons{
+    /* border-right : 1px dashed gray; */
+    position: relative;
+}
+.attendanceButtons button.btn.btn-light.border-secondary {
+    box-shadow: rgba(0, 0, 0, 0.16) 0px 1px 4px;
+    border: none;
+    padding: 7px 20px;
+    background-color: white;
+}
+.search-box{
+    display: flex;
+    justify-content: space-between;
+    
+}
+label{
+    font-weight: 600;
+    margin-bottom: 10px;
+}
+.selectdata{
+    width: 165px;
+}
+.selectdata2, .selectdata3{
+    width: 130px;
+    position: relative;
+}
+/* .attendanceButtons::after {
+    position: absolute;
+    content: "";
+    height: 2px;
+    width: 37px;
+    top: 54px;
+    background-color: #578fca;
+} */
+.exportExcelBtn{
+    background-color: #3674B5;
+}

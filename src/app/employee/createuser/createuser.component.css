@@ -1,0 +1,13 @@
+td {
+    padding: 10px 10px;
+    vertical-align: baseline;
+}
+thead th{
+    background: #578FCA !important;
+    color: white !important;
+    padding: 15px 10px !important;
+    font-weight: 600 !important;
+}
+.amountPayable td{
+    
+}

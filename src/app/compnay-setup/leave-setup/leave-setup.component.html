@@ -1,0 +1,236 @@
+<div class="main-content">
+    <div class="row gx-3  align-items-center p-2 rounded-2 mt-3">
+        <div class="col">
+            <h2 class="fw-bold"> <i class="bi bi-gear me-2 "></i> Leave Configration</h2>
+        </div>
+        <div class="company-setup">
+            <div class="container-fluid ">
+                <div class="row gap-2 my-4 justify-content-end">
+
+                    <div class="col col-lg-5 col-md-7 text-center d-flex align-items-end ">
+
+                        <div class="w-50 text-start select-company ">
+                            <label class="fw-bold">Select Company </label>
+                            <br>
+                            <select class="form-select" (change)="onCompanyChange($event)">
+                                <!-- <option value="" selected>Select Company</option> -->
+                                <option *ngFor="let item of CompanyNames" [value]="item.company_id">
+                                    {{ item.company_name }}
+                                </option>
+                            </select>
+                        </div>
+                        <div class="w-50 text-start ">
+                            <button type="button " class="btn text-white  add_company  mb-0 "
+                                style="background-color: #3674B5; margin-left: 20px;" data-bs-toggle="modal"
+                                data-bs-target="#exampleModal">
+                                <i class="bi bi-plus-lg me-2 fw-bold"></i> Add New
+                            </button>
+
+
+                        </div>
+                    </div>
+
+                </div>
+                <div class="row gap-4 row-wrap my-3 ">
+                    <div class="container  ">
+                        <div class="row g-3">
+                            <div class="col-12">
+                                <table class="table table-bordered leaveTableData"
+                                    style="border: 1px solid #dadada;border-radius: 10px; border-collapse: collapse;">
+                                    <thead class="">
+                                        <tr>
+                                            <th>Name </th>
+                                            <th>Leave Type</th>
+                                            <th>No. of Leaves</th>
+                                            <th>Is Carry Forward</th>
+                                            <th>Action</th>
+                                        </tr>
+                                    </thead>
+
+                                    <tbody class="leavesData" *ngIf="leaveData.length > 0">
+                                        <tr *ngFor="let leave of leaveData">
+                                            <!-- Leave Name -->
+                                            <td>{{ leave.LeaveName }}</td>
+
+                                            <!-- Leave Type -->
+                                            <td>
+                                                {{ leave.LeaveType }}
+                                            </td>
+
+                                            <!-- Allowed Leaves -->
+                                            <td class="text-center">{{ leave.NoOfLeave }}</td>
+
+                                            <!-- Status Icon -->
+                                            <td class="text-center">
+                                                {{leave.IsCarryForward}}
+                                            </td>
+
+                                            <td class="text-center">
+                                                <button type="button"
+                                                    class="btn border border-warning text-warning me-2"
+                                                    (click)="openEditModal(leave)" data-bs-toggle="modal"
+                                                    data-bs-target="#exampleModal2">
+                                                    <i class="bi bi-pencil "></i>
+                                                </button>
+
+                                                <button type="button" class="btn border border-danger text-danger"
+                                                    (click)="deleteLeaveRule(leave.LeaveID, leave.CompanyID)">
+                                                    <i class="bi bi-trash "></i>
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+
+                                <div class=" " *ngIf="leaveData.length == 0">
+                                    <p class="text-center fs-4 fw-2">Data not available.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Content -->
+<div class="modal fade modal-xl text-left" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Add New Leave Configuration</h5>
+                <button type="button text-white" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-left">
+                <form [formGroup]="LeaveRule" (ngSubmit)="addLeaveRule()">
+                    <div class="row">
+
+                        <!-- Company -->
+                        <div class="col-md-3 text-start select-company">
+                            <label class="fw-bold">Select Company</label>
+                            <select class="form-select" formControlName="companyid" [ngClass]="{
+          'input-error': isSubmitted && LeaveRule.get('companyid')?.invalid,
+          'is-invalid': isSubmitted && LeaveRule.get('companyid')?.invalid
+        }">
+                                <option value="" disabled>Select Company</option>
+                                <option *ngFor="let item of CompanyNames" [value]="item.Company_id">
+                                    {{ item.company_name }}
+                                </option>
+                            </select>
+                            <small class="text-danger"
+                                *ngIf="isSubmitted && LeaveRule.get('companyid')?.invalid && LeaveRule.get('companyid')?.value">
+                                Please select a valid company.
+                            </small>
+                        </div>
+
+                        <!-- Leave Type -->
+                        <div class="col-md-3">
+                            <label for="leavetype">Leave Type</label>
+                            <select id="leavetype" class="form-select" formControlName="leavetype" [ngClass]="{
+          'input-error': isSubmitted && LeaveRule.get('leavetype')?.invalid,
+          'is-invalid': isSubmitted && LeaveRule.get('leavetype')?.invalid
+        }">
+                                <option value="" disabled>Select Leave Type</option>
+                                <option value="Every Month">Every Month</option>
+                                <option value="Every Year">Every Year</option>
+                            </select>
+                            <small class="text-danger"
+                                *ngIf="isSubmitted && LeaveRule.get('leavetype')?.invalid && LeaveRule.get('leavetype')?.value">
+                                Please select a valid leave type.
+                            </small>
+                        </div>
+
+                        <!-- Leave Name -->
+                        <div class="col-md-3">
+                            <label for="leavename">Leave Name</label>
+                            <input type="text" class="form-control" id="leavename" formControlName="leavename"
+                                placeholder="Please Enter Leave Name" [ngClass]="{
+          'input-error': isSubmitted && LeaveRule.get('leavename')?.invalid,
+          'is-invalid': isSubmitted && LeaveRule.get('leavename')?.invalid
+        }">
+                            <small class="text-danger"
+                                *ngIf="isSubmitted && LeaveRule.get('leavename')?.invalid && LeaveRule.get('leavename')?.value">
+                                Please enter a valid leave name.
+                            </small>
+                        </div>
+
+                        <!-- No. Of Leaves -->
+                        <div class="col-md-3">
+                            <label for="leavenumber">No. of leaves</label>
+                            <input type="number" class="form-control" id="leavenumber" formControlName="leavenumber"
+                                placeholder="Please Enter Leave number" [ngClass]="{
+          'input-error': isSubmitted && LeaveRule.get('leavenumber')?.invalid,
+          'is-invalid': isSubmitted && LeaveRule.get('leavenumber')?.invalid
+        }">
+                            <small class="text-danger"
+                                *ngIf="isSubmitted && LeaveRule.get('leavenumber')?.invalid && LeaveRule.get('leavenumber')?.value">
+                                Please enter a valid number of leaves.
+                            </small>
+                        </div>
+
+                    </div>
+
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                        <button type="submit" class="btn btn-primary mt-3 ml-auto btn-end">Submit</button>
+                    </div>
+                </form>
+
+
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- Modal Content for edit -->
+<!-- Modal -->
+<div class="modal fade modal-lg" id="exampleModal2" tabindex="-1" aria-labelledby="exampleModalLabel">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Edit Leave Configuration</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form [formGroup]="EditLeaveRule" (ngSubmit)="editLeaveData(EditLeaveRule.value.LeaveID)">
+                    <div class="row">
+                        <!-- Leave Type -->
+                        <div class="col-4">
+                            <label for="leavetype">Leave Type</label>
+                            <select id="leavetype" class="form-select" formControlName="leavetype"
+                                [ngClass]="{'input-error': isEditSubmitted && EditLeaveRule.get('leavetype')?.invalid}">
+                                <option value="" disabled selected>Select Leave Type</option>
+                                <option value="Every Month">Every Month</option>
+                                <option value="Every Year">Every Year</option>
+                            </select>
+                        </div>
+
+                        <!-- Leave Name -->
+                        <div class="col-4">
+                            <label for="leavename">Leave Name</label>
+                            <input type="text" class="form-control" id="leavename" formControlName="leavename"
+                                placeholder="Please Enter Leave Name"
+                                [ngClass]="{'input-error': isEditSubmitted && EditLeaveRule.get('leavename')?.invalid}">
+
+                        </div>
+
+                        <!-- No. Of Leaves -->
+                        <div class="col-4">
+                            <label for="leavenumber">No. of leaves</label>
+                            <input type="number" class="form-control" id="leavenumber" formControlName="leavenumber"
+                                placeholder="Please Enter Leave number"
+                                [ngClass]="{'input-error': isEditSubmitted && EditLeaveRule.get('leavenumber')?.invalid}">
+                        </div>
+                    </div>
+
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                        <button type="submit" class="btn btn-primary mt-3 ml-auto btn-end"
+                            (click)="editLeaveData(selectedLeaveID)">Update</button>
+                    </div>
+                </form>
+            </div>
+
+        </div>
+    </div>
+</div>

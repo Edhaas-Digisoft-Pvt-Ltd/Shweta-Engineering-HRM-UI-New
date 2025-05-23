@@ -1,0 +1,96 @@
+<div class="main-content p-3">
+
+    <!-- <div class="w-100 d-flex align-items-center gap-3 mb-3">
+        <div class="col-6 d-flex align-items-center gap-2">
+            <label for="" class="fw-bold">Please Enter CTC </label><Br>
+            <input type="number" placeholder="ctc" [(ngModel)]="ctc" (ngModelChange)="calculateAmount()"
+                placeholder="CTC" class="form-control w-25">
+            <span> / 12 </span>
+        </div>
+        <div class="col-6 align-items-center">
+            <strong>{{ amount }}</strong>
+        </div>
+
+
+    </div> -->
+
+    <table class="table table-bordered" style="border: 1px solid #dadada; border-collapse: collapse;">
+        <thead class="">
+            <tr>
+                <th>Name Of the Component</th>
+                <th>Values</th>
+                <!-- <th>Amount</th> -->
+            </tr>
+        </thead>
+
+        <tbody>
+            <tr>
+                <td>Basic</td>
+                <td>
+                    <div class="w-100 d-flex align-items-center gap-2 fw-bold">
+                        <input type="number" placeholder="ctc" [(ngModel)]="ctc" (ngModelChange)="calculateAmount()"
+                            placeholder="CTC" class="form-control w-25">/ <span class="ml-3">12</span>
+                    </div>
+                </td>
+            </tr>
+
+            <tr *ngIf="statutoryInfo.includes('Enable PF Employee')">
+                <td>Provident Fund (PF)</td>
+                <td><input type="number" class="form-control" placeholder="Provident Fund (PF)" [(ngModel)]="pf"
+                        (ngModelChange)="calculateAmount()"></td>
+            </tr>
+
+            <tr *ngIf="statutoryInfo.includes('Enable PT for employee')">
+                <td>Professional Tax (PT)</td>
+                <td><input type="number" class="form-control" placeholder="Professional Tax (PT)" [(ngModel)]="pt"
+                        (ngModelChange)="calculateAmount()"></td>
+            </tr>
+
+            <tr *ngIf="statutoryInfo.includes('Enable ESIC for employee')">
+                <td>Employee ESI (ESI)</td>
+                <td><input type="number" class="form-control" placeholder="Employee ESI (ESI)" [(ngModel)]="esi"
+                        (ngModelChange)="calculateAmount()"></td>
+            </tr>
+
+            <tr *ngIf="statutoryInfo.includes('Enable LWF for employee')">
+                <td>LWF for employee</td>
+                <td><input type="number" class="form-control" placeholder="LWF" [(ngModel)]="esi"
+                        (ngModelChange)="calculateAmount()"></td>
+            </tr>
+
+            <tr *ngIf="statutoryInfo.includes('Opt for EPS entitled')">
+                <td>Provident Fund(Employer) (EPF)</td>
+                <td><input type="number" class="form-control" placeholder="Provident Fund(Employer) (EPF)"
+                        [(ngModel)]="epf" (ngModelChange)="calculateAmount()"></td>
+            </tr>
+
+            <tr *ngIf="statutoryInfo.includes('National Pension Scheme')">
+                <td>Employer ESI (EESI)</td>
+                <td><input type="number" class="form-control" placeholder="Employer ESI (EESI)" [(ngModel)]="eesi"
+                        (ngModelChange)="calculateAmount()"></td>
+            </tr>
+            <tr class="amountPayable">
+                <td>
+                    <h5>Monthly Payable Amount</h5>
+                </td>
+                <td>
+                    <h5 class="fw-bold me-5">
+                        Rs. {{salaryAmount }}
+                    </h5>
+                </td>
+            </tr>
+        </tbody>
+
+    </table>
+
+    <!-- <div class="row p-3 rounded-2 border bg-body-tertiary d-flex justify-content-between align-items-center">
+        <div class="col">
+            <h5>Monthly Payable Amount</h5>
+        </div>
+        <div class="col text-end">
+            <span class="fw-bold me-5">
+                Rs. {{salaryAmount }}
+            </span>
+        </div>
+    </div> -->
+</div>

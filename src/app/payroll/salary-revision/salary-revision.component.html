@@ -1,0 +1,112 @@
+<div class="company-setup mt-3 ">
+    <div class="container-fluid ">
+        <div class="row gx-3  align-items-center  p-2 rounded-2">
+            <div class="col-6 d-flex flex-column">
+                <!-- <img src="assets/img/Animation - 1743094888648.gif" alt=""> -->
+
+                <h2> <i class="bi bi-currency-rupee me-2"></i> Salary Revision</h2>
+                <p class="ms-5"><span>Payroll</span> / <span style="color: #3674B5;">Salary Revision</span></p>
+            </div>
+            <div class="col-12  mt-2">
+                <div class="row">
+                    <!-- <div class="col-2">
+                        <label for="">Search Employee</label>
+                        <input class="form-control" type="text" name="" id=""
+                            placeholder="Search by employee Name, ID,....">
+                    </div> -->
+                    <div class="col">
+                        <label for="">Select Company</label>
+                        <select class="form-select" aria-label="Default select example">
+                            <option selected>--select company--</option>
+                            <option  *ngFor="let Company of companies" value="1">{{Company.name}}</option>
+                        </select>
+                    </div>
+
+                    <div class="col">
+                        <label for="">Select Employee Name</label>
+                        <select class="form-select"  aria-label="Default select example">
+                            <option selected>--select employee Name--</option>
+                            <option  *ngFor="let employee of employees" value="1">{{employee.name}}</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="revision-section p-3">
+                    <form action="" class="py-3">
+                        <div class="d-flex flex-column">
+                            <div class="employeeName">
+                                <p class="id m-0">#00001</p>
+                                <h4 class="employee Name mb-1">Hrishikesh Vinayak Kadam</h4>
+                                <p class="d-flex gap-3 info"><span>Designer</span> <span><i class="bi bi-dot"></i>UI/UX
+                                        Designer</span></p>
+                            </div>
+                            <hr>
+                            <div class="compound d-flex row">
+                                <div class="old-salary col ">
+                                    <h4 class="text-center">Old Salary</h4>
+                                    <div class="row m-0 p-0">
+                                        <div class="col-12">
+                                            <label for="">Old CTC <sub>(in ₹)</sub></label>
+                                            <input type="text" class="form-control readOnlyInput" readonly>
+                                        </div>
+                                        <div class="col-6 mt-3">
+                                            <label for="">Old Pay Year</label>
+                                            <input type="text" class="form-control readOnlyInput" readonly>
+                                        </div>
+                                        <div class="col-6 mt-3">
+                                            <label for="">Old Effect From Date</label>
+                                            <input type="text" class="form-control readOnlyInput" readonly>
+                                        </div>
+                                        <div class="col-6 mt-3">
+                                            <label for="">Old Designation</label>
+                                            <input type="text" class="form-control readOnlyInput" readonly>
+                                        </div>
+                                        <div class="col-6 mt-3">
+                                            <label for="">Old Department</label>
+                                            <input type="text" class="form-control readOnlyInput" readonly>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-1 d-flex justify-content-center">
+                                    <span class="vertical-line"></span>
+                                </div>
+                                <div class="New-Salary col ">
+                                    <h4 class="text-center">New Salary</h4>
+                                    <div class="row m-0 p-0">
+                                        <div class="col-12">
+                                            <label for="">CTC <sub>(in ₹)</sub></label>
+                                            <input type="text" class="form-control ">
+                                        </div>
+                                        <div class="col-6 mt-3">
+                                            <label for="">Pay Year</label>
+                                            <input type="text" class="form-control ">
+                                        </div>
+                                        <div class="col-6 mt-3">
+                                            <label for="">Effect From Date</label>
+                                            <input type="text" class="form-control ">
+                                        </div>
+                                        <div class="col-6 mt-3">
+                                            <label for="">Designation</label>
+                                            <input type="text" class="form-control ">
+                                        </div>
+                                        <div class="col-6 mt-3">
+                                            <label for="">Department</label>
+                                            <input type="text" class="form-control ">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+
+                </div>
+
+
+                <!-- <input type="text" name="" class="form-control" placeholder="Search Employee" id=""> -->
+            </div>
+        </div>
+        <div class="d-flex gap-3 justify-content-center">
+            <div class="my-3 text-center"><button class="btn comBtn text-white">Submit </button></div>
+            <div class="my-3 text-center"><button class="btn secondBtn ">Cancel </button></div>
+        </div>
+    </div>
+</div>

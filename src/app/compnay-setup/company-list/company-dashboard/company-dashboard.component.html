@@ -1,0 +1,103 @@
+<div class="company-setup mt-3 ">
+    <div class="container-fluid ">
+        <div class=" gx-3  p-2 rounded-2">
+            <div class="d-flex flex-column">
+                <!-- <img src="assets/img/Animation - 1743094888648.gif" alt=""> -->
+
+                <h2> <i class="bi bi-buildings me-2"></i> Company Dashboard</h2>
+                <p class="ms-5"><span [routerLink]="['/authPanal/companyList/']">Company List</span> / <span
+                        style="color: #3674B5;">Company Dashboard</span></p>
+            </div>
+        </div>
+        <div class="row">
+            <div class="m-0 p-0 col-4" style="position: relative;">
+                <div class="card h-100 p-3 row m-0 shadow-sm company_cards border" style="max-height: 90vh;">
+                    <div class="d-flex justify-content-center row m-0 p-0 mt-2 ">
+                        <div class="companyProfile d-flex flex-column justify-content-center align-items-center col-12">
+                            <div class="img-holder">
+                                <img src="../../../../assets/img/logo_img.png" alt="">
+                            </div>
+                            <div class="d-flex flex-column align-items-center">
+                                <h5 class="mt-2">Shweta Engineers PVT Ltd</h5>
+                                <div class="date">
+                                    <span class="mark me-2"></span>
+                                    <span class="detailsText" style="color: #777777;">Master</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-12 row m-0 p-0 mt-3">
+                            <div class="col-12 com-text">
+                                <span class="d-flex align-items-center  ">
+                                    <i class="bi bi-geo-alt me-2"></i>
+                                    location
+                                    <hr class="ms-2 w-100">
+                                </span>
+                                <p class="ms-4">Teerth Techno Space, Unit B-505, 5th Floor,, Pune Banglore Highway
+                                    Pashan Exit,
+                                    Baner, Pune, Maharashtra 411045, India</p>
+                            </div>
+                            <div class="col-12 com-text my-3">
+                                <span class="d-flex align-items-center  ">
+                                    <i class="bi bi-calendar me-2"></i>
+                                    Date
+                                    <hr class="ms-2 w-100">
+                                </span>
+                                <p class="ms-4">2022-01-01</p>
+                            </div>
+                            <div class="col-12 com-text">
+                                <span class="d-flex align-items-center  ">
+                                    <i class="bi bi-calendar me-2"></i>
+                                    Company Description
+                                    <hr class="ms-2 w-100">
+                                </span>
+                                <p class="ms-4">Lorem ipsum dolor sit amet
+                                    consectetur, adipisicing
+                                    elit. Eum, et? Qui quas vero, impedit iusto quod tempora similique maxime iste
+                                    beatae
+                                    numquam ratione quasi quo assumenda fugiat suscipit aspernatur repellat</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="mx-3 col m-0 p-0">
+                <div>
+                    <div class="card p-3 depart row m-0 border">
+                        <h5><i class="bi bi-pc-display me-2"></i> Department's</h5>
+                        <div class="row m-0">
+                            <div class="col p-2" *ngFor="let department of departments">
+                                <div class="comProv p-2 px-3">
+                                    <p class="m-0"> {{department.name}}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <div class="card p-3 designa row m-0 border mt-3">
+                        <h5><i class="bi bi-person-check me-2"></i>Designations</h5>
+                        <div class="row m-0">
+                            <div class="col p-2" *ngFor="let designation of designations">
+                                <div class="comProv desig p-2 px-3">
+                                    <p class="m-0">{{designation.name}}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <div class="card p-3 subCompany row m-0 border mt-3">
+                        <h5><i class="bi bi-buildings me-2"></i>Sub Company</h5>
+                        <div class="row m-0">
+                            <div class="col p-2" *ngFor="let subCompany of subCompanys">
+                                <div class="comProv subCom p-2 px-3">
+                                    <p class="m-0">{{subCompany.name}}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

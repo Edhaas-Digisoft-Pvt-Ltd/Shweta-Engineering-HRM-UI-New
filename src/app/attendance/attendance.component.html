@@ -1,0 +1,134 @@
+<div class="container-fluid mt-4">
+    <div class="row gx-3  ">
+        <div class="col-md-6  ">
+            <h2 class="fw-bold">
+                <span><i class="bi bi-alarm me-2"></i></span>
+                Attedances
+            </h2>
+        </div>
+        <div class="col-md-6  text-end">
+            <h5 class="mb-0">{{getTodayDayName()}}</h5>
+            <h3>{{getFormattedTodayDate()}}</h3>
+        </div>
+    </div>
+
+    <div class="row">
+
+        <div class="tabs-container">
+            <ul class="nav nav-tabs">
+                <li class="nav-item" (click)="selectTab('tab1')">
+                    <a class="nav-link fw-bold" [ngClass]="{'active': activeTab === 'tab1'}">List
+
+                    </a>
+
+                </li>
+                <li class="nav-item" (click)="selectTab('tab2')">
+                    <a class="nav-link fw-bold" [ngClass]="{'active': activeTab === 'tab2'}">Daily Summary</a>
+                </li>
+                <li class="nav-item" (click)="selectTab('tab3')">
+                    <a class="nav-link fw-bold" [ngClass]="{'active': activeTab === 'tab3'}">Consolidate Summary</a>
+                </li>
+            </ul>
+
+            <div class="tab-content mt-3">
+                <div *ngIf="activeTab === 'tab1'">
+                    <div class="company-setup">
+                        <div class="container-fluid ">
+                            <div class="row gap-0 gx-2 my-4 align-items-center justify-content-between">
+                                <div class="col col-lg-3 text-end  search-box">
+
+
+                                    <!-- <input class="form-control me-3" type="search" placeholder="Search"
+                                            aria-label="Search"> -->
+
+                                    <input class="py-1 mx-2 form-control me-2" type="text" #searchBox
+                                        placeholder="Enter Name" [(ngModel)]="searchInputValue"
+                                        (ngModelChange)="onFilterBoxChange()" />
+
+                                    <!-- <button class="btn btn-outline-primary" type="submit">
+                                            <i class="bi bi-search"></i>
+                                        </button> -->
+
+                                </div>
+                                <div class="col col-lg-5   attendanceButtons">
+
+                                    <button class="btn btn-light border-secondary" style="border-radius: 10px;"
+                                        (click)="filterByStatus('Present')">Present</button>
+                                    <button class="btn btn-light border-secondary" style="border-radius: 10px;"
+                                        (click)="filterByStatus('Weekoff')">Weekoff</button>
+                                    <!-- <button class="btn btn-light border-secondary" style="border-radius: 10px;" (click)="filterByStatus('Holiday')">Holiday</button>
+                                    <button class="btn btn-light border-secondary" style="border-radius: 10px;" (click)="filterByStatus('OverTime')">OverTime</button> -->
+                                    <button class="btn btn-light border-secondary" style="border-radius: 10px;"
+                                        (click)="filterByStatus('Absent')">Absent</button>
+                                    <!-- <button class="btn btn-light border-secondary" style="border-radius: 10px;"
+                                    >CurrentMonth</button> -->
+                                    <button class="btn btn-light border-secondary ms-2"
+                                        (click)="clearStatusFilter()">Clear
+                                        Filter</button>
+
+                                </div>
+                                <div class="col col-lg-4 text-center d-flex justify-content-center gap-3">
+                                    <!-- Download Template -->
+                                    <div class="dropdown">
+                                        <button class="btn ExcelBtn text-white dropdown-toggle" type="button"
+                                            data-bs-toggle="dropdown">
+                                            Download Template
+                                        </button>
+                                        <ul class="dropdown-menu">
+                                            <li><a class="dropdown-item" (click)="downloadTemplate()"> Daliy Attendance
+                                                    </a></li>
+                                            <li><a class="dropdown-item" (click)="MonthlyAttendanceTemplate()"> Monthly Attendance
+                                            </a></li>
+                                        </ul>
+                                    </div>
+
+                                    <!-- Import Excel -->
+                                    <div>
+                                        <input type="file" #fileInput style="display: none"
+                                            (change)="onFileChange($event)" accept=".xlsx, .xls" />
+                                        <button class="btn ExcelBtn text-white" (click)="fileInput.click()">Import
+                                            Excel</button>
+                                    </div>
+
+
+                                </div>
+
+                            </div>
+                            <div class="row gap-4 row-wrap my-3 ">
+                                <div class="container  ">
+
+                                    <div class="row g-3">
+                                        <div class="col-12">
+                                            <ag-grid-angular *ngIf="rowData.length > 0" #agGrid class="ag-theme-alpine"
+                                                style="width: 100%; height: 60vh" [rowData]="rowData"
+                                                [columnDefs]="columnDefs" [defaultColDef]="defaultColDef"
+                                                [rowSelection]="'multiple'" (gridReady)="onGridReady($event)">
+                                            </ag-grid-angular>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div *ngIf="activeTab === 'tab2'">
+
+                    <div class="container mt-4">
+
+                        <!-- attendance summary -->
+                        <app-attendance-summary></app-attendance-summary>
+                    </div>
+                </div>
+                <div *ngIf="activeTab === 'tab3'">
+
+                    <div class="container mt-4">
+
+                        <!-- attendance summary -->
+                        <app-consolidate-attendance-summary></app-consolidate-attendance-summary>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

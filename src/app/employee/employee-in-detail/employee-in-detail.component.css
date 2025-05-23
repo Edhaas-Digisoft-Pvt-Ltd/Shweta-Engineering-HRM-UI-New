@@ -1,0 +1,161 @@
+.profile-card img {
+    width: 70px;
+    height: 70px;
+    margin-bottom: 20px
+}
+
+.chart-container {
+    width: 80%;
+    margin: auto;
+}
+
+
+.employeeProfile {
+    width: 35%;
+    height: 400px;
+}
+
+.employeeProfile .employeeData {
+    font-size: 11px;
+}
+.employeeDetail{
+    font-size: 13px;
+}
+.leaveDetails {
+    width: 35%;
+    height: 400px;
+}
+.rupee-text{
+    font-size: 10px;
+}
+.payslip {
+    width: 25%;
+    display: flex;
+    flex-direction: column;
+}
+
+.border-right-dashed {
+    border-right: 1px dashed gray;
+}
+
+.border-bottom-dashed {
+    border-bottom: 1px dashed gray;
+}
+
+.dashboard-btn {
+    background-color: #3674B5;
+    color: white;
+    font-weight: 500;
+}
+
+.attendenceCard {
+
+    background-size: cover;
+    background-repeat: no-repeat;
+}
+
+/* advance payment  */
+label {
+    font-weight: 500;
+    font-size: 0.875rem;
+}
+
+input {
+    font-weight: bold;
+}
+
+
+
+
+label {
+    /* font-size: 18px; */
+    font-weight: 500;
+    margin-bottom: 5px;
+}
+
+.modal-body {
+    padding: 10px 20px !important;
+}
+
+.modal-content {
+    border-radius: 20px;
+}
+
+.advanceSalaryTracking label {
+    height: 24px;
+}
+.advanceSalaryTracking input{
+    background-color: #EDEDED;
+}
+.attendaceWrapper{
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+}
+.senarioWrapper{
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    margin: 10px 0px;
+}
+.leaveWrapper{
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    margin: 10px 0px;
+}
+.attendanceAdvanceSalaryWrapper{
+    display: grid;
+    grid-template-columns: 31% 69%;
+    gap: 20px;
+    margin: 10px 0px;
+}
+.userInfo{
+    font-size: 14px;
+    font-weight: bold;
+}
+@media(max-width:768px) {
+    .employeeProfile {
+        width: 48%;
+    }
+
+    .leaveDetails {
+        width: 48% !important;
+    }
+
+    .payslip {
+        width: 48% !important;
+    }
+    .attendaceWrapper,.leaveWrapper{
+        grid-template-columns: repeat(2, 1fr); /* 4 equal-width columns */
+    }
+    .senarioWrapper{
+        grid-template-columns: repeat(2, 1fr); /* 4 equal-width columns */
+    }
+    .attendanceAdvanceSalaryWrapper{
+        grid-template-columns: repeat(1, 1fr); /* 4 equal-width columns */
+    }
+    .leaveWrapper div:nth-child(2){
+        border:none !important;
+    }
+}
+
+@media(max-width:430px) {
+    .employeeProfile {
+        width: 100%;
+    }
+
+    .leaveDetails {
+        width: 100% !important;
+    }
+
+    .payslip {
+        width: 100% !important;
+    }
+    .attendaceWrapper{
+        grid-template-columns: repeat(1, 1fr); /* 4 equal-width columns */
+    }
+    .senarioWrapper{
+        grid-template-columns: repeat(1, 1fr); /* 4 equal-width columns */
+    }
+}
