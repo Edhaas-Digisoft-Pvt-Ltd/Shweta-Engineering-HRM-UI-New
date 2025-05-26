@@ -90,6 +90,7 @@ export class EmployeeInDetailComponent {
 
     this.advanceSalaryForm.valueChanges.subscribe(() => this.calculateInstallment());
     this.fetchEmployee(this.employee_code);
+    this.fetchAttendance();
 
   }
 
@@ -134,6 +135,13 @@ export class EmployeeInDetailComponent {
     // alert(id);
     this.service.post(`single/employee`, { "employe_id": id }).subscribe((res: any) => {
       this.Employee_Data = res.data;
+    });
+  }
+
+  fetchAttendance(){
+    console.log('called')
+    this.service.post(`fetch/attendance`, {}).subscribe((res: any) => {
+      console.log('hi',res);
     });
   }
 
