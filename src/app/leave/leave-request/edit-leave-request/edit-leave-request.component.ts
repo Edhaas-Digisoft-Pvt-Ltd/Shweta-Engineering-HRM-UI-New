@@ -1,13 +1,14 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Router } from '@angular/router';
 import { ICellRendererAngularComp } from 'ag-grid-angular';
 declare var bootstrap: any;
 
 @Component({
-  selector: 'app-leaverequestaction',
-  templateUrl: './leaverequestaction.component.html',
-  styleUrls: ['./leaverequestaction.component.css']
+  selector: 'app-edit-leave-request',
+  templateUrl: './edit-leave-request.component.html',
+  styleUrls: ['./edit-leave-request.component.css']
 })
-export class LeaverequestactionComponent implements ICellRendererAngularComp {
+export class EditLeaveRequestComponent implements ICellRendererAngularComp {
   params: any;
   leaveRequestForm: any;
 
@@ -26,15 +27,16 @@ export class LeaverequestactionComponent implements ICellRendererAngularComp {
     if (modalElement) {
       const modal = new bootstrap.Modal(modalElement); // ✅ this will now work
       modal.show();
-    } 
+    }
   }
 
-  
   @Input() data: any;
   @Output() viewClicked = new EventEmitter<any>();
 
-  viewLeave() {
-    this.viewClicked.emit(this.data); // send selected row data to parent
+  editID(params: any) {
+    if (this.params.editCallback) {
+      this.params.editCallback(params.data.tbl_emp_leave_id);
+    }
   }
 }
 

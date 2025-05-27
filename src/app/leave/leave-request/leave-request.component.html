@@ -35,7 +35,7 @@
 
 <!-- Modal  -->
 
-    <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" >
+    <div class="modal fade" id="leaveRequestModal" tabindex="-1" aria-labelledby="exampleModalLabel" >
         <div class="modal-dialog modal-dialog-centered modal-xl">
             <div class="modal-content">
                 <div class="modal-header " style="padding: 20px 40px !important">
@@ -50,7 +50,7 @@
                                     <div class="col-md-6">
                                         <label for="employeeName">Employee Name</label>
                                         <input type="text" id="employeeName" class="form-control"
-                                            formControlName="employeeName" placeholder="Enter Employee Name" readonly>
+                                            formControlName="employeeName" placeholder="Enter Employee Name">
                                         <div *ngIf="leaveRequestForm.get('employeeName')?.invalid && leaveRequestForm.get('employeeName')?.touched"
                                             class="text-danger">
                                             Employee Name is required
@@ -59,7 +59,7 @@
 
                                     <div class="col-md-3">
                                         <label for="startDate">Start Date</label>
-                                        <input type="date" id="startDate" class="form-control"  readonly formControlName="startDate">
+                                        <input type="date" id="startDate" class="form-control"  formControlName="startDate">
                                         <div *ngIf="leaveRequestForm.get('startDate')?.invalid && leaveRequestForm.get('startDate')?.touched"
                                             class="text-danger">
                                             Start Date is required
@@ -68,7 +68,7 @@
 
                                     <div class="col-md-3">
                                         <label for="endDate">End Date</label>
-                                        <input type="date" id="endDate" class="form-control" readonly formControlName="endDate">
+                                        <input type="date" id="endDate" class="form-control" formControlName="endDate">
                                         <div *ngIf="leaveRequestForm.get('endDate')?.invalid && leaveRequestForm.get('endDate')?.touched"
                                             class="text-danger">
                                             End Date is required
@@ -78,7 +78,7 @@
                                 <div class="row my-3">
                                     <div class="col-lg-3 col-md-6">
                                         <label for="leaveType">Leave Type</label>
-                                        <input type="text" id="leaveType" class="form-control" readonly formControlName="leaveType"
+                                        <input type="text" id="leaveType" class="form-control" formControlName="leaveType"
                                             placeholder="Enter Leave Type">
                                         <div *ngIf="leaveRequestForm.get('leaveType')?.invalid && leaveRequestForm.get('leaveType')?.touched"
                                             class="text-danger">
@@ -92,13 +92,14 @@
                                         type="text"
                                         id="status"
                                         class="form-control "
+                                        formControlName="status"
                                         [ngClass]="{
-                                            'custom-bg-warning': leaveRequestData.status === 'Pending',
-                                            'custom-bg-success': leaveRequestData.status === 'Approved',
-                                            'custom-bg-danger': leaveRequestData.status === 'Rejected'
+                                            'custom-bg-warning': leaveRequestData?.status === 'pending',
+                                            'custom-bg-success': leaveRequestData?.status === 'Approved',
+                                            'custom-bg-danger': leaveRequestData?.status === 'Rejected'
                                         }"
-                                        [value]="leaveRequestData.status"
-                                        readonly
+                                        [value]="leaveRequestData?.status"
+                                      
                                         />
                                         <div *ngIf="leaveRequestForm.get('status')?.invalid && leaveRequestForm.get('status')?.touched"
                                             class="text-danger">
@@ -108,7 +109,7 @@
 
                                     <div class="col-lg-3 col-md-6">
                                         <label for="noOfDays">No. Of Days</label>
-                                        <input type="text" id="noOfDays" class="form-control" readonly formControlName="noOfDays"
+                                        <input type="text" id="noOfDays" class="form-control" formControlName="noOfDays"
                                             placeholder="Enter No. Of Days">
                                         <div *ngIf="leaveRequestForm.get('noOfDays')?.invalid && leaveRequestForm.get('noOfDays')?.touched"
                                             class="text-danger">
@@ -118,7 +119,7 @@
 
                                     <div class="col-lg-3 col-md-6">
                                         <label for="department">Department</label>
-                                        <input type="text" id="department" class="form-control" readonly formControlName="department"
+                                        <input type="text" id="department" class="form-control" formControlName="department"
                                             placeholder="Enter Department">
                                         <div *ngIf="leaveRequestForm.get('department')?.invalid && leaveRequestForm.get('department')?.touched"
                                             class="text-danger">
@@ -129,7 +130,7 @@
                                 <div class="row my-3">
                                     <div class="col-12">
                                         <label for="leavereason">Reason</label>
-                                        <textarea id="leavereason" rows="2" class="form-control"  readonly formControlName="leavereason" placeholder="Enter Reason"></textarea>
+                                        <textarea id="leavereason" rows="2" class="form-control"  formControlName="leavereason" placeholder="Enter Reason"></textarea>
                                         <div *ngIf="leaveRequestForm.get('leavereason')?.invalid && leaveRequestForm.get('leavereason')?.touched" class="text-danger">
                                         Reason is required
                                         </div>
@@ -231,8 +232,22 @@
                 </form>
 
                 <div class="modal-footer">
-                    <button type="button" class="btn approveBtn" (click)="updateStatus('Approved')">Approve Leave</button>
-                    <button type="button" class="btn declineBtn" (click)="updateStatus('Rejected')">Decline Leave</button>
+                    <button 
+                      type="button" 
+                      class="btn approveBtn" 
+                      (click)="updateStatus('Approved')"
+                      [disabled]="leaveRequestData?.status === 'Approved' || leaveRequestData?.status === 'Rejected'"
+                    >
+                      Approve Leave
+                    </button>
+                    <button 
+                      type="button" 
+                      class="btn declineBtn" 
+                      (click)="updateStatus('Rejected')"
+                      [disabled]="leaveRequestData?.status === 'Approved' || leaveRequestData?.status === 'Rejected'"
+                    >
+                      Decline Leave
+                    </button>
                     <button type="button" class="btn btn-outline-dark fw-semobild " data-bs-dismiss="modal">Cancel</button>
                 </div>
             </div>
