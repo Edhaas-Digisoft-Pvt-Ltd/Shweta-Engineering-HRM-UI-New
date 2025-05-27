@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { FormGroup, FormBuilder, Validators } from '@angular/forms';
 import { ColDef } from 'ag-grid-community';
+import { HrmserviceService } from '../hrmservice.service';
 
 @Component({
   selector: 'app-advance-payment',
@@ -17,7 +18,11 @@ export class AdvancePaymentComponent {
   activeTab: string = 'tab1';
   gridApiActive: any;
 
+  constructor(private fb: FormBuilder, private service: HrmserviceService) { }
+
   ngOnInit() {
+    this.test()
+    this.getAllAdvPayment();
     const currentDate = new Date();
     this.today = currentDate.toISOString().split('T')[0]; // Format YYYY-MM-DD
     this.initializeGrids();
@@ -27,9 +32,32 @@ export class AdvancePaymentComponent {
     this.activeTab = tab;
   }
 
+  getAllAdvPayment() {
+    this.service.post('all/advancesaraly', {}).subscribe((res: any) => {
+      try {
+        if (res.status == 'success') {
+          console.log(res.data);
 
+        }
+      } catch (error) {
+        console.log(error);
 
-  constructor(private fb: FormBuilder) { }
+      }
+    })
+  }
+
+  test() {
+    this.service.post('fetch/company', {}).subscribe((res: any) => {
+      try {
+        if (res.status == "success") {
+          console.log(res.data);
+        }
+      } catch (error) {
+        console.log(error);
+
+      }
+    })
+  }
 
   onFileSelected(event: any) {
     const file = event.target.files[0];
@@ -112,7 +140,7 @@ export class AdvancePaymentComponent {
     {
       headerName: 'Actions',
       cellStyle: { border: '1px solid #ddd' },
-     
+
       cellRenderer: (params: any) => {
         return `<button type="button" class="btn btn-outline-dark" data-bs-toggle="modal" data-bs-target="#advanceRequestModal">
   <i class="bi bi-pencil"></i>
@@ -158,7 +186,7 @@ export class AdvancePaymentComponent {
       status: 'Rejected'
     }
   ];
-  
+
 
   statusButtonRenderer(params: any) {
     const status = params.value;
@@ -193,7 +221,7 @@ export class AdvancePaymentComponent {
       button.style.border = '1px solid #B2FFE1B0';
       button.style.borderRadius = '20px';
 
-    }else if (status === 'Rejected') {
+    } else if (status === 'Rejected') {
       button.style.backgroundColor = '#FFAFAF'; // light green
       button.style.color = 'black';
       button.style.border = '1px solid #FFAFAF';
@@ -204,7 +232,7 @@ export class AdvancePaymentComponent {
     return button;
   }
 
-  updateStatus(data: any){
+  updateStatus(data: any) {
     alert("update")
   }
 }

@@ -39,7 +39,8 @@
                     </a>
                 </li>
 
-                <div class="accordion accordion-flush rounded-2 overflow-hidden bg-transparent" id="accordionFlushExample" *ngIf="role === 'admin' || role === 'accountant'">
+                <div class="accordion accordion-flush rounded-2 overflow-hidden bg-transparent"
+                    id="accordionFlushExample" *ngIf="role === 'admin' || role === 'accountant'">
                     <div class="accordion-item ">
                         <h2 class="accordion-header ">
                             <button class="accordion-button collapsed px-2" type="button" data-bs-toggle="collapse"
@@ -52,20 +53,22 @@
                             data-bs-parent="#accordionFlushExample">
                             <div class="accordion-body">
                                 <ul class="gap-3 py-2 d-flex flex-column">
-                                    <li >
-                                        <a type="button" [routerLink]="['payrollProcess']"  routerLinkActive="active-link" (click)="closeAccordion()"
+                                    <li>
+                                        <a type="button" [routerLink]="['payrollProcess']"
+                                            routerLinkActive="active-link" (click)="closeAccordion()"
                                             class="d-flex align-items-center">
                                             Process Payroll
                                         </a>
                                     </li>
-                                    <li [routerLink]="['payrollList']" >
+                                    <li [routerLink]="['payrollList']">
                                         <a type="button" routerLinkActive="active-link" (click)="closeAccordion()"
                                             class="d-flex align-items-center">
-                                           Payroll List
+                                            Payroll List
                                         </a>
                                     </li>
-                                    <li >
-                                        <a type="button"  [routerLink]="['salaryRevision']"  routerLinkActive="active-link" (click)="closeAccordion()"
+                                    <li>
+                                        <a type="button" [routerLink]="['salaryRevision']"
+                                            routerLinkActive="active-link" (click)="closeAccordion()"
                                             class="d-flex align-items-center">
                                             Salary Revisions
                                         </a>
@@ -79,7 +82,8 @@
 
                 </div>
 
-                <li [routerLink]="['Calender']" class="nav-item" *ngIf="role === 'admin' || role === 'employee' || role === 'accountant'">
+                <li [routerLink]="['Calender']" class="nav-item"
+                    *ngIf="role === 'admin' || role === 'employee' || role === 'accountant'">
 
                     <a type="button" routerLinkActive="active-link" (click)="closeAccordion()"
                         class="nav-link btn-like d-flex align-items-center">
@@ -99,14 +103,15 @@
 
 
 
-                 <!-- <li [routerLink]="['CompanySetup']" class="nav-item">
+                <!-- <li [routerLink]="['CompanySetup']" class="nav-item">
 
                     <a type="button" routerLinkActive="active-link" (click)="closeAccordion()"
                         class="nav-link btn-like d-flex align-items-center">
                         <i class="bi bi-gear ms-2 me-2"></i>Company Setup
                     </a>
                 </li> -->
-                 <div class="accordion accordion-flush rounded-2 overflow-hidden bg-transparent mb-2" id="accordionFlushExample2" *ngIf="role === 'admin'">
+                <div class="accordion accordion-flush rounded-2 overflow-hidden bg-transparent mb-2"
+                    id="accordionFlushExample2" *ngIf="role === 'admin'">
                     <div class="accordion-item ">
                         <h2 class="accordion-header ">
                             <button class="accordion-button collapsed px-2" type="button" data-bs-toggle="collapse"
@@ -119,21 +124,21 @@
                             data-bs-parent="#accordionFlushExample2">
                             <div class="accordion-body">
                                 <ul class="gap-3 py-2 d-flex flex-column">
-                                    <li >
-                                        <a type="button" [routerLink]="['companyList']"  routerLinkActive="active-link" (click)="closeAccordion()"
-                                            class="d-flex align-items-center">
+                                    <li>
+                                        <a type="button" [routerLink]="['companyList']" routerLinkActive="active-link"
+                                            (click)="closeAccordion()" class="d-flex align-items-center">
                                             Company List
                                         </a>
                                     </li>
-                                    <li [routerLink]="['comMange&Plolicies']" >
+                                    <li [routerLink]="['comMange&Plolicies']">
                                         <a type="button" routerLinkActive="active-link" (click)="closeAccordion()"
                                             class="d-flex align-items-center">
-                                           manage & Policies
+                                            manage & Policies
                                         </a>
                                     </li>
-                                    <li >
-                                        <a type="button"  [routerLink]="['LeaveSetup']"  routerLinkActive="active-link" (click)="closeAccordion()"
-                                            class="d-flex align-items-center">
+                                    <li>
+                                        <a type="button" [routerLink]="['LeaveSetup']" routerLinkActive="active-link"
+                                            (click)="closeAccordion()" class="d-flex align-items-center">
                                             Leave Config
                                         </a>
                                     </li>
@@ -145,14 +150,14 @@
                     </div>
 
                 </div>
-                 <!-- <li [routerLink]="['demo']" class="nav-item">
+                <!-- <li [routerLink]="['demo']" class="nav-item">
 
                     <a type="button" routerLinkActive="active-link" (click)="closeAccordion()"
                         class="nav-link btn-like d-flex align-items-center">
                         <i class="bi bi-gear ms-2 me-2"></i>demo
                     </a>
                 </li> -->
-                 <!-- <li [routerLink]="['demo2']" class="nav-item">
+                <!-- <li [routerLink]="['demo2']" class="nav-item">
 
                     <a type="button" routerLinkActive="active-link" (click)="closeAccordion()"
                         class="nav-link btn-like d-flex align-items-center">
