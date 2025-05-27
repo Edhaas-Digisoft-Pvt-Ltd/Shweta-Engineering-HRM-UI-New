@@ -2,18 +2,20 @@ import { Component } from '@angular/core';
 import { FormBuilder } from '@angular/forms';
 import { ColDef } from 'ag-grid-community';
 import { EmployeeActionComponent } from 'src/app/employee/employee-action/employee-action.component';
+import { HrmserviceService } from 'src/app/hrmservice.service';
 
 @Component({
   selector: 'app-approved-advance-payment',
   templateUrl: './approved-advance-payment.component.html',
-  styleUrls: ['./approved-advance-payment.component.css']
+  styleUrls: ['./approved-advance-payment.component.css'],
 })
 export class ApprovedAdvancePaymentComponent {
-
   today: string = new Date().toISOString().split('T')[0];
-  title: String = "Company Demo";
+  title: String = 'Company Demo';
   activeTab: string = 'tab1';
   gridApiActive: any;
+  role: string = '';
+  columnDefs: ColDef[] = [];
 
   advanceSalaryData = {
     id: '#0001',
@@ -28,16 +30,17 @@ export class ApprovedAdvancePaymentComponent {
     firstInstallmentDate: '07/05/25',
     installmentEndDate: '07/11/25',
     lastInstallmentPaid: '09/05/25',
-    nextInstallmentDue: '09/06/25'
+    nextInstallmentDue: '09/06/25',
   };
 
-  constructor(private fb: FormBuilder) {
-  }
+  constructor(private fb: FormBuilder, private service: HrmserviceService) {}
 
   ngOnInit() {
     const currentDate = new Date();
     this.today = currentDate.toISOString().split('T')[0]; // Format YYYY-MM-DD
-    this.initializeGrids();
+    // this.initializeGrids();
+    this.role = this.service.getRole();
+    this.initializeColumns();
   }
 
   selectTab(tab: string) {
@@ -48,7 +51,6 @@ export class ApprovedAdvancePaymentComponent {
     const file = event.target.files[0];
   }
 
-
   // columnDefs: any[] = [];
   // rowData: any[] = [];
   monthlyColumnDefs: any[] = [];
@@ -58,15 +60,25 @@ export class ApprovedAdvancePaymentComponent {
 
   financialYears = [2022, 2023, 2024, 2025];
   months = [
-    'January', 'February', 'March', 'April', 'May', 'June',
-    'July', 'August', 'September', 'October', 'November', 'December'
+    'January',
+    'February',
+    'March',
+    'April',
+    'May',
+    'June',
+    'July',
+    'August',
+    'September',
+    'October',
+    'November',
+    'December',
   ];
   days = Array.from({ length: 31 }, (_, i) => i + 1);
 
   selectedYear: number = new Date().getFullYear();
   selectedMonth: string = this.months[new Date().getMonth()];
   monthIndex1Based = this.months.indexOf(this.selectedMonth);
-  //  for selecting company 
+  //  for selecting company
   optionsArray: string[] = ['Company A', 'Company B', 'Company C'];
   selectedValue: string = 'Company A'; // Default selected
 
@@ -101,8 +113,7 @@ export class ApprovedAdvancePaymentComponent {
   }
   onYearMonthChange() {
     // alert("month change")
-    console.log("Month Change");
-
+    console.log('Month Change');
   }
 
   public defaultColDef: ColDef = {
@@ -110,29 +121,55 @@ export class ApprovedAdvancePaymentComponent {
     // flex: 1,
     resizable: true,
   };
+  initializeColumns() {
+    this.columnDefs = [
+      { headerName: 'ID', field: 'id', sortable: true, filter: true },
+      { headerName: 'Date', field: 'date', sortable: true, filter: true },
+      {
+        headerName: 'Employee Name',
+        field: 'name',
+        sortable: true,
+        filter: true,
+      },
+      {
+        headerName: 'Total Amount',
+        field: 'amount',
+        sortable: true,
+        filter: true,
+      },
+      {
+        headerName: 'Remaining Amount',
+        field: 'remainingAmount',
+        sortable: true,
+        filter: true,
+      },
+      {
+        headerName: 'First Installment Date',
+        field: 'tenure',
+        sortable: true,
+        filter: true,
+      },
+      {
+        headerName: 'Next Due Date',
+        field: 'nextDueDate',
+        sortable: true,
+        filter: true,
+      },
+      { headerName: 'Tenure', field: 'tenure', sortable: true, filter: true },
+    ];
+    if (this.role !== 'accountant') {
+      this.columnDefs.push({
+        headerName: 'Actions',
+        cellStyle: { border: '1px solid #ddd' },
 
-  columnDefs: ColDef[] = [
-
-    { headerName: 'ID', field: 'id', sortable: true, filter: true },
-    { headerName: 'Date', field: 'date', sortable: true, filter: true },
-    { headerName: 'Employee Name', field: 'name', sortable: true, filter: true },
-    { headerName: 'Total Amount', field: 'amount', sortable: true, filter: true },
-    { headerName: 'Remaining Amount', field: 'remainingAmount', sortable: true, filter: true },
-    { headerName: 'First Installment Date', field: 'tenure', sortable: true, filter: true },
-    { headerName: 'Next Due Date', field: 'nextDueDate', sortable: true, filter: true },
-    { headerName: 'Tenure', field: 'tenure', sortable: true, filter: true },
-    {
-      headerName: 'Actions',
-      cellStyle: { border: '1px solid #ddd' },
-     
-      cellRenderer: (params: any) => {
-        return `<button type="button" class="btn btn-outline-dark" data-bs-toggle="modal" data-bs-target="#advanceSalaryModalinfo">
+        cellRenderer: (params: any) => {
+          return `<button type="button" class="btn btn-outline-dark" data-bs-toggle="modal" data-bs-target="#advanceSalaryModalinfo">
   <i class="bi bi-pencil"></i>
 </button>`;
-      }
+        },
+      });
     }
-  ];
-
+  }
 
   rowData = [
     {
@@ -146,7 +183,7 @@ export class ApprovedAdvancePaymentComponent {
       nextDueDate: '2025-06-01',
       status: 'Approved',
       joinDate: '2025-03-09',
-      contact: '9078121214'
+      contact: '9078121214',
     },
     {
       id: 2,
@@ -159,7 +196,7 @@ export class ApprovedAdvancePaymentComponent {
       nextDueDate: '2025-06-01',
       status: 'Approved',
       joinDate: '2025-03-09',
-      contact: '9078121214'
+      contact: '9078121214',
     },
     {
       id: 3,
@@ -172,10 +209,9 @@ export class ApprovedAdvancePaymentComponent {
       nextDueDate: '2025-06-01',
       status: 'Approved',
       joinDate: '2025-03-09',
-      contact: '9078121214'
-    }
+      contact: '9078121214',
+    },
   ];
-
 
   statusButtonRenderer(params: any) {
     const status = params.value;
@@ -196,11 +232,10 @@ export class ApprovedAdvancePaymentComponent {
     button.style.width = '100%';
     button.style.marginTop = '6px';
 
-
     // Conditional styling
     if (status === 'Pending') {
-      button.style.backgroundColor = '#FFF291';  // light red
-      button.style.color = '#721c24';           // dark red text
+      button.style.backgroundColor = '#FFF291'; // light red
+      button.style.color = '#721c24'; // dark red text
       button.style.border = '1px solid #f5c6cb';
     } else if (status === 'Approved') {
       button.style.backgroundColor = '#B2FFE1B0'; // light green
@@ -211,9 +246,8 @@ export class ApprovedAdvancePaymentComponent {
     return button;
   }
 
-  // update function 
+  // update function
   updateStatus(data: any) {
-    alert("update")
+    alert('update');
   }
-
 }

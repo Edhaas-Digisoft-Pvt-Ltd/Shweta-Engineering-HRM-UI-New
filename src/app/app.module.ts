@@ -108,7 +108,6 @@ import { EditLeaveRequestComponent } from './leave/leave-request/edit-leave-requ
     NgChartsModule,
     FormsModule,
     FullCalendarModule,
-    NgChartsModule
   ],
   providers: [],
   bootstrap: [AppComponent],
