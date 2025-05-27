@@ -177,7 +177,7 @@ export class CreateemployeeComponent {
     this.service.post('fetch/company', {}).subscribe((res: any) => {
       if (res.status == "success") {
         // this.optionsArray = res.map((company: any) => company.CompanyName); // <-- only CompanyName
-        this.CompanyNames = res.Data;
+        this.CompanyNames = res.data;
       }
     },
       (error) => {

@@ -28,7 +28,6 @@ import { AttendanceDataComponent } from './dashboard/dashboardComponent/attendan
 import { AttendanceSummaryComponent } from './attendance/attendance-summary/attendance-summary.component';
 import { LeaveComponent } from './leave/leave/leave.component';
 import { LeaveRequestComponent } from './leave/leave-request/leave-request.component';
-import { LeaverequestactionComponent } from './leave/leaverequestaction/leaverequestaction.component';
 import { UpcommingEventsComponent } from './dashboard/dashboardComponent/upcomming-events/upcomming-events.component';
 import { ApprovedAdvancePaymentComponent } from './advance-payment/approved-advance-payment/approved-advance-payment.component';
 import { ConsolidateAttendanceSummaryComponent } from './attendance/consolidate-attendance-summary/consolidate-attendance-summary.component';
@@ -48,6 +47,7 @@ import dayGridPlugin from '@fullcalendar/daygrid';
 import { ComMangeAndPoliciesComponent } from './compnay-setup/com-mange-and-policies/com-mange-and-policies.component';
 import { LeaveSetupComponent } from './compnay-setup/leave-setup/leave-setup.component';
 import { CompanyDashboardComponent } from './compnay-setup/company-list/company-dashboard/company-dashboard.component';
+import { EditLeaveRequestComponent } from './leave/leave-request/edit-leave-request/edit-leave-request.component';
 
 // FullCalendarModule.registerPlugins([dayGridPlugin]);
 
@@ -74,7 +74,6 @@ import { CompanyDashboardComponent } from './compnay-setup/company-list/company-
     AttendanceSummaryComponent,
     LeaveComponent,
     LeaveRequestComponent,
-    LeaverequestactionComponent,
     PayrollListComponent,
     PayrollActionBtnComponent,
     PayrollSummariesComponent,
@@ -90,7 +89,8 @@ import { CompanyDashboardComponent } from './compnay-setup/company-list/company-
     Demo2Component,
     ComMangeAndPoliciesComponent,
     LeaveSetupComponent,
-     CompanyDashboardComponent
+     CompanyDashboardComponent,
+     EditLeaveRequestComponent
   ],
   imports: [
     BrowserModule,
@@ -108,7 +108,6 @@ import { CompanyDashboardComponent } from './compnay-setup/company-list/company-
     NgChartsModule,
     FormsModule,
     FullCalendarModule,
-    NgChartsModule
   ],
   providers: [],
   bootstrap: [AppComponent],

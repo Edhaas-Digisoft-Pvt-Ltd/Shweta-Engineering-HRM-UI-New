@@ -17,8 +17,8 @@ export class EmployeeComponent {
   employee: any = [];
   Employee_Data: any;
   selectedCompanyId: any = 1;
-  rowData: any = [];
-  
+  // rowData: any = [];
+
   constructor(private router: Router, private service: HrmserviceService) { }
 
   ngOnInit() {
@@ -31,8 +31,7 @@ export class EmployeeComponent {
     this.service.post('fetch/company', {}).subscribe((res: any) => {
       if (res.status == "success") {
         // this.optionsArray = res.map((company: any) => company.CompanyName); // <-- only CompanyName
-        this.CompanyNames = res.Data;
-        console.log(this.CompanyNames);
+        this.CompanyNames = res.data;
       }
     },
       (error) => {
@@ -40,7 +39,7 @@ export class EmployeeComponent {
       }
     );
   }
-  
+
   onCompanyChange(event: Event): void {
     this.selectedCompanyId = (event.target as HTMLSelectElement).value;
     console.log('Selected Company ID:', this.selectedCompanyId);
@@ -69,15 +68,15 @@ export class EmployeeComponent {
       headerName: 'Status',
       field: 'status',
         cellRenderer: (params:any) => {
-          
+
         const status = params.data.status;
         // console.log(status);
-        
+
         const button = document.createElement('button');
-    
+
         // Set the text of the button
         button.innerText = status === 'active' ? 'Active' : 'Inactive';
-        
+
         // Apply the styles based on the status
         if (status === 'active') {
           button.style.backgroundColor = '#CAFFEA';  // Green
@@ -86,7 +85,7 @@ export class EmployeeComponent {
           button.style.backgroundColor = '#FFAFAF';  // Blue
           button.style.color = '#000';
         }
-        
+
         // Additional button styling
         button.style.border = 'none';
         button.style.padding = '8px 16px';
@@ -99,13 +98,13 @@ export class EmployeeComponent {
         button.style.height ="28px";
         button.style.width ="100px";
 
-        
-    
+
+
         // Optional: Add event listener for button click if needed
         button.addEventListener('click', () => {
           console.log(`Button for ${status} clicked!`);
         });
-    
+
         return button;  // Return the button to be rendered
       }
     },
@@ -115,11 +114,22 @@ export class EmployeeComponent {
       cellStyle: { border: '1px solid #ddd' },
       cellRenderer: EmployeeActionComponent,
       cellRendererParams: {
-        viewEmployee : (field: any) => this.editApp(field),  
+        viewEmployee : (field: any) => this.editApp(field),
         // deleteCallback: (appId: string) => this.deleteApp(appId),
       },
     }
   ];
+   rowData = [
+    {
+      employee_id: 1,
+      employee_code: 'EMP001',
+      emp_name: 'John Doe',
+      emp_contact: '1234567890',
+      doj: '2020-01-01',
+      department_name: 'HR',
+      designation_name: 'Manager',
+    }
+  ]
 
 
 
@@ -136,27 +146,29 @@ export class EmployeeComponent {
     this.router.navigate(['/authPanal/CreateEmployee']);
   }
 
-  // getting all data from api : 
+  // getting all data from api :
   getEmployee() {
 
     let company_id = this.selectedCompanyId ;
     this.service.post("company/employee", {company_id}).subscribe((res: any) => {
-      console.log(res.Data)
       if (res.status == 'success') {
-        this.rowData = res.Data.map((item:any)=>({
+
+        this.rowData = res.data.map((item:any)=>({
           employee_id:item.employe_id,
           employee_code:item.employee_code,
           emp_name:item.emp_name,
           emp_contact:item.emp_contact,
           doj:item.doj,
-          department_name:item.department,
-          designation_name : item.designation,
-          status:item.status ==="Active"?"active":"Inactive",
+          department_name:item.department_name,
+          designation_name : item.designation_name,
+          status:item.status ==="Active"?"Active":"Inactive",
         }));
+
       }
-      
+
     });
   }
+
 
   onOptionSelected() {
     console.log('Selected option:', this.selectedValue);

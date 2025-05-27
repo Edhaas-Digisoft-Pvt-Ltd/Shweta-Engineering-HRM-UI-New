@@ -14,6 +14,7 @@ export class LoginComponent {
   loginForm: FormGroup;
   loginData: any;
   readonly NoWhitespaceRegExp: RegExp = new RegExp('\\S');
+  roles: any;
 
   constructor(
     private router: Router,
@@ -21,77 +22,84 @@ export class LoginComponent {
     private service: HrmserviceService
   ) {
     this.loginForm = new FormGroup({
-      email: new FormControl('', [
+      email: new FormControl('smp@gmail.com', [
         Validators.required,
         Validators.email,
         Validators.pattern(
           /^[a-zA-Z0-9._%+-]+@[a-zA-Z]+\.[a-zA-Z]{2,}(?:\.[a-zA-Z]{2,})?$/
         ),
       ]), // Email validation
-      password: new FormControl('', [
+      password: new FormControl('7057063094', [
         Validators.required,
         Validators.minLength(6),
         Validators.pattern(this.NoWhitespaceRegExp),
       ]), // Min length validation
-      role: new FormControl('',[
+      role: new FormControl('admin', [
         Validators.required,]), // Required field
     });
   }
+  ngOnInit(): void {
+    this.getRoles()
 
+  }
+  //--------------------------------------------------------------------------------------
+  getRoles() {
+    this.service.post('fetch/roles', {}).subscribe((res: any) => {
+      try {
+        if (res.status == "success") {
+          this.roles = res.data
+        }
+      } catch (error) {
+        console.log(error);
+
+      }
+    })
+  }
+
+  //--------------------------------------------------------------------------------------
   login() {
     const body = {
-      Username: this.loginForm.get('email')?.value,
-      PasswordHash: this.loginForm.get('password')?.value,
-      User_Role: this.loginForm.get('role')?.value,
+      username: this.loginForm.get('email')?.value,
+      password: this.loginForm.get('password')?.value,
     };
-    this.service.post('/loginemp', body).subscribe((res: any) => {
+
+    this.service.post('login', body).subscribe((res: any) => {
       if (res.status == 'success') {
-        console.log('Form Submitted:', this.loginForm.value);
         this.toastr.success('Login successful !!!');
-        this.router.navigate(['/authPanal/Dashboard']);
-      } else {
-        this.toastr.error('Please Check Detail !!!');
+
+        const role = this.loginForm.value.role;
+        sessionStorage.setItem("AUTH", res.token); // Session storage for Auth
+        this.service.setRole(role); // Session storage for role
+
+        if (role === 'employee') {
+          this.router.navigate(['/authPanal/EmployeeInDetail']);
+        }
+        if (role === 'accountant') {
+          this.router.navigate(['/authPanal/payrollProcess']);
+        }
+        else if (role === 'admin') {
+          this.router.navigate(['/authPanal/Dashboard']);
+        }
+
+      }
+      else if (res.status === 'error') {
+        console.log("eeeeeeeeeeeee");
+
+        alert(res.message)
+        this.toastr.error(res.message);
       }
     });
   }
-
-  // onSubmit() {
-  //   if (this.loginForm.valid) {
-  //     console.log(this.loginData);
-  //     // this.login();
-  //     this.router.navigate(['/authPanal/Dashboard']);
-
-  //   } else {
-  //     console.log("Incorrect Details :", this.loginForm.value);
-  //     this.toastr.error('Invalid credentials !');
-  //   }
-  // }
-
-  // onRegisterSubmit() {
-  //   alert("Working on register");
-  // }
-  employeID: any;
+  //--------------------------------------------------------------------------------------
   onSubmit() {
     if (this.loginForm.valid) {
-      const role = this.loginForm.value.role;
-      this.service.setRole(role);
-      this.router.navigate(['/authPanal/Dashboard']);
-      // this.login();
-      console.log(this.loginForm);
-      if (role === 'employee') {
-        this.router.navigate(['/authPanal/EmployeeInDetail']);
-      }
-      if (role === 'accountant') {
-        this.router.navigate(['/authPanal/payrollProcess']);
-      }
+      this.login();
     } else {
       console.log('Incorrect Details :', this.loginForm.value);
       this.toastr.error('Invalid credentials !');
     }
   }
+  //--------------------------------------------------------------------------------------
 
-  onRegisterSubmit() {
-    alert('Working on register');
-    // this.router.navigate(['/authPanal/Dashboard']);
-  }
+
 }

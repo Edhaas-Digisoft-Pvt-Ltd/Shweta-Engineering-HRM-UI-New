@@ -1,8 +1,9 @@
 import { Component, ElementRef } from '@angular/core';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { ColDef } from 'ag-grid-community';
-import { LeaverequestactionComponent } from '../leaverequestaction/leaverequestaction.component';
 import { FormGroup, FormBuilder, Validators } from '@angular/forms';
+import { HrmserviceService } from 'src/app/hrmservice.service';
+import { EditLeaveRequestComponent } from './edit-leave-request/edit-leave-request.component';
 
 declare var bootstrap: any;
 
@@ -18,19 +19,14 @@ export class LeaveRequestComponent {
   params: any;
   leaveRequestForm!: FormGroup;
   selectedCompanyId : any = 1 ;
+  rowData : any = [];
+  leaveRequestData!: any;
+  empLeaveId : any;
+
   // @ViewChild('leaveModal') leaveModalRef!: ElementRef;
 
   // leave request data 
-  leaveRequestData = {
-    employeeName: 'John Doe',
-    startDate: '2025-04-10',
-    endDate: '2025-04-12',
-    leaveType: 'Casual Leave',
-    status: 'Pending', // or 'Approved', 'Rejected'
-    noOfDays: '2',
-    department: 'HR',
-    leavereason: 'Personal work',
-  };
+  singleleaveRequestData: any;
 
   // leaves data 
   leaveBalance = {
@@ -49,31 +45,22 @@ export class LeaveRequestComponent {
   CompanyNames: any = [] ;
   selectedValue: any = 1 ; // Default selected
 
-  constructor(private router: Router, private fb: FormBuilder) { }
+  constructor(private route: ActivatedRoute, private router: Router, private fb: FormBuilder, private service: HrmserviceService) { }
 
   // leave request form : 
   ngOnInit(): void {
     this.leaveRequestForm = this.fb.group({
-      employeeName: ['', Validators.required],
-      startDate: ['', Validators.required],
-      endDate: ['', Validators.required],
-      leaveType: ['', Validators.required],
-      status: ['', Validators.required],
-      noOfDays: ['', Validators.required],
-      department: ['', Validators.required],
-      leavereason: ['', Validators.required]
+      employeeName: [{ value: '', disabled: true }, Validators.required],
+      startDate: [{ value: '', disabled: true }, Validators.required],
+      endDate: [{ value: '', disabled: true }, Validators.required],
+      leaveType: [{ value: '', disabled: true }, Validators.required],
+      status: [{ value: '', disabled: true }, Validators.required],
+      noOfDays: [{ value: '', disabled: true }, Validators.required],
+      department: [{ value: '', disabled: true }, Validators.required],
+      leavereason: [{ value: '', disabled: true }, Validators.required]
     });
-    this.leaveRequestData = {
-      employeeName: 'John Doe',
-      startDate: '2025-04-10',
-      endDate: '2025-04-12',
-      leaveType: 'Casual Leave',
-      status: 'Pending', // or 'Approved', 'Rejected'
-      noOfDays: '2',
-      department: 'HR',
-      leavereason: 'Personal work',
-    };
-    this.leaveRequestForm.patchValue(this.leaveRequestData);
+    this.getCompanyNames();
+    this.getLeaveRequests();
 
   }
 
@@ -89,17 +76,16 @@ export class LeaveRequestComponent {
   };
 
   columnDefs: ColDef[] = [
-    { headerName: 'Name', field: 'name', sortable: true, filter: true },
-    { headerName: 'Company Name', field: 'companyname', sortable: true, filter: true },
-    // { headerName: 'Role', field: 'role', sortable: true, filter: true },
-    { headerName: 'Department', field: 'department', sortable: true, filter: true },
-    { headerName: 'Start Date', field: 'startDate', sortable: true, filter: true },
-    { headerName: 'End Date', field: 'endDate', sortable: true, filter: true },
-    { headerName: 'Day Count', field: 'dayCount', sortable: true, filter: true },
+    { headerName: 'Name', field: 'emp_name',},
+    { headerName: 'Company Name', field: 'company_name',},
+    { headerName: 'Department', field: 'department_name',},
+    { headerName: 'Start Date', field: 'start_date',},
+    { headerName: 'End Date', field: 'end_date',},
+    { headerName: 'Day Count', field: 'apply_leave_count',},
 
     {
       headerName: 'Leave Status',
-      field: 'status',
+      field: 'leave_status',
       sortable: true,
       filter: true,
       cellRenderer: (params: any) => {
@@ -107,9 +93,9 @@ export class LeaveRequestComponent {
         let backgroundColor = '#6c757d'; // Default gray
         let textColor = '#000';
 
-        if (status === 'Accepted') backgroundColor = '#CAFFEA';
+        if (status === 'Approved') backgroundColor = '#CAFFEA';
         else if (status === 'Rejected') backgroundColor = '#FFAFAF';
-        else if (status === 'Pending') {
+        else if (status === 'pending') {
           backgroundColor = '#FFF291';
           textColor = '#716300';
         }
@@ -121,85 +107,76 @@ export class LeaveRequestComponent {
       }
     },
 
-    // { headerName: 'Contact', field: 'contact', sortable: true, filter: true },
     {
       headerName: 'Actions',
       cellStyle: { border: '1px solid #ddd' },
       minWidth: 180,
       maxWidth: 400,
-      cellRenderer: LeaverequestactionComponent,
-
+      cellRenderer: EditLeaveRequestComponent,
+      cellRendererParams: {
+        editCallback: (leaveId: any) => this.onViewLeaveClick(leaveId), 
+      }
     }
   ];
 
-
-  rowData = [
-    {
-      name: 'Shivani',
-      role: 'Frontend Developer',
-      companyname: 'abc',
-      department: 'UI/UX',
-      status: 'Pending',
-      joinDate: '2024-03-01',
-      contact: '9876543210',
-      startDate: '2025-04-10',
-      endDate: '2025-04-12',
-      dayCount: 3
-    },
-    {
-      name: 'Mansi',
-      role: 'Backend Developer',
-      department: 'API Services',
-      companyname: 'abc',
-      status: 'Accepted',
-      joinDate: '2023-11-15',
-      contact: '9123456789',
-      startDate: '2025-04-01',
-      endDate: '2025-04-03',
-      dayCount: 3
-    },
-    {
-      name: 'Mrunal',
-      role: 'Full Stack Developer',
-      department: 'Engineering',
-      companyname: 'abc',
-      status: 'Rejected',
-      joinDate: '2024-06-20',
-      contact: '9988776655',
-      startDate: '2025-03-25',
-      endDate: '2025-03-27',
-      dayCount: 3
-    },
-    {
-      name: 'Shivani',
-      role: 'Frontend Developer',
-      department: 'UI/UX',
-      companyname: 'abc',
-      status: 'Pending',
-      joinDate: '2024-03-01',
-      contact: '9876543210',
-      startDate: '2025-04-05',
-      endDate: '2025-04-05',
-      dayCount: 1
-    },
-    {
-      name: 'Anuradha',
-      role: 'Frontend Developer',
-      department: 'UI/UX',
-      companyname: 'abc',
-      status: 'Pending',
-      joinDate: '2024-03-01',
-      contact: '9876543210',
-      startDate: '2025-04-08',
-      endDate: '2025-04-09',
-      dayCount: 2
-    }
-  ];
-
+  onViewLeaveClick(params: any) {
+    this.empLeaveId = params;
+     this.service.post(`single/leave/request`,{ "tbl_emp_leave_id": this.empLeaveId}).subscribe((res: any) => {
+       if (res.status === 'success') {
+        this.singleleaveRequestData = res.data[0]; 
+        this.leaveRequestData = {
+          employeeName: this.singleleaveRequestData?.emp_name,
+          startDate: this.singleleaveRequestData?.start_date,
+          endDate: this.singleleaveRequestData?.end_date,
+          leaveType: this.singleleaveRequestData?.leave_type,
+          status: this.singleleaveRequestData?.leave_status, // or 'Approved', 'Rejected'
+          noOfDays: this.singleleaveRequestData?.apply_leave_count,
+          department: this.singleleaveRequestData?.department_name,
+          leavereason: this.singleleaveRequestData?.leave_reason,
+        };
+        this.leaveRequestForm.patchValue(this.leaveRequestData);    
+       }
+    });
+  }
+ 
   onCompanyChange(event: Event): void {
     this.selectedCompanyId = (event.target as HTMLSelectElement).value;
     console.log('Selected Company ID:', this.selectedCompanyId);
-    
+    this.getLeaveRequests();
+  }
+
+    getCompanyNames() {
+    this.service.post('fetch/company', {}).subscribe((res: any) => {
+      if (res.status == "success") {
+        this.CompanyNames = res.data
+      }
+    },
+      (error) => {
+        console.error('Error fetching companies:', error);
+      }
+    );
+  }
+
+  getLeaveRequests(){
+     this.service.post('leave/request', { company_id: this.selectedCompanyId }).subscribe(
+      (res: any) => {
+        if (res.status === 'success') {
+          this.rowData = res.data.map((item:any)=>({
+            emp_name:item.emp_name,
+            company_name:item.company_name,
+            department_name:item.department_name,
+            start_date:item.start_date,
+            end_date:item.end_date,
+            apply_leave_count : item.apply_leave_count,
+            leave_status:item.leave_status,
+            tbl_emp_leave_id: item.tbl_emp_leave_id,
+        }));
+        } 
+      },
+       (error) => {
+        console.error('Error fetching leave request:', error);
+      }
+    );
   }
 
   statusButtonRenderer(params: any) {
@@ -262,29 +239,27 @@ export class LeaveRequestComponent {
     return true;
   }
 
-  openModal() {
-    const modalId = `#leaveModal${this.params.node.id}`;
-    const modalElement = document.querySelector(modalId) as HTMLElement;
-
-    if (modalElement) {
-      const modal = new bootstrap.Modal(modalElement);
-      modal.show();
-    }
-  }
-
-  openLeaveRequestModal(data: any) {
-    this.leaveRequestForm.patchValue(data); // Patch selected row data
-    this.leaveRequestForm.disable();        // Make form readonly
-
-    const modalElement = document.getElementById('leaveRequestModal');
-    if (modalElement) {
-      const bootstrapModal = new bootstrap.Modal(modalElement);
-      bootstrapModal.show();
-    }
-  }
-
   updateStatus(data: any) {
-    alert("update")
+    if(confirm("Do you want to update Status?") == true){
+      const payload = {
+        tbl_emp_leave_id : this.empLeaveId,
+        leave_status : data
+      }
+      this.service.post(`update/leave/request`,payload).subscribe((res: any) => {
+        if(res.status === 'success'){
+          this.getLeaveRequests()
+           const modalElement = document.getElementById('leaveRequestModal');
+            if (modalElement) {
+              const modalInstance = bootstrap.Modal.getInstance(modalElement);
+              if (modalInstance) {
+                modalInstance.hide();
+              }
+            }
+        }
+      },(error) => {
+        console.error('Error fetching leave request:', error);
+      });
+    }
   }
 
   submitForm() {
