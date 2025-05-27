@@ -40,6 +40,7 @@ export class EmployeeInDetailComponent {
   isAdvanceSalary: any = false;
   employee_code: any;
   Employee_Data: any;
+  
 
   constructor(private route: ActivatedRoute, private fb: FormBuilder, private router: Router, private toastr: ToastrService, private service: HrmserviceService,) {
     // Generate last 20 years dynamically
@@ -54,7 +55,7 @@ export class EmployeeInDetailComponent {
 
 
   }
-  
+
   role: string = '';
 
 
@@ -91,7 +92,10 @@ export class EmployeeInDetailComponent {
     this.advanceSalaryForm.valueChanges.subscribe(() => this.calculateInstallment());
     this.fetchEmployee(this.employee_code);
 
+
   }
+
+
 
 
   leaveStatus = {

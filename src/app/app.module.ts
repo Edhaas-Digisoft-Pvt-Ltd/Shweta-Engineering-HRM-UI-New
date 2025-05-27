@@ -108,7 +108,6 @@ import { CompanyDashboardComponent } from './compnay-setup/company-list/company-
     NgChartsModule,
     FormsModule,
     FullCalendarModule,
-    NgChartsModule
   ],
   providers: [],
   bootstrap: [AppComponent],

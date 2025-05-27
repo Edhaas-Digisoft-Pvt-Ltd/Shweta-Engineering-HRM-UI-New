@@ -13,10 +13,10 @@ import {
 })
 export class HrmserviceService {
 
-  url: string = 'http://127.0.0.1:8000/api/v1/';
+  // url: string = 'http://127.0.0.1:8000/api/v1/';
 
   // url: string = 'http://localhost/CRM_rest/index.php/';
-  // url: string = 'https://edhaasdigisoft.co.in/website1/Hrishi/CRM_rest/index.php/';
+  url: string = 'https://edhaasdigisoft.co.in/website1/Hrishi/CRM_rest/index.php/';
   // url:  string =  'http://localhost/CRM_Portal_API/index.php';
 
   constructor(private router: Router, private httpClient: HttpClient) { }
