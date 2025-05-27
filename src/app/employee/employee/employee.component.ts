@@ -31,8 +31,7 @@ export class EmployeeComponent {
     this.service.post('fetch/company', {}).subscribe((res: any) => {
       if (res.status == "success") {
         // this.optionsArray = res.map((company: any) => company.CompanyName); // <-- only CompanyName
-        this.CompanyNames = res.Data;
-        console.log(this.CompanyNames);
+        this.CompanyNames = res.data;
       }
     },
       (error) => {
@@ -152,18 +151,19 @@ export class EmployeeComponent {
 
     let company_id = this.selectedCompanyId ;
     this.service.post("company/employee", {company_id}).subscribe((res: any) => {
-      console.log(res.Data)
       if (res.status == 'success') {
-        // this.rowData = res.Data.map((item:any)=>({
-        //   employee_id:item.employe_id,
-        //   employee_code:item.employee_code,
-        //   emp_name:item.emp_name,
-        //   emp_contact:item.emp_contact,
-        //   doj:item.doj,
-        //   department_name:item.department,
-        //   designation_name : item.designation,
-        //   status:item.status ==="Active"?"active":"Inactive",
-        // }));
+
+        this.rowData = res.data.map((item:any)=>({
+          employee_id:item.employe_id,
+          employee_code:item.employee_code,
+          emp_name:item.emp_name,
+          emp_contact:item.emp_contact,
+          doj:item.doj,
+          department_name:item.department_name,
+          designation_name : item.designation_name,
+          status:item.status ==="Active"?"Active":"Inactive",
+        }));
+
       }
 
     });

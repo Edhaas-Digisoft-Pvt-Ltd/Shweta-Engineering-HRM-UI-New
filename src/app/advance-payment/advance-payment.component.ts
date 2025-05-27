@@ -18,8 +18,16 @@ export class AdvancePaymentComponent {
 
   activeTab: string = 'tab1';
   gridApiActive: any;
+
+
+  
+
+
   columnDefs: ColDef[] = [];
+
   ngOnInit() {
+    this.test()
+    this.getAllAdvPayment();
     const currentDate = new Date();
     this.today = currentDate.toISOString().split('T')[0]; // Format YYYY-MM-DD
     // this.initializeGrids();
@@ -31,6 +39,35 @@ export class AdvancePaymentComponent {
   selectTab(tab: string) {
     this.activeTab = tab;
   }
+
+
+  getAllAdvPayment() {
+    this.service.post('all/advancesaraly', {}).subscribe((res: any) => {
+      try {
+        if (res.status == 'success') {
+          console.log(res.data);
+
+        }
+      } catch (error) {
+        console.log(error);
+
+      }
+    })
+  }
+
+  test() {
+    this.service.post('fetch/company', {}).subscribe((res: any) => {
+      try {
+        if (res.status == "success") {
+          console.log(res.data);
+        }
+      } catch (error) {
+        console.log(error);
+
+      }
+    })
+  }
+
 
   onFileSelected(event: any) {
     const file = event.target.files[0];
@@ -186,6 +223,7 @@ export class AdvancePaymentComponent {
     },
   ];
 
+
   statusButtonRenderer(params: any) {
     const status = params.value;
     const button = document.createElement('button');
@@ -216,6 +254,7 @@ export class AdvancePaymentComponent {
       button.style.color = 'black';
       button.style.border = '1px solid #B2FFE1B0';
       button.style.borderRadius = '20px';
+
     } else if (status === 'Rejected') {
       button.style.backgroundColor = '#FFAFAF'; // light green
       button.style.color = 'black';
@@ -227,6 +266,7 @@ export class AdvancePaymentComponent {
   }
 
   updateStatus(data: any) {
-    alert('update');
+    alert("update")
+
   }
 }

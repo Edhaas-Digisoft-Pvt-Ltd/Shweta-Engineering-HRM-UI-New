@@ -42,12 +42,15 @@
 
                         <!-- Role Dropdown -->
                         <select id="roleSelect" formControlName="role" class="form-select mt-4 ">
-                            <option value="" disabled selected>Select Role</option>
+                            <!-- <option value="" disabled selected>Select Role</option>
                             <option value="admin">Admin</option>
                             <option value="employee">Employee</option>
-                            <option value="accountant">Accountant</option>
+                            <option value="accountant">Accountant</option> -->
+                            <option *ngFor="let cat of roles" [value]="cat.role_name">
+                                {{ cat.role_name }}
+                            </option>
                         </select>
-                        <small class="text-danger my-4"
+                        <small class=" text-danger my-4"
                             *ngIf="loginForm.get('role')?.invalid && loginForm.get('role')?.touched">
                             * This Field is required
                         </small>
