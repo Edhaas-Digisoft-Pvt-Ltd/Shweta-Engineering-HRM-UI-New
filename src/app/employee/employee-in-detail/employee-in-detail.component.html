@@ -522,7 +522,7 @@
                     aria-label="Close"></button>
             </div>
 
-            <form *ngIf="leaveForm" [formGroup]="leaveForm" (ngSubmit)="addLeaveRequest()">
+            <form *ngIf="leaveForm" [formGroup]="leaveForm" (ngSubmit)="applyLeaveRequest()">
                 <div class="modal-body">
                     <div class="row mb-3">
 
@@ -533,7 +533,7 @@
                                 'is-invalid': isLeaveSubmitted && leaveForm.get('leaveType')?.invalid
                               }">
                                 <option value="">-- Select Leave Type --</option>
-                                <option *ngFor="let leave of leaveTypes" [value]="leave">{{ leave }}</option>
+                                <option *ngFor="let leave of leaveTypes" [value]="leave.key">{{ leave.value }}</option>
                             </select>
                             <small class="text-danger"
                                 *ngIf="isLeaveSubmitted && leaveForm.get('leaveType')?.hasError('required')">
@@ -618,7 +618,7 @@
                     aria-label="Close"></button>
             </div>
 
-            <form *ngIf="advanceSalaryForm" [formGroup]="advanceSalaryForm" (ngSubmit)="addAdvanceSalary()">
+            <form *ngIf="advanceSalaryForm" [formGroup]="advanceSalaryForm" (ngSubmit)="applyAdvanceSalaryRequest()">
                 <div class="modal-body">
 
                     <div class="row mb-3">
@@ -628,7 +628,7 @@
                             <select class="form-select" formControlName="tenure"
                                 [class.is-invalid]="advanceSalaryForm.get('tenure')?.invalid && advanceSalaryForm.get('tenure')?.touched">
                                 <option value="">-- Select Tenure --</option>
-                                <option *ngFor="let option of tenures" [value]="option">{{ option }}</option>
+                                <option *ngFor="let tenure of tenures" [value]="tenure.key">{{ tenure.value }}</option>
                             </select>
                             <!-- <div *ngIf="advanceSalaryForm.get('tenure')?.invalid && advanceSalaryForm.get('tenure')?.touched"
                                 class="text-danger">

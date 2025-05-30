@@ -25,8 +25,8 @@
                         <div class="w-50 text-start select-company ">
                             <label class="fw-bold">Select Company </label>
                             <br>
-                            <select class="form-select" [(ngModel)]="selectedValue">
-                                <option *ngFor="let item of optionsArray" [value]="item">{{ item }}</option>
+                            <select class="form-select" (change)="onCompanyChange($event)">
+                                <option *ngFor="let item of CompanyNames" [value]="item.company_id">{{ item.company_name }}</option>
                             </select>
                         </div>
                     </div>
@@ -61,7 +61,7 @@
                           </div>
                           <div class="ms-2">
                             <select class="form-control selectdata3" [(ngModel)]="selectedMonth" (change)="onYearMonthChange()">
-                              <option *ngFor="let month of months">{{ month }}</option>
+                              <option *ngFor="let month of months" [value]="month.id">{{ month.value }}</option>
                             </select>
                           </div>
                           
@@ -83,17 +83,19 @@
                           <!-- Day View Grid -->
                           <ag-grid-angular
                           class="ag-theme-alpine"
-                          style="width: 100%; height: 500px;"
+                          style="width: 100%; height: 60vh;"
                           [rowData]="rowData"
                           [columnDefs]="columnDefs"
-                          [domLayout]="'autoHeight'">
-                        </ag-grid-angular>
+                          [defaultColDef]="defaultColDef"
+                           (gridReady)="onGridReady($event)"
+                          >
+                          </ag-grid-angular>
                         
                   
                           <!-- Month View Grid -->
-                          <ag-grid-angular *ngIf="viewMode === 'Month'" class="ag-theme-alpine" [rowData]="monthlyRowData"
+                          <!-- <ag-grid-angular *ngIf="viewMode === 'Month'" class="ag-theme-alpine" [rowData]="rowData"
                             [columnDefs]="monthlyColumnDefs" rowSelection="multiple" style="width: 100%; height: 60vh;">
-                          </ag-grid-angular>
+                          </ag-grid-angular> -->
                   
                   
                         </div>
@@ -126,22 +128,55 @@
       </div>
       <div class="modal-body p-4">
         <div class="row mb-3">
-          <div class="col-md-2"><strong>ID</strong><input class="form-control" value="#0001"  /></div>
-          <div class="col-md-3"><strong>Employee Name</strong><input class="form-control" value="Hrishikesh Vinayak Kadam"  /></div>
-          <div class="col-md-3"><strong>Company</strong><input class="form-control" value="Company A"  /></div>
-          <div class="col-md-2"><strong>Department</strong><input class="form-control" value="Design"  /></div>
-          <div class="col-md-2"><strong>Role</strong><input class="form-control" value="Jr Designer"  /></div>
+          <div class="col-md-2">
+            <strong>ID</strong>
+            <input class="form-control" formControlName="id" value="#0001"  />
+          </div>
+          <div class="col-md-3">
+            <strong>Employee Name</strong>
+            <input class="form-control" formControlName="employeeName" value="Hrishikesh Vinayak Kadam"  />
+          </div>
+          <div class="col-md-3">
+            <strong>Company</strong>
+            <input class="form-control" formControlName="company" value="Company A"  />
+          </div>
+          <div class="col-md-2">
+            <strong>Department</strong>
+            <input class="form-control" formControlName="department" value="Design"  />
+          </div>
+          <div class="col-md-2">
+            <strong>Role</strong>
+            <input class="form-control" formControlName="role" value="Jr Designer"  />
+          </div>
         </div>
 
         <div class="row mb-3">
-          <div class="col-md-2"><strong>Request Date</strong><input class="form-control" value="09/04/25"  /></div>
+          <div class="col-md-2">
+            <strong>Request Date</strong>
+            <input class="form-control" formControlName="requestData"  value="09/04/25"  />
+          </div>
           <div class="col-md-2">
             <strong>Status</strong>
+            <!-- <input
+              type="text"
+              id="status"
+              class="form-control "
+              formControlName="status"
+              [ngClass]="{
+                  'custom-bg-warning': EditAdvancePayment?.status === 'pending',
+                  'custom-bg-success': EditAdvancePayment?.status === 'Approved',
+                  'custom-bg-danger': EditAdvancePayment?.status === 'Rejected'
+              }"
+              [value]="EditAdvancePayment?.status"
+            /> -->
             <div class="px-3 py-2 rounded text-center fw-bold" style="background-color: #fef3c7; color: #7c6000;">
               Pending
             </div>
           </div>
-          <div class="col-md-2"><strong>Tenure</strong><input class="form-control" value="6 Month"  /></div>
+          <div class="col-md-2">
+            <strong>Tenure</strong>
+            <input class="form-control" formControlName="tenure" value="6 Month"  />
+          </div>
           <div class="col-md-2"><strong>Amount (in ₹)</strong><input class="form-control" value="10,000"  /></div>
           <div class="col-md-4">
             <strong>Reason <small class="text-muted">(In Case of Rejection)</small></strong>

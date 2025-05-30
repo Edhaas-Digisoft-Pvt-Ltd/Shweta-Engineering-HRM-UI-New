@@ -18,15 +18,12 @@ export class LeaveRequestComponent {
 
   params: any;
   leaveRequestForm!: FormGroup;
-  selectedCompanyId : any = 1 ;
-  rowData : any = [];
+  selectedCompanyId : any = 1;
+   rowData : any = [];
   leaveRequestData!: any;
   empLeaveId : any;
 
   // @ViewChild('leaveModal') leaveModalRef!: ElementRef;
-
-  // leave request data 
-  singleleaveRequestData: any;
 
   // leaves data 
   leaveBalance = {
@@ -76,12 +73,12 @@ export class LeaveRequestComponent {
   };
 
   columnDefs: ColDef[] = [
-    { headerName: 'Name', field: 'emp_name',},
-    { headerName: 'Company Name', field: 'company_name',},
-    { headerName: 'Department', field: 'department_name',},
-    { headerName: 'Start Date', field: 'start_date',},
-    { headerName: 'End Date', field: 'end_date',},
-    { headerName: 'Day Count', field: 'apply_leave_count',},
+    { headerName: 'Name', field: 'emp_name', sortable: true, filter: true},
+    { headerName: 'Company Name', field: 'company_name',sortable: true, filter: true, minWidth: 180,},
+    { headerName: 'Department', field: 'department_name',sortable: true, filter: true},
+    { headerName: 'Start Date', field: 'start_date',sortable: true, filter: true},
+    { headerName: 'End Date', field: 'end_date',sortable: true, filter: true},
+    { headerName: 'Day Count', field: 'apply_leave_count',sortable: true, filter: true},
 
     {
       headerName: 'Leave Status',
@@ -110,8 +107,7 @@ export class LeaveRequestComponent {
     {
       headerName: 'Actions',
       cellStyle: { border: '1px solid #ddd' },
-      minWidth: 180,
-      maxWidth: 400,
+      maxWidth: 100,
       cellRenderer: EditLeaveRequestComponent,
       cellRendererParams: {
         editCallback: (leaveId: any) => this.onViewLeaveClick(leaveId), 
@@ -123,16 +119,16 @@ export class LeaveRequestComponent {
     this.empLeaveId = params;
      this.service.post(`single/leave/request`,{ "tbl_emp_leave_id": this.empLeaveId}).subscribe((res: any) => {
        if (res.status === 'success') {
-        this.singleleaveRequestData = res.data[0]; 
+        const singleleaveRequestData = res.data[0]; 
         this.leaveRequestData = {
-          employeeName: this.singleleaveRequestData?.emp_name,
-          startDate: this.singleleaveRequestData?.start_date,
-          endDate: this.singleleaveRequestData?.end_date,
-          leaveType: this.singleleaveRequestData?.leave_type,
-          status: this.singleleaveRequestData?.leave_status, // or 'Approved', 'Rejected'
-          noOfDays: this.singleleaveRequestData?.apply_leave_count,
-          department: this.singleleaveRequestData?.department_name,
-          leavereason: this.singleleaveRequestData?.leave_reason,
+          employeeName: singleleaveRequestData?.emp_name,
+          startDate: singleleaveRequestData?.start_date,
+          endDate: singleleaveRequestData?.end_date,
+          leaveType: singleleaveRequestData?.leave_type,
+          status: singleleaveRequestData?.leave_status, // or 'Approved', 'Rejected'
+          noOfDays: singleleaveRequestData?.apply_leave_count,
+          department: singleleaveRequestData?.department_name,
+          leavereason: singleleaveRequestData?.leave_reason,
         };
         this.leaveRequestForm.patchValue(this.leaveRequestData);    
        }
@@ -145,7 +141,7 @@ export class LeaveRequestComponent {
     this.getLeaveRequests();
   }
 
-    getCompanyNames() {
+  getCompanyNames() {
     this.service.post('fetch/company', {}).subscribe((res: any) => {
       if (res.status == "success") {
         this.CompanyNames = res.data
