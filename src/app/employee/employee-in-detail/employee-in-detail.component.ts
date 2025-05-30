@@ -145,7 +145,6 @@ export class EmployeeInDetailComponent {
   }
 
   fetchAttendance(){
-    console.log('called')
     this.service.post(`fetch/attendance`, {}).subscribe((res: any) => {
     });
   }
@@ -221,7 +220,8 @@ export class EmployeeInDetailComponent {
   editEmployee() {
     this.isSubmitted = true;
     let current_data = {
-      "employe_id": this.Employee_Data.employe_id,
+      ...this.Employee_Data.employee,
+      // "employe_id": this.Employee_Data.employe_id,
       "emp_email": this.editForm.value.email,
       "emp_contact": this.editForm.value.contact,
       "status": this.editForm.value.status,
