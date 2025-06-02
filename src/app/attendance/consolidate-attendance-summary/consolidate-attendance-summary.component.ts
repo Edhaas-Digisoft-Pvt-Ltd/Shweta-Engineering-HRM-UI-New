@@ -118,6 +118,11 @@ export class ConsolidateAttendanceSummaryComponent {
     this.columnDefs = baseCols;
   }
 
+  gridOptions = {
+    pagination: false,
+    paginationPageSize: 10,
+  };
+
   getCustomHeader(label: string, color: string): string {
     return `<div style="display: flex; justify-content: center; flex-direction: column; align-items: center; width: 100%;">
                 <div>${label}</div>
