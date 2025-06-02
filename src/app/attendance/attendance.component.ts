@@ -159,7 +159,7 @@ export class AttendanceComponent {
   filterByStatus(status: string): void {
     if (this.agGrid && this.agGrid.api) {
       this.agGrid.api.setFilterModel({
-        Attendance: {
+        status: {
           type: 'equals',
           filter: status
         }
