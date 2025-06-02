@@ -82,6 +82,7 @@ export class AttendanceComponent {
     this.service.post('import-attendance', formData).subscribe((res: any) => {
       if (res.status === 'success') {
         this.toastr.success('File Upload successfully !');
+        this.fetchAttendance();
       } else {
         console.log(res.error);
       }
