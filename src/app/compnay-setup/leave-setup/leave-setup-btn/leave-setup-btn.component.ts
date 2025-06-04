@@ -18,7 +18,6 @@ export class LeaveSetupBtnComponent {
 
   agInit(params: any): void {
     this.params = params;
-    console.log(params)
   }
 
   refresh(params: any): boolean {

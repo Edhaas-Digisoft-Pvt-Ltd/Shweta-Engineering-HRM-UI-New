@@ -106,7 +106,6 @@ export class LeaveSetupComponent {
     });
 
     this.LeaveRule = this.fb.group({
-
       companyid: ['', [
         Validators.required,
         // Validators.pattern(/^\d+$/)  // only digits allowed (CompanyID is numeric)
