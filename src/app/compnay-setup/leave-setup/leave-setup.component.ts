@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { AbstractControl, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { ColDef } from 'ag-grid-community';
 import { ToastrService } from 'ngx-toastr';
 import { HrmserviceService } from 'src/app/hrmservice.service';
 declare var bootstrap: any;
@@ -27,11 +28,59 @@ export class LeaveSetupComponent {
   selectedLogoFile: any;
   isSubmitted = false;
   isEditSubmitted = false;
-  CompanyNames: any;
+  CompanyNames: any = [];
   selectedCompanyId: any = 1;
-  toastr: any;
+  rowData: any = [];
+  columnDefs: ColDef[] = [];
+  gridApiActive: any;
+  singleleave: any;
 
-  constructor(private fb: FormBuilder, private service: HrmserviceService) {
+  public defaultColDef: ColDef = {
+    editable: true,
+    flex: 1,
+    resizable: true,
+  };
+
+  initializeColumns() {
+    this.columnDefs = [
+      { headerName: 'Name', field: 'leave_name', sortable: true, filter: true, maxWidth:150, },
+      { headerName: 'Leave Type', field: 'leave_type', sortable: true, filter: true, maxWidth:150, },
+      { headerName: 'No. of Leaves', field: 'leave_count', sortable: true, filter: true },
+      { headerName: 'Is Carry Forward', field: 'leave_carryforwad', sortable: true, filter: true },
+    ];
+      this.columnDefs.push({
+        headerName: 'Actions',
+        cellStyle: { border: '1px solid #ddd' },
+        cellRenderer: () => {
+          return `<button type="button" class="btn btn-outline-dark" data-bs-toggle="modal" data-bs-target="#exampleModal2">
+            <i class="bi bi-pencil"></i>
+          </button>`;
+        },
+        onCellClicked: (event: any) => {
+          this.getSingleLeaveData(event.data.leave_id);
+        },  
+      });
+  }
+
+  getSingleLeaveData(leaveId: any) {
+  console.log('Leave id:', leaveId);
+    this.service.post("fetch/leave", {company_id: this.selectedCompanyId}).subscribe((res: any) => {
+        if (res.status === 'success') {
+          console.log(res)
+        } 
+      },
+       (error) => {
+        console.error('Error fetching leave request:', error);
+      }
+    );
+  }
+
+  onGridReady(params: { api: any }) {
+    this.gridApiActive = params.api;
+  }
+   
+
+  constructor(private fb: FormBuilder, private service: HrmserviceService, private toastr:ToastrService) {
     this.companyForm = this.fb.group({
       // Company Name: Only letters, numbers, spaces, dots, and ampersands (e.g., TCS, Infosys Ltd., H&M)
       companyName: [
@@ -71,7 +120,7 @@ export class LeaveSetupComponent {
 
       companyid: ['', [
         Validators.required,
-        Validators.pattern(/^\d+$/)  // only digits allowed (CompanyID is numeric)
+        // Validators.pattern(/^\d+$/)  // only digits allowed (CompanyID is numeric)
       ]],
 
       leavenumber: ['', [
@@ -120,6 +169,26 @@ export class LeaveSetupComponent {
     this.getCompanyData();
     this.getleaveData(this.selectedValue);
     this.getCompanyNames();
+    this.getAllLeaves();
+    this.initializeColumns();
+  }
+
+  getAllLeaves(){
+     this.service.post("fetch/companyleave", {company_id: this.selectedCompanyId}).subscribe((res: any) => {
+        if (res.status === 'success') {
+          this.rowData = res.data.map((item:any)=>({
+            leave_name:item.leave_name,
+            leave_type:item.leave_type,
+            leave_count:item.leave_count,
+            leave_carryforwad:item.leave_carryforwad,
+            leave_id:item.leave_id
+        }));
+        } 
+      },
+       (error) => {
+        console.error('Error fetching leave request:', error);
+      }
+    );
   }
 
   selectTab(tab: string) {
@@ -129,6 +198,7 @@ export class LeaveSetupComponent {
   onCompanyChange(event: Event): void {
     this.selectedCompanyId = (event.target as HTMLSelectElement).value;
     console.log('Selected Company ID:', this.selectedCompanyId);
+    this.getAllLeaves()
   }
 
   noWhitespaceValidator(control: AbstractControl) {
@@ -148,7 +218,7 @@ export class LeaveSetupComponent {
   getCompanyNames() {
     this.service.post('fetch/company', {}).subscribe((res: any) => {
       if (res.status == "success") {
-        this.CompanyNames = res.Data
+        this.CompanyNames = res.data
       }
     },
       (error) => {
@@ -156,7 +226,6 @@ export class LeaveSetupComponent {
       }
     );
   }
-
 
   getleaveData(id: any) {
 
@@ -238,24 +307,25 @@ export class LeaveSetupComponent {
         "company_id": this.LeaveRule.value.companyid,
         "leave_type": this.LeaveRule.value.leavetype,
         "leave_name": this.LeaveRule.value.leavename,
-        "leave_count": this.LeaveRule.value.leavenumber
+        "leave_count": this.LeaveRule.value.leavenumber,
       }
 
-
-      this.service.post("create/leave", current_data).subscribe((res) => {
-        this.toastr.success('Leave Rule Added !');
-        this.getleaveData(this.LeaveRule.value.companyid)
-        this.closeAllModals();
-      });
-
-      console.log(this.LeaveRule.value);
-      this.LeaveRule.reset();
-
+      this.service.post("create/leave", current_data).subscribe(
+        (res: any) => {
+          if (res.status === 'success') {
+            this.toastr.success('Leave Rule Added!');
+            this.LeaveRule.reset();
+            this.closeAllModals();
+          } 
+        },
+        (error) => {
+          console.error(error);
+          this.toastr.error('Something went wrong!');
+        }
+      );
     } else {
       this.LeaveRule.markAllAsTouched();
-
     }
-
   }
 
   openEditModal(leave: any) {
