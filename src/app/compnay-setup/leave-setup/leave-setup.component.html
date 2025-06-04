@@ -152,7 +152,7 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <form [formGroup]="EditLeaveRule" (ngSubmit)="editLeaveData(EditLeaveRule.value.LeaveID)">
+                <form [formGroup]="EditLeaveRule" (ngSubmit)="editLeaveData()">
                     <div class="row">
                         <!-- Leave Type -->
                         <div class="col-4">
@@ -185,7 +185,7 @@
 
                     <div class="d-grid gap-2 d-md-flex justify-content-md-end">
                         <button type="submit" class="btn btn-primary mt-3 ml-auto btn-end"
-                            (click)="editLeaveData(selectedLeaveID)">Update</button>
+                        >Update</button>
                     </div>
                 </form>
             </div>

@@ -3,6 +3,7 @@ import { AbstractControl, FormBuilder, FormGroup, Validators } from '@angular/fo
 import { ColDef } from 'ag-grid-community';
 import { ToastrService } from 'ngx-toastr';
 import { HrmserviceService } from 'src/app/hrmservice.service';
+import { LeaveSetupBtnComponent } from './leave-setup-btn/leave-setup-btn.component';
 declare var bootstrap: any;
 @Component({
   selector: 'app-leave-setup',
@@ -34,6 +35,8 @@ export class LeaveSetupComponent {
   columnDefs: ColDef[] = [];
   gridApiActive: any;
   singleleave: any;
+  companyId:any;
+  leaveId:any
 
   public defaultColDef: ColDef = {
     editable: true,
@@ -43,44 +46,29 @@ export class LeaveSetupComponent {
 
   initializeColumns() {
     this.columnDefs = [
-      { headerName: 'Name', field: 'leave_name', sortable: true, filter: true, maxWidth:150, },
-      { headerName: 'Leave Type', field: 'leave_type', sortable: true, filter: true, maxWidth:150, },
-      { headerName: 'No. of Leaves', field: 'leave_count', sortable: true, filter: true },
+      { headerName: 'Name', field: 'leave_name', sortable: true, filter: true, maxWidth: 250, },
+      { headerName: 'Leave Type', field: 'leave_type', sortable: true, filter: true, maxWidth: 220, },
+      { headerName: 'No. of Leaves', field: 'leave_count', sortable: true, filter: true, maxWidth: 200 },
       { headerName: 'Is Carry Forward', field: 'leave_carryforwad', sortable: true, filter: true },
     ];
-      this.columnDefs.push({
-        headerName: 'Actions',
-        cellStyle: { border: '1px solid #ddd' },
-        cellRenderer: () => {
-          return `<button type="button" class="btn btn-outline-dark" data-bs-toggle="modal" data-bs-target="#exampleModal2">
-            <i class="bi bi-pencil"></i>
-          </button>`;
-        },
-        onCellClicked: (event: any) => {
-          this.getSingleLeaveData(event.data.leave_id);
-        },  
-      });
+    this.columnDefs.push({
+      headerName: 'Actions',
+      cellStyle: { border: '1px solid #ddd' },
+      cellRenderer: LeaveSetupBtnComponent,
+      cellRendererParams: {
+        editCallback: (leaveId: string) => this.openEditModal(leaveId),
+        deleteCallback: (leaveId: string) => this.deleteLeaveRule(leaveId),
+      },
+    });
   }
 
-  getSingleLeaveData(leaveId: any) {
-  console.log('Leave id:', leaveId);
-    this.service.post("fetch/leave", {company_id: this.selectedCompanyId}).subscribe((res: any) => {
-        if (res.status === 'success') {
-          console.log(res)
-        } 
-      },
-       (error) => {
-        console.error('Error fetching leave request:', error);
-      }
-    );
-  }
 
   onGridReady(params: { api: any }) {
     this.gridApiActive = params.api;
   }
-   
 
-  constructor(private fb: FormBuilder, private service: HrmserviceService, private toastr:ToastrService) {
+
+  constructor(private fb: FormBuilder, private service: HrmserviceService, private toastr: ToastrService) {
     this.companyForm = this.fb.group({
       // Company Name: Only letters, numbers, spaces, dots, and ampersands (e.g., TCS, Infosys Ltd., H&M)
       companyName: [
@@ -116,6 +104,7 @@ export class LeaveSetupComponent {
         textInputControl?.enable();
       }
     });
+
     this.LeaveRule = this.fb.group({
 
       companyid: ['', [
@@ -173,19 +162,19 @@ export class LeaveSetupComponent {
     this.initializeColumns();
   }
 
-  getAllLeaves(){
-     this.service.post("fetch/companyleave", {company_id: this.selectedCompanyId}).subscribe((res: any) => {
-        if (res.status === 'success') {
-          this.rowData = res.data.map((item:any)=>({
-            leave_name:item.leave_name,
-            leave_type:item.leave_type,
-            leave_count:item.leave_count,
-            leave_carryforwad:item.leave_carryforwad,
-            leave_id:item.leave_id
+  getAllLeaves() {
+    this.service.post("fetch/companyleave", { company_id: this.selectedCompanyId }).subscribe((res: any) => {
+      if (res.status === 'success') {
+        this.rowData = res.data.map((item: any) => ({
+          leave_name: item.leave_name,
+          leave_type: item.leave_type,
+          leave_count: item.leave_count,
+          leave_carryforwad: item.leave_carryforwad,
+          leave_id: item.leave_id
         }));
-        } 
-      },
-       (error) => {
+      }
+    },
+      (error) => {
         console.error('Error fetching leave request:', error);
       }
     );
@@ -316,7 +305,8 @@ export class LeaveSetupComponent {
             this.toastr.success('Leave Rule Added!');
             this.LeaveRule.reset();
             this.closeAllModals();
-          } 
+            this.getAllLeaves();
+          }
         },
         (error) => {
           console.error(error);
@@ -328,49 +318,42 @@ export class LeaveSetupComponent {
     }
   }
 
-  openEditModal(leave: any) {
-    console.log(leave); // Check if leave.LeaveID exists
-
-    if (leave.LeaveID) {
-      this.EditLeaveRule.patchValue({
-        leavenumber: leave.NoOfLeave,
-        leavename: leave.LeaveName,
-        leavetype: leave.LeaveType,
-      });
-      this.selectedLeaveID = leave.LeaveID;
-      // Pass LeaveID to editData function
-      // this.editData(leave.LeaveID);
-    } else {
-      console.error('LeaveID is undefined!');
-    }
+  openEditModal(id: any) {
+    this.service.post("fetch-specific/emp-leave", { leave_id: id }).subscribe((res: any) => {
+      if (res.status === 'success') {
+        this.leaveId = res.data.leave_id
+        this.companyId = res.data.company_id
+        this.EditLeaveRule.patchValue({
+          leavetype: res.data.leave_type,
+          leavename: res.data.leave_name,
+          leavenumber: res.data.leave_count,
+        })
+      }
+    },
+      (error) => {
+        console.error('Error fetching leave request:', error);
+      }
+    );
   }
 
-  editLeaveData(LeaveID: any) {
-    // Check if LeaveID is defined
-    if (!LeaveID) {
-      console.error('LeaveID is not defined!');
-      return;
-    }
-
+  editLeaveData() {
     this.isEditSubmitted = true;
     if (this.EditLeaveRule.valid) {
 
       let current_data: any = {
-        "CompanyID": 1,
-        "LeaveType": this.EditLeaveRule.value.leavetype,
-        "LeaveName": this.EditLeaveRule.value.leavename,
-        "NoOfLeave": this.EditLeaveRule.value.leavenumber,
-        "IsCarryForward": "Yes"
+        "leave_id": this.leaveId,
+        "company_id": this.companyId,
+        "leave_type": this.EditLeaveRule.value.leavetype,
+        "leave_name": this.EditLeaveRule.value.leavename,
+        "leave_count": this.EditLeaveRule.value.leavenumber,
       };
 
-      console.log('Form Data:', current_data);  // Log to verify form data
 
-      // Make the PUT request with LeaveID
-      this.service.put(`updateleavesetup/${LeaveID}`, current_data).subscribe(
+      this.service.post("update/leave", current_data).subscribe(
         (res: any) => {
-          console.log('Response:', res);
           this.toastr.success('Data updated successfully!');
           this.closeAllModals();
+          this.getAllLeaves()
         },
         (error) => {
           console.error('Error:', error);
@@ -380,23 +363,20 @@ export class LeaveSetupComponent {
     } else {
       this.EditLeaveRule.markAllAsTouched();
       this.toastr.error('Invalid Credentials!');
-      // this.EditLeaveRule.reset();
+      this.EditLeaveRule.reset();
       this.isEditSubmitted = false;
 
     }
   }
 
-  deleteLeaveRule(LeaveID: any, CompanyID: any) {
+  deleteLeaveRule(id: any) {
     if (confirm("Are you sure?")) {
-      this.service.delete(`deleteleavesetup/${LeaveID}`).subscribe(
-        (res) => {
-          console.log(res);
-          this.toastr.success("Data deleted successfully !")
-          this.getleaveData(CompanyID);
-        },
-        (err) => {
-          console.error(err);
-          alert("Error deleting data");
+      this.service.post("delete/leave", { leave_id: id }).subscribe((res: any) => {
+        this.toastr.success("Leave deleted successfully !");
+        this.getAllLeaves();
+      },
+        (error) => {
+          console.error('Error fetching leave request:', error);
         }
       );
     }
