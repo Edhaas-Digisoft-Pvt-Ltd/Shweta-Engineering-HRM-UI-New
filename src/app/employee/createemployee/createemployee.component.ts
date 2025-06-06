@@ -2,7 +2,6 @@ import { Component, ChangeDetectorRef } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ToastrService } from 'ngx-toastr';
 import { HrmserviceService } from 'src/app/hrmservice.service';
-
 @Component({
   selector: 'app-createemployee',
   templateUrl: './createemployee.component.html',
@@ -123,7 +122,6 @@ export class CreateemployeeComponent {
       this.calculateAmount();
     });
     this.getCompanyNames();
-   
   }
 
   removeSpaces(): void {
@@ -356,13 +354,13 @@ export class CreateemployeeComponent {
 
       let current_data: any = {
 
-        "company_id": 2,
+        "company_id": this.selectedCompanyId ,
         "emp_title": this.multiStepForm.value.title,
         "emp_name": this.multiStepForm.value.fname,
         "emp_email": this.multiStepForm.value.email,
         "emp_gender": this.multiStepForm.value.gender,
-        "department_id": 1,
-        "designation_id": 1,
+        "department_id": this.multiStepForm.value.department,
+        "designation_id": this.multiStepForm.value.designation,
         "CTC": this.multiStepForm.value.ctc,
         "statutory_list": "xyz",
         "bank_name": this.multiStepForm.value.bankName,

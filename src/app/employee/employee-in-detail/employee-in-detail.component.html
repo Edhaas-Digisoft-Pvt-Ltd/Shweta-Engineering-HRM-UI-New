@@ -535,10 +535,6 @@
                                 <option value="">-- Select Leave Type --</option>
                                 <option *ngFor="let leave of leaveTypes" [value]="leave.key">{{ leave.value }}</option>
                             </select>
-                            <small class="text-danger"
-                                *ngIf="isLeaveSubmitted && leaveForm.get('leaveType')?.hasError('required')">
-                                This field is required.
-                            </small>
                         </div>
 
                         <!-- No Of Leaves -->
@@ -559,10 +555,6 @@
                             <input type="date" class="form-control" formControlName="fromDate" [ngClass]="{
                                'is-invalid': isLeaveSubmitted && leaveForm.get('fromDate')?.invalid
                              }" />
-                            <small class="text-danger"
-                                *ngIf="isLeaveSubmitted && leaveForm.get('fromDate')?.hasError('required')">
-                                This field is required.
-                            </small>
                         </div>
 
                         <!-- To Date -->
@@ -571,10 +563,6 @@
                             <input type="date" class="form-control" formControlName="toDate" [ngClass]="{
                                'is-invalid': isLeaveSubmitted && leaveForm.get('toDate')?.invalid
                              }" />
-                            <small class="text-danger"
-                                *ngIf="isLeaveSubmitted && leaveForm.get('toDate')?.hasError('required')">
-                                This field is required.
-                            </small>
                         </div>
                     </div>
 
@@ -585,14 +573,6 @@
                             placeholder="Enter your reason here" [ngClass]="{
                                 'is-invalid': isLeaveSubmitted && leaveForm.get('reason')?.invalid
                               }"></textarea>
-                        <small class="text-danger"
-                            *ngIf="isLeaveSubmitted && leaveForm.get('reason')?.hasError('required')">
-                            This field is required.
-                        </small>
-                        <small class="text-danger"
-                            *ngIf="leaveForm.get('reason')?.value && leaveForm.get('reason')?.hasError('pattern')">
-                            No special characters are allowed.
-                        </small>
                     </div>
                 </div>
 
@@ -626,7 +606,8 @@
                         <div class="col-md-3">
                             <label class="form-label">Tenure</label>
                             <select class="form-select" formControlName="tenure"
-                                [class.is-invalid]="advanceSalaryForm.get('tenure')?.invalid && advanceSalaryForm.get('tenure')?.touched">
+                            [class.is-invalid]="advanceSalaryForm.get('tenure')?.invalid && isAdvanceSalary"
+                            >
                                 <option value="">-- Select Tenure --</option>
                                 <option *ngFor="let tenure of tenures" [value]="tenure.key">{{ tenure.value }}</option>
                             </select>
@@ -640,11 +621,7 @@
                             <label class="form-label">Amount (in ₹)</label>
                             <input type="number" class="form-control" formControlName="amount"
                                 (input)="calculateInstallment()"
-                                [class.is-invalid]="advanceSalaryForm.get('amount')?.invalid && advanceSalaryForm.get('amount')?.touched" />
-                            <!-- <div *ngIf="advanceSalaryForm.get('amount')?.invalid && advanceSalaryForm.get('amount')?.touched"
-                                class="text-danger">
-                                This is required field.
-                            </div> -->
+                                [class.is-invalid]="advanceSalaryForm.get('amount')?.invalid && isAdvanceSalary" />
                         </div>
 
                         <div class="col-md-6">
@@ -662,7 +639,7 @@
 
                     <div class="mb-3">
                         <label class="form-label">Installment Amount (in ₹)</label>
-                        <input type="text" class="form-control" [value]="installmentAmount" readonly>
+                        <input type="text" class="form-control" [value]="installmentAmount" disabled>
                     </div>
 
                 </div>

@@ -11,7 +11,6 @@ declare var bootstrap: any;
   styleUrls: ['./leave-setup.component.css']
 })
 export class LeaveSetupComponent {
-  // today: string = '';ta
   today = new Date().toISOString().split('T')[0];
   title: String = "Company Demo";
   CompanyDetails: any[] = [];
@@ -67,7 +66,6 @@ export class LeaveSetupComponent {
     this.gridApiActive = params.api;
   }
 
-
   constructor(private fb: FormBuilder, private service: HrmserviceService, private toastr: ToastrService) {
     this.companyForm = this.fb.group({
       // Company Name: Only letters, numbers, spaces, dots, and ampersands (e.g., TCS, Infosys Ltd., H&M)
@@ -113,7 +111,7 @@ export class LeaveSetupComponent {
 
       leavenumber: ['', [
         Validators.required,
-        Validators.max(20),
+        // Validators.max(20),
         Validators.pattern(/^\d+$/)  // only digits
       ]],
       leavename: ['', [
@@ -132,7 +130,7 @@ export class LeaveSetupComponent {
     this.EditLeaveRule = this.fb.group({
       leavenumber: ['', [
         Validators.required,
-        Validators.max(30),
+        // Validators.max(30),
         Validators.min(1),
         Validators.pattern(/^\d+$/)
       ]],
@@ -347,31 +345,28 @@ export class LeaveSetupComponent {
         "leave_count": this.EditLeaveRule.value.leavenumber,
       };
 
-
       this.service.post("update/leave", current_data).subscribe(
         (res: any) => {
-          this.toastr.success('Data updated successfully!');
+          this.toastr.success(res.data);
           this.closeAllModals();
           this.getAllLeaves()
         },
         (error) => {
           console.error('Error:', error);
-          this.toastr.error('Error updating data!');
+          this.toastr.error('Something went wrong!');
         }
       );
     } else {
       this.EditLeaveRule.markAllAsTouched();
       this.toastr.error('Invalid Credentials!');
-      this.EditLeaveRule.reset();
       this.isEditSubmitted = false;
-
     }
   }
 
   deleteLeaveRule(id: any) {
     if (confirm("Are you sure?")) {
       this.service.post("delete/leave", { leave_id: id }).subscribe((res: any) => {
-        this.toastr.success("Leave deleted successfully !");
+        this.toastr.success(res.data);
         this.getAllLeaves();
       },
         (error) => {

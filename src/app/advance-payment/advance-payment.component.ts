@@ -2,14 +2,15 @@ import { Component } from '@angular/core';
 import { FormGroup, FormBuilder, Validators } from '@angular/forms';
 import { ColDef } from 'ag-grid-community';
 import { HrmserviceService } from '../hrmservice.service';
-
+import { ToastrService } from 'ngx-toastr';
+declare var bootstrap: any;
 @Component({
   selector: 'app-advance-payment',
   templateUrl: './advance-payment.component.html',
   styleUrls: ['./advance-payment.component.css'],
 })
 export class AdvancePaymentComponent {
-  constructor(private fb: FormBuilder, private service: HrmserviceService) {}
+  constructor(private fb: FormBuilder, private service: HrmserviceService, private toastr: ToastrService) {}
   today: string = new Date().toISOString().split('T')[0];
   title: String = 'Company Demo';
   role: string = '';
@@ -24,10 +25,10 @@ export class AdvancePaymentComponent {
   selectedMonth: any;
   rowData: any = [];
   columnDefs: ColDef[] = [];
-
-    // columnDefs: any[] = [];
+  advPayId: any;
   monthlyColumnDefs: any[] = [];
   monthlyRowData: any[] = [];
+  EditAdvancePaymentData!: any;
 
   ngOnInit() {
     this.getCompanyNames();
@@ -50,7 +51,21 @@ export class AdvancePaymentComponent {
       requestData: [{ value: '', disabled: true }, Validators.required],
       status: [{ value: '', disabled: true }, Validators.required],
       tenure: [{ value: '', disabled: true }, Validators.required],
+      amount: [{ value: '', disabled: true }, Validators.required],
+      reason: [{ value: '', disabled: true }, Validators.required],
+      EMIStartDate: [{ value: '', disabled: true }, Validators.required],
+      installmentAmount: [{ value: '', disabled: true }, Validators.required],
     })
+  }
+
+  closeAllModals(): void {
+    const modals = document.querySelectorAll('.modal.show');
+    modals.forEach((modalElement: any) => {
+      const modalInstance = bootstrap.Modal.getInstance(modalElement);
+      if (modalInstance) {
+        modalInstance.hide();
+      }
+    });
   }
 
   selectTab(tab: string) {
@@ -59,7 +74,6 @@ export class AdvancePaymentComponent {
 
   getCompanyNames() {
     this.service.post('fetch/company', {}).subscribe((res: any) => {
-      console.log(res)
       if (res.status == "success") {
         this.CompanyNames = res.data
       }
@@ -76,12 +90,38 @@ export class AdvancePaymentComponent {
     this.getAllAdvSalary();
   }
 
-  getAllAdvSalary() {
-    this.service.post('fetch/allcompanyrequest', { 
+  // getAllAdvSalary() {
+  //   this.service.post('fetch/allcompanyrequest', { 
+  //     // company_id: this.selectedCompanyId, 
+  //     company_id: 2, 
+  //     year: this.selectedYear,
+  //     month: this.selectedMonth,
+  //   }).subscribe((res: any) => {
+  //     console.log(res)
+  //     try {
+  //       if (res.status === 'success') {
+  //         this.rowData = res.data.map((item:any)=>({
+  //           employee_code:item.employee_code,
+  //           apply_date:item.apply_date,
+  //           emp_name:item.emp_name,
+  //           department_name:item.department_name,
+  //           designation_name:item.designation_name,
+  //           advance_amount : item.advance_amount,
+  //           tenure:item.tenure,
+  //           status: item.status,
+  //         }));
+  //       } 
+  //     } catch (error) {
+  //       console.log(error);
+  //     }
+  //   })
+  // }
+
+   getAllAdvSalary() {
+    this.service.post('all/advancesaraly', { 
       // company_id: this.selectedCompanyId, 
-      company_id: 2, 
-      year: this.selectedYear,
-      month: 6
+      // year: this.selectedYear,
+      // month: this.selectedMonth,
     }).subscribe((res: any) => {
       console.log(res)
       try {
@@ -95,29 +135,11 @@ export class AdvancePaymentComponent {
             advance_amount : item.advance_amount,
             tenure:item.tenure,
             status: item.status,
+            adv_pay_id: item.adv_pay_id,
           }));
         } 
       } catch (error) {
         console.log(error);
-      }
-    })
-  }
-
-  getSingleAdvanceSalary() {
-    this.service.post('/single/advancesaraly',{}).subscribe((res: any) => {
-      console.log('single adv salary',res)
-      if(res.status === 'success'){
-        const singleAdvanceSalary = res.data;
-          // this.EditAdvancePayment = {
-          //   id: singleAdvanceSalary?.id,
-          //   employeeName: singleAdvanceSalary?.
-          //   company: singleAdvanceSalary?.
-          //   department: singleAdvanceSalary?.
-          //   role: singleAdvanceSalary?.
-          //   requestData: singleAdvanceSalary?.
-          //   status: singleAdvanceSalary?.
-          //   tenure: singleAdvanceSalary?.
-          // } 
       }
     })
   }
@@ -200,36 +222,59 @@ export class AdvancePaymentComponent {
         field: 'department_name',
         sortable: true,
         filter: true,
+        maxWidth:150,
       },
-      { headerName: 'Role', field: 'designation_name', sortable: true, filter: true },
-      { headerName: 'Amount', field: 'advance_amount', sortable: true, filter: true },
-      { headerName: 'Tenure', field: 'tenure', sortable: true, filter: true },
+      { headerName: 'Role', field: 'designation_name',  maxWidth:130,  sortable: true, filter: true },
+      { headerName: 'Amount', field: 'advance_amount',  maxWidth:110, sortable: true, filter: true },
+      { headerName: 'Tenure', field: 'tenure', sortable: true, filter: true, maxWidth:110},
       {
         headerName: 'Status',
         field: 'status',
         sortable: true,
         filter: true,
+        maxWidth:140,
         cellRenderer: this.statusButtonRenderer,
       },
     ];
     if (this.role !== 'accountant') {
       this.columnDefs.push({
         headerName: 'Actions',
+        maxWidth:120,
         cellStyle: { border: '1px solid #ddd' },
         cellRenderer: (params: any) => {
-          return `<button type="button" class="btn btn-outline-dark" data-bs-toggle="modal" data-bs-target="#advanceRequestModal">
+          return `<button type="button" class="btn btn-outline-dark mb-1" data-bs-toggle="modal" data-bs-target="#advanceRequestModal">
             <i class="bi bi-pencil"></i>
           </button>`;
         },
         onCellClicked: (event: any) => {
-          this.getEmployeeId(event.data.employee_code);
+          this.getSingleAdvanceSalary(event.data.adv_pay_id);
         },  
       });
     }
   }
 
-  getEmployeeId(data:any) {
-    console.log('Employee code:', data);
+  getSingleAdvanceSalary(data:any) {
+    this.advPayId = data;
+     this.service.post('single/advancesaraly',{adv_pay_id: data}).subscribe((res: any) => {
+      if(res.status === 'success'){
+        const singleAdvanceSalary = res.data[0];
+          this.EditAdvancePaymentData = {
+            id: singleAdvanceSalary?.employee_code,
+            employeeName: singleAdvanceSalary?.emp_name,
+            company: singleAdvanceSalary?.company_name,
+            department: singleAdvanceSalary?.department_name,
+            role: singleAdvanceSalary?.designation_name,
+            requestData: singleAdvanceSalary?.apply_date,
+            status: singleAdvanceSalary?.status,
+            tenure: singleAdvanceSalary?.tenure,
+            amount: singleAdvanceSalary?.advance_amount,
+            reason: singleAdvanceSalary?.remarks,
+            EMIStartDate: singleAdvanceSalary?.updated_on,
+            installmentAmount:singleAdvanceSalary?.emi,
+          } 
+        this.EditAdvancePayment.patchValue(this.EditAdvancePaymentData);  
+      }
+    })
   }
 
   statusButtonRenderer(params: any) {
@@ -252,7 +297,7 @@ export class AdvancePaymentComponent {
     button.style.marginTop = '6px';
 
     // Conditional styling
-    if (status === 'Pending') {
+    if (status === 'pending') {
       button.style.backgroundColor = '#FFF291'; // light red
       button.style.color = '#721c24'; // dark red text
       button.style.border = '1px solid #f5c6cb';
@@ -262,7 +307,6 @@ export class AdvancePaymentComponent {
       button.style.color = 'black';
       button.style.border = '1px solid #B2FFE1B0';
       button.style.borderRadius = '20px';
-
     } else if (status === 'Rejected') {
       button.style.backgroundColor = '#FFAFAF'; // light green
       button.style.color = 'black';
@@ -273,8 +317,26 @@ export class AdvancePaymentComponent {
     return button;
   }
 
-  updateStatus(data: any) {
-    alert("update")
+   gridOptions = {
+    pagination: false,
+    paginationPageSize: 10,
+  };
 
+  updateStatus(data: any) {
+    if(confirm("Do you want to update Status?") == true){
+      const payload = {
+        adv_pay_id : this.advPayId,
+        status : data
+      }
+      this.service.post(`update/advancesaraly`,payload).subscribe((res: any) => {
+        if(res.status === 'success'){
+          this.toastr.success("Advance salary status updated successfully");
+          this.getAllAdvSalary();
+           this.closeAllModals();
+        }
+      },(error) => {
+        console.error('Error:', error);
+      });
+    }
   }
 }

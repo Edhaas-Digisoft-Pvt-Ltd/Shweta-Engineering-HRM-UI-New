@@ -4,6 +4,7 @@ import { ColDef } from 'ag-grid-community';
 import { FormGroup, FormBuilder, Validators } from '@angular/forms';
 import { HrmserviceService } from 'src/app/hrmservice.service';
 import { EditLeaveRequestComponent } from './edit-leave-request/edit-leave-request.component';
+import { ToastrService } from 'ngx-toastr';
 
 declare var bootstrap: any;
 
@@ -42,7 +43,7 @@ export class LeaveRequestComponent {
   CompanyNames: any = [] ;
   selectedValue: any = 1 ; // Default selected
 
-  constructor(private route: ActivatedRoute, private router: Router, private fb: FormBuilder, private service: HrmserviceService) { }
+  constructor(private route: ActivatedRoute, private router: Router, private fb: FormBuilder, private service: HrmserviceService, private toastr: ToastrService) { }
 
   // leave request form : 
   ngOnInit(): void {
@@ -110,12 +111,12 @@ export class LeaveRequestComponent {
       maxWidth: 100,
       cellRenderer: EditLeaveRequestComponent,
       cellRendererParams: {
-        editCallback: (leaveId: any) => this.onViewLeaveClick(leaveId), 
+        editCallback: (leaveId: any) => this.getSingleLeaveRequest(leaveId), 
       }
     }
   ];
 
-  onViewLeaveClick(params: any) {
+  getSingleLeaveRequest(params: any) {
     this.empLeaveId = params;
      this.service.post(`single/leave/request`,{ "tbl_emp_leave_id": this.empLeaveId}).subscribe((res: any) => {
        if (res.status === 'success') {
@@ -243,8 +244,9 @@ export class LeaveRequestComponent {
       }
       this.service.post(`update/leave/request`,payload).subscribe((res: any) => {
         if(res.status === 'success'){
+        this.toastr.success("Updated Successfully");
           this.getLeaveRequests()
-           const modalElement = document.getElementById('leaveRequestModal');
+          const modalElement = document.getElementById('leaveRequestModal');
             if (modalElement) {
               const modalInstance = bootstrap.Modal.getInstance(modalElement);
               if (modalInstance) {

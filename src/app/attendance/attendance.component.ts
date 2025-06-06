@@ -105,9 +105,9 @@ export class AttendanceComponent {
       const headers = ['employe_id', 'attendance_date', 'check_in', 'check_out', 'shift_id', 'status'];
       const exampleRow = [
         '1',
-        '30-05-2025',
-        '09:00 AM',
-        '06:00 PM',
+        '1-06-2025',
+        '7:00',
+        '19:00',
         '1',
         'P'
       ];
