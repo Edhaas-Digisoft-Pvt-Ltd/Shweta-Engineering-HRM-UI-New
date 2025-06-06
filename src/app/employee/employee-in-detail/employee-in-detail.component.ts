@@ -22,11 +22,11 @@ export class EmployeeInDetailComponent {
   leaveForm!: FormGroup; // apply leave
   // leaveTypes: string[] = ['Casual', 'Sick', 'Earned', 'Maternity', 'Paternity'];
   leaveTypes = [
-    { key: "1", value: "Casual" },
-    { key: "2", value: "Sick" },
-    { key: "3", value: "Earned" },
-    { key: "4", value: "Maternity" },
-    { key: "5", value: "Paternity" }
+    { key: 1, value: "Casual" },
+    { key: 2, value: "Sick" },
+    { key: 3, value: "Earned" },
+    { key: 4, value: "Maternity" },
+    { key: 5, value: "Paternity" }
   ];
   advanceSalaryForm!: FormGroup;  // apply advance salary
   tenures = [
@@ -66,6 +66,16 @@ export class EmployeeInDetailComponent {
   }
 
   role: string = '';
+
+  closeAllModals(): void {
+    const modals = document.querySelectorAll('.modal.show');
+    modals.forEach((modalElement: any) => {
+      const modalInstance = bootstrap.Modal.getInstance(modalElement);
+      if (modalInstance) {
+        modalInstance.hide();
+      }
+    });
+  }
 
   ngOnInit(): void {
     this.route.queryParams.subscribe(params => {
@@ -279,13 +289,7 @@ export class EmployeeInDetailComponent {
        if (res.status === 'success') {
         this.toastr.success('Leave Added !!!');
         this.leaveForm.reset();
-        const modalElement = document.getElementById('applyLeaveModal');
-          if (modalElement) {
-            const modalInstance = bootstrap.Modal.getInstance(modalElement);
-            if (modalInstance) {
-              modalInstance.hide();
-            }
-          }
+        this.closeAllModals();
        }
        else {
         console.log(res.error)
@@ -296,27 +300,21 @@ export class EmployeeInDetailComponent {
 
   // advance salary request
   applyAdvanceSalaryRequest() {
-    console.log('called')
     this.isAdvanceSalary = true;
     if (this.advanceSalaryForm.valid) {
       const advanceSalaryData = {
         employee_id: this.employeeId,
         advance_amount: this.advanceSalaryForm.value.amount,
         tenure: this.advanceSalaryForm.value.tenure,
-        emi: this.installmentAmount,
+        emi: this.installmentAmount,  
         remarks: this.advanceSalaryForm.value.reason,
       };
       console.log('advanceSalaryData', advanceSalaryData);
       this.service.post(`apply/advancesaraly`,advanceSalaryData).subscribe((res: any) => {
        if (res.status === 'success') {
         this.toastr.success(' Request Added !!!');
-        const modalElement = document.getElementById('advanceSalaryModal');
-          if (modalElement) {
-            const modalInstance = bootstrap.Modal.getInstance(modalElement);
-            if (modalInstance) {
-              modalInstance.hide();
-            }
-          }
+        this.advanceSalaryForm.reset();
+        this.closeAllModals();
        }
        else {
         console.log(res.error)
