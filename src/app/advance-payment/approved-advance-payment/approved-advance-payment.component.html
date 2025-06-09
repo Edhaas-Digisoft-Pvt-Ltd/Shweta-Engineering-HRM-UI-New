@@ -87,36 +87,38 @@
 
       <!-- Header -->
       <div class="modal-header  text-white">
-        <h5 class="modal-title" id="advanceSalaryModalLabel">Advance Salary Request Info</h5>
+        <h5 class="modal-title" id="advanceSalaryModalLabel">Approved Salary Request Info</h5>
         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
 
       <!-- Body -->
+      <form [formGroup]="displayApprovedData">
       <div class="modal-body p-4">
 
         <!-- Row 1 -->
         <div class="row mb-3">
-          <div class="col-md-2"><strong>ID</strong><input class="form-control" value="#0001"></div>
-          <div class="col-md-3"><strong>Employee Name</strong><input class="form-control"
-              value="Hrishikesh Vinayak Kadam"></div>
-          <div class="col-md-2"><strong>Company</strong><input class="form-control" value="Company A"></div>
-          <div class="col-md-3"><strong>Department</strong><input class="form-control" value="Design"></div>
-          <div class="col-md-2"><strong>Role</strong><input class="form-control" value="Jr Designer"></div>
+          <div class="col-md-2"><strong>ID</strong><input class="form-control" formControlName="id"></div>
+          <div class="col-md-3"><strong>Employee Name</strong><input class="form-control" formControlName="employeeName"></div>
+          <div class="col-md-2"><strong>Company</strong><input class="form-control" formControlName="company"></div>
+          <div class="col-md-3"><strong>Department</strong><input class="form-control" formControlName="department"></div>
+          <div class="col-md-2"><strong>Role</strong><input class="form-control" formControlName="role"></div>
         </div>
 
         <!-- Row 2 -->
         <div class="row mb-3">
-          <div class="col-md-2"><strong>Request Date</strong><input class="form-control" value="09/04/25"></div>
-          <div class="col-md-2"><strong>Tenure</strong><input class="form-control" value="6 Month"></div>
-          <div class="col-md-2"><strong>Amount (in ₹)</strong><input class="form-control" value="10,000"></div>
+          <div class="col-md-2"><strong>Request Date</strong><input class="form-control" formControlName="requestDate"></div>
+          <div class="col-md-2"><strong>Tenure</strong><input class="form-control" formControlName="tenure"></div>
+          <div class="col-md-2"><strong>Amount (in ₹)</strong><input class="form-control" formControlName="amount"></div>
         </div>
 
         <!-- Loan Amount Progress Bar -->
         <div class="mb-3">
           <label class="fw-bold">Loan Amount</label>
           <div class="d-flex justify-content-between">
-            <span class="fw-bold text-dark">₹ 10,000</span>
-            <span class="text-muted small">Remaining<br>₹ 5,000</span>
+            <span class="fw-bold text-dark">₹ {{ displayApprovedData.get('advanceAmount')?.value || '0' }}</span>
+            <span class="text-muted small">
+              Remaining<br>₹ {{ displayApprovedData.get('remainingBalance')?.value || '0' }}
+            </span>
           </div>
           <div class="progress mt-2" style="height: 12px;">
             <div class="progress-bar bg-success" role="progressbar" style="width: 50%;" aria-valuenow="50"
@@ -124,28 +126,29 @@
               <span class="visually-hidden">Paid</span>
             </div>
           </div>
-          <div class="small text-success mt-1">● Paid ₹ 5,000</div>
+          <div class="small text-success mt-1">● Paid ₹ {{ calculatePaidAmount() }}</div>
         </div>
 
         <!-- Row 3 -->
-        <div class="row">
-          <div class="col-md-3"><strong>First Installment Date</strong><input class="form-control" value="07/05/25">
+        <div class="row mb-3">
+          <div class="col-md-3"><strong>First Installment Date</strong><input class="form-control" formControlName="firstInstallmentDate">
           </div>
-          <div class="col-md-3"><strong>Installment End Date</strong><input class="form-control" value="07/11/25"></div>
-          <div class="col-md-3"><strong>Last Installment Paid</strong><input class="form-control" value="09/05/25">
+          <div class="col-md-3"><strong>Installment End Date</strong><input class="form-control" formControlName="installmentEndDate"></div>
+          <div class="col-md-3"><strong>Last Installment Paid</strong><input class="form-control" formControlName="lastInstallmentDate">
           </div>
-          <div class="col-md-3"><strong>Next Installment Due Date</strong><input class="form-control" value="09/06/25">
+          <div class="col-md-3"><strong>Next Installment Due Date</strong><input class="form-control" formControlName="installmentDueDate">
           </div>
         </div>
 
       </div>
+      </form>
 
       <!-- modal footer -->
-      <div class="modal-footer">
+      <!-- <div class="modal-footer">
         <button type="button" class="btn approveBtn" (click)="updateStatus('Approved')">Approve Leave</button>
         <button type="button" class="btn declineBtn" (click)="updateStatus('Rejected')">Decline Leave</button>
         <button type="button" class="btn btn-outline-dark fw-semobild " data-bs-dismiss="modal">Cancel</button>
-      </div>
+      </div> -->
     </div>
   </div>
 </div>
