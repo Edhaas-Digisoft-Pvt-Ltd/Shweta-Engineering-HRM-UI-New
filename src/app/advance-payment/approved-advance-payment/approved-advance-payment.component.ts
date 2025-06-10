@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { FormBuilder } from '@angular/forms';
+import { FormBuilder, FormGroup } from '@angular/forms';
 import { ColDef } from 'ag-grid-community';
 import { EmployeeActionComponent } from 'src/app/employee/employee-action/employee-action.component';
 import { HrmserviceService } from 'src/app/hrmservice.service';
@@ -16,31 +16,89 @@ export class ApprovedAdvancePaymentComponent {
   gridApiActive: any;
   role: string = '';
   columnDefs: ColDef[] = [];
-
-  advanceSalaryData = {
-    id: '#0001',
-    employeeName: 'Hrishikesh Vinayak Kadam',
-    company: 'Company A',
-    department: 'Design',
-    role: 'Jr Designer',
-    requestDate: '09/04/25',
-    tenure: '6 Month',
-    amount: 10000,
-    paidAmount: 5000,
-    firstInstallmentDate: '07/05/25',
-    installmentEndDate: '07/11/25',
-    lastInstallmentPaid: '09/05/25',
-    nextInstallmentDue: '09/06/25',
-  };
+  rowData: any = [];
+  CompanyNames: any = [] ;
+  selectedCompanyId : any = 1 ;
+  selectedYear: any;
+  selectedMonth: any;
+  displayApprovedData!: FormGroup;
+  approvedData!: any;
 
   constructor(private fb: FormBuilder, private service: HrmserviceService) {}
 
   ngOnInit() {
     const currentDate = new Date();
+    this.selectedYear = new Date().getFullYear();
+    this.selectedMonth = new Date().getMonth() + 1;
     this.today = currentDate.toISOString().split('T')[0]; // Format YYYY-MM-DD
     // this.initializeGrids();
     this.role = this.service.getRole();
     this.initializeColumns();
+    this.getCompanyNames();
+    this.getAllApprovedRequest();
+
+    this.displayApprovedData = this.fb.group({
+      id: [{ value: '', disabled: true }],
+      employeeName: [{ value: '', disabled: true }],
+      company: [{ value: '', disabled: true }],
+      department: [{ value: '', disabled: true }],
+      role: [{ value: '', disabled: true }],
+      requestDate: [{ value: '', disabled: true }],
+      tenure: [{ value: '', disabled: true }],
+      amount: [{ value: '', disabled: true }],
+      firstInstallmentDate: [{ value: '', disabled: true }],
+      installmentEndDate: [{ value: '', disabled: true }],
+      lastInstallmentDate: [{ value: '', disabled: true }],
+      installmentDueDate: [{ value: '', disabled: true }],
+      remainingBalance: [{value: '', disabled: true}],
+      advanceAmount: [{value: '', disabled: true}]
+    })
+  }
+
+  onCompanyChange(event: Event): void {
+    this.selectedCompanyId = (event.target as HTMLSelectElement).value;
+    console.log('Selected Company ID:', this.selectedCompanyId);
+    this.getAllApprovedRequest();
+  }
+
+  getCompanyNames() {
+    this.service.post('fetch/company', {}).subscribe((res: any) => {
+      if (res.status == "success") {
+        this.CompanyNames = res.data
+      }
+    },
+      (error) => {
+        console.error('Error fetching companies:', error);
+      }
+    );
+  }
+
+  getAllApprovedRequest() {
+    this.service.post('all/approvedrequest', { 
+      // company_id: this.selectedCompanyId, 
+      // year: this.selectedYear,
+      // month: this.selectedMonth
+    }).subscribe((res: any) => {
+      try {
+        if (res.status === 'success') {
+          this.rowData = res.data.map((item:any)=>({
+            emp_id:item.employee_code,
+            emp_name:item.emp_name,
+            apply_date:item.apply_date,
+            advance_amount:item.advance_amount,
+            remaining_balance:item.remaining_balance,
+            emi: item.emi,
+            updated_on:item.updated_on,
+            deducted_on:item.deducted_on,
+            status: item.status,
+            tenure : item.tenure,
+            adv_pay_id: item.adv_pay_id
+          }));
+        } 
+      } catch (error) {
+        console.log(error);
+      }
+    })
   }
 
   selectTab(tab: string) {
@@ -60,24 +118,20 @@ export class ApprovedAdvancePaymentComponent {
 
   financialYears = [2022, 2023, 2024, 2025];
   months = [
-    'January',
-    'February',
-    'March',
-    'April',
-    'May',
-    'June',
-    'July',
-    'August',
-    'September',
-    'October',
-    'November',
-    'December',
+    { id: 1, value: 'January' },
+    { id: 2, value: 'February' },
+    { id: 3, value: 'March' },
+    { id: 4, value: 'April' },
+    { id: 5, value: 'May' },
+    { id: 6, value: 'June' },
+    { id: 7, value: 'July' },
+    { id: 8, value: 'August' },
+    { id: 9, value: 'September' },
+    { id: 10, value: 'October' },
+    { id: 11, value: 'November' },
+    { id: 12, value: 'December' }
   ];
   days = Array.from({ length: 31 }, (_, i) => i + 1);
-
-  selectedYear: number = new Date().getFullYear();
-  selectedMonth: string = this.months[new Date().getMonth()];
-  monthIndex1Based = this.months.indexOf(this.selectedMonth);
   //  for selecting company
   optionsArray: string[] = ['Company A', 'Company B', 'Company C'];
   selectedValue: string = 'Company A'; // Default selected
@@ -123,95 +177,98 @@ export class ApprovedAdvancePaymentComponent {
   };
   initializeColumns() {
     this.columnDefs = [
-      { headerName: 'ID', field: 'id', sortable: true, filter: true },
-      { headerName: 'Date', field: 'date', sortable: true, filter: true },
+      { headerName: 'ID', field: 'emp_id', sortable: true, filter: true, maxWidth: 150 },
       {
         headerName: 'Employee Name',
-        field: 'name',
+        field: 'emp_name',
         sortable: true,
         filter: true,
+        maxWidth:180
       },
+      { headerName: 'Apply Date', field: 'apply_date', sortable: true, filter: true, maxWidth:140 },
       {
-        headerName: 'Total Amount',
-        field: 'amount',
+        headerName: 'Adv. Amount',
+        field: 'advance_amount',
         sortable: true,
         filter: true,
+        maxWidth:150
       },
       {
         headerName: 'Remaining Amount',
-        field: 'remainingAmount',
+        field: 'remaining_balance',
         sortable: true,
         filter: true,
+        maxWidth:190
       },
       {
-        headerName: 'First Installment Date',
-        field: 'tenure',
+        headerName: 'EMI',
+        field: 'emi',
         sortable: true,
         filter: true,
+        maxWidth:100
       },
       {
-        headerName: 'Next Due Date',
-        field: 'nextDueDate',
+        headerName: 'Updated On',
+        field: 'updated_on',
         sortable: true,
         filter: true,
+        maxWidth:140
       },
-      { headerName: 'Tenure', field: 'tenure', sortable: true, filter: true },
+        {
+        headerName: 'Deducted On',
+        field: 'deducted_on',
+        sortable: true,
+        filter: true,
+        maxWidth:150
+      },
+      { headerName: 'Status', field: 'status', cellRenderer: this.statusButtonRenderer, sortable: true, filter: true,  maxWidth:140},
+      { headerName: 'Tenure', field: 'tenure', sortable: true, filter: true,  maxWidth:110},
     ];
-    if (this.role !== 'accountant') {
       this.columnDefs.push({
         headerName: 'Actions',
+        maxWidth:120,
         cellStyle: { border: '1px solid #ddd' },
-
         cellRenderer: (params: any) => {
-          return `<button type="button" class="btn btn-outline-dark" data-bs-toggle="modal" data-bs-target="#advanceSalaryModalinfo">
-  <i class="bi bi-pencil"></i>
-</button>`;
+          return `<button type="button" class="btn btn-outline-dark mb-1" data-bs-toggle="modal" data-bs-target="#advanceSalaryModalinfo">
+           <i class="bi bi-eye-fill"></i>
+          </button>`;
         },
+        onCellClicked: (event: any) => {
+          this.getSingleApprovedData(event.data.adv_pay_id);
+        },  
       });
-    }
   }
 
-  rowData = [
-    {
-      id: 1,
-      date: '2025-04-13',
-      name: 'Shivani',
-      amount: 100000,
-      remainingAmount: 50000,
-      tenure: '12 Months',
-      emiStartDate: '2025-05-01',
-      nextDueDate: '2025-06-01',
-      status: 'Approved',
-      joinDate: '2025-03-09',
-      contact: '9078121214',
-    },
-    {
-      id: 2,
-      date: '2025-04-13',
-      name: 'Mansi',
-      amount: 80000,
-      remainingAmount: 20000,
-      tenure: '10 Months',
-      emiStartDate: '2025-05-01',
-      nextDueDate: '2025-06-01',
-      status: 'Approved',
-      joinDate: '2025-03-09',
-      contact: '9078121214',
-    },
-    {
-      id: 3,
-      date: '2025-04-13',
-      name: 'Mrunal',
-      amount: 120000,
-      remainingAmount: 60000,
-      tenure: '18 Months',
-      emiStartDate: '2025-05-01',
-      nextDueDate: '2025-06-01',
-      status: 'Approved',
-      joinDate: '2025-03-09',
-      contact: '9078121214',
-    },
-  ];
+  getSingleApprovedData(data:any) {
+     this.service.post('single/report/advancesaraly',{adv_pay_id: data}).subscribe((res: any) => {
+      if(res.status === 'success'){
+        const singleApprovedData = res.data[0];
+          this.approvedData = {
+            id: singleApprovedData?.employee_code,
+            employeeName: singleApprovedData?.emp_name,
+            company: singleApprovedData?.company_name,
+            department: singleApprovedData?.department_name,
+            role: singleApprovedData?.designation_name,
+            requestDate: singleApprovedData?.apply_date,
+            status: singleApprovedData?.status,
+            tenure: singleApprovedData?.tenure,
+            amount: singleApprovedData?.advance_amount,
+            reason: singleApprovedData?.remarks,
+            EMIStartDate: singleApprovedData?.updated_on,
+            installmentAmount: singleApprovedData?.emi,
+            remainingBalance: singleApprovedData?.remaining_balance,
+            advanceAmount: singleApprovedData?.advance_amount
+          } 
+        this.displayApprovedData.patchValue(this.approvedData);  
+      }
+    })
+  }
+  
+calculatePaidAmount(): number {
+  const total = +this.displayApprovedData.get('amount')?.value || 0;
+  const remaining = +this.displayApprovedData.get('remainingBalance')?.value || 0;
+  return total - remaining;
+}
 
   statusButtonRenderer(params: any) {
     const status = params.value;
@@ -245,6 +302,11 @@ export class ApprovedAdvancePaymentComponent {
 
     return button;
   }
+
+  gridOptions = {
+    pagination: false,
+    paginationPageSize: 10,
+  };
 
   // update function
   updateStatus(data: any) {

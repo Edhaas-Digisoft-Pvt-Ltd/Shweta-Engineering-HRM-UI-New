@@ -6,9 +6,9 @@
     </div>
     <div>
       <label>Select Year</label><br />
-      <!-- <select class="form-control selectdata" [(ngModel)]="selectedYear" (change)="onYearMonthChange()">
-          <option *ngFor="let year of financialYears">{{ year }}</option>
-        </select> -->
+      <select class="form-control selectdata" [(ngModel)]="selectedYear" (change)="onMonthYearChange()">
+        <option *ngFor="let year of years" [value]="year">{{ year }}</option>
+      </select>
     </div>
 
     <!-- <div class="text-start">
@@ -26,14 +26,13 @@
 
 
       <div class="ms-2">
-        <!-- <select class="form-control selectdata3" [(ngModel)]="selectedMonth" (change)="onYearMonthChange()">
-              <option *ngFor="let month of months">{{ month }}</option>
-            </select> -->
-
+          <select class="form-control selectdata3" [(ngModel)]="selectedMonth" (change)="onMonthYearChange()">
+            <option *ngFor="let month of months" [value]="month.value">{{ month.name }}</option>
+          </select>
 
       </div>
 
-
+      
     </div>
 
     <div>
@@ -61,6 +60,7 @@
 
         <!-- Month View Grid -->
         <ag-grid-angular style="width: 100%; height: 600px;" class="ag-theme-alpine" id="specualGrid2"
+          [gridOptions]="gridOptions" [pagination]="true"
           [columnDefs]="columnDefs" [defaultColDef]="defaultColDef" [rowData]="rowData" [domLayout]="'autoHeight'"
           (gridReady)="onGridReady($event)">
         </ag-grid-angular>

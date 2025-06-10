@@ -1,6 +1,9 @@
 .createEmployee {
     width: 200px;
+}
 
+.importExcel {
+    width: 160px;
 }
 
 input {
