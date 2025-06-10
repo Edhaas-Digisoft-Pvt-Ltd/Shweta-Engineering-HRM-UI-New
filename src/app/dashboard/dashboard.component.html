@@ -8,16 +8,16 @@
     </div>
 
     <div class="row justify-content-between gap-3 mb-3 ">
-      <div class="col border p-3 companyCard" *ngFor="let stat of dashboardStats"
-        [ngClass]="{'highlighted': selectedCompany === stat.title}"  style="border-radius: 10px; cursor: pointer;"
-        (click)="selectCompany(stat.title)">
+      <div class="col border p-3 companyCard" *ngFor="let stat of CompanyNames"
+        [ngClass]="{'highlighted': selectedCompanyId === stat.company_id }"  style="border-radius: 10px; cursor: pointer;"
+         (click)="selectCompany(stat)">
         <div class="d-flex justify-content-center gap-3">
           <div>
             <i class="bi" [ngClass]="stat.icon + ' text-primary'" style="font-size: 22px;"></i>
           </div>
           <div>
-            <h6 class="companyTitle">{{ stat.title }}</h6>
-            <p class="mb-0 companyCount">{{ stat.value }}</p>
+            <h6 class="companyTitle">{{ stat.company_name }}</h6>
+            <p class="mb-0 companyCount">{{ stat.company_desc }}</p>
           </div>
         </div>
       </div>

@@ -4,6 +4,7 @@ import { AgGridAngular } from 'ag-grid-angular';
 import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
 import { ToastrService } from 'ngx-toastr';
+import { HrmserviceService } from '../hrmservice.service';
 @Component({
   selector: 'app-attendance',
   templateUrl: './attendance.component.html',
@@ -11,18 +12,19 @@ import { ToastrService } from 'ngx-toastr';
 })
 export class AttendanceComponent {
   @ViewChild('agGrid', { static: false }) agGrid!: AgGridAngular;
- 
+
   rowData: any[] = [];
   activeTab: string = 'tab1';
   searchInputValue: string = '';
   gridApiActive: any;
- 
-  constructor( private toastr: ToastrService){ }
- 
+
+  constructor(private toastr: ToastrService, private service: HrmserviceService) { }
+
   ngOnInit() {
     this.loadTodayDataFromStorage();
+    this.fetchAttendance();
   }
- 
+
   public defaultColDef: ColDef = {
     editable: false,
     flex: 1,
@@ -30,23 +32,25 @@ export class AttendanceComponent {
     sortable: true,
     filter: true
   };
- 
-columnDefs: ColDef[] = [
-  { headerName: 'Employee ID', field: 'Employee ID' },
-  { headerName: 'Attendance Date', field: 'Attendance Date' },
-  { headerName: 'Check In', field: 'Check In' },
-  { headerName: 'Check Out', field: 'Check Out' },
-  { headerName: 'Shift Id', field: 'Shift Id' },
-  { headerName: 'Status', field: 'Status' },
-];
- 
- 
- 
- 
+
+  columnDefs: ColDef[] = [
+    { headerName: 'Employee Id', field: 'employe_id' },
+    { headerName: 'Date', field: 'attendance_date' },
+    { headerName: 'CheckIn', field: 'check_in' },
+    { headerName: 'CheckOut', field: 'check_out' },
+    { headerName: 'ShiftId', field: 'shift_id' },
+    { headerName: 'Status', field: 'status' },
+  ];
+
+  gridOptions = {
+    pagination: false,
+    paginationPageSize: 10,
+  };
+
   getTodayDateString(): string {
     return new Date().toISOString().split('T')[0]; // yyyy-MM-dd
   }
- 
+
   getFormattedTodayDate(): string {
     const today = new Date();
     const options: Intl.DateTimeFormatOptions = { day: '2-digit', month: 'short', year: 'numeric' };
@@ -57,70 +61,63 @@ columnDefs: ColDef[] = [
     const today = new Date();
     return days[today.getDay()];
   }
- 
+
   loadTodayDataFromStorage(): void {
     const allData = JSON.parse(localStorage.getItem('attendanceData') || '[]');
     const todayStr = this.getTodayDateString();
     this.rowData = allData.filter((row: { attendance_date: string; }) => row.attendance_date === todayStr);
   }
 
-  onFileChange(event: any): void {
-    const target: DataTransfer = <DataTransfer>(event.target);
-    if (target.files.length !== 1) {
-      alert('Please upload only one file');
-      return;
-    }
+  selectedFile: File | null = null;
 
-    const reader: FileReader = new FileReader();
-    reader.onload = (e: any) => {
-      const bstr: string = e.target.result;
-      const wb: XLSX.WorkBook = XLSX.read(bstr, { type: 'binary' });
-      const wsname: string = wb.SheetNames[0];
-      const ws: XLSX.WorkSheet = wb.Sheets[wsname];
+  onFileChange(event: any) {
+    const file = event.target.files[0];
+    if (!file) return;
 
-      const rawData = XLSX.utils.sheet_to_json(ws, { raw: true });
+    this.selectedFile = file;
 
-      const formatTime = (excelTime: number) => {
-        if (typeof excelTime !== 'number') return excelTime;
-        const totalMinutes = Math.round(excelTime * 24 * 60);
-        const hours = Math.floor(totalMinutes / 60).toString().padStart(2, '0');
-        const minutes = (totalMinutes % 60).toString().padStart(2, '0');
-        return `${hours}:${minutes}`;
-      };
+    const formData = new FormData();
+    formData.append('upload_file', file);
 
-      this.rowData = rawData.map((row: any) => ({
-        ...row,
-        'Check In': formatTime(row['Check In']),
-        'Check Out': formatTime(row['Check Out']),
-      }));
-
-      if (this.gridApiActive) {
-        this.gridApiActive.setRowData(this.rowData);
+    this.service.post('import-attendance', formData).subscribe((res: any) => {
+      if (res.status === 'success') {
+        this.toastr.success(res.data);
+        this.fetchAttendance();
+      } else {
+        console.log(res.error);
       }
-    };
-
-    reader.readAsBinaryString(target.files[0]);
+    });
   }
- 
+
+  fetchAttendance(): void {
+    this.service.post('fetch/attendance', {}).subscribe((res: any) => {
+      if (res.status === 'success') {
+        this.rowData = res.data
+      } else {
+        console.log(res.error);
+      }
+    });
+  }
+
   downloadTemplate(): void {
     const userConfirmed = confirm("Do you want to download the daily attendance template?");
     if (userConfirmed) {
-      const headers = ['Employee_ID', 'Attendance_Date', 'CheckIn', 'CheckOut', 'Shift Id', 'Status'];
+      const headers = ['employe_id', 'attendance_date', 'check_in', 'check_out', 'shift_id', 'status'];
       const exampleRow = [
         '1',
-        '26-05-2025',
-        '09:00 AM',
-        '06:00 PM',
+        '1-06-2025',
+        '7:00',
+        '19:00',
         '1',
         'P'
       ];
- 
+
       const worksheet: XLSX.WorkSheet = XLSX.utils.aoa_to_sheet([headers, exampleRow]);
       const workbook: XLSX.WorkBook = { Sheets: { 'Template': worksheet }, SheetNames: ['Template'] };
       const excelBuffer: any = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
       const blob: Blob = new Blob([excelBuffer], { type: 'application/octet-stream' });
       saveAs(blob, 'Attendance_Template.xlsx');
- 
+
       this.toastr.success('Download successfully !');
     }
   }
@@ -135,34 +132,34 @@ columnDefs: ColDef[] = [
         headers.push(i.toString());
       }
       headers.push('Total Present');
- 
+
       const exampleRow1 = ['1001', 'John Doe', 'P', 'P', 'A', 'P', 'P', 'P', 'A', 'P', 'P', 'P', 'P', 'P', 'P', 'P', 'A', 'P', 'P', 'P', 'P', 'P', 'P', 'A', 'P', 'P', 'P', 'P', 'P', 'P', 'P', 'A', '28'];
       const exampleRow2 = ['1002', 'Jane Smith', 'P', 'LT', 'P', 'P', 'P', 'P', 'P', 'P', 'P', 'P', 'P', 'P', 'P', 'P', 'P', 'P', 'P', 'P', 'P', 'P', 'P', 'P', 'P', 'P', 'P', 'P', 'P', 'P', 'P', 'P', '30'];
- 
+
       const worksheet: XLSX.WorkSheet = XLSX.utils.aoa_to_sheet([headers, exampleRow1, exampleRow2]);
       const workbook: XLSX.WorkBook = { Sheets: { 'Monthly Attendance': worksheet }, SheetNames: ['Monthly Attendance'] };
       const excelBuffer: any = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
       const blob: Blob = new Blob([excelBuffer], { type: 'application/octet-stream' });
       saveAs(blob, 'Monthly_Attendance_Template.xlsx');
- 
+
       this.toastr.success('Download successfully !');
     }
   }
- 
- 
+
+
   onGridReady(params: any): void {
     this.gridApiActive = params.api;
     this.gridApiActive.setRowData(this.rowData);
   }
- 
+
   selectTab(tab: string) {
     this.activeTab = tab;
   }
- 
+
   filterByStatus(status: string): void {
     if (this.agGrid && this.agGrid.api) {
       this.agGrid.api.setFilterModel({
-        Attendance: {
+        status: {
           type: 'equals',
           filter: status
         }
@@ -170,14 +167,14 @@ columnDefs: ColDef[] = [
       this.agGrid.api.onFilterChanged();
     }
   }
- 
+
   clearStatusFilter(): void {
     if (this.agGrid && this.agGrid.api) {
       this.agGrid.api.setFilterModel(null);
       this.agGrid.api.onFilterChanged();
     }
   }
- 
+
   onFilterBoxChange(): void {
     if (this.gridApiActive) {
       this.gridApiActive.setQuickFilter(this.searchInputValue);

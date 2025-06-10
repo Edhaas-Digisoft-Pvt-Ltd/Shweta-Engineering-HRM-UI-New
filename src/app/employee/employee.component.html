@@ -7,9 +7,6 @@
                 <h2> <i class="bi bi-people-fill me-2"></i> Employees</h2>
             </div>
             <div class="col-md-8  d-flex justify-content-end gap-2  align-items-end">
-             
-                
-
                 <div class="">
                     <input class="py-1 px-3 form-control" type="text" #searchBox
                         placeholder="Search Here" [(ngModel)]="searchValue"
@@ -25,6 +22,16 @@
                         </option>
                     </select>
                   </div>
+                <!-- <div class="">
+                <button class="btn importExcel"  style="background-color: #3674b5; color: white;">Import Excel
+                </button>
+                </div> -->
+                <div class="">
+                    <input type="file" #fileInput style="display: none"
+                     (change)="onFileChange($event)" accept=".xlsx, .xls"  />
+                    <button class="btn importExcel"  style="background-color: #3674b5; color: white;" (click)="fileInput.click()">Import Excel
+                    </button>       
+                </div>
                 <div class="">
                     <button class="btn createEmployee"  (click)="create_user()" style="background-color: #3674b5; color: white;"><i class="bi bi-plus"></i>Create
                         Employee</button>

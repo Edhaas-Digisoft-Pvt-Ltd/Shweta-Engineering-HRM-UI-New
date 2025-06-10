@@ -198,7 +198,7 @@ redirect(){
 
   addCompany() {
     this.isSubmitted = true;
-    if (this.textInputControl == 'yes') {
+    if (this.companyForm.value.radioChoice == 'no') { 
       if (this.companyForm.valid && this.selectedLogoFile) {
         const current_data = {
           master_id: this.selectedId,

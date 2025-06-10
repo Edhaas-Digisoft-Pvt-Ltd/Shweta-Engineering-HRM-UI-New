@@ -6,11 +6,8 @@ import { AuthPanelComponent } from './auth-panel/auth-panel.component';
 import { DashboardComponent } from './dashboard/dashboard.component';
 import { CompnaySetupComponent } from './compnay-setup/compnay-setup.component';
 import { CreateaccountComponent } from './createaccount/createaccount.component';
-import { EmployeeComponent } from './employee/employee/employee.component';
-import { EmployeeInDetailComponent } from './employee/employee-in-detail/employee-in-detail.component';
-import { EmployeeEditComponent } from './employee/employee-edit/employee-edit.component';
-import { CreateemployeeComponent } from './employee/createemployee/createemployee.component';
-import { CreateuserComponent } from './employee/createuser/createuser.component';
+import { EmployeeComponent } from './employee/employee.component';
+
 import { AttendanceComponent } from './attendance/attendance.component';
 import { CalenderComponent } from './calender/calender.component';
 import { NewcalenderComponent } from './newcalender/newcalender.component';
@@ -29,6 +26,10 @@ import { ComMangeAndPoliciesComponent } from './compnay-setup/com-mange-and-poli
 import { LeaveSetupComponent } from './compnay-setup/leave-setup/leave-setup.component';
 import { CompanyDashboardComponent } from './compnay-setup/company-list/company-dashboard/company-dashboard.component';
 
+import { CreateEmployeeComponent } from './employee/create-employee/create-employee.component';
+import { EmployeeDashboardComponent } from './employee/employee-dashboard/employee-dashboard.component';
+
+import { BonusAndIncentiveComponent } from './compnay-setup/bonus-and-incentive/bonus-and-incentive.component';
 const routes: Routes = [
   {
     path: '',
@@ -53,6 +54,10 @@ const routes: Routes = [
         component: CompnaySetupComponent,
       },
       {
+        path: 'BonusAndIncentive',
+        component: BonusAndIncentiveComponent ,
+      },
+      {
         path: 'demo',
         component: DemoComponent,
       },
@@ -65,20 +70,12 @@ const routes: Routes = [
         component: EmployeeComponent,
       },
       {
-        path: 'EmployeeInDetail',
-        component: EmployeeInDetailComponent,
-      },
-      {
-        path: 'EditEmployee',
-        component: EmployeeEditComponent,
-      },
-      {
         path: 'CreateEmployee',
-        component: CreateemployeeComponent,
+        component: CreateEmployeeComponent,
       },
       {
-        path: 'CreateUser',
-        component: CreateuserComponent,
+        path: 'EmployeeDashboard',
+        component: EmployeeDashboardComponent,
       },
       {
         path: 'Attendance',
