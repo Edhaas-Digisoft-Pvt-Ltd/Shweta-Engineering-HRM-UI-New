@@ -48,6 +48,9 @@ import { ComMangeAndPoliciesComponent } from './compnay-setup/com-mange-and-poli
 import { LeaveSetupComponent } from './compnay-setup/leave-setup/leave-setup.component';
 import { CompanyDashboardComponent } from './compnay-setup/company-list/company-dashboard/company-dashboard.component';
 import { EditLeaveRequestComponent } from './leave/leave-request/edit-leave-request/edit-leave-request.component';
+import { BonusAndIncentiveComponent } from './compnay-setup/bonus-and-incentive/bonus-and-incentive.component';
+import { ManageBonusAndIncentiveComponent } from './compnay-setup/bonus-and-incentive/manage-bonus-and-incentive/manage-bonus-and-incentive.component';
+import { BonuseAndInsentiveReportsComponent } from './compnay-setup/bonus-and-incentive/bonuse-and-insentive-reports/bonuse-and-insentive-reports.component';
 
 // FullCalendarModule.registerPlugins([dayGridPlugin]);
 
@@ -90,7 +93,11 @@ import { EditLeaveRequestComponent } from './leave/leave-request/edit-leave-requ
     ComMangeAndPoliciesComponent,
     LeaveSetupComponent,
      CompanyDashboardComponent,
-     EditLeaveRequestComponent
+     EditLeaveRequestComponent,
+     BonusAndIncentiveComponent,
+     ManageBonusAndIncentiveComponent,
+     BonuseAndInsentiveReportsComponent,
+     
   ],
   imports: [
     BrowserModule,

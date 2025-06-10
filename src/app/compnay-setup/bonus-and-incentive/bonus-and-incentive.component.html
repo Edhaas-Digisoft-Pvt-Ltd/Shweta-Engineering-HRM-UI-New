@@ -1,0 +1,28 @@
+<div class="main-content">
+    <div class="row gx-3  align-items-center p-2 rounded-2 mt-3">
+        <div class="col">
+            <h2 class="fw-bold"> <i class="bi bi-gear me-2 "></i> Bonus And incentive</h2>
+        </div>
+    </div>
+    <div class="tabs-container m-2">
+        <ul class="nav nav-tabs">
+            <li class="nav-item" (click)="selectTab('tab1')">
+                <a class="nav-link fw-bold" [ngClass]="{'active': activeTab === 'tab1'}">Manage Bonus And Incentive</a>
+            </li>
+            <li class="nav-item" (click)="selectTab('tab2')">
+                <a class="nav-link fw-bold" [ngClass]="{'active': activeTab === 'tab2'}">Bonus And Incentive Reports</a>
+            </li>
+
+        </ul>
+
+        <div class="tab-content mt-3">
+            <div *ngIf="activeTab === 'tab1'">
+                <app-manage-bonus-and-incentive></app-manage-bonus-and-incentive>
+            </div>
+            <div *ngIf="activeTab === 'tab2'">
+                <app-bonuse-and-insentive-reports></app-bonuse-and-insentive-reports>
+
+            </div>
+        </div>
+    </div>
+</div>

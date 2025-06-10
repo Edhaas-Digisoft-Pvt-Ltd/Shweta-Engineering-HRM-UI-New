@@ -142,6 +142,12 @@
                                             Leave Config
                                         </a>
                                     </li>
+                                    <li>
+                                        <a type="button" [routerLink]="['BonusAndIncentive']" routerLinkActive="active-link"
+                                            (click)="closeAccordion()" class="d-flex align-items-center">
+                                            Bonus And Incentive
+                                        </a>
+                                    </li>
                                 </ul>
                             </div>
                         </div>
@@ -169,6 +175,13 @@
             <div class="d-flex flex-column align-items-start gap-1 flex-nowrap userLogin">
                 <div>
                     <h5>User</h5>
+                </div>
+                <div class="login-Details ms-2">
+                    <i class="bi bi-box-arrow-right me-2"></i>
+                    <span>
+                        {{empName}}<br>
+                        <span>{{roleName}}</span>
+                    </span>
                 </div>
                 <div>
                     <button class="btn fw-medium text-white" (click)="logout()">
