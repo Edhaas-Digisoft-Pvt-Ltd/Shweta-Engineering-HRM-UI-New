@@ -15,6 +15,7 @@ export class LoginComponent {
   loginData: any;
   readonly NoWhitespaceRegExp: RegExp = new RegExp('\\S');
   roles: any;
+  logindata: any;
 
   constructor(
     private router: Router,
@@ -66,7 +67,9 @@ export class LoginComponent {
     this.service.post('login', body).subscribe((res: any) => {
       if (res.status == 'success') {
         this.toastr.success('Login successful !!!');
-
+        this.logindata = res.data
+        sessionStorage.setItem('roleName', this.logindata.employe_role)
+        sessionStorage.setItem('empName', this.logindata.employe_id)
         const role = this.loginForm.value.role;
         sessionStorage.setItem("AUTH", res.token); // Session storage for Auth
         this.service.setRole(role); // Session storage for role
@@ -80,7 +83,6 @@ export class LoginComponent {
         else if (role === 'admin') {
           this.router.navigate(['/authPanal/Dashboard']);
         }
-
       }
       else if (res.status === 'error') {
         console.log("eeeeeeeeeeeee");

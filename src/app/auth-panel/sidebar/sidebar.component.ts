@@ -4,14 +4,17 @@ import { HrmserviceService } from 'src/app/hrmservice.service';
 @Component({
   selector: 'app-sidebar',
   templateUrl: './sidebar.component.html',
-  styleUrls: ['./sidebar.component.css']
+  styleUrls: ['./sidebar.component.css'],
 })
 export class SidebarComponent implements OnInit {
-  constructor(private router: Router, private service: HrmserviceService) { }
+  empName: any;
+  roleName: any;
+  constructor(private router: Router, private service: HrmserviceService) {}
 
   isAccordionOpen1 = false;
   isAccordionOpen2 = false;
   role: string = '';
+  adminData: string | null | undefined;
 
   toggleAccordion(which: 'accordion1' | 'accordion2') {
     if (which === 'accordion1') {
@@ -22,8 +25,13 @@ export class SidebarComponent implements OnInit {
       if (this.isAccordionOpen2) this.isAccordionOpen1 = false;
     }
   }
-ngOnInit(): void {
+  ngOnInit(): void {
     this.role = this.service.getRole();
+    // this.adminData= this.service.getRole();
+    // this.checkLoginBtn();
+    this.empName = sessionStorage.getItem('empName')
+    this.roleName = sessionStorage.getItem('roleName')
+    
   }
   closeAccordion() {
     this.isAccordionOpen1 = false;
@@ -34,19 +42,21 @@ ngOnInit(): void {
   isActiveLink(link: string): boolean {
     return this.router.isActive(link, false);
   }
+  // checkLoginBtn() {
+
+  //   // console.log(this.service.get)
 
 
-  logout(){
+  //   // console.log( this.service.get(data$))
+  // }
 
-    if(confirm("Do you want to logout?") == true){
+  logout() {
+    if (confirm('Do you want to logout?') == true) {
       // alert("Logout ...");
       this.router.navigate(['']);
-
-    }
-    else{
-      alert("Stay Here !!!");
+    } else {
+      alert('Stay Here !!!');
     }
     this.service.clearRole();
   }
-
 }

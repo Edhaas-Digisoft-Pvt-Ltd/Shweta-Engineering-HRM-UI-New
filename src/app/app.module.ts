@@ -43,10 +43,16 @@ import { ComMangeAndPoliciesComponent } from './compnay-setup/com-mange-and-poli
 import { LeaveSetupComponent } from './compnay-setup/leave-setup/leave-setup.component';
 import { CompanyDashboardComponent } from './compnay-setup/company-list/company-dashboard/company-dashboard.component';
 import { EditLeaveRequestComponent } from './leave/leave-request/edit-leave-request/edit-leave-request.component';
+
 import { ApprovedSalaryReportComponent } from './advance-payment/approved-salary-report/approved-salary-report.component';
 import { EmployeeComponent } from './employee/employee.component';
 import { EmployeeDashboardComponent } from './employee/employee-dashboard/employee-dashboard.component';
 import { CreateEmployeeComponent } from './employee/create-employee/create-employee.component';
+
+import { BonusAndIncentiveComponent } from './compnay-setup/bonus-and-incentive/bonus-and-incentive.component';
+import { ManageBonusAndIncentiveComponent } from './compnay-setup/bonus-and-incentive/manage-bonus-and-incentive/manage-bonus-and-incentive.component';
+import { BonuseAndInsentiveReportsComponent } from './compnay-setup/bonus-and-incentive/bonuse-and-insentive-reports/bonuse-and-insentive-reports.component';
+
 
 // FullCalendarModule.registerPlugins([dayGridPlugin]);
 
@@ -87,10 +93,15 @@ import { CreateEmployeeComponent } from './employee/create-employee/create-emplo
     Demo2Component,
     ComMangeAndPoliciesComponent,
     LeaveSetupComponent,
-    CompanyDashboardComponent,
 
-    EditLeaveRequestComponent,
     ApprovedSalaryReportComponent,
+
+
+     CompanyDashboardComponent,
+     EditLeaveRequestComponent,
+     BonusAndIncentiveComponent,
+     ManageBonusAndIncentiveComponent,
+     BonuseAndInsentiveReportsComponent,
 
   ],
   imports: [

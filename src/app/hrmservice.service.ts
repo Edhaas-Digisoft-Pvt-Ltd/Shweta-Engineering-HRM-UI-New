@@ -12,6 +12,10 @@ import {
   providedIn: 'root'
 })
 export class HrmserviceService {
+  data$: any;
+  subscribe(arg0: (data: any) => void) {
+    throw new Error('Method not implemented.');
+  }
 
   // url: string = 'http://127.0.0.1:8000/api/v1/';
 

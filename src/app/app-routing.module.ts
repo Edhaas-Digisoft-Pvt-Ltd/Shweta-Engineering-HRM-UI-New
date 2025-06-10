@@ -25,9 +25,11 @@ import { CompanyListComponent } from './compnay-setup/company-list/company-list.
 import { ComMangeAndPoliciesComponent } from './compnay-setup/com-mange-and-policies/com-mange-and-policies.component';
 import { LeaveSetupComponent } from './compnay-setup/leave-setup/leave-setup.component';
 import { CompanyDashboardComponent } from './compnay-setup/company-list/company-dashboard/company-dashboard.component';
+
 import { CreateEmployeeComponent } from './employee/create-employee/create-employee.component';
 import { EmployeeDashboardComponent } from './employee/employee-dashboard/employee-dashboard.component';
 
+import { BonusAndIncentiveComponent } from './compnay-setup/bonus-and-incentive/bonus-and-incentive.component';
 const routes: Routes = [
   {
     path: '',
@@ -50,6 +52,10 @@ const routes: Routes = [
       {
         path: 'CompanySetup',
         component: CompnaySetupComponent,
+      },
+      {
+        path: 'BonusAndIncentive',
+        component: BonusAndIncentiveComponent ,
       },
       {
         path: 'demo',
