@@ -11,15 +11,10 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ToastrModule } from 'ngx-toastr';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { CreateaccountComponent } from './createaccount/createaccount.component';
-import { EmployeeComponent } from './employee/employee/employee.component';
 import { AgGridModule } from 'ag-grid-angular';
-import { EmployeeEditComponent } from './employee/employee-edit/employee-edit.component';
-import { EmployeeInDetailComponent } from './employee/employee-in-detail/employee-in-detail.component';
 import { EmployeeActionComponent } from './employee/employee-action/employee-action.component';
 import { NgChartsModule } from 'ng2-charts';
 import { ChartOptions, ChartType } from 'chart.js';
-import { CreateemployeeComponent } from './employee/createemployee/createemployee.component';
-import { CreateuserComponent } from './employee/createuser/createuser.component';
 import { AttendanceComponent } from './attendance/attendance.component';
 import { FullCalendarModule } from '@fullcalendar/angular';
 import { CalenderComponent } from './calender/calender.component';
@@ -49,6 +44,9 @@ import { LeaveSetupComponent } from './compnay-setup/leave-setup/leave-setup.com
 import { CompanyDashboardComponent } from './compnay-setup/company-list/company-dashboard/company-dashboard.component';
 import { EditLeaveRequestComponent } from './leave/leave-request/edit-leave-request/edit-leave-request.component';
 import { ApprovedSalaryReportComponent } from './advance-payment/approved-salary-report/approved-salary-report.component';
+import { EmployeeComponent } from './employee/employee.component';
+import { EmployeeDashboardComponent } from './employee/employee-dashboard/employee-dashboard.component';
+import { CreateEmployeeComponent } from './employee/create-employee/create-employee.component';
 
 // FullCalendarModule.registerPlugins([dayGridPlugin]);
 
@@ -61,12 +59,10 @@ import { ApprovedSalaryReportComponent } from './advance-payment/approved-salary
     DashboardComponent,
     CompnaySetupComponent,
     CreateaccountComponent,
-    EmployeeComponent,
-    EmployeeEditComponent,
-    EmployeeInDetailComponent,
     EmployeeActionComponent,
-    CreateemployeeComponent,
-    CreateuserComponent,
+    EmployeeComponent,
+    EmployeeDashboardComponent,
+    CreateEmployeeComponent,
     AttendanceComponent,
     CalenderComponent,
     NewcalenderComponent,
@@ -90,9 +86,9 @@ import { ApprovedSalaryReportComponent } from './advance-payment/approved-salary
     Demo2Component,
     ComMangeAndPoliciesComponent,
     LeaveSetupComponent,
-     CompanyDashboardComponent,
-     EditLeaveRequestComponent,
-     ApprovedSalaryReportComponent,
+    CompanyDashboardComponent,
+    EditLeaveRequestComponent,
+    ApprovedSalaryReportComponent,
   ],
   imports: [
     BrowserModule,

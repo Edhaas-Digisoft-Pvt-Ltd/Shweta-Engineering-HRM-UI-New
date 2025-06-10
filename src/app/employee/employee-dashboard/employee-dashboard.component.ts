@@ -1,38 +1,24 @@
 import { Component, ElementRef, ViewChild } from '@angular/core';
-import { ChartData, ChartOptions, ChartType } from 'chart.js';
-import { ColDef } from 'ag-grid-community';
-import { AbstractControl, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { FormGroup, FormBuilder, Validators, AbstractControl } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
+import { ChartData, ChartOptions } from 'chart.js';
 import { ToastrService } from 'ngx-toastr';
 import { HrmserviceService } from 'src/app/hrmservice.service';
 
-declare var bootstrap: any;
-
 @Component({
-  selector: 'app-employee-in-detail',
-  templateUrl: './employee-in-detail.component.html',
-  styleUrls: ['./employee-in-detail.component.css']
+  selector: 'app-employee-dashboard',
+  templateUrl: './employee-dashboard.component.html',
+  styleUrls: ['./employee-dashboard.component.css']
 })
-export class EmployeeInDetailComponent {
-
-  @ViewChild('advanceSalaryModal') advanceSalaryModalRef!: ElementRef;
+export class EmployeeDashboardComponent {
+ @ViewChild('advanceSalaryModal') advanceSalaryModalRef!: ElementRef;
   @ViewChild('leaveRequestModal') leaveRequestModalRef!: ElementRef;
 
   editForm!: FormGroup;
   leaveForm!: FormGroup; // apply leave
-  // leaveTypes: string[] = ['Casual', 'Sick', 'Earned', 'Maternity', 'Paternity'];
-  leaveTypes = [
-    { key: 1, value: "Casual" },
-    { key: 2, value: "Sick" },
-    { key: 3, value: "Earned" },
-    { key: 4, value: "Maternity" },
-    { key: 5, value: "Paternity" }
-  ];
+  leaveTypes: string[] = ['Casual', 'Sick', 'Earned', 'Maternity', 'Paternity'];
   advanceSalaryForm!: FormGroup;  // apply advance salary
-  tenures = [
-    {key:1, value:'3Month'},
-    {key:2, value:'6Month'}
-  ];
+  tenures: string[] = ['3 Month', '6 Month'];
   installmentAmount: number = 0;
   years: number[] = [];
   selectedMonth: string = '';
@@ -40,8 +26,7 @@ export class EmployeeInDetailComponent {
   canDownload: boolean = false;
   userName: string = "John Doe";
   billAmount: number = 0;
-  employeeId!: number;
-  companyId!: number;
+  EmployeeID!: number;
   currentDateTime: Date = new Date();
   searchValue: any = "";
   Companydata: any;
@@ -52,7 +37,6 @@ export class EmployeeInDetailComponent {
   isAdvanceSalary: any = false;
   employee_code: any;
   Employee_Data: any;
-  
 
   constructor(private route: ActivatedRoute, private fb: FormBuilder, private router: Router, private toastr: ToastrService, private service: HrmserviceService,) {
     // Generate last 20 years dynamically
@@ -63,26 +47,16 @@ export class EmployeeInDetailComponent {
     setInterval(() => {
       this.currentDateTime = new Date();
     }, 1000);
-  }
 
-  role: string = '';
-
-  closeAllModals(): void {
-    const modals = document.querySelectorAll('.modal.show');
-    modals.forEach((modalElement: any) => {
-      const modalInstance = bootstrap.Modal.getInstance(modalElement);
-      if (modalInstance) {
-        modalInstance.hide();
-      }
-    });
   }
 
   ngOnInit(): void {
+
     this.route.queryParams.subscribe(params => {
       this.employee_code = params['id'];
       console.log('Received employee code:', params['id']);
     });
-    this.role = this.service.getRole();
+
 
     this.editForm = this.fb.group({
       email: ['', [Validators.required, Validators.email, Validators.pattern(/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/)]],
@@ -107,8 +81,9 @@ export class EmployeeInDetailComponent {
 
     this.advanceSalaryForm.valueChanges.subscribe(() => this.calculateInstallment());
     this.fetchEmployee(this.employee_code);
-    this.fetchAttendance();
+
   }
+
 
   leaveStatus = {
     accept: 1,
@@ -147,15 +122,9 @@ export class EmployeeInDetailComponent {
   }
 
   fetchEmployee(id: any) {
+    // alert(id);
     this.service.post(`single/employee`, { "employe_id": id }).subscribe((res: any) => {
       this.Employee_Data = res.data;
-      this.employeeId = this.Employee_Data.employee.employe_id
-      this.companyId = this.Employee_Data.employee.company_id
-    });
-  }
-
-  fetchAttendance(){
-    this.service.post(`fetch/attendance`, {}).subscribe((res: any) => {
     });
   }
 
@@ -165,7 +134,7 @@ export class EmployeeInDetailComponent {
     return isWhitespace ? { whitespace: true } : null;
   }
 
-  // for installment calculation :
+  // for installment calculation : 
   calculateInstallment() {
     const amount = this.advanceSalaryForm.get('amount')?.value;
     const tenureString = this.advanceSalaryForm.get('tenure')?.value;
@@ -230,8 +199,7 @@ export class EmployeeInDetailComponent {
   editEmployee() {
     this.isSubmitted = true;
     let current_data = {
-      ...this.Employee_Data.employee,
-      // "employe_id": this.Employee_Data.employe_id,
+      "employe_id": this.Employee_Data.employe_id,
       "emp_email": this.editForm.value.email,
       "emp_contact": this.editForm.value.contact,
       "status": this.editForm.value.status,
@@ -263,79 +231,46 @@ export class EmployeeInDetailComponent {
     }
   }
 
-  // getleaveTypes() {
-  //   this.service.post(`fetch/companyleave`,{"company_id":this.companyId}).subscribe((res: any) => {
-  //     console.log(res)
-  //      if (res.status === 'success') {
-  //       // leaveTypes
-          
-  //       };
-  //   })
-  // }
-
-  //apply leave
-  applyLeaveRequest() {
+  //apply leave 
+  addLeaveRequest() {
     this.isLeaveSubmitted = true;
     if (this.leaveForm.valid) {
-      const leaveData = {
-        employe_id: this.employeeId,
-        company_id: this.companyId,
-        leave_id: this.leaveForm.value.leaveType,
-        start_date: this.leaveForm.value.fromDate,
-        end_date: this.leaveForm.value.toDate,
-        leave_reason: this.leaveForm.value.reason
-      };
-      this.service.post(`apply/leave`,leaveData).subscribe((res: any) => {
-       if (res.status === 'success') {
-        this.toastr.success('Leave Added !!!');
-        this.leaveForm.reset();
-        this.closeAllModals();
-       }
-       else {
-        console.log(res.error)
-       }
-      });
+      const leaveData = this.leaveForm.value;
+      console.log('Leave Request Submitted:', leaveData);
+      this.toastr.success('Leave Added !!!');
+      this.router.navigate(['/authPanal/EmployeeInDetail']);
+      this.leaveForm.reset();
+
+      //  API here
+    }
+    else {
+      // alert("Check Again !!!")
+      const leaveData = this.leaveForm.value;
+      // this.leaveForm.markAllAsTouched();
+      this.toastr.error('Invalid Credentials !');
+      // console.log('Leave Request Submitted:', leaveData);
     }
   }
 
-  // advance salary request
-  applyAdvanceSalaryRequest() {
+  // advance salary request 
+  addAdvanceSalary() {
     this.isAdvanceSalary = true;
     if (this.advanceSalaryForm.valid) {
-      const advanceSalaryData = {
-        employee_id: this.employeeId,
-        advance_amount: this.advanceSalaryForm.value.amount,
-        tenure: this.advanceSalaryForm.value.tenure,
-        emi: this.installmentAmount,  
-        remarks: this.advanceSalaryForm.value.reason,
+      const formData = {
+        ...this.advanceSalaryForm.value,
+        installmentAmount: this.installmentAmount
       };
-      console.log('advanceSalaryData', advanceSalaryData);
-      this.service.post(`apply/advancesaraly`,advanceSalaryData).subscribe((res: any) => {
-       if (res.status === 'success') {
-        this.toastr.success(' Request Added !!!');
-        this.advanceSalaryForm.reset();
-        this.closeAllModals();
-       }
-       else {
-        console.log(res.error)
-       }
-      });
+      console.log('Advance Salary Request Submitted:', formData);
+      this.toastr.success(' Request Added !!!');
+      this.router.navigate(['/authPanal/EmployeeInDetail']);
+      this.advanceSalaryForm.reset();
+      //  API here
     }
-    // if (this.advanceSalaryForm.valid) {
-    //   const formData = {
-    //     ...this.advanceSalaryForm.value,
-    //     installmentAmount: this.installmentAmount
-    //   };
-    //   console.log('Advance Salary Request Submitted:', formData);
-    //   this.router.navigate(['/authPanal/EmployeeInDetail']);
-    //   //  API here
-    // }
-    // else {
-    //   // this.advanceSalaryForm.markAllAsTouched();
-    //   this.toastr.error(' Invalid credentials !');
-    // }
+    else {
+      // this.advanceSalaryForm.markAllAsTouched();
+      this.toastr.error(' Invalid credentials !');
+    }
 
   }
-
 
 }

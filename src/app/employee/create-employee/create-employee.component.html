@@ -201,8 +201,9 @@
                                 <div class="col-lg-4">
                                     <label class="fw-bold">Select Company </label>
                                     <br>
-                                    <select class="form-select" (change)="onCompanyChange($event)">
-                                        <option value="" selected>Select Company</option>
+                                    <select class="form-select" formControlName="company" (click)="onCompanyChange($event)"
+                                        [ngClass]="{'input-error': nextCheck && multiStepForm.get('company')?.invalid}">
+                                        <option value="" selected disabled>Select Company</option>
                                         <option *ngFor="let item of CompanyNames" [value]="item.company_id">
                                             {{ item.company_name }}
                                         </option>
@@ -212,7 +213,7 @@
                                     <label>Department <span class="text-danger">*</span></label>
                                     <select id="roleSelect" formControlName="department" class="form-select"
                                         [ngClass]="{'input-error': nextCheck && multiStepForm.get('department')?.invalid}">
-                                        <option value="" selected>Select Department</option>
+                                        <option value="" selected disabled>Select Department</option>
 
                                         <option *ngFor="let dept of departmentNames" [value]="dept.department_id">
                                             {{ dept.department_name }}
@@ -225,7 +226,7 @@
                                     <label>Designation <span class="text-danger">*</span></label>
                                     <select id="roleSelect" formControlName="designation" class="form-select"
                                         [ngClass]="{'input-error': nextCheck && multiStepForm.get('designation')?.invalid}">
-                                        <option value="" selected>Select Designation</option>
+                                        <option value="" selected disabled>Select Designation</option>
                                         <option *ngFor="let desig of designationNames" [value]="desig.designation_id">
                                             {{ desig.designation_name }}
                                         </option>
@@ -365,110 +366,71 @@
 
 
                     <!-- Step 5 : Salary Structure -->
-                    <div *ngIf="currentStep === 5" [formGroup]="salaryStructureForm.get('salaryComponents')">
+                    <div *ngIf="currentStep === 5">
+                        <!-- for checking purpose -->
+                        <!-- <div>{{ statutoryInfo | json }}</div> -->
 
                         <div class="border" style="border-radius: 10px; padding: 30px;">
-                            <app-createuser [ctc]="multiStepForm.get('ctc')?.value" [statutoryInfo]="statutoryInfo"
-                                (ctcChange)="handleCTCFromChild($event)" (salaryAmountChange)="handleSalary($event)">
-                            </app-createuser>
+                            <div class="main-content p-3">
+                                <table class="table table-bordered"
+                                    style="border: 1px solid #dadada; border-collapse: collapse;">
+                                    <thead>
+                                        <tr>
+                                            <th>Name Of the Component</th>
+                                            <th>Values</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>Basic</td>
+                                            <td>
+                                                <div class="w-100 d-flex align-items-center gap-2 fw-bold">
+                                                    <input type="number" placeholder="ctc" formControlName="ctc"
+                                                        (ngModelChange)="calculateSalaryAmount()"
+                                                        class="form-control w-25"> /
+                                                    <span class="ml-3">12</span>
+                                                </div>
+                                            </td>
+                                        </tr>
+
+                                        <tr *ngFor="let field of selectedStatutoryOptions">
+                                            <td>{{field.label}}</td>
+                                            <td>
+                                                {{field.value}}
+                                            </td>
+                                        </tr>
 
 
+                                        <tr class="amountPayable">
+                                            <td>
+                                                <h5>Monthly Payable Amount</h5>
+                                            </td>
+                                            <td>
+                                                <div *ngIf="salaryAmount>0">
+                                                    <h5 class="fw-bold me-5">Rs. {{ salaryAmount }}</h5>
+                                                </div>
+                                                <div *ngIf="salaryAmount==0">
+                                                    <h5 class="fw-bold me-5">Rs. {{ salaryAmount }}</h5>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
 
                         <div class="d-flex justify-content-center gap-2 mt-4">
-                            <div class="">
+                            <div>
                                 <button type="button" class="btn previous-btn me-2"
                                     (click)="previousStep()">Previous</button>
-
                             </div>
-                            <div class="">
-                                <!-- <button type="button" class="btn btn-primary  next-btn rounded-2 " (click)="nextStep()">
-                                    Next </button> -->
-                                <button type="submit" class="btn next-btn">
-                                    Finish</button>
+                            <div>
+                                <button type="submit" class="btn next-btn">Finish</button>
                             </div>
                         </div>
-
-                        <!-- <button type="button" class="btn btn-secondary me-2" (click)="previousStep()"><i
-                                class="bi bi-caret-right-fill "></i>Previous</button>
-                        <button type="button" class="btn btn-primary rounded-2 " (click)="nextStep()"
-                            [disabled]="!isStepValid(1)"> Next <i class="bi bi-caret-right-fill"></i></button> -->
-
                     </div>
 
-                    <!-- Step 6 : Leave Structure -->
-                    <!-- <div *ngIf="currentStep === 6">
 
-
-                        <div class="border" style="border-radius: 10px; padding: 30px;">
-                            <table class="table table-bordered "
-                                style="border: 1px solid #dadada; border-collapse: collapse;">
-                                <thead class="">
-                                    <tr>
-                                        <th>Name </th>
-                                        <th>Start Date</th>
-                                        <th>End Date</th>
-                                        <th>Allowed Leave</th>
-
-                                    </tr>
-                                </thead>
-                                <tbody class="leavesData">
-                                    <tr>
-                                        <td>Sick Leaves</td>
-                                        <td>
-                                            <div class="w-100 d-flex align-items-center gap-2">
-                                                <input type="date" name="" id="" class="form-control"
-                                                    formControlName="sick_start_date">
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <div class="w-100 d-flex align-items-center gap-2">
-                                                <input type="date" name="" id="" class="form-control"
-                                                    formControlName="sick_end_date">
-
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <input type="number" name="" id="" class="form-control"
-                                                placeholder="Enter Allowd Leaves">
-                                        </td>
-                                    </tr>
-
-                                    <tr>
-                                        <td>Casual Leaves</td>
-                                        <td>
-                                            <div class="w-100 d-flex align-items-center gap-2">
-                                                <input type="date" name="" id="" class="form-control"
-                                                    formControlName="casual_start_date">
-
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <div class="w-100 d-flex align-items-center gap-2">
-                                                <input type="date" name="" id="" class="form-control"
-                                                    formControlName="casual_end_date">
-
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <input type="number" name="" id="" class="form-control"
-                                                placeholder="Enter Casual Leaves">
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-
-
-                        <div class="d-flex justify-content-center mt-4">
-                            <button type="button" class="btn previous-btn me-2" (click)="previousStep()">
-                                Previous</button>
-
-                            <button type="submit" class="btn next-btn">
-                                Finish</button>
-
-                        </div>
-                    </div> -->
 
 
                 </form>
