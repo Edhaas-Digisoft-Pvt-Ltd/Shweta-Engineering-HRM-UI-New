@@ -50,6 +50,7 @@ import { CreateEmployeeComponent } from './employee/create-employee/create-emplo
 
 // FullCalendarModule.registerPlugins([dayGridPlugin]);
 
+//onkar
 @NgModule({
   declarations: [
     AppComponent,
@@ -87,8 +88,10 @@ import { CreateEmployeeComponent } from './employee/create-employee/create-emplo
     ComMangeAndPoliciesComponent,
     LeaveSetupComponent,
     CompanyDashboardComponent,
+
     EditLeaveRequestComponent,
     ApprovedSalaryReportComponent,
+
   ],
   imports: [
     BrowserModule,
