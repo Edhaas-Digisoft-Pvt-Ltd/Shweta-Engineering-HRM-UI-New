@@ -4,6 +4,7 @@ import { Chart, ChartConfiguration, ChartData, ChartOptions, ChartType } from 'c
 import { Component, OnInit } from '@angular/core';
 import DataLabelsPlugin from 'chartjs-plugin-datalabels';
 import { Router } from '@angular/router';
+import { HrmserviceService } from '../hrmservice.service';
 
 // For attendance chart
 Chart.register(DataLabelsPlugin);
@@ -17,7 +18,10 @@ export class DashboardComponent {
 
   financialYears: string[] = [];
   selectedYear: string = '';
-  selectedCompany: string = 'Company A'; // default selection
+  selectedCompany: string = ''; 
+  CompanyNames: any = [] ;
+  selectedCompanyId: any = 2;
+
   leaveCards = [
     {
       title: 'Total Leave Request',
@@ -50,7 +54,7 @@ export class DashboardComponent {
   gridApiActive: any;
 
 
-  constructor(private router: Router) {
+  constructor(private router: Router, private service: HrmserviceService) {
     this.loadChartData();
   }
 
@@ -63,11 +67,25 @@ export class DashboardComponent {
     }
 
     this.selectedYear = this.financialYears[0]; // default selected
+    this.getCompanyNames();
   }
 
 
-  selectCompany(companyName: string) {
-    this.selectedCompany = companyName;
+ selectCompany(company: any) {
+  this.selectedCompany = company.company_name;
+  this.selectedCompanyId = company.company_id;
+}
+
+  getCompanyNames() {
+  this.service.post('fetch/company', {}).subscribe((res: any) => {
+    if (res.status === 'success') {
+      this.CompanyNames = res.data;
+      const defaultCompany = this.CompanyNames.find((comp: any) => comp.company_id === this.selectedCompanyId);
+        if (defaultCompany) {
+          this.selectCompany(defaultCompany);
+        }
+    }
+  });
   }
 
   loadChartData() {
@@ -106,35 +124,6 @@ export class DashboardComponent {
     flex: 1,
     resizable: true,
   };
-
-  dashboardStats = [
-    {
-      icon: ' bi-buildings',
-      title: 'Company A',
-      value: 1500
-    },
-    {
-      icon: ' bi-buildings',
-      title: 'Company B',
-      value: 4200
-    },
-    {
-      icon: ' bi-buildings',
-      title: 'Company C',
-      value: 4200
-    },
-    {
-      icon: ' bi-buildings',
-      title: 'Company D',
-      value: 4200
-    },
-    {
-      icon: ' bi-buildings',
-      title: 'Company E',
-      value: 4200
-    },
-
-  ];
 
   statusButtonRenderer(params: any) {
     const status = params.value;

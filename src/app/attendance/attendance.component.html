@@ -53,13 +53,13 @@
                                 <div class="col col-lg-5   attendanceButtons">
 
                                     <button class="btn btn-light border-secondary" style="border-radius: 10px;"
-                                        (click)="filterByStatus('Present')">Present</button>
+                                        (click)="filterByStatus('P')">Present</button>
                                     <button class="btn btn-light border-secondary" style="border-radius: 10px;"
-                                        (click)="filterByStatus('Weekoff')">Weekoff</button>
+                                        (click)="filterByStatus('W')">Weekoff</button>
                                     <!-- <button class="btn btn-light border-secondary" style="border-radius: 10px;" (click)="filterByStatus('Holiday')">Holiday</button>
                                     <button class="btn btn-light border-secondary" style="border-radius: 10px;" (click)="filterByStatus('OverTime')">OverTime</button> -->
                                     <button class="btn btn-light border-secondary" style="border-radius: 10px;"
-                                        (click)="filterByStatus('Absent')">Absent</button>
+                                        (click)="filterByStatus('A')">Absent</button>
                                     <!-- <button class="btn btn-light border-secondary" style="border-radius: 10px;"
                                     >CurrentMonth</button> -->
                                     <button class="btn btn-light border-secondary ms-2"
@@ -75,10 +75,12 @@
                                             Download Template
                                         </button>
                                         <ul class="dropdown-menu">
-                                            <li><a class="dropdown-item" (click)="downloadTemplate()"> Daliy Attendance
-                                                    </a></li>
-                                            <li><a class="dropdown-item" (click)="MonthlyAttendanceTemplate()"> Monthly Attendance
+                                            <!-- <li><a class="dropdown-item" (click)="downloadTemplate()"> Daliy Attendance
+                                                    </a></li> -->
+                                            <li><a class="dropdown-item" (click)="downloadTemplate()"> Monthly Attendance
                                             </a></li>
+                                            <!-- <li><a class="dropdown-item" (click)="MonthlyAttendanceTemplate()"> Monthly Attendance
+                                            </a></li> -->
                                         </ul>
                                     </div>
 
@@ -102,6 +104,7 @@
                                             <ag-grid-angular *ngIf="rowData.length > 0" #agGrid class="ag-theme-alpine"
                                                 style="width: 100%; height: 60vh" [rowData]="rowData"
                                                 [columnDefs]="columnDefs" [defaultColDef]="defaultColDef"
+                                                [gridOptions]="gridOptions" [pagination]="true"
                                                 [rowSelection]="'multiple'" (gridReady)="onGridReady($event)">
                                             </ag-grid-angular>
                                         </div>

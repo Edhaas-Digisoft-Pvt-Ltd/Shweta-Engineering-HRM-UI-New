@@ -1,30 +1,22 @@
-import { Component, ChangeDetectorRef } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { ChangeDetectorRef, Component } from '@angular/core';
+import { FormGroup, FormBuilder, Validators } from '@angular/forms';
 import { ToastrService } from 'ngx-toastr';
 import { HrmserviceService } from 'src/app/hrmservice.service';
 
 @Component({
-  selector: 'app-createemployee',
-  templateUrl: './createemployee.component.html',
-  styleUrls: ['./createemployee.component.css'],
+  selector: 'app-create-employee',
+  templateUrl: './create-employee.component.html',
+  styleUrls: ['./create-employee.component.css']
 })
-export class CreateemployeeComponent {
+
+export class CreateEmployeeComponent {
 
   CompanyNames: any = [];
   selectedCompanyId: any = 1;
-
   multiStepForm: FormGroup;
-
-  // personalInfo: FormGroup;
-  // professionalInfo : FormGroup;
-  // statutoryInfo : FormGroup;
-  // salaryStructure : FormGroup;
-  // leaveRule : FormGroup ;
-
   currentStep: number = 1;
-  // Start from Step 1
 
-  // Salary calculation variables
+
   ctc: number = 0;
   value: number = 0;
   amount: number = 0;
@@ -35,19 +27,23 @@ export class CreateemployeeComponent {
   eesi: number = 0;
   ruleAmount: number = 0;
   salaryAmount: number = 0;
-  departmentNames : any;
-  designationNames : any;
+  departmentNames: any;
+  designationNames: any;
   nextCheck: any = false;
   salaryComponents: { [key: string]: number } = {};
   salaryStructureForm: any;
+  statutoryInfo: string[] = [];
+  selectedStatutoryOptions: any[] = [];
   readonly NoWhitespaceRegExp: RegExp = new RegExp('\\S');
+  salaryAmountChange: any;
+  ctcChange: any;
+  lwf: number = 0;
 
   constructor(
     private fb: FormBuilder,
     private cdr: ChangeDetectorRef,
     private toastr: ToastrService, private service: HrmserviceService,
-  ) 
-  {
+  ) {
     this.multiStepForm = this.fb.group({
       title: ['', Validators.required],
       fname: [
@@ -81,6 +77,7 @@ export class CreateemployeeComponent {
       ],
       // employee_code: ['', Validators.required,],
       gender: ['', Validators.required],
+      company:['', Validators.required],
       department: ['', Validators.required],
       designation: ['', Validators.required],
       // ctc: ['', Validators.required],
@@ -118,12 +115,13 @@ export class CreateemployeeComponent {
   }
 
   ngOnInit() {
+
     this.multiStepForm.get('ctc')?.valueChanges.subscribe((value) => {
       this.ctc = value;
-      this.calculateAmount();
+      // this.calculateAmount();
     });
     this.getCompanyNames();
-   
+
   }
 
   removeSpaces(): void {
@@ -132,7 +130,8 @@ export class CreateemployeeComponent {
     this.multiStepForm.get('ifsc')?.setValue(cleanedValue, { emitEvent: false });
   }
 
-  statutoryInfo: string[] = [];
+
+
   handleSalary(salary: number): void {
     console.log('Received salary from child:', salary);
     this.multiStepForm.get('salary')?.setValue(salary);
@@ -150,34 +149,47 @@ export class CreateemployeeComponent {
   }
 
   checkboxOptions = [
-    { id: 'pf', label: 'Enable PF Employee', formControl: 'pf' },
-    { id: 'eps', label: 'Opt for EPS entitled', formControl: 'eps' },
-    { id: 'esic', label: 'Enable ESIC for employee', formControl: 'esic' },
-    { id: 'pt', label: 'Enable PT for employee', formControl: 'pt' },
-    { id: 'lwf', label: 'Enable LWF for employee', formControl: 'lwf' },
-    { id: 'nps', label: 'National Pension Scheme', formControl: 'nps' },
+    { id: 'pf', label: 'Enable PF Employee', formControl: 'pf', value: 400 },
+    { id: 'eps', label: 'Opt for EPS entitled', formControl: 'eps', value: 200 },
+    { id: 'esic', label: 'Enable ESIC for employee', formControl: 'esic', value: 200 },
+    { id: 'pt', label: 'Enable PT for employee', formControl: 'pt', value: 200 },
+    { id: 'lwf', label: 'Enable LWF for employee', formControl: 'lwf', value: 200 },
+    { id: 'nps', label: 'National Pension Scheme', formControl: 'nps', value: 200 },
   ];
 
-  onCheckboxChange(event: Event): void {
-    const checkbox = event.target as HTMLInputElement;
-    const value = checkbox.value;
-    const isChecked = checkbox.checked;
+  // onCheckboxChange(event: any): void {
+  //   const value = event.target.value;
+  //   if (event.target.checked) {
+  //     this.statutoryInfo.push(value);
+  //     console.log("statutoryinfo :", value)
+  //   } else {
+  //     this.statutoryInfo = this.statutoryInfo.filter(item => item !== value);
+  //   }
+  // }
 
-    if (isChecked && !this.statutoryInfo.includes(value)) {
-      this.statutoryInfo.push(value);
-    } else if (!isChecked) {
-      this.statutoryInfo = this.statutoryInfo.filter((item) => item !== value);
+  onCheckboxChange(event: any): void {
+    const label = event.target.value;
+    const option = this.checkboxOptions.find(opt => opt.label === label);
+
+    if (event.target.checked) {
+      if (!this.statutoryInfo.includes(label)) {
+        this.statutoryInfo.push(label);
+      }
+      if (option && !this.selectedStatutoryOptions.some(o => o.label === label)) {
+        this.selectedStatutoryOptions.push(option);
+      }
+    } else {
+      this.statutoryInfo = this.statutoryInfo.filter(item => item !== label);
+      this.selectedStatutoryOptions = this.selectedStatutoryOptions.filter(item => item.label !== label);
     }
-
-    console.log('Selected statutory info:', this.statutoryInfo);
   }
-
 
   getCompanyNames() {
     this.service.post('fetch/company', {}).subscribe((res: any) => {
       if (res.status == "success") {
         // this.optionsArray = res.map((company: any) => company.CompanyName); // <-- only CompanyName
         this.CompanyNames = res.data;
+        console.log(this.CompanyNames.company_id)
       }
     },
       (error) => {
@@ -191,49 +203,53 @@ export class CreateemployeeComponent {
       (res: any) => {
         if (res.status === 'success') {
           this.departmentNames = res.data;
-        } 
+          console.log(this.departmentNames.department_id)
+        }
       },
       (error) => {
         console.error('Error fetching department:', error);
-  
+
         // ✅ Check for 400 status code
         if (error.status == 400) {
           this.toastr.error('Department Not Available !');
-          this.departmentNames = []; 
-        } 
+          this.departmentNames = [];
+        }
       }
     );
   }
-  
+
 
   getDesignationNames() {
     this.service.post('fetch/designation', { company_id: this.selectedCompanyId }).subscribe(
       (res: any) => {
         if (res.status === 'success') {
           this.designationNames = res.data;
-        } 
+          console.log(this.designationNames.designation_id)
+
+        }
       },
       (error) => {
         console.error('Error fetching designation:', error);
-  
+
         // ✅ Handle specific HTTP status codes
         if (error.status === 400) {
           this.toastr.error('Designation Not Available !');
-          this.designationNames  =[];
-        } 
+          this.designationNames = [];
+        }
       }
     );
   }
-  
+
   onCompanyChange(event: Event): void {
     this.selectedCompanyId = (event.target as HTMLSelectElement).value;
     console.log('Selected Company ID:', this.selectedCompanyId);
+
     this.getDepartmentNames();
     this.getDesignationNames();
   }
-  
+
   nextStep() {
-    
+
     // if (this.currentStep === 5) {
     //   this.currentStep++;
     // } else if (!this.isStepValid(this.currentStep)) {
@@ -249,6 +265,7 @@ export class CreateemployeeComponent {
     //   }
     // }
 
+   
     if (this.currentStep < 6) {
       this.currentStep++;
     }
@@ -259,15 +276,7 @@ export class CreateemployeeComponent {
       this.currentStep--;
     }
   }
-  checkboxStates = {
-    pf: false,
-    eps: false,
-    esic: false,
-    pt: false,
-    lwf: false,
-    nps: false,
-  };
-
+  
   isStepValid(step: number): boolean {
     switch (step) {
       case 1:
@@ -311,35 +320,11 @@ export class CreateemployeeComponent {
   isSalaryVisible = false;
   showSalarySummary2: boolean = false;
 
-  showSalarySummary() {
-    this.calculateAmount(); // call your calculation logic
-    this.isSalaryVisible = true;
-  }
-
-  // salaryComponents: { [key: string]: number } = {};
-  // ✅ Fix: Salary calculation now updates the UI properly
-
-  calculateAmount() {
-    console.log('All deduction values:', this.salaryComponents);
-
-    // Example: Accessing specific value
-    console.log('PF:', this.salaryComponents['PF']);
-
-    // Total deduction
-    let totalDeduction = 0;
-    for (let item of this.statutoryInfo) {
-      totalDeduction += +this.salaryComponents[item] || 0;
-    }
-
-    // Calculate salary
-    const basicSalary = (this.ctc || 0) / 12;
-    const netSalary = basicSalary - totalDeduction;
-  }
-
-  get f() {
-    return this.multiStepForm.get('salaryStructure') as FormGroup;
-  }
-
+  // showSalarySummary() {
+  //   this.calculateAmount(); // call your calculation logic
+  //   this.isSalaryVisible = true;
+  // }
+  
   showStatutoryValues(): void {
     const values = this.multiStepForm.getRawValue(); // or this.form.value
     let message = 'Statutory Values:\n';
@@ -354,29 +339,32 @@ export class CreateemployeeComponent {
   onSubmit() {
     if (this.multiStepForm.valid) {
 
+
+      let company_id_value: any = this.selectedCompanyId;
+
       let current_data: any = {
 
-        "company_id": 2,
+        "company_id": this.selectedCompanyId,
         "emp_title": this.multiStepForm.value.title,
-        "emp_name": this.multiStepForm.value.fname,
+        "emp_name": this.multiStepForm.value.fname + this.multiStepForm.value.lname,
         "emp_email": this.multiStepForm.value.email,
         "emp_gender": this.multiStepForm.value.gender,
-        "department_id": 1,
-        "designation_id": 1,
+        "department_id":this.multiStepForm.value.department,
+        "designation_id": this.multiStepForm.value.designation,
         "CTC": this.multiStepForm.value.ctc,
-        "statutory_list": "xyz",
+        "statutory_list": JSON.stringify(this.statutoryInfo),
         "bank_name": this.multiStepForm.value.bankName,
         "account_num": this.multiStepForm.value.accountNumber,
         "ifsc_code": this.multiStepForm.value.ifsc,
         "doj": this.multiStepForm.value.join_date,
         "emp_contact": this.multiStepForm.value.contact,
-        "status": "active",
+        "status": "Active",
         "emp_address": this.multiStepForm.value.address,
-        "department_name": this.multiStepForm.value.department,
-        "designation_name": this.multiStepForm.value.designation
+        // "department_name": this.multiStepForm.value.department,
+        // "designation_name": this.multiStepForm.value.designation
       }
 
-      console.log('Form Submitted:', this.multiStepForm.value );
+      console.log('Form Submitted:', this.multiStepForm.value);
 
       this.service.post("create/employee", current_data).subscribe((res: any) => {
         if (res.status === 'success') {
@@ -385,7 +373,7 @@ export class CreateemployeeComponent {
           this.toastr.error(res.message || 'Submission failed!');
         }
       });
-      
+
 
       this.multiStepForm.reset();
       this.currentStep = 1;
@@ -397,5 +385,35 @@ export class CreateemployeeComponent {
       this.multiStepForm.markAllAsTouched();
       console.log(this.multiStepForm.value);
     }
+  }
+
+
+
+  calculateSalaryAmount() {
+    const monthlyAmount = this.ctc / 12;
+
+    // Sum of all selected statutory field values from the form
+    let totalDeduction = 0;
+    this.selectedStatutoryOptions.forEach(field => {
+      const control = this.multiStepForm.get(field.formControl);
+      const value = control?.value || 0;
+      totalDeduction += Number(value);
+    });
+
+    const total = this.logTotalDeductions();
+
+    
+    this.salaryAmount = monthlyAmount - total;
+
+    console.log('Monthly Amount:', this.amount);
+    console.log('Deductions:', total);
+    console.log('Final Salary:', this.salaryAmount);
+  }
+
+  logTotalDeductions() {
+    const total = this.selectedStatutoryOptions.reduce((sum, field) => {
+      return sum + Number(field.value || 0); // treat undefined/null as 0
+    }, 0);
+    return total;
   }
 }

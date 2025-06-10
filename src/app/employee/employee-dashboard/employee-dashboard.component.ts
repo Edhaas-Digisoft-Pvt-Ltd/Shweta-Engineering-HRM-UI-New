@@ -1,20 +1,17 @@
 import { Component, ElementRef, ViewChild } from '@angular/core';
-import { ChartData, ChartOptions, ChartType } from 'chart.js';
-import { ColDef } from 'ag-grid-community';
-import { AbstractControl, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { FormGroup, FormBuilder, Validators, AbstractControl } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
+import { ChartData, ChartOptions } from 'chart.js';
 import { ToastrService } from 'ngx-toastr';
 import { HrmserviceService } from 'src/app/hrmservice.service';
 
-
 @Component({
-  selector: 'app-employee-in-detail',
-  templateUrl: './employee-in-detail.component.html',
-  styleUrls: ['./employee-in-detail.component.css']
+  selector: 'app-employee-dashboard',
+  templateUrl: './employee-dashboard.component.html',
+  styleUrls: ['./employee-dashboard.component.css']
 })
-export class EmployeeInDetailComponent {
-
-  @ViewChild('advanceSalaryModal') advanceSalaryModalRef!: ElementRef;
+export class EmployeeDashboardComponent {
+ @ViewChild('advanceSalaryModal') advanceSalaryModalRef!: ElementRef;
   @ViewChild('leaveRequestModal') leaveRequestModalRef!: ElementRef;
 
   editForm!: FormGroup;
@@ -40,7 +37,6 @@ export class EmployeeInDetailComponent {
   isAdvanceSalary: any = false;
   employee_code: any;
   Employee_Data: any;
-  
 
   constructor(private route: ActivatedRoute, private fb: FormBuilder, private router: Router, private toastr: ToastrService, private service: HrmserviceService,) {
     // Generate last 20 years dynamically
@@ -52,12 +48,7 @@ export class EmployeeInDetailComponent {
       this.currentDateTime = new Date();
     }, 1000);
 
-
-
   }
-
-  role: string = '';
-
 
   ngOnInit(): void {
 
@@ -65,7 +56,6 @@ export class EmployeeInDetailComponent {
       this.employee_code = params['id'];
       console.log('Received employee code:', params['id']);
     });
-    this.role = this.service.getRole();
 
 
     this.editForm = this.fb.group({
@@ -91,12 +81,8 @@ export class EmployeeInDetailComponent {
 
     this.advanceSalaryForm.valueChanges.subscribe(() => this.calculateInstallment());
     this.fetchEmployee(this.employee_code);
-    this.fetchAttendance();
-
 
   }
-
-
 
 
   leaveStatus = {
@@ -142,20 +128,13 @@ export class EmployeeInDetailComponent {
     });
   }
 
-  fetchAttendance(){
-    console.log('called')
-    this.service.post(`fetch/attendance`, {}).subscribe((res: any) => {
-      console.log('hi',res);
-    });
-  }
-
   // No spaces only, no leading/trailing spaces
   NoWhitespaceValidator(control: AbstractControl) {
     const isWhitespace = (control.value || '').trim().length === 0;
     return isWhitespace ? { whitespace: true } : null;
   }
 
-  // for installment calculation :
+  // for installment calculation : 
   calculateInstallment() {
     const amount = this.advanceSalaryForm.get('amount')?.value;
     const tenureString = this.advanceSalaryForm.get('tenure')?.value;
@@ -252,7 +231,7 @@ export class EmployeeInDetailComponent {
     }
   }
 
-  //apply leave
+  //apply leave 
   addLeaveRequest() {
     this.isLeaveSubmitted = true;
     if (this.leaveForm.valid) {
@@ -273,7 +252,7 @@ export class EmployeeInDetailComponent {
     }
   }
 
-  // advance salary request
+  // advance salary request 
   addAdvanceSalary() {
     this.isAdvanceSalary = true;
     if (this.advanceSalaryForm.valid) {
@@ -293,6 +272,5 @@ export class EmployeeInDetailComponent {
     }
 
   }
-
 
 }
