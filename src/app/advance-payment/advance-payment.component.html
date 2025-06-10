@@ -13,7 +13,9 @@
       <li class="nav-item" (click)="selectTab('tab2')">
         <a class="nav-link fw-bold" [ngClass]="{'active': activeTab === 'tab2'}">Approved Salary Request</a>
       </li>
-
+      <li class="nav-item" (click)="selectTab('tab3')">
+        <a class="nav-link fw-bold" [ngClass]="{'active': activeTab === 'tab3'}">Approved Salary Report</a>
+      </li>
     </ul>
 
     <div class="tab-content mt-3">
@@ -104,12 +106,17 @@
 
         </div>
       </div>
+
       <div *ngIf="activeTab === 'tab2'">
         <div class="container ">
           <app-approved-advance-payment></app-approved-advance-payment>
         </div>
+      </div>
 
-
+      <div *ngIf="activeTab === 'tab3'">
+        <div class="container ">
+          <app-approved-salary-report></app-approved-salary-report>
+        </div>
       </div>
     </div>
   </div>
