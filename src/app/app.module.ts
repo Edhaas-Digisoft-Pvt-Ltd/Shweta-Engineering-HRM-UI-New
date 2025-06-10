@@ -51,6 +51,7 @@ import { EditLeaveRequestComponent } from './leave/leave-request/edit-leave-requ
 
 // FullCalendarModule.registerPlugins([dayGridPlugin]);
 
+//onkar
 @NgModule({
   declarations: [
     AppComponent,
@@ -89,8 +90,8 @@ import { EditLeaveRequestComponent } from './leave/leave-request/edit-leave-requ
     Demo2Component,
     ComMangeAndPoliciesComponent,
     LeaveSetupComponent,
-     CompanyDashboardComponent,
-     EditLeaveRequestComponent
+    CompanyDashboardComponent,
+    EditLeaveRequestComponent
   ],
   imports: [
     BrowserModule,
