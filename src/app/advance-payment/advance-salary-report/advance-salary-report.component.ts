@@ -4,11 +4,11 @@ import { ColDef } from 'ag-grid-community';
 import { HrmserviceService } from 'src/app/hrmservice.service';
 
 @Component({
-  selector: 'app-approved-salary-report',
-  templateUrl: './approved-salary-report.component.html',
-  styleUrls: ['./approved-salary-report.component.css']
+  selector: 'app-advance-salary-report',
+  templateUrl: './advance-salary-report.component.html',
+  styleUrls: ['./advance-salary-report.component.css']
 })
-export class ApprovedSalaryReportComponent {
+export class AdvanceSalaryReportComponent {
   searchValue: string = '';
   selectedYear = new Date().getFullYear();
   selectedMonth = new Date().getMonth() + 1;

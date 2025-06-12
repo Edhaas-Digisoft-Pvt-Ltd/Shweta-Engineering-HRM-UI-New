@@ -44,7 +44,7 @@ import { LeaveSetupComponent } from './compnay-setup/leave-setup/leave-setup.com
 import { CompanyDashboardComponent } from './compnay-setup/company-list/company-dashboard/company-dashboard.component';
 import { EditLeaveRequestComponent } from './leave/leave-request/edit-leave-request/edit-leave-request.component';
 
-import { ApprovedSalaryReportComponent } from './advance-payment/approved-salary-report/approved-salary-report.component';
+import { AdvanceSalaryReportComponent } from './advance-payment/advance-salary-report/advance-salary-report.component';
 import { EmployeeComponent } from './employee/employee.component';
 import { EmployeeDashboardComponent } from './employee/employee-dashboard/employee-dashboard.component';
 import { CreateEmployeeComponent } from './employee/create-employee/create-employee.component';
@@ -93,15 +93,12 @@ import { BonuseAndInsentiveReportsComponent } from './compnay-setup/bonus-and-in
     Demo2Component,
     ComMangeAndPoliciesComponent,
     LeaveSetupComponent,
-
-    ApprovedSalaryReportComponent,
-
-
-     CompanyDashboardComponent,
-     EditLeaveRequestComponent,
-     BonusAndIncentiveComponent,
-     ManageBonusAndIncentiveComponent,
-     BonuseAndInsentiveReportsComponent,
+    AdvanceSalaryReportComponent,
+    CompanyDashboardComponent,
+    EditLeaveRequestComponent,
+    BonusAndIncentiveComponent,
+    ManageBonusAndIncentiveComponent,
+    BonuseAndInsentiveReportsComponent,
 
   ],
   imports: [
