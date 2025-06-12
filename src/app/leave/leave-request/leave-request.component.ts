@@ -229,7 +229,11 @@ export class LeaveRequestComponent {
     this.searchInputValue = '';
     window.location.reload();
   }
-
+  
+  gridOptions = {
+    pagination: false,
+    paginationPageSize: 10,
+  };
 
 
   refresh(params: any): boolean {

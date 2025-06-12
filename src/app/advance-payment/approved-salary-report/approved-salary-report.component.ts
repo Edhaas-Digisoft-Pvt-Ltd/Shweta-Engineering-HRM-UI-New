@@ -60,32 +60,32 @@ export class ApprovedSalaryReportComponent {
   }
 
   searchEmployeeAdvanceSalary() {
-  const code = this.searchValue?.trim();
-  if (!code) {
-    this.rowData = []; 
-    return;
-  }
-
-  const payload = {
-    employee_code: code,
-    year: this.selectedYear,
-    month: this.selectedMonth,
-  };
-
-  this.service.post('emp/advancesaraly/report', payload).subscribe(
-    (res: any) => {
-      if (res.status === 'success' && res.data.length > 0) {
-        this.rowData = res.data;
-      } else {
-        this.rowData = []; 
-      }
-    },
-    (error) => {
-      console.error('Error fetching salary report:', error);
-      this.rowData = [];
+    const code = this.searchValue?.trim();
+    if (!code) {
+      this.rowData = []; 
+      return;
     }
-  );
-}
+
+    const payload = {
+      employee_id: code,
+      year: this.selectedYear,
+      month: this.selectedMonth,
+    };
+
+    this.service.post('emp/advancesaraly/report', payload).subscribe(
+      (res: any) => {
+        if (res.status === 'success' && res.data.length > 0) {
+          this.rowData = res.data;
+        } else {
+          this.rowData = []; 
+        }
+      },
+      (error) => {
+        console.error('Error fetching salary report:', error);
+        this.rowData = [];
+      }
+    );
+  }
 
 
   // getemployees () {

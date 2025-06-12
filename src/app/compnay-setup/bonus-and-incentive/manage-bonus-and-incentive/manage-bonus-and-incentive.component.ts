@@ -1,56 +1,102 @@
 import { Component } from '@angular/core';
 import { FormGroup, FormBuilder, Validators } from '@angular/forms';
 import { ColDef } from 'ag-grid-community';
-
+import { ToastrService } from 'ngx-toastr';
+import { HrmserviceService } from 'src/app/hrmservice.service';
+declare var bootstrap: any;
 @Component({
   selector: 'app-manage-bonus-and-incentive',
   templateUrl: './manage-bonus-and-incentive.component.html',
   styleUrls: ['./manage-bonus-and-incentive.component.css'],
 })
 export class ManageBonusAndIncentiveComponent {
-  // columnDefs: ColDef[] = [];
+  CompanyNames: any = [];
+  employees: any = [];
+  selectedYear: any;
+  selectedMonth: any;
+  bonusAndIncentive! : FormGroup;
+  editBonusAndIncentive! : FormGroup;
+  isSubmitted = false;
+  rowData: any = [];
+  editBonusAndIncentiveData: any;
+  tbiId: any;
+  loggedInUser: any;
 
-  columnDefs: ColDef[] = [
-    { headerName: 'ID', field: 'id', sortable: true, filter: true },
-     {
-      headerName: 'Employee Name',
-      field: 'name',
-      sortable: true,
-      filter: true,
-    },
-    { headerName: 'Date', field: 'date', sortable: true, filter: true },
-    {
-      headerName: 'Status',
-      field: 'status',
-      sortable: true,
-      filter: true,
+  constructor(private fb: FormBuilder, private service: HrmserviceService, private toastr: ToastrService) {}
+  
+
+  financialYears = [2022, 2023, 2024, 2025];
+  months = [
+    { id: 1, value: 'January' },
+    { id: 2, value: 'February' },
+    { id: 3, value: 'March' },
+    { id: 4, value: 'April' },
+    { id: 5, value: 'May' },
+    { id: 6, value: 'June' },
+    { id: 7, value: 'July' },
+    { id: 8, value: 'August' },
+    { id: 9, value: 'September' },
+    { id: 10, value: 'October' },
+    { id: 11, value: 'November' },
+    { id: 12, value: 'December' }
+  ];
+
+  closeAllModals(): void {
+    const modals = document.querySelectorAll('.modal.show');
+    modals.forEach((modalElement: any) => {
+      const modalInstance = bootstrap.Modal.getInstance(modalElement);
+      if (modalInstance) {
+        modalInstance.hide();
+      }
+    });
+  }
+
+   ngOnInit() {
+    this.selectedYear = new Date().getFullYear();
+    this.selectedMonth = new Date().getMonth() + 1;
+    this.getCompanyNames();
+    this.getBonusAndIncentives();
+     this.loggedInUser = sessionStorage.getItem('employeeName')
+
+    this.bonusAndIncentive = this.fb.group({
+      employee_id: ['', [Validators.required]],
+      bonus_incentive_date: ['', [Validators.required]],
+      bonus_amount: ['', [Validators.required]],
+      incentive_amount: ['', [Validators.required]],
+    });
+
+    this.editBonusAndIncentive = this.fb.group({
+      employee_id: [{ value: '', disabled: true }, Validators.required],
+      employee_name: [{ value: '', disabled: true }, Validators.required],
+      bonus_incentive_date: [{ value: '', disabled: true }, Validators.required],
+      bonus_amount: [{ value: '', disabled: true }, Validators.required],
+      incentive_amount: [{ value: '', disabled: true }, Validators.required],
+      status: [{ value: '', disabled: true }, Validators.required],
+    });
+   }
+
+    columnDefs: ColDef[] = [
+    { headerName: 'ID', field: 'employee_id', sortable: true, filter: true, minWidth:200 },
+    { headerName: 'Employee Name', field: 'emp_name', sortable: true, filter: true, minWidth:250 },
+    { headerName: 'Date', field: 'bonus_incentive_date', sortable: true, filter: true, minWidth:240 },
+    { headerName: 'Status', field: 'status',  sortable: true, filter: true, minWidth:250,
       cellRenderer: this.statusButtonRenderer,
     },
     {
       headerName: 'Actions',
       cellStyle: { border: '1px solid #ddd' },
-
+      minWidth: 210,
       cellRenderer: (params: any) => {
-        return `<button type="button" class="btn btn-outline-dark" data-bs-toggle="modal" data-bs-target="#advanceRequestModal">
-  <i class="bi bi-pencil"></i>
-</button>`;
+        return `<button type="button" class="btn btn-outline-dark" data-bs-toggle="modal" data-bs-target="#requestBonusIncentiveModal">
+          <i class="bi bi-pencil"></i>
+        </button>`;
       },
+       onCellClicked: (event: any) => {
+          this.getSingleBonusIncentive(event.data);
+        },  
     },
   ];
-  rowData = [
-    {
-      id: 'EMP001',
-      date: '2025-05-01',
-      name: 'John Doe',
-      company: 'Company A',
-      department: 'Finance',
-      role: 'Accountant',
-      amount: 50000,
-      tenure: '6 months',
-      status: 'Approved',
-    },
 
-  ];
   gridApiActive: any;
  onGridReady(params: { api: any }) {
     this.gridApiActive = params.api;
@@ -75,7 +121,7 @@ export class ManageBonusAndIncentiveComponent {
     button.style.marginTop = '6px';
 
     // Conditional styling
-    if (status === 'Pending') {
+    if (status === 'pending') {
       button.style.backgroundColor = '#FFF291'; // light red
       button.style.color = '#721c24'; // dark red text
       button.style.border = '1px solid #f5c6cb';
@@ -95,7 +141,111 @@ export class ManageBonusAndIncentiveComponent {
     return button;
   }
 
-  updateStatus(data: any) {
-    alert('update');
+   getCompanyNames() {
+    this.service.post('fetch/company', {}).subscribe((res: any) => {
+      if (res.status == "success") {
+        this.CompanyNames = res.data
+      }
+    },
+      (error) => {
+        console.error('Error fetching companies:', error);
+      }
+    );
   }
+
+  // getemployees () {
+  //    this.service.post('all/employee', {}).subscribe((res: any) => {
+  //     console.log(res)
+  //     if (res.status == "success") {
+  //       this.employees = res.data
+  //     }
+  //   },
+  //     (error) => {
+  //       console.error('Error fetching companies:', error);
+  //     }
+  //   );
+  // }
+
+  addBonusAndIncentive() {
+    this.isSubmitted = true;
+    if (this.bonusAndIncentive.valid) {
+      const current_data: any = {
+        employee_id: this.bonusAndIncentive.value.employee_id,
+        bonus_incentive_date: this.bonusAndIncentive.value.bonus_incentive_date,
+        bonus_amount: this.bonusAndIncentive.value.bonus_amount,
+        incentive_amount: this.bonusAndIncentive.value.incentive_amount,
+      };
+
+      this.service.post("insert/bonusincentive", current_data).subscribe({
+        next: (res) => {
+          this.toastr.success('Form Submitted Successfully!');
+          this.bonusAndIncentive.reset(); // reset only after success
+          this.closeAllModals();
+        },
+        error: (err) => {
+          console.error(err);
+          this.toastr.error('Failed to add company.');
+        }
+      });
+
+    } else {
+      this.toastr.error('Please fill all required fields !');
+    }
+  }
+
+  getBonusAndIncentives() {
+    this.service.post('fetch/bonusincentive', { }).subscribe((res: any) => {
+      try {
+        if (res.status === 'success') {
+          this.rowData = res.Data.map((item:any)=>({
+            employee_id:item.employee_code,
+            emp_name:item.emp_name,
+            bonus_incentive_date:item.bonus_incentive_date,
+            status:item.status,
+            tbi_id:item.tbi_id
+          }));
+        } 
+      } catch (error) {
+        console.log(error);
+      }
+    })
+  }
+
+  getSingleBonusIncentive(data:any) {
+    this.tbiId = data;
+     this.service.post('fetch/single/bonusincentive',{tbi_id: data.tbi_id}).subscribe((res: any) => {
+      if(res.status === 'success'){
+        const singleBonusAndIncentive = res.data[0];
+          this.editBonusAndIncentiveData = {
+            employee_id: singleBonusAndIncentive?.employee_id,
+            employee_name: singleBonusAndIncentive?.emp_name,
+            bonus_incentive_date: singleBonusAndIncentive?.bonus_incentive_date,
+            bonus_amount: singleBonusAndIncentive?.bonus_amount,
+            incentive_amount: singleBonusAndIncentive?.incentive_amount,
+            status: singleBonusAndIncentive?.status,
+          } 
+        this.editBonusAndIncentive.patchValue(this.editBonusAndIncentiveData);  
+      }
+    })
+  }
+
+  updateStatus(data: any) {
+    if(confirm("Do you want to update Status?") == true){
+      const payload = {
+        tbi_id : this.tbiId.tbi_id,
+        status : data,
+        approved_by : this.loggedInUser
+      }
+      this.service.post(`action/bonusincentive`,payload).subscribe((res: any) => {
+        if(res.status === 'success'){
+          this.toastr.success("Bonus and Incentive status updated successfully");
+          this.getBonusAndIncentives();
+          this.closeAllModals();
+        }
+      },(error) => {
+        console.error('Error:', error);
+      });
+    }
+  }
+
 }

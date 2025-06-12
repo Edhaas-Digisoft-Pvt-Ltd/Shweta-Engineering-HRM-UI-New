@@ -177,15 +177,15 @@ export class ApprovedAdvancePaymentComponent {
   };
   initializeColumns() {
     this.columnDefs = [
-      { headerName: 'ID', field: 'emp_id', sortable: true, filter: true, maxWidth: 150 },
+      { headerName: 'ID', field: 'emp_id', sortable: true, filter: true, maxWidth: 160 },
       {
         headerName: 'Employee Name',
         field: 'emp_name',
         sortable: true,
         filter: true,
-        maxWidth:180
+        maxWidth:200
       },
-      { headerName: 'Apply Date', field: 'apply_date', sortable: true, filter: true, maxWidth:140 },
+      { headerName: 'Apply Date', field: 'apply_date', sortable: true, filter: true, maxWidth:150 },
       {
         headerName: 'Adv. Amount',
         field: 'advance_amount',
@@ -205,23 +205,23 @@ export class ApprovedAdvancePaymentComponent {
         field: 'emi',
         sortable: true,
         filter: true,
-        maxWidth:100
+        maxWidth:120
       },
-      {
-        headerName: 'Updated On',
-        field: 'updated_on',
-        sortable: true,
-        filter: true,
-        maxWidth:140
-      },
-        {
-        headerName: 'Deducted On',
-        field: 'deducted_on',
-        sortable: true,
-        filter: true,
-        maxWidth:150
-      },
-      { headerName: 'Status', field: 'status', cellRenderer: this.statusButtonRenderer, sortable: true, filter: true,  maxWidth:140},
+      // {
+      //   headerName: 'Updated On',
+      //   field: 'updated_on',
+      //   sortable: true,
+      //   filter: true,
+      //   maxWidth:140
+      // },
+      //   {
+      //   headerName: 'Deducted On',
+      //   field: 'deducted_on',
+      //   sortable: true,
+      //   filter: true,
+      //   maxWidth:150
+      // },
+      // { headerName: 'Status', field: 'status', cellRenderer: this.statusButtonRenderer, sortable: true, filter: true,  maxWidth:140},
       { headerName: 'Tenure', field: 'tenure', sortable: true, filter: true,  maxWidth:110},
     ];
       this.columnDefs.push({
