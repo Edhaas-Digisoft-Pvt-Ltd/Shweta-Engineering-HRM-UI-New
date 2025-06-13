@@ -151,21 +151,21 @@
             </div>
             <div class="col-md-2">
               <strong>Status</strong>
-              <!-- <input
+              <input
               type="text"
               id="status"
               class="form-control "
               formControlName="status"
               [ngClass]="{
-                  'custom-bg-warning': EditAdvancePayment?.status === 'pending',
-                  'custom-bg-success': EditAdvancePayment?.status === 'Approved',
-                  'custom-bg-danger': EditAdvancePayment?.status === 'Rejected'
+                  'custom-bg-warning': EditAdvancePaymentData?.status === 'pending',
+                  'custom-bg-success': EditAdvancePaymentData?.status === 'Approved',
+                  'custom-bg-danger': EditAdvancePaymentData?.status === 'Rejected'
               }"
-              [value]="EditAdvancePayment?.status"
-            /> -->
-              <div class="px-3 py-2 rounded text-center fw-bold" style="background-color: #fef3c7; color: #7c6000;">
+              [value]="EditAdvancePaymentData?.status"
+            />
+              <!-- <div class="px-3 py-2 rounded text-center fw-bold" style="background-color: #fef3c7; color: #7c6000;">
                 Pending
-              </div>
+              </div> -->
             </div>
             <div class="col-md-2">
               <strong>Tenure</strong>

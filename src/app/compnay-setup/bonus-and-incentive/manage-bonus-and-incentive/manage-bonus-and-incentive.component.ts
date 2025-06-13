@@ -21,6 +21,7 @@ export class ManageBonusAndIncentiveComponent {
   editBonusAndIncentiveData: any;
   tbiId: any;
   loggedInUser: any;
+  maxDate: string = '';
 
   constructor(private fb: FormBuilder, private service: HrmserviceService, private toastr: ToastrService) {}
   
@@ -56,13 +57,14 @@ export class ManageBonusAndIncentiveComponent {
     this.selectedMonth = new Date().getMonth() + 1;
     this.getCompanyNames();
     this.getBonusAndIncentives();
-     this.loggedInUser = sessionStorage.getItem('employeeName')
+    this.setMaxDate();
+    this.loggedInUser = sessionStorage.getItem('employeeName')
 
     this.bonusAndIncentive = this.fb.group({
       employee_id: ['', [Validators.required]],
       bonus_incentive_date: ['', [Validators.required]],
-      bonus_amount: ['', [Validators.required]],
-      incentive_amount: ['', [Validators.required]],
+      bonus_amount: ['', [Validators.required, Validators.pattern(/^\d+$/)]],
+      incentive_amount: ['', [Validators.required, Validators.pattern(/^\d+$/)]],
     });
 
     this.editBonusAndIncentive = this.fb.group({
@@ -85,9 +87,9 @@ export class ManageBonusAndIncentiveComponent {
     {
       headerName: 'Actions',
       cellStyle: { border: '1px solid #ddd' },
-      minWidth: 210,
+      minWidth: 240,
       cellRenderer: (params: any) => {
-        return `<button type="button" class="btn btn-outline-dark" data-bs-toggle="modal" data-bs-target="#requestBonusIncentiveModal">
+        return `<button type="button" class="btn btn-outline-dark mb-1" data-bs-toggle="modal" data-bs-target="#requestBonusIncentiveModal">
           <i class="bi bi-pencil"></i>
         </button>`;
       },
@@ -98,7 +100,7 @@ export class ManageBonusAndIncentiveComponent {
   ];
 
   gridApiActive: any;
- onGridReady(params: { api: any }) {
+  onGridReady(params: { api: any }) {
     this.gridApiActive = params.api;
   }
   statusButtonRenderer(params: any) {
@@ -141,7 +143,7 @@ export class ManageBonusAndIncentiveComponent {
     return button;
   }
 
-   getCompanyNames() {
+  getCompanyNames() {
     this.service.post('fetch/company', {}).subscribe((res: any) => {
       if (res.status == "success") {
         this.CompanyNames = res.data
@@ -151,6 +153,12 @@ export class ManageBonusAndIncentiveComponent {
         console.error('Error fetching companies:', error);
       }
     );
+  }
+
+  setMaxDate() {
+    const today = new Date();
+    const lastDayPrevMonth = new Date(today.getFullYear(), today.getMonth(), 0); 
+    this.maxDate = lastDayPrevMonth.toISOString().split('T')[0]; 
   }
 
   // getemployees () {
@@ -217,7 +225,7 @@ export class ManageBonusAndIncentiveComponent {
       if(res.status === 'success'){
         const singleBonusAndIncentive = res.data[0];
           this.editBonusAndIncentiveData = {
-            employee_id: singleBonusAndIncentive?.employee_id,
+            employee_id: singleBonusAndIncentive?.employee_code,
             employee_name: singleBonusAndIncentive?.emp_name,
             bonus_incentive_date: singleBonusAndIncentive?.bonus_incentive_date,
             bonus_amount: singleBonusAndIncentive?.bonus_amount,

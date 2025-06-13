@@ -257,18 +257,26 @@ export class ApprovedAdvancePaymentComponent {
             EMIStartDate: singleApprovedData?.updated_on,
             installmentAmount: singleApprovedData?.emi,
             remainingBalance: singleApprovedData?.remaining_balance,
-            advanceAmount: singleApprovedData?.advance_amount
+            advanceAmount: singleApprovedData?.advance_amount,
+            firstInstallmentDate: singleApprovedData?.deducted_on, 
           } 
         this.displayApprovedData.patchValue(this.approvedData);  
       }
     })
   }
   
-calculatePaidAmount(): number {
-  const total = +this.displayApprovedData.get('amount')?.value || 0;
-  const remaining = +this.displayApprovedData.get('remainingBalance')?.value || 0;
-  return total - remaining;
-}
+  calculatePaidAmount(): number {
+    const total = +this.displayApprovedData.get('amount')?.value || 0;
+    const remaining = +this.displayApprovedData.get('remainingBalance')?.value || 0;
+    return total - remaining;
+  }
+
+  calculatePaidPercentage(): number {
+    const advance = +this.displayApprovedData.get('advanceAmount')?.value || 0;
+    const remaining = +this.displayApprovedData.get('remainingBalance')?.value || 0;
+    if (advance === 0) return 0;
+    return Math.round(((advance - remaining) / advance) * 100);
+  }
 
   statusButtonRenderer(params: any) {
     const status = params.value;

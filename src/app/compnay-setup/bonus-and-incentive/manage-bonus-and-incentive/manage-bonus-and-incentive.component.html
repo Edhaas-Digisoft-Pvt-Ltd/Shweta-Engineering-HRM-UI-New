@@ -69,7 +69,7 @@
                                             </div> -->
                                             <div class="col-lg-6">
                                                 <label>Date<span class="text-danger">*</span></label>
-                                                <input type="date" formControlName="bonus_incentive_date" class="form-control" placeholder="Date"
+                                                <input type="date" formControlName="bonus_incentive_date" class="form-control" placeholder="Date"  [attr.max]="maxDate"
                                                 [ngClass]="{'is-invalid': isSubmitted && bonusAndIncentive.get('bonus_incentive_date')?.invalid}">
                                             </div>
 
@@ -79,6 +79,10 @@
                                                     <input type="text" id="companyName" class="form-control" formControlName="bonus_amount" placeholder="Enter Bonus"
                                                     [ngClass]="{'is-invalid': isSubmitted && bonusAndIncentive.get('bonus_amount')?.invalid}"
                                                     >
+                                                <div class="invalid-feedback"
+                                                    *ngIf="isSubmitted && bonusAndIncentive.get('bonus_amount')?.errors?.['pattern']">
+                                                    Only Numbers are Allowed
+                                                </div>
                                                 </div>
                                             </div>
 
@@ -89,6 +93,10 @@
                                                     <input type="text" id="companyName" class="form-control" formControlName="incentive_amount" placeholder="Enter Incentive"
                                                     [ngClass]="{'is-invalid': isSubmitted && bonusAndIncentive.get('incentive_amount')?.invalid}"
                                                     >
+                                                    <small class="text-danger"
+                                                        *ngIf="isSubmitted && bonusAndIncentive.get('incentive_amount')?.invalid && bonusAndIncentive.get('incentive_amount')?.value">
+                                                         Only Numbers are Allowed
+                                                    </small>
                                                 </div>
                                             </div>
 
@@ -180,7 +188,7 @@
             </div>
         </div>
         <div class="col-12 mt-3">
-            <ag-grid-angular class="ag-theme-alpine" style="height: 60vh;" [rowData]="rowData"
+            <ag-grid-angular class="ag-theme-alpine" style="width: 100%; height: 60vh;" [rowData]="rowData"
                 [columnDefs]="columnDefs" (gridReady)="onGridReady($event)">
             </ag-grid-angular>
         </div>

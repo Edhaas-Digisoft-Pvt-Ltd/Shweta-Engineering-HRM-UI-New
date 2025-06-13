@@ -115,8 +115,14 @@
               </span>
             </div>
             <div class="progress mt-2" style="height: 12px;">
-              <div class="progress-bar bg-success" role="progressbar" style="width: 50%;" aria-valuenow="50"
-                aria-valuemin="0" aria-valuemax="100">
+              <div
+                class="progress-bar bg-success"
+                role="progressbar"
+                [style.width.%]="calculatePaidPercentage()"
+                [attr.aria-valuenow]="calculatePaidPercentage()"
+                aria-valuemin="0"
+                aria-valuemax="100"
+              >
                 <span class="visually-hidden">Paid</span>
               </div>
             </div>

@@ -119,7 +119,7 @@ export class AdvanceSalaryReportComponent {
 
     // Common styles
     button.style.padding = '6px 12px';
-    button.style.borderRadius = '18px';
+    button.style.borderRadius = '20px';
     button.style.cursor = 'default';
     button.style.height = '30px'; // ✅ Match AG Grid row height
     button.style.lineHeight = '20px';
@@ -127,7 +127,7 @@ export class AdvanceSalaryReportComponent {
     button.style.display = 'flex';
     button.style.alignItems = 'center';
     button.style.justifyContent = 'center';
-    button.style.width = '100%';
+    button.style.width = '97%';
     button.style.marginTop = '6px';
 
     // Conditional styling
@@ -135,11 +135,19 @@ export class AdvanceSalaryReportComponent {
       button.style.backgroundColor = '#FFF291'; // light red
       button.style.color = '#721c24'; // dark red text
       button.style.border = '1px solid #f5c6cb';
+      button.style.borderRadius = '20px';
     } else if (status === 'Approved') {
       button.style.backgroundColor = '#B2FFE1B0'; // light green
       button.style.color = 'black';
       button.style.border = '1px solid #B2FFE1B0';
+      button.style.borderRadius = '20px';
+    } else if (status === 'Rejected') {
+      button.style.backgroundColor = '#FFAFAF'; // light green
+      button.style.color = 'black';
+      button.style.border = '1px solid #FFAFAF';
+      button.style.borderRadius = '20px';
     }
+
     return button;
   }
 

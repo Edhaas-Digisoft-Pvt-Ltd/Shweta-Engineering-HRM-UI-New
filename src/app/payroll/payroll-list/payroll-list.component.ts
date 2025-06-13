@@ -3,13 +3,21 @@ import { ColDef } from 'ag-grid-community';
 // import { EmployeeActionComponent } from '../employee-action/employee-action.component';
 import { PayrollActionBtnComponent } from './payroll-action-btn/payroll-action-btn.component';
 import { Router } from '@angular/router';
+import { HrmserviceService } from 'src/app/hrmservice.service';
 @Component({
   selector: 'app-payroll-list',
   templateUrl: './payroll-list.component.html',
   styleUrls: ['./payroll-list.component.css'],
 })
 export class PayrollListComponent {
-  constructor(private router: Router) {}
+  CompanyNames: any = [] ;
+  selectedCompanyId : any = 1 ;
+  selectedYear: any;
+  selectedMonth: any;
+  rowData: any = [];
+  
+  today: string = new Date().toISOString().split('T')[0];
+  constructor(private router: Router, private service: HrmserviceService) {}
 
   rowSelection: string = 'multiple';
   public defaultColDef: ColDef = {
@@ -17,6 +25,67 @@ export class PayrollListComponent {
     flex: 1,
     resizable: true,
   };
+
+  financialYears = [2022, 2023, 2024, 2025];
+  months = [
+    { id: 1, value: 'January' },
+    { id: 2, value: 'February' },
+    { id: 3, value: 'March' },
+    { id: 4, value: 'April' },
+    { id: 5, value: 'May' },
+    { id: 6, value: 'June' },
+    { id: 7, value: 'July' },
+    { id: 8, value: 'August' },
+    { id: 9, value: 'September' },
+    { id: 10, value: 'October' },
+    { id: 11, value: 'November' },
+    { id: 12, value: 'December' }
+  ];
+
+  ngOnInit() {
+    this.selectedYear = new Date().getFullYear();
+    this.selectedMonth = new Date().getMonth() + 1;
+    const currentDate = new Date();
+    this.today = currentDate.toISOString().split('T')[0];
+    this.getCompanyNames();
+    this.getpayrollList();
+  }
+
+  getCompanyNames() {
+    this.service.post('fetch/company', {}).subscribe((res: any) => {
+      if (res.status == "success") {
+        this.CompanyNames = res.data
+      }
+    },
+      (error) => {
+        console.error('Error fetching companies:', error);
+      }
+    );
+  }
+
+  onYearMonthChange() {
+    this.getpayrollList();
+  }
+
+  getpayrollList() {
+    this.service.post('fetch/payroll', { 
+      company_id: this.selectedCompanyId, 
+      year: this.selectedYear,
+      month: this.selectedMonth,
+    }).subscribe((res: any) => {
+      console.log(res)
+      try {
+        if (res.status === 'success') {
+          this.rowData = res.data.map((item:any)=>({
+            employee_code:item.employee_code,
+           
+          }));
+        } 
+      } catch (error) {
+        console.log(error);
+      }
+    })
+  }
 
   columnDefs: ColDef[] = [
     {
@@ -98,132 +167,17 @@ export class PayrollListComponent {
     console.log('Selected rows:', selectedRows);
   }
 
-  rowData = [
-    {
-      date:'April 2025',
-      employeeName: 'Shivani',
-      department: 'computer',
-      grossAmount: 'computer',
-      overTime: '361.4',
-      joinDate: '09-03-2025',
-      contact: '9078121214',
-    },
-    {
-      date:'April 2025',
-      employeeName: 'Shivani',
-      department: 'computer',
-      grossAmount: 'computer',
-      overTime: '361.4',
-      joinDate: '09-03-2025',
-      contact: '9078121214',
-    },
-    {
-      date:'April 2025',
-      employeeName: 'Shivani',
-      department: 'computer',
-      grossAmount: 'computer',
-      overTime: '361.4',
-      joinDate: '09-03-2025',
-      contact: '9078121214',
-    },
-    {
-      date:'April 2025',
-      employeeName: 'Shivani',
-      department: 'computer',
-      grossAmount: 'computer',
-      overTime: '361.4',
-      joinDate: '09-03-2025',
-      contact: '9078121214',
-    },
-    {
-      date:'April 2025',
-      employeeName: 'Shivani',
-      department: 'computer',
-      grossAmount: 'computer',
-      overTime: '361.4',
-      joinDate: '09-03-2025',
-      contact: '9078121214',
-    },
-    {
-      date:'April 2025',
-      employeeName: 'Shivani',
-      department: 'computer',
-      grossAmount: 'computer',
-      overTime: '361.4',
-      joinDate: '09-03-2025',
-      contact: '9078121214',
-    },
-    {
-      date:'April 2025',
-      employeeName: 'Shivani',
-      department: 'computer',
-      grossAmount: 'computer',
-      overTime: '361.4',
-      joinDate: '09-03-2025',
-      contact: '9078121214',
-    },
-    {
-      date:'April 2025',
-      employeeName: 'Shivani',
-      department: 'computer',
-      grossAmount: 'computer',
-      overTime: '361.4',
-      joinDate: '09-03-2025',
-      contact: '9078121214',
-    },
-    {
-      date:'April 2025',
-      employeeName: 'Shivani',
-      department: 'computer',
-      grossAmount: 'computer',
-      overTime: '361.4',
-      joinDate: '09-03-2025',
-      contact: '9078121214',
-    },
-    {
-      date:'April 2025',
-      employeeName: 'Shivani',
-      department: 'computer',
-      grossAmount: 'computer',
-      overTime: '361.4',
-      joinDate: '09-03-2025',
-      contact: '9078121214',
-    },
-    {
-      date:'April 2025',
-      employeeName: 'Shivani',
-      department: 'computer',
-      grossAmount: 'computer',
-      overTime: '361.4',
-      joinDate: '09-03-2025',
-      contact: '9078121214',
-    },
-    {
-      date:'April 2025',
-      employeeName: 'Shivani',
-      department: 'computer',
-      grossAmount: 'computer',
-      overTime: '361.4',
-      joinDate: '09-03-2025',
-      contact: '9078121214',
-    },
-
-  ];
-
-
-
   create_user() {
     // alert("Create User");
     this.router.navigate(['/authPanal/CreateEmployee']);
   }
+
   gridOptions = {
     rowHeight: 45,
     rowClass: 'custom-row-class',
     pagination: false,
     paginationPageSize: 10,
     paginationPageSizeSelector: [10, 50, 100],
-
-
   };
 
 }

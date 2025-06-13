@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { ColDef } from 'ag-grid-community';
 import { Router } from '@angular/router';
+import { HrmserviceService } from 'src/app/hrmservice.service';
 
 @Component({
   selector: 'app-payroll-process',
@@ -8,7 +9,14 @@ import { Router } from '@angular/router';
   styleUrls: ['./payroll-process.component.css'],
 })
 export class PayrollProcessComponent {
-  constructor(private router: Router) {}
+  CompanyNames: any = [] ;
+  selectedCompanyId : any = 1 ;
+  selectedYear: any;
+  selectedMonth: any;
+  rowData: any = [];
+  
+  today: string = new Date().toISOString().split('T')[0];
+  constructor(private router: Router,  private service: HrmserviceService) {}
 
   rowSelection: string = 'multiple';
   public defaultColDef: ColDef = {
@@ -16,6 +24,73 @@ export class PayrollProcessComponent {
     flex: 1,
     resizable: true,
   };
+
+  financialYears = [2022, 2023, 2024, 2025];
+  months = [
+    { id: 1, value: 'January' },
+    { id: 2, value: 'February' },
+    { id: 3, value: 'March' },
+    { id: 4, value: 'April' },
+    { id: 5, value: 'May' },
+    { id: 6, value: 'June' },
+    { id: 7, value: 'July' },
+    { id: 8, value: 'August' },
+    { id: 9, value: 'September' },
+    { id: 10, value: 'October' },
+    { id: 11, value: 'November' },
+    { id: 12, value: 'December' }
+  ];
+
+   ngOnInit() {
+    this.selectedYear = new Date().getFullYear();
+    this.selectedMonth = new Date().getMonth() + 1;
+    const currentDate = new Date();
+    this.today = currentDate.toISOString().split('T')[0];
+    this.getCompanyNames();
+    this.getpayrollList();
+  }
+
+  getCompanyNames() {
+    this.service.post('fetch/company', {}).subscribe((res: any) => {
+      if (res.status == "success") {
+        this.CompanyNames = res.data
+      }
+    },
+      (error) => {
+        console.error('Error fetching companies:', error);
+      }
+    );
+  }
+
+  onYearMonthChange() {
+    this.getpayrollList();
+  }
+
+  getpayrollList() {
+    this.service.post('fetch/payroll', { 
+      company_id: this.selectedCompanyId, 
+      year: this.selectedYear,
+      month: this.selectedMonth,
+    }).subscribe((res: any) => {
+      console.log(res)
+      try {
+        if (res.status === 'success') {
+          this.rowData = res.data.map((item:any)=>({
+            employee_code: item.employee_code,
+            employeeName: item.emp_name,
+            department: item.department_name,
+            role: item.role_name,
+            presentDays: item.present_days,
+            absentDays: item.absent_days,
+            hours: item.total_hours,
+            overTime: item.total_overtime,
+          }));
+        } 
+      } catch (error) {
+        console.log(error);
+      }
+    })
+  }
 
   columnDefs: ColDef[] = [
     {
@@ -68,7 +143,7 @@ export class PayrollProcessComponent {
       field: 'overTime',
       sortable: true,
       filter: true,
-      maxWidth: 150,
+      maxWidth: 140,
     },
     {
       headerName: 'Gross Amount',
@@ -85,59 +160,6 @@ export class PayrollProcessComponent {
     console.log('Selected rows:', selectedRows);
   }
 
-  rowData = [
-    {
-      employeeName: 'Shivani',
-      department: 'Developer',
-      role: 'front End',
-      presentDays: '23',
-      absentDays: '3',
-      hours: '232',
-      overTime: '112',
-      grossAmount: '59,000',
-    },
-    {
-      employeeName: 'Shivani',
-      department: 'Developer',
-      role: 'front End',
-      presentDays: '23',
-      absentDays: '3',
-      hours: '232',
-      overTime: '112',
-      grossAmount: '59,000',
-    },
-    {
-      employeeName: 'Shivani',
-      department: 'Developer',
-      role: 'front End',
-      presentDays: '23',
-      absentDays: '3',
-      hours: '232',
-      overTime: '112',
-      grossAmount: '59,000',
-    },
-    {
-      employeeName: 'Shivani',
-      department: 'Developer',
-      role: 'front End',
-      presentDays: '23',
-      absentDays: '3',
-      hours: '232',
-      overTime: '112',
-      grossAmount: '59,000',
-    },
-    {
-      employeeName: 'Shivani',
-      department: 'Developer',
-      role: 'front End',
-      presentDays: '23',
-      absentDays: '3',
-      hours: '232',
-      overTime: '112',
-      grossAmount: '59,000',
-    },
-  ];
-
   create_user() {
     // alert("Create User");
     this.router.navigate(['/authPanal/CreateEmployee']);
@@ -151,18 +173,4 @@ export class PayrollProcessComponent {
 
   };
 
-  companies = [
-    {
-      name: 'Company A',
-    },
-    {
-      name: 'Company B',
-    },
-    {
-      name: 'Company C',
-    },
-    {
-      name: 'Company D',
-    },
-  ];
 }
