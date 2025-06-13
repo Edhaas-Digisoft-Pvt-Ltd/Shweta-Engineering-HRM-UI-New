@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { ColDef } from 'ag-grid-community';
 import { Router } from '@angular/router';
 import { HrmserviceService } from 'src/app/hrmservice.service';
+import { ToastrService } from 'ngx-toastr';
 
 @Component({
   selector: 'app-payroll-process',
@@ -9,14 +10,15 @@ import { HrmserviceService } from 'src/app/hrmservice.service';
   styleUrls: ['./payroll-process.component.css'],
 })
 export class PayrollProcessComponent {
-  CompanyNames: any = [] ;
-  selectedCompanyId : any = 1 ;
+  CompanyNames: any = [];
+  selectedCompanyId: any = 1;
   selectedYear: any;
   selectedMonth: any;
   rowData: any = [];
-  
+  selectedRowData: any[] = [];
+
   today: string = new Date().toISOString().split('T')[0];
-  constructor(private router: Router,  private service: HrmserviceService) {}
+  constructor(private router: Router, private service: HrmserviceService, private toastr: ToastrService) { }
 
   rowSelection: string = 'multiple';
   public defaultColDef: ColDef = {
@@ -41,7 +43,7 @@ export class PayrollProcessComponent {
     { id: 12, value: 'December' }
   ];
 
-   ngOnInit() {
+  ngOnInit() {
     this.selectedYear = new Date().getFullYear();
     this.selectedMonth = new Date().getMonth() + 1;
     const currentDate = new Date();
@@ -67,15 +69,15 @@ export class PayrollProcessComponent {
   }
 
   getpayrollList() {
-    this.service.post('fetch/payroll', { 
-      company_id: this.selectedCompanyId, 
+    this.service.post('fetch/payroll', {
+      company_id: this.selectedCompanyId,
       year: this.selectedYear,
       month: this.selectedMonth,
     }).subscribe((res: any) => {
       console.log(res)
       try {
         if (res.status === 'success') {
-          this.rowData = res.data.map((item:any)=>({
+          this.rowData = res.data.map((item: any) => ({
             employee_code: item.employee_code,
             employeeName: item.emp_name,
             department: item.department_name,
@@ -85,11 +87,36 @@ export class PayrollProcessComponent {
             hours: item.total_hours,
             overTime: item.total_overtime,
           }));
-        } 
+        }
       } catch (error) {
         console.log(error);
       }
     })
+  }
+
+  processPayroll() {
+    if (this.selectedRowData.length === 0) {
+      this.toastr.warning('Please select at least one employee.');
+      return;
+    }
+
+    const payloadArray = this.selectedRowData.map((emp: any) => ({
+      employee_id: emp.employee_code,
+      year: this.selectedYear,
+      month: this.selectedMonth,
+      basic_salary: 20000, 
+      total_tax_deduction: 500, 
+    }));
+
+    this.service.post("process/payroll", payloadArray).subscribe({
+      next: (res) => {
+        this.toastr.success('Payroll processed successfully for all selected employees.');
+      },
+      error: (err) => {
+        console.error(err);
+        this.toastr.error('Failed to process payroll.');
+      }
+    });
   }
 
   columnDefs: ColDef[] = [
@@ -156,8 +183,8 @@ export class PayrollProcessComponent {
   ];
 
   onSelectionChanged(event: any): void {
-    const selectedRows = event.api.getSelectedRows();
-    console.log('Selected rows:', selectedRows);
+   this.selectedRowData = event.api.getSelectedRows();
+    console.log('Selected rows:', this.selectedRowData);
   }
 
   create_user() {
