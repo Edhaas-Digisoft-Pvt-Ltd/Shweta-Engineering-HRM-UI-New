@@ -27,7 +27,7 @@ export class PayrollProcessComponent {
     resizable: true,
   };
 
-  financialYears = [2022, 2023, 2024, 2025];
+  // financialYears = [2022, 2023, 2024, 2025];
   months = [
     { id: 1, value: 'January' },
     { id: 2, value: 'February' },
@@ -49,7 +49,12 @@ export class PayrollProcessComponent {
     const currentDate = new Date();
     this.today = currentDate.toISOString().split('T')[0];
     this.getCompanyNames();
-    this.getpayrollList();
+    this.getPayrollProcess();
+  }
+
+  getMonthName(monthId: number): string {
+    const month = this.months.find(m => m.id === monthId);
+    return month ? month.value : '';
   }
 
   getCompanyNames() {
@@ -65,10 +70,10 @@ export class PayrollProcessComponent {
   }
 
   onYearMonthChange() {
-    this.getpayrollList();
+    this.getPayrollProcess();
   }
 
-  getpayrollList() {
+  getPayrollProcess() {
     this.service.post('fetch/payroll', {
       company_id: this.selectedCompanyId,
       year: this.selectedYear,
@@ -78,7 +83,6 @@ export class PayrollProcessComponent {
       try {
         if (res.status === 'success') {
           this.rowData = res.data.map((item: any) => ({
-            employee_code: item.employee_code,
             employeeName: item.emp_name,
             department: item.department_name,
             role: item.role_name,
@@ -86,6 +90,7 @@ export class PayrollProcessComponent {
             absentDays: item.absent_days,
             hours: item.total_hours,
             overTime: item.total_overtime,
+            employe_id: item.employe_id,
           }));
         }
       } catch (error) {
@@ -100,24 +105,52 @@ export class PayrollProcessComponent {
       return;
     }
 
-    const payloadArray = this.selectedRowData.map((emp: any) => ({
-      employee_id: emp.employee_code,
-      year: this.selectedYear,
-      month: this.selectedMonth,
-      basic_salary: 20000, 
-      total_tax_deduction: 500, 
-    }));
+    this.selectedRowData.forEach((emp: any) => {
+      const payload = {
+        employee_id: emp.employe_id, 
+        year: this.selectedYear,
+        month: this.selectedMonth,
+        basic_salary: 20000, 
+        total_tax_deduction: 200, 
+      };
 
-    this.service.post("process/payroll", payloadArray).subscribe({
-      next: (res) => {
-        this.toastr.success('Payroll processed successfully for all selected employees.');
-      },
-      error: (err) => {
-        console.error(err);
-        this.toastr.error('Failed to process payroll.');
-      }
+      this.service.post("craete/payroll", payload).subscribe({
+        next: () => {
+          this.toastr.success(`Payroll processed successfully`);
+          this.getPayrollProcess();
+        },
+        error: (err) => {
+          console.error(err);
+        }
+      });
     });
   }
+
+  //for multiple selection
+  // processPayroll() {
+  //   if (this.selectedRowData.length === 0) {
+  //     this.toastr.warning('Please select at least one employee.');
+  //     return;
+  //   }
+
+  //   const payloadArray = this.selectedRowData.map((emp: any) => ({
+  //     employee_id: emp.employee_code,
+  //     year: this.selectedYear,
+  //     month: this.selectedMonth,
+  //     basic_salary: 20000, 
+  //     total_tax_deduction: 500, 
+  //   }));
+
+  //   this.service.post("process/payroll", payloadArray).subscribe({
+  //     next: (res) => {
+  //       this.toastr.success('Payroll processed successfully for all selected employees.');
+  //     },
+  //     error: (err) => {
+  //       console.error(err);
+  //       this.toastr.error('Failed to process payroll.');
+  //     }
+  //   });
+  // }
 
   columnDefs: ColDef[] = [
     {

@@ -26,7 +26,7 @@ export class PayrollListComponent {
     resizable: true,
   };
 
-  financialYears = [2022, 2023, 2024, 2025];
+  // financialYears = [2022, 2023, 2024, 2025];
   months = [
     { id: 1, value: 'January' },
     { id: 2, value: 'February' },
@@ -49,6 +49,11 @@ export class PayrollListComponent {
     this.today = currentDate.toISOString().split('T')[0];
     this.getCompanyNames();
     this.getpayrollList();
+  }
+
+  getMonthName(monthId: number): string {
+    const month = this.months.find(m => m.id === monthId);
+    return month ? month.value : '';
   }
 
   getCompanyNames() {

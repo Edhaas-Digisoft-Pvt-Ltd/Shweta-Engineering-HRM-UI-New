@@ -21,7 +21,7 @@
                         </select>
                     </div>
 
-                    <div class="col-2">
+                    <!-- <div class="col-2">
                         <label for="">Select year</label>
                         <select class="form-control selectdata2" [(ngModel)]="selectedYear">
                             <option *ngFor="let year of financialYears">{{ year }}</option>
@@ -35,8 +35,19 @@
                         <select class="form-control selectdata3" [(ngModel)]="selectedMonth">
                             <option *ngFor="let month of months" [value]="month.id">{{ month.value }}</option>
                         </select>
-                    </div>
+                    </div> -->
 
+                    <div class="col-2">
+                        <label for="">Year</label>
+                        <input class="form-control" [value]="selectedYear" readonly />
+                    </div>
+                    <div class="col vector">
+                        <span class="mt-4"></span>
+                    </div>
+                    <div class="col-2">
+                        <label for="">Month</label>
+                        <input class="form-control" [value]="getMonthName(selectedMonth)" readonly />
+                    </div>
 
                 </div>
 
