@@ -29,6 +29,7 @@ export class ManageBonusAndIncentiveComponent {
   blockStart = ''; 
   blockEnd = ''; 
   defaultDate = '';
+  isEditSubmitted = false;
 
   constructor(private fb: FormBuilder, private service: HrmserviceService, private toastr: ToastrService) {}
   
@@ -82,8 +83,8 @@ export class ManageBonusAndIncentiveComponent {
     });
 
     this.editBonusAndIncentive = this.fb.group({
-      employee_id: [{ value: '' }, Validators.required],
-      employee_name: [{ value: '' }, Validators.required],
+      employee_id: [{ value: '', disabled: true}, Validators.required],
+      employee_name: [{ value: '', disabled: true}, Validators.required],
       bonus_incentive_date: [{ value: '' }, Validators.required],
       bonus_amount: [{ value: '' }, Validators.required],
       incentive_amount: [{ value: '' }, Validators.required],
@@ -91,19 +92,45 @@ export class ManageBonusAndIncentiveComponent {
     });
   }
 
+  // ngAfterViewInit() {
+  //   const now = new Date();
+  //   const m1 = new Date(now.getFullYear(), now.getMonth() , 1);
+  //   const y1 = new Date(m1.getFullYear(), m1.getMonth() + 12, 0);
+
+  //   flatpickr("#bonusDate", {
+  //     dateFormat: "Y-m-d",  
+  //     minDate: m1,
+  //     maxDate: y1,
+  //     disable: [(d: Date) => {
+  //       const isNextMonth = d.getMonth() === m1.getMonth() && d.getFullYear() === m1.getFullYear();
+  //       return isNextMonth && d.getDate() > 10;
+  //     }]
+  //   });
+  // }
+
   ngAfterViewInit() {
     const now = new Date();
-    const m1 = new Date(now.getFullYear(), now.getMonth() , 1);
-    const y1 = new Date(m1.getFullYear(), m1.getMonth() + 12, 0);
+    const currentDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const day = now.getDate();
+    const month = now.getMonth();
+    const year = now.getFullYear();
+
+    const lastAllowedCurrentMonthDate = new Date(year, month, 10);
+    const nextMonthStart = new Date(year, month + 1, 1);
+    const oneYearLater = new Date(year, month + 13, 0);
 
     flatpickr("#bonusDate", {
-      dateFormat: "Y-m-d",  
-      minDate: m1,
-      maxDate: y1,
-      disable: [(d: Date) => {
-        const isNextMonth = d.getMonth() === m1.getMonth() && d.getFullYear() === m1.getFullYear();
-        return isNextMonth && d.getDate() > 10;
-      }]
+      dateFormat: "Y-m-d",
+      minDate: currentDate,
+      maxDate: oneYearLater,
+      disable: [
+        (d: Date) => {
+          if (d.getFullYear() === year && d.getMonth() === month) {
+            return d.getDate() > 10 || d < currentDate;
+          }
+          return false; 
+        }
+      ]
     });
   }
 
@@ -260,44 +287,31 @@ export class ManageBonusAndIncentiveComponent {
     })
   }
 
-  getSingleBonusIncentive(data:any) {
+  fetchBonusIncentive(data: any, formGroup: FormGroup) {
     this.tbiId = data;
-     this.service.post('fetch/single/bonusincentive',{tbi_id: data.tbi_id}).subscribe((res: any) => {
-      if(res.status === 'success'){
+    this.service.post('fetch/single/bonusincentive', { tbi_id: data.tbi_id }).subscribe((res: any) => {
+      if (res.status === 'success') {
         const singleBonusAndIncentive = res.data[0];
-          this.editBonusAndIncentiveData = {
-            employee_id: singleBonusAndIncentive?.employee_code,
-            employee_name: singleBonusAndIncentive?.emp_name,
-            bonus_incentive_date: singleBonusAndIncentive?.bonus_incentive_date,
-            bonus_amount: singleBonusAndIncentive?.bonus_amount,
-            incentive_amount: singleBonusAndIncentive?.incentive_amount,
-            status: singleBonusAndIncentive?.status,
-          } 
-        this.updateStatusBonusAndIncentive.patchValue(this.editBonusAndIncentiveData);  
+        const patchData = {
+          employee_id: singleBonusAndIncentive?.employee_code,
+          employee_name: singleBonusAndIncentive?.emp_name,
+          bonus_incentive_date: singleBonusAndIncentive?.bonus_incentive_date,
+          bonus_amount: singleBonusAndIncentive?.bonus_amount,
+          incentive_amount: singleBonusAndIncentive?.incentive_amount,
+          status: singleBonusAndIncentive?.status,
+        };
+        this.editBonusAndIncentiveData = patchData;
+        formGroup.patchValue(patchData);
       }
-    })
+    });
   }
 
-  getSingleBonusIncentiveforEdit(data:any) {
-    this.tbiId = data;
-     this.service.post('fetch/single/bonusincentive',{tbi_id: data.tbi_id}).subscribe((res: any) => {
-      if(res.status === 'success'){
-        const singleBonusAndIncentive = res.data[0];
-          this.editBonusAndIncentiveData = {
-            employee_id: singleBonusAndIncentive?.employee_code,
-            employee_name: singleBonusAndIncentive?.emp_name,
-            bonus_incentive_date: singleBonusAndIncentive?.bonus_incentive_date,
-            bonus_amount: singleBonusAndIncentive?.bonus_amount,
-            incentive_amount: singleBonusAndIncentive?.incentive_amount,
-            status: singleBonusAndIncentive?.status,
-          } 
-        this.editBonusAndIncentive.patchValue(this.editBonusAndIncentiveData);  
-      }
-    })
+  getSingleBonusIncentive(data: any) {
+    this.fetchBonusIncentive(data, this.updateStatusBonusAndIncentive);
   }
 
-  openEditModal(data: any){
-    console.log(data)
+  getSingleBonusIncentiveforEdit(data: any) {
+    this.fetchBonusIncentive(data, this.editBonusAndIncentive);
   }
 
   updateStatus(data: any) {
@@ -319,34 +333,33 @@ export class ManageBonusAndIncentiveComponent {
     }
   }
 
-  updateBonusIncentive(data: any) {
-    
+  updateBonusIncentive() {
+    this.isEditSubmitted = true;
+    if (this.editBonusAndIncentive.valid) {
+
+      let current_data: any = {
+        employee_id: this.editBonusAndIncentive.value.employee_id,
+        bonus_incentive_date: this.editBonusAndIncentive.value.bonus_incentive_date,
+        bonus_amount: this.editBonusAndIncentive.value.bonus_amount,
+        incentive_amount: this.editBonusAndIncentive.value.incentive_amount,
+      };
+
+      this.service.post("update/bonus-incentive", current_data).subscribe(
+        (res: any) => {
+          this.toastr.success(res.data);
+          this.closeAllModals();
+          this.getBonusAndIncentives();
+        },
+        (error) => {
+          console.error('Error:', error);
+          this.toastr.error('Something went wrong!');
+        }
+      );
+    } else {
+      this.editBonusAndIncentive.markAllAsTouched();
+      this.toastr.error('Invalid Credentials!');
+      this.isEditSubmitted = false;
+    }
   }
 
 }
-
-// ngAfterViewInit() {
-//   const now = new Date();
-//   const currentDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-//   const day = now.getDate();
-//   const month = now.getMonth();
-//   const year = now.getFullYear();
-
-//   const lastAllowedCurrentMonthDate = new Date(year, month, 10);
-//   const nextMonthStart = new Date(year, month + 1, 1);
-//   const oneYearLater = new Date(year, month + 13, 0);
-
-//   flatpickr("#bonusDate", {
-//     dateFormat: "Y-m-d",
-//     minDate: currentDate,
-//     maxDate: oneYearLater,
-//     disable: [
-//       (d: Date) => {
-//         if (d.getFullYear() === year && d.getMonth() === month) {
-//           return d.getDate() > 10 || d < currentDate;
-//         }
-//         return false; 
-//       }
-//     ]
-//   });
-// }

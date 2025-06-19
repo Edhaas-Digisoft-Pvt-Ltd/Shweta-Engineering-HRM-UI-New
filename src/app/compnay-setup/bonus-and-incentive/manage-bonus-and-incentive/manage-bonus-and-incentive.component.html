@@ -129,7 +129,7 @@
                                         aria-label="Close"></button>
                                 </div>
                                 <div class="modal-body text-left">
-                                    <form [formGroup]="updateStatusBonusAndIncentive" (ngSubmit)="addBonusAndIncentive()">
+                                    <form [formGroup]="updateStatusBonusAndIncentive">
                                         <div class="row">
       
                                             <div class="col-md-5 mb-3">
@@ -189,12 +189,12 @@
                         <div class="modal-dialog modal-xl  modal-dialog-centered">
                             <div class="modal-content">
                                 <div class="modal-header">
-                                    <h5 class="modal-title" id="exampleModalLabel">Request Bonus and Incentive</h5>
+                                    <h5 class="modal-title" id="exampleModalLabel">Edit Bonus and Incentive</h5>
                                     <button type="button text-white" class="btn-close" data-bs-dismiss="modal"
                                         aria-label="Close"></button>
                                 </div>
                                 <div class="modal-body text-left">
-                                    <form [formGroup]="editBonusAndIncentive">
+                                    <form [formGroup]="editBonusAndIncentive" (ngSubmit)="updateBonusIncentive()">
                                         <div class="row">
       
                                             <div class="col-md-5 mb-3">
@@ -232,8 +232,10 @@
                                             </div>
 
                                              <div class="modal-footer">
-                                            <button type="button" class="btn approveBtn" 
-                                            >Update</button>
+                                           <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                                                <button type="submit"
+                                                    class="btn btn-primary mt-3 ml-auto btn-end submit-btn">Update</button>
+                                            </div>
                                         </div> 
                                         </div>
                                     </form>
