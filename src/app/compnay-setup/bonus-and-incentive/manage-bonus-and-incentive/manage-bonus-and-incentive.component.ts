@@ -228,20 +228,7 @@ export class ManageBonusAndIncentiveComponent {
     const lastDayPrevMonth = new Date(today.getFullYear(), today.getMonth(), 0); 
     this.maxDate = lastDayPrevMonth.toISOString().split('T')[0]; 
   }
-
-  // getemployees () {
-  //    this.service.post('all/employee', {}).subscribe((res: any) => {
-  //     console.log(res)
-  //     if (res.status == "success") {
-  //       this.employees = res.data
-  //     }
-  //   },
-  //     (error) => {
-  //       console.error('Error fetching companies:', error);
-  //     }
-  //   );
-  // }
-
+  
   addBonusAndIncentive() {
     this.isSubmitted = true;
     if (this.bonusAndIncentive.valid) {
@@ -338,13 +325,13 @@ export class ManageBonusAndIncentiveComponent {
     if (this.editBonusAndIncentive.valid) {
 
       let current_data: any = {
-        employee_id: this.editBonusAndIncentive.value.employee_id,
+        tbi_id: this.tbiId.tbi_id,
         bonus_incentive_date: this.editBonusAndIncentive.value.bonus_incentive_date,
         bonus_amount: this.editBonusAndIncentive.value.bonus_amount,
         incentive_amount: this.editBonusAndIncentive.value.incentive_amount,
       };
 
-      this.service.post("update/bonus-incentive", current_data).subscribe(
+      this.service.post("update/bonusincentive", current_data).subscribe(
         (res: any) => {
           this.toastr.success(res.data);
           this.closeAllModals();
