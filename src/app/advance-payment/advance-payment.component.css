@@ -126,6 +126,11 @@ label{
     text-align: center;
     color: black;
 }
+
+.exportExcelBtn {
+    background-color: #3674B5;
+}
+
 /* modal footer btn */
 .approveBtn{
     background-color: #3674B5;

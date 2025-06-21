@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
-import { ColDef } from 'ag-grid-community';
+import { ColDef, GridApi } from 'ag-grid-community';
 import { EmployeeActionComponent } from 'src/app/employee/employee-action/employee-action.component';
 import { HrmserviceService } from 'src/app/hrmservice.service';
 
@@ -13,7 +13,7 @@ export class ApprovedAdvancePaymentComponent {
   today: string = new Date().toISOString().split('T')[0];
   title: String = 'Company Demo';
   activeTab: string = 'tab1';
-  gridApiActive: any;
+  gridApiActive!: GridApi;;
   role: string = '';
   columnDefs: ColDef[] = [];
   rowData: any = [];
@@ -319,5 +319,11 @@ export class ApprovedAdvancePaymentComponent {
   // update function
   updateStatus(data: any) {
     alert('update');
+  }
+
+   exportExcel() {
+    if (this.gridApiActive) {
+      this.gridApiActive.exportDataAsCsv();
+    }
   }
 }

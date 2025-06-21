@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { ColDef } from 'ag-grid-community';
+import { ColDef, GridApi } from 'ag-grid-community';
 import { Router } from '@angular/router';
 import { HrmserviceService } from 'src/app/hrmservice.service';
 import { ToastrService } from 'ngx-toastr';
@@ -16,6 +16,7 @@ export class PayrollProcessComponent {
   selectedMonth: any;
   rowData: any = [];
   selectedRowData: any[] = [];
+  gridApiActive!: GridApi;
 
   today: string = new Date().toISOString().split('T')[0];
   constructor(private router: Router, private service: HrmserviceService, private toastr: ToastrService) { }
@@ -73,6 +74,10 @@ export class PayrollProcessComponent {
     this.getPayrollProcess();
   }
 
+  onGridReady(params: { api: any }) {
+    this.gridApiActive = params.api;
+  }
+
   getPayrollProcess() {
     this.service.post('fetch/payroll', {
       company_id: this.selectedCompanyId,
@@ -99,58 +104,58 @@ export class PayrollProcessComponent {
     })
   }
 
-  processPayroll() {
-    if (this.selectedRowData.length === 0) {
-      this.toastr.warning('Please select at least one employee.');
-      return;
-    }
-
-    this.selectedRowData.forEach((emp: any) => {
-      const payload = {
-        employee_id: emp.employe_id, 
-        year: this.selectedYear,
-        month: this.selectedMonth,
-        basic_salary: 20000, 
-        total_tax_deduction: 200, 
-      };
-
-      this.service.post("craete/payroll", payload).subscribe({
-        next: () => {
-          this.toastr.success(`Payroll processed successfully`);
-          this.getPayrollProcess();
-        },
-        error: (err) => {
-          console.error(err);
-        }
-      });
-    });
-  }
-
-  //for multiple selection
   // processPayroll() {
   //   if (this.selectedRowData.length === 0) {
   //     this.toastr.warning('Please select at least one employee.');
   //     return;
   //   }
 
-  //   const payloadArray = this.selectedRowData.map((emp: any) => ({
-  //     employee_id: emp.employee_code,
-  //     year: this.selectedYear,
-  //     month: this.selectedMonth,
-  //     basic_salary: 20000, 
-  //     total_tax_deduction: 500, 
-  //   }));
+  //   this.selectedRowData.forEach((emp: any) => {
+  //     const payload = {
+  //       employee_id: emp.employe_id, 
+  //       year: this.selectedYear,
+  //       month: this.selectedMonth,
+  //       // basic_salary: 20000, 
+  //       // total_tax_deduction: 200, 
+  //     };
 
-  //   this.service.post("process/payroll", payloadArray).subscribe({
-  //     next: (res) => {
-  //       this.toastr.success('Payroll processed successfully for all selected employees.');
-  //     },
-  //     error: (err) => {
-  //       console.error(err);
-  //       this.toastr.error('Failed to process payroll.');
-  //     }
+  //     this.service.post("craete/payroll", payload).subscribe({
+  //       next: () => {
+  //         this.toastr.success(`Payroll processed successfully`);
+  //         this.getPayrollProcess();
+  //       },
+  //       error: (err) => {
+  //         console.error(err);
+  //       }
+  //     });
   //   });
   // }
+
+  //for multiple selection
+  processPayroll() {
+    if (this.selectedRowData.length === 0) {
+      this.toastr.warning('Please select at least one employee.');
+      return;
+    }
+
+    const payloadArray = this.selectedRowData.map((emp: any) => ({
+      employee_id: emp.employe_id,
+      year: this.selectedYear,
+      month: this.selectedMonth,
+      // basic_salary: 20000, 
+      // total_tax_deduction: 500, 
+    }));
+
+    this.service.post("process/payroll", payloadArray).subscribe({
+      next: (res) => {
+        this.toastr.success('Payroll processed successfully for all selected employees.');
+      },
+      error: (err) => {
+        console.error(err);
+        this.toastr.error('Failed to process payroll.');
+      }
+    });
+  }
 
   columnDefs: ColDef[] = [
     {
@@ -232,5 +237,12 @@ export class PayrollProcessComponent {
     paginationPageSizeSelector: [10, 50, 100],
 
   };
+
+  exportExcel() {
+    console.log('called')
+    if (this.gridApiActive) {
+      this.gridApiActive.exportDataAsCsv();
+    }
+  }
 
 }

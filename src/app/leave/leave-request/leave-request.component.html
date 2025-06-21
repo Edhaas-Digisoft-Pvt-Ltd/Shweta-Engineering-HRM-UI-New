@@ -18,6 +18,12 @@
                     </option>
                 </select>
               </div>
+
+              <div class="ms-3 mt-4">    
+              <button class="btn exportExcelBtn btn-primary" >
+                <i class="bi bi-file-earmark-excel me-1"></i> Export to Excel
+              </button>
+            </div>
             </div>
         </div>
 
@@ -36,8 +42,8 @@
 <!-- Modal  -->
 
     <div class="modal fade" id="leaveRequestModal" tabindex="-1" aria-labelledby="exampleModalLabel" >
-        <div class="modal-dialog modal-dialog-centered modal-xl">
-            <div class="modal-content">
+        <div class="modal-dialog modal-dialog-centered modal-xl" style="max-height: 60vh;">
+          <div class="modal-content" style="max-height: 60vh; overflow-y: auto;">
                 <div class="modal-header " style="padding: 20px 40px !important">
                     <h1 class="modal-title fs-5" id="exampleModalLabel">Leave Request Info</h1>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
@@ -137,6 +143,24 @@
                                     </div>
                                     
                                 </div>
+                                  <div class="modal-footer">
+                    <button 
+                      type="button" 
+                      class="btn approveBtn" 
+                      (click)="updateStatus('Approved')"
+                      [disabled]="leaveRequestData?.status === 'Approved' || leaveRequestData?.status === 'Rejected'"
+                    >
+                      Approve Leave
+                    </button>
+                    <button 
+                      type="button" 
+                      class="btn declineBtn" 
+                      (click)="updateStatus('Rejected')"
+                      [disabled]="leaveRequestData?.status === 'Approved' || leaveRequestData?.status === 'Rejected'"
+                    >
+                      Decline Leave
+                    </button>
+                </div>
                             </div>
                             <div class="col-lg-5 p-4">
                                 <div class="leavesSchedule p-0" style="border-radius: 10px; border:1px solid rgb(188, 188, 188); overflow:hidden">
@@ -229,27 +253,47 @@
                         </div>
 
                     </div>
+
+                    <div class="row my-3">
+                      <div class="col-12 p-5">
+                        <div class="table-responsive" style="border: 1px solid #ccc;">
+                          <table class="table table-hover text-center align-middle">
+                            <thead class="sticky-top" style="top: 0; z-index: 1;">
+                              <tr>
+                                <th>Emp Code</th>
+                                <th>Start Date</th>
+                                <th>End Date</th>
+                                <th>Leave Type</th>
+                                <th>Status</th>
+                              </tr>
+                            </thead>
+                            <tbody *ngIf="data1.length > 0">
+                              <tr  *ngFor="let item of data1">
+                                <td>{{ item.emp_code }}</td>
+                                <td>{{ item.date }}</td>
+                                <td>{{ item.end_date }}</td>
+                                <td>{{ item.type }}</td>
+                                <td>{{ item.status }}</td>
+                              </tr>
+                            </tbody>
+                            <tbody *ngFor="let item of leaveHistory">
+                              <tr>
+                                <td>{{ item.emp_code }}</td>
+                                <td>{{ item.date }}</td>
+                                <td>{{ item.end_date }}</td>
+                                <td>{{ item.type }}</td>
+                                <td>{{ item.status }}</td>
+                              </tr>
+                            </tbody>
+                          </table>
+                        </div>
+                      </div>
+                    </div>
                 </form>
 
-                <div class="modal-footer">
-                    <button 
-                      type="button" 
-                      class="btn approveBtn" 
-                      (click)="updateStatus('Approved')"
-                      [disabled]="leaveRequestData?.status === 'Approved' || leaveRequestData?.status === 'Rejected'"
-                    >
-                      Approve Leave
-                    </button>
-                    <button 
-                      type="button" 
-                      class="btn declineBtn" 
-                      (click)="updateStatus('Rejected')"
-                      [disabled]="leaveRequestData?.status === 'Approved' || leaveRequestData?.status === 'Rejected'"
-                    >
-                      Decline Leave
-                    </button>
-                    <button type="button" class="btn btn-outline-dark fw-semobild " data-bs-dismiss="modal">Cancel</button>
-                </div>
+              <div class="row">
+                
+              </div>
             </div>
         </div>
     </div>

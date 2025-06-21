@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { ColDef } from 'ag-grid-community';
+import { ColDef, GridApi } from 'ag-grid-community';
 import { EmployeeActionComponent } from './employee-action/employee-action.component';
 import { Router } from '@angular/router';
 import { HrmserviceService } from 'src/app/hrmservice.service';
@@ -12,7 +12,7 @@ import { ToastrService } from 'ngx-toastr';
 })
 export class EmployeeComponent {
 
-  gridApiActive: any;
+  gridApiActive!: GridApi;
   searchValue: string = '';
   CompanyNames: any ;
   selectedValue: string = 'Company A';
@@ -191,6 +191,12 @@ export class EmployeeComponent {
 
     // });
     console.log("editApp",params);
+  }
+
+  exportExcel() {
+    if (this.gridApiActive) {
+      this.gridApiActive.exportDataAsCsv();
+    }
   }
 
 }

@@ -90,6 +90,10 @@ label{
 a.nav-link{
     position: relative;;
 }
+.exportExcelBtn {
+    background-color: #3674B5;
+}
+
 @media(max-width:768px){
     .main-content{
         padding:15px 0px;
@@ -122,14 +126,14 @@ label{
     width: 150px;
     position: relative;
 }
-.attendanceButtons::after {
+/* .attendanceButtons::after {
     position: absolute;
     content: "";
     height: 2px;
     width: 27px;
     top: 52px;
     background-color: #578fca;
-}
+} */
 .attendanceButtons{
     /* border-right : 1px dashed gray; */
     position: relative;

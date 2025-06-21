@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { FormGroup, FormBuilder, Validators } from '@angular/forms';
-import { ColDef } from 'ag-grid-community';
+import { ColDef, GridApi } from 'ag-grid-community';
 import { HrmserviceService } from '../hrmservice.service';
 import { ToastrService } from 'ngx-toastr';
 declare var bootstrap: any;
@@ -18,7 +18,7 @@ export class AdvancePaymentComponent {
   EditAdvancePayment!: FormGroup;
 
   activeTab: string = 'tab1';
-  gridApiActive: any;
+  gridApiActive!: GridApi;
   CompanyNames: any = [] ;
   selectedCompanyId : any = 1 ;
   selectedYear: any;
@@ -117,7 +117,7 @@ export class AdvancePaymentComponent {
   //   })
   // }
 
-   getAllAdvSalary() {
+  getAllAdvSalary() {
     this.service.post('all/advancesaraly', { 
       // company_id: this.selectedCompanyId, 
       // year: this.selectedYear,
@@ -337,6 +337,12 @@ export class AdvancePaymentComponent {
       },(error) => {
         console.error('Error:', error);
       });
+    }
+  }
+
+  exportExcel() {
+    if (this.gridApiActive) {
+      this.gridApiActive.exportDataAsCsv();
     }
   }
 }

@@ -1,40 +1,31 @@
-<div class="row gap-2 mb-0 align-items-center justify-content-end">
-    <div class="col col-lg-4 d-flex align-items-end search-box text-start">
-        <input class="py-1 mx-2 form-control me-2" type="text" #searchBox placeholder="Search Employee code"
-            [(ngModel)]="searchValue" value=""/>
+<div class="row mb-2 justify-content-end">
+  <div class="col-lg-8 d-flex align-items-end justify-content-end gap-3 flex-wrap">
 
-          <!-- <div class="w-50 text-start">
-            <label class="fw-bold">Select Employee </label>
-            <br>
-            <select class="form-select">
-              <option *ngFor="let item of employees" [value]="item.employee_id">{{ item.employee_name }}</option>
-            </select>
-          </div> -->
-        <div>
-            <label>Select Year</label><br />
-            <select class="form-control selectdata" style="width: 150px;" [(ngModel)]="selectedYear">
-                <option *ngFor="let year of years" [value]="year">{{ year }}</option>
-            </select>
-        </div>
+    <div class="d-flex flex-column">
+      <label class="fw-bold mb-1">Search Emp Code</label>
+      <input class="form-control py-1" type="text" #searchBox placeholder="Search Employee code"
+        [(ngModel)]="searchValue" />
     </div>
-    <span class="devider p-0"></span>
-    <div class="col col-lg-4 d-flex gap-2 attendanceButtons text-start align-items-end">
-        <div>
-            <label>Select Month</label><br />
-            <div class="d-flex align-items-center w-100">
-                <select class="form-control selectdata3" style="width: 150px;" [(ngModel)]="selectedMonth"
-                   >
-                    <option *ngFor="let month of months" [value]="month.id">{{ month.value }}</option>
-                </select>
-            </div>
-        </div>
 
-        <div class="flex-grow-1">
-            <button class="btn btn-primary exportExcelBtn w-75  float-end" (click)="searchEmployeeAdvanceSalary()">
-                Search
-            </button>
-        </div>
+    <div class="d-flex flex-column">
+      <label class="fw-bold mb-1">Select Year</label>
+      <select class="form-control" style="width: 140px;" [(ngModel)]="selectedYear">
+        <option *ngFor="let year of years" [value]="year">{{ year }}</option>
+      </select>
     </div>
+
+    <div class="d-flex flex-column">
+      <label class="fw-bold mb-1">Select Month</label>
+      <select class="form-control" style="width: 140px;" [(ngModel)]="selectedMonth">
+        <option *ngFor="let month of months" [value]="month.id">{{ month.value }}</option>
+      </select>
+    </div>
+
+    <div class="d-flex flex-column justify-content-end">
+      <button class="btn btn-primary searchBtn" (click)="searchEmployeeAdvanceSalary()">Search</button>
+    </div>
+
+  </div>
 </div>
 
 <div class="row gap-4 row-wrap my-3 ">
