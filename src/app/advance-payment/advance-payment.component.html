@@ -20,42 +20,40 @@
     </ul>
     <div class="tab-content mt-3">
       <div *ngIf="activeTab === 'tab1'">
-       <div class="row mb-4 justify-content-end">
-          <div class="col-lg-11 d-flex flex-wrap gap-4   justify-content-end align-items-end">
+        <div class="row gx-3  align-items-center  p-2 rounded-2">
+            <div class="col-12  mt-2">
+                <div class="row justify-content-end">
+                    <div class="col-3">
+                        <label for="">Select Company</label>
+                        <select class="form-select" (change)="onCompanyChange($event)">
+                          <option *ngFor="let item of CompanyNames" [value]="item.company_id">{{ item.company_name }}</option>
+                        </select>
+                    </div>
 
-            <!-- Company Select -->
-            <div class="d-flex flex-column">
-              <label class="fw-bold mb-1">Select Company</label>
-              <select class="form-select" (change)="onCompanyChange($event)">
-                <option *ngFor="let item of CompanyNames" [value]="item.company_id">{{ item.company_name }}</option>
-              </select>
+                    <div class="col-2">
+                        <label for="">Select Year</label>
+                        <select class="form-select" [(ngModel)]="selectedYear" (change)="onYearMonthChange()">
+                          <option *ngFor="let year of financialYears">{{ year }}</option>
+                        </select>
+                    </div>
+                    <div class="col vector">
+                        <span class="mt-4"></span>
+                    </div>
+                    <div class="col-2">
+                        <label for="">Select Month</label>
+                        <select class="form-select" [(ngModel)]="selectedMonth" (change)="onYearMonthChange()">
+                          <option *ngFor="let month of months" [value]="month.id">{{ month.value }}</option>
+                        </select>
+                    </div>
+
+                    <div class="col-auto d-flex align-items-end">
+                      <button class="btn btn-primary exportExcelBtn" (click)="exportExcel()">
+                        <i class="bi bi-file-earmark-excel me-1"></i> Export to Excel
+                      </button>
+                    </div>
+
+                </div>
             </div>
-
-            <!-- Year Select -->
-            <div class="d-flex flex-column">
-              <label class="mb-1">Select Year</label>
-              <select class="form-select" [(ngModel)]="selectedYear" (change)="onYearMonthChange()">
-                <option *ngFor="let year of financialYears">{{ year }}</option>
-              </select>
-            </div>
-
-            <!-- Month Select -->
-            <div class="d-flex flex-column">
-              <label class="mb-1">Select Month</label>
-              <select class="form-select" [(ngModel)]="selectedMonth" (change)="onYearMonthChange()">
-                <option *ngFor="let month of months" [value]="month.id">{{ month.value }}</option>
-              </select>
-            </div>
-
-            <!-- Export Button -->
-            <div class="d-flex flex-column">
-              <label class="invisible">Export</label> <!-- keeps alignment with others -->
-              <button class="btn btn-primary exportExcelBtn" (click)="exportExcel()">
-                <i class="bi bi-file-earmark-excel me-1"></i> Export to Excel
-              </button>
-            </div>
-
-          </div>
         </div>
 
         <div class="row gap-4 row-wrap my-3 ">

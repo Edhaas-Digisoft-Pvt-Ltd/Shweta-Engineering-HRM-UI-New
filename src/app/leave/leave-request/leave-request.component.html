@@ -175,13 +175,13 @@
                                       <hr class="m-0">
                                     </div>
                               
-                                    <div class="col-md-4 col-sm-6 my-2" *ngIf="leaveBalance.casual">
+                                    <div class="col-md-4 col-sm-6 my-2">
                                       <div class="leaveStatusCard text-center border" style="border-radius: 5px">
                                         <div class="heading p-2" style="background-color: #C8E3FF; border-radius: 5px 5px 0px 0px; font-size: 13px;">
                                           Total Leaves
                                         </div>
                                         <div class="content p-2">
-                                          {{ leaveBalance.casual.total }}
+                                          {{ leaveBalance?.leave_count }}
                                         </div>
                                       </div>
                                     </div>
@@ -192,7 +192,7 @@
                                           Taken Leaves
                                         </div>
                                         <div class="content p-2">
-                                          {{ leaveBalance.casual.taken }}
+                                          {{ leaveBalance?.apply_leave_count}}
                                         </div>
                                       </div>
                                     </div>
@@ -203,7 +203,7 @@
                                           Balance Leaves
                                         </div>
                                         <div class="content p-2">
-                                          {{ leaveBalance.casual.balance }}
+                                          {{ leaveBalance?.leave_balance_count }}
                                         </div>
                                       </div>
                                     </div>
@@ -220,7 +220,7 @@
                                           Total Leaves
                                         </div>
                                         <div class="content p-2">
-                                          {{ leaveBalance.sick.total }}
+                                          {{ leaveBalance?.leave_count }}
                                         </div>
                                       </div>
                                     </div>
@@ -231,7 +231,7 @@
                                           Taken Leaves
                                         </div>
                                         <div class="content p-2">
-                                          {{ leaveBalance.sick.taken }}
+                                          {{ leaveBalance?.leave_count }}
                                         </div>
                                       </div>
                                     </div>
@@ -242,7 +242,7 @@
                                           Balance Leaves
                                         </div>
                                         <div class="content p-2">
-                                          {{ leaveBalance.sick.balance }}
+                                          {{ leaveBalance?.leave_count }}
                                         </div>
                                       </div>
                                     </div>
@@ -254,7 +254,7 @@
 
                     </div>
 
-                    <div class="row my-3">
+                    <div class="row my-3" *ngIf="previousLeaves?.length">
                       <div class="col-12 p-5">
                         <div class="table-responsive" style="border: 1px solid #ccc;">
                           <table class="table table-hover text-center align-middle">
@@ -267,22 +267,13 @@
                                 <th>Status</th>
                               </tr>
                             </thead>
-                            <tbody *ngIf="data1.length > 0">
-                              <tr  *ngFor="let item of data1">
-                                <td>{{ item.emp_code }}</td>
-                                <td>{{ item.date }}</td>
-                                <td>{{ item.end_date }}</td>
-                                <td>{{ item.type }}</td>
-                                <td>{{ item.status }}</td>
-                              </tr>
-                            </tbody>
-                            <tbody *ngFor="let item of leaveHistory">
+                            <tbody *ngFor="let item of previousLeaves">
                               <tr>
-                                <td>{{ item.emp_code }}</td>
-                                <td>{{ item.date }}</td>
+                                <td>{{ item.employee_code }}</td>
+                                <td>{{ item.start_date }}</td>
                                 <td>{{ item.end_date }}</td>
-                                <td>{{ item.type }}</td>
-                                <td>{{ item.status }}</td>
+                                <td>{{ item.leave_name }}</td>
+                                <td>{{ item.leave_status }}</td>
                               </tr>
                             </tbody>
                           </table>

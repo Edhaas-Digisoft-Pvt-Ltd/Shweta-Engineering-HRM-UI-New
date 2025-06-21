@@ -20,25 +20,27 @@ export class LeaveRequestComponent {
   params: any;
   leaveRequestForm!: FormGroup;
   selectedCompanyId : any = 1;
-   rowData : any = [];
+  rowData : any = [];
   leaveRequestData!: any;
   empLeaveId : any;
+  leaveBalance : any = {};
+  previousLeaves: any;
 
   // @ViewChild('leaveModal') leaveModalRef!: ElementRef;
 
   // leaves data 
-  leaveBalance = {
-    casual: {
-      total: 8,
-      taken: 5,
-      balance: 3
-    },
-    sick: {
-      total: 8,
-      taken: 2,
-      balance: 6
-    }
-  };
+  // leaveBalance = {
+  //   casual: {
+  //     total: 8,
+  //     taken: 5,
+  //     balance: 3
+  //   },
+  //   sick: {
+  //     total: 8,
+  //     taken: 2,
+  //     balance: 6
+  //   }
+  // };
 
   CompanyNames: any = [] ;
   selectedValue: any = 1 ; // Default selected
@@ -74,41 +76,12 @@ export class LeaveRequestComponent {
   };
 
   columnDefs: ColDef[] = [
-    { headerName: 'Name', field: 'emp_name', sortable: true, filter: true},
-    { headerName: 'Company Name', field: 'company_name',sortable: true, filter: true, minWidth: 180,},
+    { headerName: 'Employee Code', field: 'employee_code', sortable: true, filter: true},
+    { headerName: 'Employee Name', field: 'emp_name', sortable: true, filter: true},
     { headerName: 'Department', field: 'department_name',sortable: true, filter: true},
-    { headerName: 'Start Date', field: 'start_date',sortable: true, filter: true},
-    { headerName: 'End Date', field: 'end_date',sortable: true, filter: true},
-    { headerName: 'Day Count', field: 'apply_leave_count',sortable: true, filter: true},
-
-    {
-      headerName: 'Leave Status',
-      field: 'leave_status',
-      sortable: true,
-      filter: true,
-      cellRenderer: (params: any) => {
-        const status = params.value;
-        let backgroundColor = '#6c757d'; // Default gray
-        let textColor = '#000';
-
-        if (status === 'Approved') backgroundColor = '#CAFFEA';
-        else if (status === 'Rejected') backgroundColor = '#FFAFAF';
-        else if (status === 'pending') {
-          backgroundColor = '#FFF291';
-          textColor = '#716300';
-        }
-
-        return `<span style="background-color:${backgroundColor}; color:${textColor}; 
-               padding:0px ; margin:5px ;border-radius:20px; display:flex; justify-content:center; align-items:center;width:95%; height:30px">
-                ${status}
-              </span>`;
-      }
-    },
-
     {
       headerName: 'Actions',
       cellStyle: { border: '1px solid #ddd' },
-      maxWidth: 100,
       cellRenderer: EditLeaveRequestComponent,
       cellRendererParams: {
         editCallback: (leaveId: any) => this.getSingleLeaveRequest(leaveId), 
@@ -120,18 +93,20 @@ export class LeaveRequestComponent {
     this.empLeaveId = params;
      this.service.post(`single/leave/request`,{ "tbl_emp_leave_id": this.empLeaveId}).subscribe((res: any) => {
        if (res.status === 'success') {
-        const singleleaveRequestData = res.data[0]; 
+        const singleleaveRequestData = res.current_leave; 
         this.leaveRequestData = {
           employeeName: singleleaveRequestData?.emp_name,
           startDate: singleleaveRequestData?.start_date,
           endDate: singleleaveRequestData?.end_date,
-          leaveType: singleleaveRequestData?.leave_type,
+          leaveType: singleleaveRequestData?.leave_name,
           status: singleleaveRequestData?.leave_status, // or 'Approved', 'Rejected'
           noOfDays: singleleaveRequestData?.apply_leave_count,
           department: singleleaveRequestData?.department_name,
           leavereason: singleleaveRequestData?.leave_reason,
         };
-        this.leaveRequestForm.patchValue(this.leaveRequestData);    
+        this.leaveRequestForm.patchValue(this.leaveRequestData);  
+        this.leaveBalance = res.leavebalnce[0];   
+        this.previousLeaves = res.previous_leaves;
        }
     });
   }
@@ -159,6 +134,7 @@ export class LeaveRequestComponent {
       (res: any) => {
         if (res.status === 'success') {
           this.rowData = res.data.map((item:any)=>({
+            employee_code:item.employe_id,
             emp_name:item.emp_name,
             company_name:item.company_name,
             department_name:item.department_name,
@@ -263,6 +239,14 @@ export class LeaveRequestComponent {
       });
     }
   }
+
+  // data1 = [
+  //   { emp_code: 'SEE202505129', date: '2025-06-01', end_date: '2025-06-03', type: 'Sick Leave', status: 'Pending' },
+  // ];
+  // leaveHistory = [
+  //   { emp_code: 'SEE202505129', date: '2025-06-01', end_date: '2025-06-03', type: 'Sick Leave', status: 'Approved' },
+  //   { emp_code: 'SEE202505129', date: '2025-06-01', end_date: '2025-06-03', type: 'c Leave', status: 'Rejected' },
+  // ];
 
   submitForm() {
     if (this.leaveRequestForm.valid) {

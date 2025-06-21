@@ -74,7 +74,7 @@ const routes: Routes = [
         component: CreateEmployeeComponent,
       },
       {
-        path: 'EmployeeDashboard',
+        path: 'EmployeeInDetail',
         component: EmployeeDashboardComponent,
       },
       {

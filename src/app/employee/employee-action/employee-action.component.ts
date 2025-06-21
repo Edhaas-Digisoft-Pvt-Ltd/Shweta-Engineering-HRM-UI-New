@@ -40,7 +40,7 @@ export class EmployeeActionComponent implements ICellRendererAngularComp {
   }
 
   viewEmployee() {
-    this.router.navigate(['/authPanal/EmployeeDashboard'],{
+    this.router.navigate(['/authPanal/EmployeeInDetail'],{
     queryParams: { id: this.employeID }
   });
     console.log(this.employeID);

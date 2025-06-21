@@ -138,15 +138,16 @@ export class PayrollProcessComponent {
       return;
     }
 
-    const payloadArray = this.selectedRowData.map((emp: any) => ({
+    const payrolls  = this.selectedRowData.map((emp: any) => ({
       employee_id: emp.employe_id,
       year: this.selectedYear,
       month: this.selectedMonth,
       // basic_salary: 20000, 
       // total_tax_deduction: 500, 
     }));
-
-    this.service.post("process/payroll", payloadArray).subscribe({
+    const payload = { payrolls };
+    console.log('payloadArray',payload)
+    this.service.post("craete/payroll", payload).subscribe({
       next: (res) => {
         this.toastr.success('Payroll processed successfully for all selected employees.');
       },
