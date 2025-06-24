@@ -171,10 +171,10 @@
       <div class="modal-footer">
         <button type="button" class="btn approveBtn" (click)="updateStatus('Approved')"
           [disabled]="EditAdvancePaymentData?.status === 'Approved' || EditAdvancePaymentData?.status === 'Rejected'">Approve
-          Leave</button>
+          Request</button>
         <button type="button" class="btn declineBtn" (click)="updateStatus('Rejected')"
           [disabled]="EditAdvancePaymentData?.status === 'Approved' || EditAdvancePaymentData?.status === 'Rejected'">Decline
-          Leave</button>
+          Request</button>
         <button type="button" class="btn btn-outline-dark fw-semobild " data-bs-dismiss="modal">Cancel</button>
       </div>
     </div>

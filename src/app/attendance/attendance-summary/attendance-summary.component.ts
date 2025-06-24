@@ -1,6 +1,6 @@
 import { Component, ViewChild } from '@angular/core';
 import { AgGridAngular } from 'ag-grid-angular';
-import { GridApi, ColumnApi, GridReadyEvent, ColDef } from 'ag-grid-community';
+import { GridApi, ColumnApi, GridReadyEvent, ColDef, GridOptions } from 'ag-grid-community';
 import { AttendanceActionComponent } from '../attendance-action/attendance-action.component';
 import * as XLSX from 'xlsx';
 import { HrmserviceService } from 'src/app/hrmservice.service';
@@ -62,20 +62,21 @@ export class AttendanceSummaryComponent {
     for (let i = 1; i <= daysInMonth; i++) {
       const date = new Date(Date.UTC(this.selectedYear, this.selectedMonth, i));
       const dayName = date.toLocaleDateString('en-US', { weekday: 'short' });
-      const header = `${this.months[this.selectedMonth].name} ${i} ${dayName}`;
+      const header = `${i}\n${dayName}`;
       const isSunday = dayName === 'Sun';
       const fieldKey = this.formatDateKey(date);
 
       this.columnDefs.push({
-        headerName: header,
+        headerValueGetter: () => header,
         field: fieldKey,
         cellRenderer: (params: any) => this.dotAndImageRenderer(params, isSunday),
-
+        minWidth: 50,
+        maxWidth: 80,
       });
     }
   }
 
-  gridOptions = {
+  gridOptions: GridOptions = {
     pagination: false,
     paginationPageSize: 10,
   };

@@ -110,27 +110,36 @@ export class ManageBonusAndIncentiveComponent {
 
   ngAfterViewInit() {
     const now = new Date();
-    const currentDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
     const day = now.getDate();
     const month = now.getMonth();
     const year = now.getFullYear();
 
-    const lastAllowedCurrentMonthDate = new Date(year, month, 10);
+    const currentDate = new Date(year, month, day);
     const nextMonthStart = new Date(year, month + 1, 1);
     const oneYearLater = new Date(year, month + 13, 0);
 
+    const minDate = day <= 10 ? currentDate : nextMonthStart;
+
+    const disableDates = day <= 10
+      ? [
+          (d: Date) => {
+            return d.getFullYear() === year &&
+              d.getMonth() === month &&
+              d.getDate() > 10;
+          },
+        ]
+      : [
+          (d: Date) => d.getFullYear() === year && d.getMonth() === month
+        ];
+
     flatpickr("#bonusDate", {
       dateFormat: "Y-m-d",
-      minDate: currentDate,
+      minDate,
       maxDate: oneYearLater,
-      disable: [
-        (d: Date) => {
-          if (d.getFullYear() === year && d.getMonth() === month) {
-            return d.getDate() > 10 || d < currentDate;
-          }
-          return false; 
-        }
-      ]
+      disable: disableDates,
+      onChange: (selectedDates: Date[], dateStr: string) => {
+        this.bonusAndIncentive.get('bonus_incentive_date')?.setValue(dateStr);
+      },
     });
   }
 
