@@ -102,14 +102,13 @@ export class AttendanceComponent {
   downloadTemplate(): void {
     const userConfirmed = confirm("Do you want to download the daily attendance template?");
     if (userConfirmed) {
-      const headers = ['employe_id', 'attendance_date', 'check_in', 'check_out', 'shift_id', 'status'];
+      const headers = ['employe_id', 'attendance_date', 'check_in', 'check_out', 'shift_id'];
       const exampleRow = [
         '1',
-        '1-06-2025',
+        'mm-dd-yyyy',
         '7:00',
         '19:00',
         '1',
-        'P'
       ];
 
       const worksheet: XLSX.WorkSheet = XLSX.utils.aoa_to_sheet([headers, exampleRow]);
