@@ -4,7 +4,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { ChartData, ChartOptions } from 'chart.js';
 import { ToastrService } from 'ngx-toastr';
 import { HrmserviceService } from 'src/app/hrmservice.service';
-
+declare var bootstrap: any;
 @Component({
   selector: 'app-employee-dashboard',
   templateUrl: './employee-dashboard.component.html',
@@ -240,7 +240,13 @@ export class EmployeeDashboardComponent {
       this.toastr.success('Leave Added !!!');
       this.router.navigate(['/authPanal/EmployeeInDetail']);
       this.leaveForm.reset();
-
+      const modalElement = document.getElementById('applyLeaveModal');
+      if (modalElement) {
+        const modalInstance = bootstrap.Modal.getInstance(modalElement);
+        if (modalInstance) {
+          modalInstance.hide();
+        }
+      }
       //  API here
     }
     else {
@@ -264,7 +270,13 @@ export class EmployeeDashboardComponent {
       this.toastr.success(' Request Added !!!');
       this.router.navigate(['/authPanal/EmployeeInDetail']);
       this.advanceSalaryForm.reset();
-      //  API here
+       const modalElement = document.getElementById('advanceSalaryModal');
+      if (modalElement) {
+        const modalInstance = bootstrap.Modal.getInstance(modalElement);
+        if (modalInstance) {
+          modalInstance.hide();
+        }
+      }
     }
     else {
       // this.advanceSalaryForm.markAllAsTouched();

@@ -87,6 +87,10 @@ export class AttendanceSummaryComponent {
       .split('T')[0];
   }
 
+  get selectedMonthYear(): string {
+    return `${this.months[this.selectedMonth].name} ${this.selectedYear}`;
+  }
+
   fetchDailySummary() {
     const payload = {
       month: this.selectedMonth + 1,

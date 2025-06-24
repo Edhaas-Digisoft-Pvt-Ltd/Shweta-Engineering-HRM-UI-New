@@ -82,11 +82,9 @@ export class ConsolidateAttendanceSummaryComponent {
   scrollToSelectedMonth() {
     if (this.gridApi) {
       // Middle index of the HEADERS array (11 items -> index 5)
-      const midHeader = this.HEADERS[Math.floor(this.HEADERS.length / 2)].key;
-
-      // Construct the field name like 'month-4-HR' (for May, assuming HR is middle)
-      const targetField = `month-${this.selectedMonth}-${midHeader}`;
-
+      const firstHeader = this.HEADERS[0].key;
+    // Construct the field name like 'month-4-PR'
+      const targetField = `month-${this.selectedMonth}-${firstHeader}`;
       this.gridApi.ensureColumnVisible(targetField);
     }
   }
