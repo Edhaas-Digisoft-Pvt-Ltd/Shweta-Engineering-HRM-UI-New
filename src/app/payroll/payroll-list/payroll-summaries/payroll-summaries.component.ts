@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import {
   ColDef,
   GridApi,
@@ -14,6 +14,8 @@ import {
   FormControl,
 } from '@angular/forms';
 import { AdvanceSalaryBtnComponent } from './advance-salary-btn/advance-salary-btn.component';
+import { ToastrService } from 'ngx-toastr';
+import { HrmserviceService } from 'src/app/hrmservice.service';
 
 @Component({
   selector: 'app-payroll-summaries',
@@ -21,12 +23,10 @@ import { AdvanceSalaryBtnComponent } from './advance-salary-btn/advance-salary-b
   styleUrls: ['./payroll-summaries.component.css'],
 })
 export class PayrollSummariesComponent {
-  payrollDetails: FormGroup;
+  payrollDetails!: FormGroup;
+  employee_id : any;
 
-  ngOnInit() {
-    this.columnDefs2= this.generateColumns(['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep','oct','nov','dec']);
-  }
-  constructor(private router: Router, private formBuilder: FormBuilder) {
+  constructor(private route: ActivatedRoute, private router: Router, private formBuilder: FormBuilder, private service: HrmserviceService) {
     this.payrollDetails = this.formBuilder.group({
       id: ['', [Validators.required]],
       employeeName: ['', [Validators.required]],
@@ -34,6 +34,25 @@ export class PayrollSummariesComponent {
       date: ['', [Validators.required]],
     });
   }
+
+  ngOnInit() {
+     this.route.queryParams.subscribe(params => {
+      this.employee_id = params['id'];
+      console.log('Received employee  payroll:', params['id']);
+    });
+    this.getSinglePayroll()
+
+    this.columnDefs2= this.generateColumns(['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep','oct','nov','dec']);
+  }
+
+  getSinglePayroll() {
+    this.service.post('get/single/payroll_list', { employee_id : this.employee_id }).subscribe((res: any) => {
+      console.log(res)
+      
+    })
+  }
+
+
   backtoPayroll() {
     this.router.navigate(['/authPanal/payrollList']);
   }

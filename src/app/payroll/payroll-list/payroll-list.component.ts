@@ -73,7 +73,7 @@ export class PayrollListComponent {
   }
 
   getpayrollList() {
-    this.service.post('fetch/payroll', { 
+    this.service.post('get/payroll_list', { 
       company_id: this.selectedCompanyId, 
       year: this.selectedYear,
       month: this.selectedMonth,
@@ -82,8 +82,13 @@ export class PayrollListComponent {
       try {
         if (res.status === 'success') {
           this.rowData = res.data.map((item:any)=>({
-            employee_code:item.employee_code,
-           
+            employee_code: item.employee_code,
+            employeeName : item.emp_name,
+            grossAmount : item.gross_salary,
+            overTime : item.total_overtime,
+            netAmount : item.net_salary,
+            deduction : item.deduction,
+            employe_id : item.employe_id
           }));
         } 
       } catch (error) {
@@ -100,17 +105,18 @@ export class PayrollListComponent {
       headerCheckboxSelection: true, // Optional: if you want to select/unselect all
     },
     {
-      headerName: 'Date',
-      field: 'date',
+      headerName: 'Employee Code',
+      field: 'employee_code',
       sortable: true,
       filter: true,
-      maxWidth: 100,
+      maxWidth: 180,
     },
     {
       headerName: 'Employee Name',
       field: 'employeeName',
       sortable: true,
       filter: true,
+      maxWidth: 230,
     },
 
     {
@@ -118,36 +124,29 @@ export class PayrollListComponent {
       field: 'grossAmount',
       sortable: true,
       filter: true,
-      maxWidth: 150
+      maxWidth: 170
     },
     {
-      headerName: 'Over Time (in Hrs)',
+      headerName: 'Over Time',
       field: 'overTime',
       sortable: true,
       filter: true,
-      maxWidth: 150
+      maxWidth: 130
 
     },
     {
-      headerName: 'Total Hours (in Hrs)',
-      field: 'joinDate',
-      sortable: true,
-      filter: true,
-      maxWidth: 150
-    },
-    {
       headerName: 'Deductions',
-      field: 'contact',
+      field: 'deduction',
       sortable: true,
       filter: true,
-      maxWidth: 150
+      maxWidth: 140
     },
     {
       headerName: 'Net Amount',
-      field: 'contact',
+      field: 'netAmount',
       sortable: true,
       filter: true,
-      maxWidth: 150,
+      maxWidth: 140,
       // flex:1
     },
 
@@ -158,6 +157,7 @@ export class PayrollListComponent {
       maxWidth: 100,
       cellRenderer: PayrollActionBtnComponent,
       cellRendererParams: {
+        viewEmployee : (field: any) => this.editApp(field), 
         // clickedEdit: (field: any) => this.getqutation(field),
         // clickedView: (field: any) => this.viewqutation(field),
         // quotationEdit: (field: any) => this.editqutation(field),
@@ -166,6 +166,10 @@ export class PayrollListComponent {
 
     },
   ];
+
+  editApp(params :any ){
+    console.log("editApp",params);
+  }
 
   onSelectionChanged(event: any): void {
     const selectedRows = event.api.getSelectedRows();
