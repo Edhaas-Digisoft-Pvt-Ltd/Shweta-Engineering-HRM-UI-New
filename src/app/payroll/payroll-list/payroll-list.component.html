@@ -21,20 +21,20 @@
                         </select>
                     </div>
 
-                   <div class="col-2">
+                   <div class="col-2 dotted-line">
                         <label for="">Year</label>
                         <input class="form-control" [value]="selectedYear" readonly />
                     </div>
-                    <div class="col vector">
+                    <!-- <div class="col vector">
                         <span class="mt-4"></span>
-                    </div>
+                    </div> -->
                     <div class="col-2">
                         <label for="">Month</label>
                         <input class="form-control" [value]="getMonthName(selectedMonth)" readonly />
                     </div>
 
                      <div class="col-auto d-flex align-items-end">
-                        <button class="btn exportExcelBtn btn-primary ms-2">
+                        <button class="btn exportExcelBtn btn-primary">
                         <i class="bi bi-file-earmark-excel me-1"></i> Export To Excel
                         </button>
                     </div>
