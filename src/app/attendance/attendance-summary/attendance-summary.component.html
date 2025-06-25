@@ -8,7 +8,7 @@
           [(ngModel)]="searchValue" (ngModelChange)="onFilterBoxChange()" />
       </div>
 
-      <div class="col-2">
+      <div class="col-2 dotted-line">
         <label>Select Year</label>
         <select class="form-select" [(ngModel)]="selectedYear" (change)="onMonthYearChange()">
           <option *ngFor="let year of years" [value]="year">{{ year }}</option>
