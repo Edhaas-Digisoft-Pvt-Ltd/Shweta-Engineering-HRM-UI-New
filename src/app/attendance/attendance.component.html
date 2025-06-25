@@ -34,7 +34,6 @@
                             <div class="row gap-0 gx-2 my-4 align-items-center justify-content-between">
                                 <div class="col col-lg-3 text-end  search-box">
 
-
                                     <!-- <input class="form-control me-3" type="search" placeholder="Search"
                                             aria-label="Search"> -->
 
@@ -67,18 +66,18 @@
                                 <div class="col col-lg-4 text-center d-flex justify-content-center gap-3">
                                     <!-- Download Template -->
                                     <div class="dropdown">
-                                        <button class="btn ExcelBtn text-white dropdown-toggle" type="button"
-                                            data-bs-toggle="dropdown">
+                                        <button class="btn ExcelBtn text-white" type="button"
+                                            (click)="downloadTemplate()">
                                             Download Template
                                         </button>
-                                        <ul class="dropdown-menu">
+                                        <!-- <ul class="dropdown-menu"> -->
                                             <!-- <li><a class="dropdown-item" (click)="downloadTemplate()"> Daliy Attendance
                                                     </a></li> -->
-                                            <li><a class="dropdown-item" (click)="downloadTemplate()"> Monthly Attendance
-                                            </a></li>
+                                            <!-- <li><a class="dropdown-item" (click)="downloadTemplate()"> Monthly Attendance
+                                            </a></li> -->
                                             <!-- <li><a class="dropdown-item" (click)="MonthlyAttendanceTemplate()"> Monthly Attendance
                                             </a></li> -->
-                                        </ul>
+                                        <!-- </ul> -->
                                     </div>
 
                                     <!-- Import Excel -->

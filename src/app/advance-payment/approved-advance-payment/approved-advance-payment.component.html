@@ -8,15 +8,15 @@
                 </select>
             </div>
 
-            <div class="col-2">
+            <div class="col-2 dotted-line">
                 <label for="">Select Year</label>
                 <select class="form-select" [(ngModel)]="selectedYear" (change)="onYearMonthChange()">
                   <option *ngFor="let year of financialYears">{{ year }}</option>
                 </select>
             </div>
-            <div class="col vector">
+            <!-- <div class="col vector">
                 <span class="mt-4"></span>
-            </div>
+            </div> -->
             <div class="col-2">
                 <label for="">Select Month</label>
                 <select class="form-select" [(ngModel)]="selectedMonth" (change)="onYearMonthChange()">

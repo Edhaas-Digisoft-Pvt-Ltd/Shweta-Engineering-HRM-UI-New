@@ -103,3 +103,7 @@ label {
 .searchBtn {
     background-color: #3674B5;
 }
+
+.dotted-line {
+    border-right : 1px dashed gray;padding-right:12px;
+}
