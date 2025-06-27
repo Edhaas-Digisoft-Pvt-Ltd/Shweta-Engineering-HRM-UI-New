@@ -29,6 +29,11 @@ export class PayrollSummariesComponent {
   attendanceDetails : any;
   selectedYear: any;
   selectedMonth: any;
+  columnDefs2: any;
+  rowData : any;
+  AdvanceSalaryDetails : any;
+  hasAdvanceSalary : any;
+  prevAdvanceSalaryDetails: any;
   today: string = new Date().toISOString().split('T')[0];
 
   constructor(private route: ActivatedRoute, private router: Router, private formBuilder: FormBuilder, private service: HrmserviceService) {
@@ -66,8 +71,8 @@ export class PayrollSummariesComponent {
       console.log('Received employee  payroll:', params['id']);
     });
     this.getSinglePayroll()
-
-    this.columnDefs2= this.generateColumns(['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep','oct','nov','dec']);
+    this.setMonthGroupHeader();
+    // this.columnDefs2= this.generateColumns(['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep','oct','nov','dec']);
   }
 
   getMonthName(monthId: number): string {
@@ -79,18 +84,55 @@ export class PayrollSummariesComponent {
     this.service.post('get/single/payroll_list', { employee_id : this.employee_id }).subscribe((res: any) => {
       if(res.status == 'success'){
         this.employeeDetails = res.data.payroll_summary[0];
-        this.rowData = res.data.attendance_summary[0];
-
+        const attendanceData = res.data.attendance_summary[0];
+        this.AdvanceSalaryDetails =  res.data.advance_salary.length > 0 ? res.data.advance_salary[0] : null;
+        this.hasAdvanceSalary = !!this.AdvanceSalaryDetails;
+       
         this.payrollDetails.patchValue({
           id: this.employeeDetails.employee_code,
           employeeName: this.employeeDetails.emp_name,
           companyName: this.employeeDetails.company_name,
-      });
+        });
+
+        this.attendanceDetails = [
+          {
+            P: parseInt(attendanceData.present_days),
+            A: parseInt(attendanceData.absent_days),
+            W: parseInt(attendanceData.weekend),
+            W_Od: parseInt(attendanceData.weekend_od),
+            H: parseInt(attendanceData.holiday_days),
+            WFH_2: parseInt(attendanceData.work_from_home_half_day),
+            HD: parseInt(attendanceData.half_day),
+            HR: parseInt(attendanceData.total_days),
+            OT: parseInt(attendanceData.total_overtime),
+            LT: parseInt(attendanceData.late),
+            TH: parseInt(attendanceData.total_days),
+          }
+        ]
+
+       if (res.data.prvadvancesalary.length > 0) {
+          this.prevAdvanceSalaryDetails = res.data.prvadvancesalary[0];
+          this.rowData = [{
+            emp_name: this.prevAdvanceSalaryDetails.emp_name,
+            first_InstallmentDate: this.prevAdvanceSalaryDetails.first_InstallmentDate,
+            last_InstallmentDate: this.prevAdvanceSalaryDetails.last_InstallmentDate,
+            tenure: this.prevAdvanceSalaryDetails.tenure,
+            advance_amount: this.prevAdvanceSalaryDetails.advance_amount,
+            emi_status: this.prevAdvanceSalaryDetails.emi_status,
+          }];
+        } else {
+          this.rowData = []; 
+        }
+
       }
-      console.log(this.attendanceDetails)
     })
   }
 
+  calculateProgress(): number {
+    if (!this.AdvanceSalaryDetails) return 0;
+    const paid = this.AdvanceSalaryDetails.advance_amount - this.AdvanceSalaryDetails.remaining_balance;
+    return Math.round((paid / this.AdvanceSalaryDetails.advance_amount) * 100);
+  }
 
   backtoPayroll() {
     this.router.navigate(['/authPanal/payrollList']);
@@ -130,30 +172,47 @@ export class PayrollSummariesComponent {
   ];
 
   columnDefs: ColDef[] = [
-    {
-      headerName: 'First Installment Date',
-      field: 'date',
+     {
+      headerName: 'Employee Name',
+      field: 'emp_name',
       sortable: true,
       filter: true,
       flex: 1,
+      maxWidth:250,
+    },
+    {
+      headerName: 'First Installment Date',
+      field: 'first_InstallmentDate',
+      sortable: true,
+      filter: true,
+      flex: 1,
+      maxWidth:200,
     },
     {
       headerName: 'Installment End Date',
-      field: 'employeeName',
+      field: 'last_InstallmentDate',
       sortable: true,
       filter: true,
       flex: 1,
+      maxWidth:200,
     },
     {
       headerName: 'Tenure',
-      field: 'companyName',
+      field: 'tenure',
       sortable: true,
       filter: true,
       flex: 1,
     },
     {
       headerName: 'Amount',
-      field: 'grossAmount',
+      field: 'advance_amount',
+      sortable: true,
+      filter: true,
+      flex: 1,
+    },
+    {
+      headerName: 'Status',
+      field: 'emi_status',
       sortable: true,
       filter: true,
       flex: 1,
@@ -172,29 +231,57 @@ export class PayrollSummariesComponent {
       flex: 1,
     },
   ];
-  columnDefs2 = [
-    {
-      // headerName: 'Athlete Details',
-    },
-  ];
-  generateColumns(fields: string[]) {
-    return fields.map((field) => ({
-      headerName: field.charAt(0).toUpperCase() + field.slice(1),
-      children: [
-        {  field:'p', headerName: 'P', maxWidth:50},
-        {  field:'a', headerName: 'A', maxWidth:50 },
-        {  field:'w', headerName: 'W', maxWidth:50 },
-        {  field:'wod', headerName: 'W/od', maxWidth:80 },
-        {  field:'h', headerName: 'H', maxWidth:50 },
-        {  field:'wfh2', headerName: 'WFH/2', maxWidth:80 },
-        {  field:'hd', headerName: 'HD', maxWidth:70 },
-        {  field:'hr', headerName: 'HR', maxWidth:70 },
-        {  field:'ot', headerName: 'OT', maxWidth:70 },
-        {  field:'lt', headerName: 'LT', maxWidth:70 },
-        {  field:'th', headerName: 'TH', maxWidth:70 },
-      ]
-    }));
+
+  setMonthGroupHeader(): void {
+    const monthName = this.getMonthName(this.selectedMonth);
+    this.columnDefs2 = [
+      {
+        headerName: monthName,
+        children: [
+          { headerName: 'P', field: 'P' },
+          { headerName: 'A', field: 'A' },
+          { headerName: 'W', field: 'W' },
+          { headerName: 'W/Od', field: 'W_Od' },
+          { headerName: 'H', field: 'H' },
+          { headerName: 'WFH/2', field: 'WFH_2' },
+          { headerName: 'HD', field: 'HD' },
+          { headerName: 'HR', field: 'HR' },
+          { headerName: 'OT', field: 'OT' },
+          { headerName: 'LT', field: 'LT' },
+          { headerName: 'TH', field: 'TH' },
+        ],
+      },
+    ];
   }
+
+  defaultColDef: ColDef = {
+    width: 100,
+    resizable: true,
+    cellStyle: { textAlign: 'center' }
+  };
+
+  onMonthChange() {
+    this.columnDefs[0]['headerName'] = this.selectedMonth;
+    this.columnDefs = [...this.columnDefs]; // Trigger change detection
+  }
+  // generateColumns(fields: string[]) {
+  //   return fields.map((field) => ({
+  //     headerName: field.charAt(0).toUpperCase() + field.slice(1),
+  //     children: [
+  //       {  field:'p', headerName: 'P', maxWidth:50},
+  //       {  field:'a', headerName: 'A', maxWidth:50 },
+  //       {  field:'w', headerName: 'W', maxWidth:50 },
+  //       {  field:'wod', headerName: 'W/od', maxWidth:80 },
+  //       {  field:'h', headerName: 'H', maxWidth:50 },
+  //       {  field:'wfh2', headerName: 'WFH/2', maxWidth:80 },
+  //       {  field:'hd', headerName: 'HD', maxWidth:70 },
+  //       {  field:'hr', headerName: 'HR', maxWidth:70 },
+  //       {  field:'ot', headerName: 'OT', maxWidth:70 },
+  //       {  field:'lt', headerName: 'LT', maxWidth:70 },
+  //       {  field:'th', headerName: 'TH', maxWidth:70 },
+  //     ]
+  //   }));
+  // }
 
   onSelectionChanged(event: any): void {
     const selectedRows = event.api.getSelectedRows();
@@ -203,35 +290,6 @@ export class PayrollSummariesComponent {
   gridApi!: GridApi;
   selectedColumn: string = '';
 
-  rowData = [
-    {
-      employeeName: 'Shivani',
-      companyName: 'Developer',
-      department: 'computer',
-      grossAmount: 'computer',
-      overTime: '361.4',
-      joinDate: '09-03-2025',
-      contact: '9078121214',
-    },
-    {
-      employeeName: 'Hrishikesh',
-      companyName: 'Developer',
-      department: 'computer',
-      grossAmount: 'computer',
-      overTime: '361.4',
-      joinDate: '09-03-2025',
-      contact: '9078121214',
-    },
-    {
-      employeeName: 'onkar',
-      companyName: 'Developer',
-      department: 'computer',
-      grossAmount: 'computer',
-      overTime: '361.4',
-      joinDate: '09-03-2025',
-      contact: '9078121214',
-    },
-  ];
   attandanceDetails = [
     {
       p: '1',

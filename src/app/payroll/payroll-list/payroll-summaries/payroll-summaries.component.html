@@ -99,27 +99,30 @@
                             <div class="card-header">
                                 Advance Salary Tenure
                             </div>
-                            <div class="card-body">
+                            <div class="card-body" >
+                                <div *ngIf="!hasAdvanceSalary" class="mt-2 mb-5">
+                                    <p class="text-center">Advance Salary Not Available</p>
+                                </div>
+                                <div  *ngIf="hasAdvanceSalary">
                                 <div class="progress-Section">
                                     <div class="row m-0 p-0">
-                                        <div class="col">
+                                        <div class="col" >
                                             <label for="">Loan Amount</label>
-                                            <p class="m-0">₹ 10,000</p>
+                                            <p class="m-0">₹ {{AdvanceSalaryDetails.advance_amount}}</p>
                                         </div>
                                         <div class="progress  col-12 p-0 mt-2" role="progressbar"
-                                            aria-label="Example with label" aria-valuenow="40" aria-valuemin="0"
-                                            aria-valuemax="100">
-                                            <div class="progress-bar" style="width: 40%">40%</div>
+                                            [attr.aria-valuenow]="calculateProgress()" aria-valuemin="0" aria-valuemax="100">
+                                            <div  class="progress-bar" [style.width.%]="calculateProgress()">{{ calculateProgress() }}%</div>
                                         </div>
                                     </div>
                                     <div class=" px-2 mt-2 d-flex justify-content-between">
                                         <div class="loanAmount">
                                             <label for=""> <span class="me-1"></span> Loan Amount</label>
-                                            <p class="m-0">₹ 10,000</p>
+                                            <p class="m-0">₹ {{AdvanceSalaryDetails.advance_amount}}</p>
                                         </div>
                                         <div class="RemainingAmount">
                                             <label for=""> <span class="me-1"></span> Remaining</label>
-                                            <p class="m-0">₹ 10,000</p>
+                                            <p class="m-0">₹ {{AdvanceSalaryDetails.remaining_balance}}</p>
                                         </div>
                                     </div>
                                 </div>
@@ -129,41 +132,42 @@
                                         <div class="row m-0 p-0">
                                             <div class="col-12 col-sm-3">
                                                 <label for="">Tenure</label>
-                                                <input class="form-control readOnlyInput" type="text">
+                                                <input class="form-control readOnlyInput" type="text" [value]="AdvanceSalaryDetails.tenure">
                                             </div>
                                             <div class="col-12 col-sm">
                                                 <label for="">First Payment Date</label>
-                                                <input class="form-control readOnlyInput" type="text">
+                                                <input class="form-control readOnlyInput" type="text" [value]="AdvanceSalaryDetails.apply_date">
                                             </div>
                                             <div class="col-12 col-sm">
                                                 <label for="">Payment End Date</label>
-                                                <input class="form-control readOnlyInput" type="text">
+                                                <input class="form-control readOnlyInput" type="text" [value]="AdvanceSalaryDetails.updated_on">
                                             </div>
                                         </div>
                                         <div class="row m-0 p-0 mt-3">
                                             <div class="col-12 col-sm-3">
                                                 <label for="">Amount</label>
-                                                <input class="form-control readOnlyInput" type="text">
+                                                <input class="form-control readOnlyInput" type="text" [value]="AdvanceSalaryDetails.advance_amount">
                                             </div>
                                             <div class="col-12 col-sm">
                                                 <label for="">Last Payment Date</label>
-                                                <input class="form-control readOnlyInput" type="text">
+                                                <input class="form-control readOnlyInput" type="text" [value]="AdvanceSalaryDetails.updated_on">
                                             </div>
                                             <div class="col-12 col-sm">
                                                 <label for="">Next Payment Due Date</label>
-                                                <input class="form-control readOnlyInput" type="text">
+                                                <input class="form-control readOnlyInput" type="text" value="-">
                                             </div>
                                         </div>
                                     </form>
+                                </div> 
+                                </div>  
+                                 <div class="row d-flex p-0 mt-3 ">
+                                <div class="col">
+                                    <button class="btn preVieBtn w-100 " data-bs-toggle="modal"
+                                    data-bs-target="#exampleModal"><i
+                                        class="bi bi-file-earmark-text me-2"></i>Previous Advance
+                                    Salary</button>
                                 </div>
-                                <div class="row d-flex p-0 mt-3">
-                                    <div class="col">
-                                        <button class="btn preVieBtn w-100 " data-bs-toggle="modal"
-                                            data-bs-target="#exampleModal"><i
-                                                class="bi bi-file-earmark-text me-2"></i>Previous Advance
-                                            Salary</button>
-                                    </div>
-                                </div>
+                            </div>                            
                             </div>
                         </div>
                     </div>
@@ -311,7 +315,6 @@
                     </div>
                 </form>
                 <div class="mt-2">
-
                     <ag-grid-angular style="width: 100%; height: 60vh;" class="ag-theme-alpine" [rowData]="rowData"
                         [columnDefs]="columnDefs" [gridOptions]="gridOptions"
                         (selectionChanged)="onSelectionChanged($event)"> [defaultColDef]="defaultColDef">
@@ -355,15 +358,22 @@
                         <div class="payrollSummaryDetails">
                             <label for="">Month</label>
                             <input class="form-control readOnlyInput" [value]="getMonthName(selectedMonth)"/>
-                            
                         </div>
                     </div>
                 </form>
-                <div class="mt-2">
-                    <ag-grid-angular id="ViewAttendanceDetails" style="width: 100%; height: 30vh;" class="ag-theme-alpine"
+                <div class="mt-2">        
+                    <ag-grid-angular
+                        class="ag-theme-alpine"
+                        style="width: 100%; height: 30vh;"
+                        [rowData]="attendanceDetails"
+                        [columnDefs]="columnDefs2"
+                        [defaultColDef]="defaultColDef"
+                    >
+                    </ag-grid-angular>
+                    <!-- <ag-grid-angular id="ViewAttendanceDetails" style="width: 100%; height: 30vh;" class="ag-theme-alpine"
                         [rowData]="attandanceDetails" [columnDefs]="columnDefs2" (gridReady)="onGridReady($event)"
                         (selectionChanged)="onSelectionChanged($event)"> [defaultColDef]="defaultColDef">
-                    </ag-grid-angular>
+                    </ag-grid-angular> -->
                 </div>
 
             </div>

@@ -149,7 +149,7 @@ export class PayrollProcessComponent {
     console.log('payloadArray',payload)
     this.service.post("craete/payroll", payload).subscribe({
       next: (res) => {
-        this.toastr.success('Payroll processed successfully for all selected employees.');
+        this.toastr.success('Payroll processed successfully.');
       },
       error: (err) => {
         console.error(err);
