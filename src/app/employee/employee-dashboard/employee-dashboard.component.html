@@ -203,7 +203,7 @@
                     </div>
                     <div class="row">
                         <div class="col-lg-12  gx-2 mt-4 rounded-1 gap-2">
-                            <div class="">
+                            <div class="" *ngIf="role === 'employee'">
 
                                 <button type="button" class="btn dashboard-btn w-100" data-bs-toggle="modal"
                                     data-bs-target="#applyLeaveModal">
@@ -249,8 +249,9 @@
                         </div>
                     </div>
 
-                    <div class="col d-flex align-items-center border px-4 mt-4  "
-                        style="border-radius: 10px; height: 122px;">
+                    <div class="col d-flex align-items-center border px-4 mt-4"
+                        style="border-radius: 10px; height: 122px;"
+                        *ngIf="role === 'employee'">
                         <button class="btn  w-100 " style="background-color:#94C8FF" data-bs-toggle="modal"
                             data-bs-target="#advanceSalaryModal">
                             Apply for Advance Salary
@@ -530,11 +531,11 @@
                         <!-- Leave Type -->
                         <div class="col-md-4">
                             <label class="form-label">Leave Name</label>
-                            <select class="form-select" formControlName="leaveType" [ngClass]="{
-                                'is-invalid': isLeaveSubmitted && leaveForm.get('leaveType')?.invalid
-                              }">
+                            <select class="form-select" formControlName="leave_id" 
+                             [ngClass]="{'input-error': isLeaveSubmitted && leaveForm.get('leave_id')?.invalid,
+                                'is-invalid': isLeaveSubmitted && leaveForm.get('leave_id')?.invalid }">
                                 <option value="">-- Select Leave Type --</option>
-                                <option *ngFor="let leave of leaveTypes" [value]="leave">{{ leave }}</option>
+                                <option *ngFor="let leave of leaveTypes" [value]="leave.id">{{ leave.value }}</option>
                             </select>
                             <small class="text-danger"
                                 *ngIf="isLeaveSubmitted && leaveForm.get('leaveType')?.hasError('required')">
@@ -557,9 +558,9 @@
                         <!-- From Date -->
                         <div class="col-md-4">
                             <label class="form-label">From Date</label>
-                            <input type="date" class="form-control" formControlName="fromDate" [ngClass]="{
-                               'is-invalid': isLeaveSubmitted && leaveForm.get('fromDate')?.invalid
-                             }" />
+                            <input type="date" class="form-control" formControlName="start_date" 
+                            [ngClass]="{'input-error': isLeaveSubmitted && leaveForm.get('start_date')?.invalid,
+                                'is-invalid': isLeaveSubmitted && leaveForm.get('start_date')?.invalid }"/>
                             <small class="text-danger"
                                 *ngIf="isLeaveSubmitted && leaveForm.get('fromDate')?.hasError('required')">
                                 This field is required.
@@ -569,9 +570,9 @@
                         <!-- To Date -->
                         <div class="col-md-4">
                             <label class="form-label">To Date</label>
-                            <input type="date" class="form-control" formControlName="toDate" [ngClass]="{
-                               'is-invalid': isLeaveSubmitted && leaveForm.get('toDate')?.invalid
-                             }" />
+                            <input type="date" class="form-control" formControlName="end_date" 
+                            [ngClass]="{'input-error': isLeaveSubmitted && leaveForm.get('end_date')?.invalid,
+                                'is-invalid': isLeaveSubmitted && leaveForm.get('end_date')?.invalid }" />
                             <small class="text-danger"
                                 *ngIf="isLeaveSubmitted && leaveForm.get('toDate')?.hasError('required')">
                                 This field is required.
@@ -582,10 +583,10 @@
                     <!-- Reason -->
                     <div class="mb-3">
                         <label class="form-label">Reason</label>
-                        <textarea class="form-control" rows="3" formControlName="reason"
-                            placeholder="Enter your reason here" [ngClass]="{
-                                'is-invalid': isLeaveSubmitted && leaveForm.get('reason')?.invalid
-                              }"></textarea>
+                        <textarea class="form-control" rows="3" formControlName="leave_reason"
+                            placeholder="Enter your reason here"
+                            [ngClass]="{'input-error': isLeaveSubmitted && leaveForm.get('leave_reason')?.invalid,
+                                'is-invalid': isLeaveSubmitted && leaveForm.get('leave_reason')?.invalid }"></textarea>
                         <small class="text-danger"
                             *ngIf="isLeaveSubmitted && leaveForm.get('reason')?.hasError('required')">
                             This field is required.
@@ -627,7 +628,9 @@
                         <div class="col-md-3">
                             <label class="form-label">Tenure</label>
                             <select class="form-select" formControlName="tenure"
-                                [class.is-invalid]="advanceSalaryForm.get('tenure')?.invalid && advanceSalaryForm.get('tenure')?.touched">
+                             [ngClass]="{'input-error': isAdvanceSalary && advanceSalaryForm.get('tenure')?.invalid,
+                                'is-invalid': isAdvanceSalary && advanceSalaryForm.get('tenure')?.invalid }"
+                            >
                                 <option value="">-- Select Tenure --</option>
                                 <option *ngFor="let option of tenures" [value]="option">{{ option }}</option>
                             </select>
@@ -639,9 +642,11 @@
 
                         <div class="col-md-3">
                             <label class="form-label">Amount (in ₹)</label>
-                            <input type="number" class="form-control" formControlName="amount"
+                            <input type="number" class="form-control" formControlName="advance_amount"
                                 (input)="calculateInstallment()"
-                                [class.is-invalid]="advanceSalaryForm.get('amount')?.invalid && advanceSalaryForm.get('amount')?.touched" />
+                                [ngClass]="{'input-error': isAdvanceSalary && advanceSalaryForm.get('advance_amount')?.invalid,
+                                'is-invalid': isAdvanceSalary && advanceSalaryForm.get('advance_amount')?.invalid }"
+                                 />
                             <!-- <div *ngIf="advanceSalaryForm.get('amount')?.invalid && advanceSalaryForm.get('amount')?.touched"
                                 class="text-danger">
                                 This is required field.
@@ -650,9 +655,11 @@
 
                         <div class="col-md-6">
                             <label class="form-label">Reason</label>
-                            <textarea rows="3" class="form-control" formControlName="reason"
+                            <textarea rows="3" class="form-control" formControlName="remarks"
                                 placeholder="Enter your reason here"
-                                [class.is-invalid]="advanceSalaryForm.get('reason')?.invalid && isAdvanceSalary"></textarea>
+                                [ngClass]="{'input-error': isAdvanceSalary && advanceSalaryForm.get('remarks')?.invalid,
+                                'is-invalid': isAdvanceSalary && advanceSalaryForm.get('remarks')?.invalid }"
+                                ></textarea>
                             <div *ngIf="advanceSalaryForm.get('reason')?.invalid && advanceSalaryForm.get('reason')?.value && isAdvanceSalary"
                                 class="text-danger">
                                 NO special character are allowed.
@@ -663,7 +670,7 @@
 
                     <div class="mb-3">
                         <label class="form-label">Installment Amount (in ₹)</label>
-                        <input type="text" class="form-control" [value]="installmentAmount" readonly>
+                        <input type="text" class="form-control readonlyInput" [value]="installmentAmount">
                     </div>
 
                 </div>

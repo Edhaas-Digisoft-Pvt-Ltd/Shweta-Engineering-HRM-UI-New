@@ -63,7 +63,9 @@ label {
 input {
     font-weight: bold;
 }
-
+.input-error {
+    border: 1px solid rgb(220, 53, 69) !important;
+}
 
 
 

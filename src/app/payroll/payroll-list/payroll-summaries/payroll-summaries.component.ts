@@ -25,6 +25,11 @@ import { HrmserviceService } from 'src/app/hrmservice.service';
 export class PayrollSummariesComponent {
   payrollDetails!: FormGroup;
   employee_id : any;
+  employeeDetails : any;
+  attendanceDetails : any;
+  selectedYear: any;
+  selectedMonth: any;
+  today: string = new Date().toISOString().split('T')[0];
 
   constructor(private route: ActivatedRoute, private router: Router, private formBuilder: FormBuilder, private service: HrmserviceService) {
     this.payrollDetails = this.formBuilder.group({
@@ -35,8 +40,28 @@ export class PayrollSummariesComponent {
     });
   }
 
+  months = [
+    { id: 1, value: 'January' },
+    { id: 2, value: 'February' },
+    { id: 3, value: 'March' },
+    { id: 4, value: 'April' },
+    { id: 5, value: 'May' },
+    { id: 6, value: 'June' },
+    { id: 7, value: 'July' },
+    { id: 8, value: 'August' },
+    { id: 9, value: 'September' },
+    { id: 10, value: 'October' },
+    { id: 11, value: 'November' },
+    { id: 12, value: 'December' }
+  ];
+
   ngOnInit() {
-     this.route.queryParams.subscribe(params => {
+    this.selectedYear = new Date().getFullYear();
+    this.selectedMonth = new Date().getMonth() + 1;
+    const currentDate = new Date();
+    this.today = currentDate.toISOString().split('T')[0];
+
+    this.route.queryParams.subscribe(params => {
       this.employee_id = params['id'];
       console.log('Received employee  payroll:', params['id']);
     });
@@ -45,10 +70,24 @@ export class PayrollSummariesComponent {
     this.columnDefs2= this.generateColumns(['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep','oct','nov','dec']);
   }
 
+  getMonthName(monthId: number): string {
+    const month = this.months.find(m => m.id === monthId);
+    return month ? month.value : '';
+  }
+
   getSinglePayroll() {
     this.service.post('get/single/payroll_list', { employee_id : this.employee_id }).subscribe((res: any) => {
-      console.log(res)
-      
+      if(res.status == 'success'){
+        this.employeeDetails = res.data.payroll_summary[0];
+        this.rowData = res.data.attendance_summary[0];
+
+        this.payrollDetails.patchValue({
+          id: this.employeeDetails.employee_code,
+          employeeName: this.employeeDetails.emp_name,
+          companyName: this.employeeDetails.company_name,
+      });
+      }
+      console.log(this.attendanceDetails)
     })
   }
 

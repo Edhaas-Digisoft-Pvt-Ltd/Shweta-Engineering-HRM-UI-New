@@ -18,25 +18,36 @@
                                     id="">
                             </div>
                         </div>
-                        <div class="col-12 col-sm">
+                        <div class="col-12 col-sm-4">
                             <div class="payrollSummaryDetails">
                                 <label for="payrollId"><i class="bi bi-people me-2"></i>Employee Name</label>
                                 <input class="form-control readOnlyInput" formControlName="employeeName" type="text"
                                     name="" id="">
                             </div>
                         </div>
-                        <div class="col-12 col-sm">
+                        <div class="col-12 col-sm-3">
                             <div class="payrollSummaryDetails">
                                 <label for="payrollId"><i class="bi bi-buildings me-2"></i>Company Name</label>
                                 <input class="form-control readOnlyInput" formControlName="companyName" type="text"
                                     name="" id="">
                             </div>
-                        </div>
-                        <div class="col-12 col-sm-2">
+                        </div>  
+                        <div class="col-12 col-sm-1">
                             <div class="payrollSummaryDetails">
+                                <label for="">Year</label>
+                                <input class="form-control readOnlyInput" [value]="selectedYear"/>
+                            </div>
+                           
+                            <!-- <div class="payrollSummaryDetails">
                                 <label for="payrollId"><i class="bi bi-calendar3 me-2"></i>Date</label>
                                 <input class="form-control readOnlyInput" formControlName="date" type="text" name=""
                                     id="">
+                            </div> -->
+                        </div>
+                         <div class="col-12 col-sm-2">
+                            <div class="payrollSummaryDetails">
+                                <label for="">Month</label>
+                                <input class="form-control readOnlyInput" [value]="getMonthName(selectedMonth)"/>
                             </div>
                         </div>
                     </form>
@@ -50,32 +61,37 @@
                             <div
                                 class="d-flex flex-column align-items-center justify-content-center p-2 py-2 attandance-summary">
                                 <p class="mb-1"><i class="bi bi-calendar-check me-2"></i>Present Days</p>
-                                <h4 class="m-0">23</h4>
+                                <h4 class="m-0">{{employeeDetails.present_days}}</h4>
                             </div>
                         </div>
                         <div class="col-12 col-sm-6">
                             <div
                                 class="d-flex flex-column align-items-center justify-content-center p-2 py-2 attandance-summary">
-                                <p class="mb-1"><i class="bi bi-clock-history me-2"></i>Over Time</p>
-                                <h4 class="m-0">114.5</h4>
+                                <p class="mb-1"><i class="bi bi-clock-history me-2"></i>Absent Days</p>
+                                <h4 class="m-0">{{employeeDetails.absent_days}}</h4>
                             </div>
                         </div>
 
                     </div>
-                    <div class="row m-0 p-0 mt-3">
+                    <div class="row m-0 p-0 mt-3">  
                         <div class="col-12 col-sm-6">
                             <div
                                 class="d-flex flex-column align-items-center justify-content-center p-2 py-2 attandance-summary">
-                                <p class="mb-1"><i class="bi bi-clock me-2"></i>Total hours</p>
-                                <h4 class="m-0">346.3</h4>
+                                <p class="mb-1"><i class="bi bi-clock me-2"></i>Over Time</p>
+                                <h4 class="m-0">{{employeeDetails.total_overtime}}</h4>
                             </div>
                         </div>
                         <div class="col-12 col-sm-6">
                             <div
                                 class="d-flex flex-column align-items-center justify-content-center p-2 py-2 attandance-summary">
+                                <p class="mb-1"><i class="bi bi-clock me-2"></i>Total hours</p>
+                                <h4 class="m-0">{{employeeDetails.total_hours}}</h4>
+                            </div>
+                            <!-- <div
+                                class="d-flex flex-column align-items-center justify-content-center p-2 py-2 attandance-summary">
                                 <p class="mb-1"><i class="bi bi-clock me-2"></i>Per Hours/Day</p>
                                 <h4 class="m-0">100.96</h4>
-                            </div>
+                            </div> -->
                         </div>
                     </div>
                     <div class="row m-0 p-0  px-2 mt-3">
@@ -156,7 +172,7 @@
                     <div class="row m-0 p-0">
                         <div class="d-flex justify-content-center justify-content-sm-end ms-auto ">
                             <button class="btn comBtn text-white" data-bs-toggle="modal"
-                                data-bs-target="#ViewAttendanceDetails"><i class="bi bi-file-earmark-text me-2"></i>Vew
+                                data-bs-target="#ViewAttendanceDetails"><i class="bi bi-file-earmark-text me-2"></i>View
                                 Attendance Details </button>
                         </div>
                         <div class="col-12 mt-2">
@@ -310,7 +326,7 @@
     <div class="modal-dialog modal-xl">
         <div class="modal-content">
             <div class="modal-header">
-                <h1 class="modal-title fs-5" id="exampleModalLabel">Previous Advance Salary Records</h1>
+                <h1 class="modal-title fs-5" id="exampleModalLabel">Attendance</h1>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
@@ -330,36 +346,20 @@
                     </div>
                     <div class="col-2">
                         <div class="payrollSummaryDetails">
-                            <label for="payrollId"><i class="bi bi-calendar3 me-2"></i>Select year</label>
-                            <select name="" id="" class="form-control form-select" aria-label="Default select example">
-                                <option value="2022-23">2022-23</option>
-                                <option value="2023-24">2023-24</option>
-                                <option value="2024-25">2024-25</option>
-                            </select>
+                            <label for="">Year</label>
+                            <input class="form-control readOnlyInput" [value]="selectedYear"/>
+                            
                         </div>
                     </div>
                     <div class="col-2">
                         <div class="payrollSummaryDetails">
-                            <label for="payrollId"><i class="bi bi-calendar3 me-2"></i>Select Month</label>
-                            <select name="" id="" [(ngModel)]="selectedColumn" (change)="onColumnSelectChange()" class="form-control form-select" aria-label="Default select example">
-                                <option value="jan">January</option>
-                                <option value="feb">February</option>
-                                <option value="mar">March</option>
-                                <option value="apr">April</option>
-                                <option value="may">May</option>
-                                <option value="jun">June</option>
-                                <option value="jul">July</option>
-                                <option value="aug">August</option>
-                                <option value="sep">September</option>
-                                <option value="oct">October</option>
-                                <option value="nov">November</option>
-                                <option value="dec">December</option>
-                            </select>
+                            <label for="">Month</label>
+                            <input class="form-control readOnlyInput" [value]="getMonthName(selectedMonth)"/>
+                            
                         </div>
                     </div>
                 </form>
                 <div class="mt-2">
-
                     <ag-grid-angular id="ViewAttendanceDetails" style="width: 100%; height: 30vh;" class="ag-theme-alpine"
                         [rowData]="attandanceDetails" [columnDefs]="columnDefs2" (gridReady)="onGridReady($event)"
                         (selectionChanged)="onSelectionChanged($event)"> [defaultColDef]="defaultColDef">
