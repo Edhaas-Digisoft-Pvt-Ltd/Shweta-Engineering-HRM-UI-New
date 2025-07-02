@@ -34,6 +34,8 @@ export class PayrollSummariesComponent {
   AdvanceSalaryDetails : any;
   hasAdvanceSalary : any;
   prevAdvanceSalaryDetails: any;
+  calculationData: any;
+  deduct: any[] = [];
   today: string = new Date().toISOString().split('T')[0];
 
   constructor(private route: ActivatedRoute, private router: Router, private formBuilder: FormBuilder, private service: HrmserviceService) {
@@ -87,6 +89,7 @@ export class PayrollSummariesComponent {
         const attendanceData = res.data.attendance_summary[0];
         this.AdvanceSalaryDetails =  res.data.advance_salary.length > 0 ? res.data.advance_salary[0] : null;
         this.hasAdvanceSalary = !!this.AdvanceSalaryDetails;
+        this.calculationData = res.data.calculation[0];
        
         this.payrollDetails.patchValue({
           id: this.employeeDetails.employee_code,
@@ -115,14 +118,44 @@ export class PayrollSummariesComponent {
           this.rowData = [{
             emp_name: this.prevAdvanceSalaryDetails.emp_name,
             first_InstallmentDate: this.prevAdvanceSalaryDetails.first_InstallmentDate,
-            last_InstallmentDate: this.prevAdvanceSalaryDetails.last_InstallmentDate,
+            last_InstallmentDate: this.prevAdvanceSalaryDetails.last_InstallmentDate || '-',
             tenure: this.prevAdvanceSalaryDetails.tenure,
             advance_amount: this.prevAdvanceSalaryDetails.advance_amount,
-            emi_status: this.prevAdvanceSalaryDetails.emi_status,
+            status: this.prevAdvanceSalaryDetails.status,
           }];
         } else {
           this.rowData = []; 
         }
+
+        this.deduct = [
+          {
+            Compound: 'Provident Fund (PF)',
+            deduction: 'Fixed %',
+            amount: 'Rs. 1000' 
+          },
+  
+          {
+            Compound: 'Professional Tax (PT)',
+            deduction: 'Tax Deduction',
+            amount: `Rs. ${this.calculationData.total_tax_deduction ?? 0}`
+          },
+
+          {
+            Compound: 'ESIC',
+            deduction: 'Fixed %',
+            amount: 'Rs. 0' 
+          },
+          {
+            Compound: 'Advance Salary',
+            deduction: 'Advance Deduction',
+            amount: `Rs. ${this.calculationData.advance_amount ?? 0}`
+          },
+          {
+            Compound: 'Other',
+            deduction: 'lorem',
+            amount: 'Rs. 0',
+          },
+        ];
 
       }
     })
@@ -137,56 +170,56 @@ export class PayrollSummariesComponent {
   backtoPayroll() {
     this.router.navigate(['/authPanal/payrollList']);
   }
-  deduct = [
-    {
-      Compound: 'provident found (PF)',
-      deduction: 'lorem',
-      amount: 'Rs. 1000',
-    },
-    {
-      Compound: 'Professional Tax (PT)',
-      deduction: 'lorem',
-      amount: 'Rs. 1000',
-    },
+  // deduct = [
+  //   {
+  //     Compound: 'provident found (PF)',
+  //     deduction: 'lorem',
+  //     amount: 'Rs. 1000',
+  //   },
+  //   {
+  //     Compound: 'Professional Tax (PT)',
+  //     deduction: 'lorem',
+  //     amount: 'Rs. 1000',
+  //   },
 
-    {
-      Compound: 'ESIC Employee 0.75%',
-      deduction: 'lorem',
-      amount: 'Rs.0',
-    },
-    {
-      Compound: 'Provident Fund(Employer) (EPF)',
-      deduction: 'lorem',
-      amount: 'Rs. 1000',
-    },
-    {
-      Compound: 'Advance Salary',
-      deduction: 'lorem',
-      amount: 'Rs. 0',
-    },
-    {
-      Compound: 'Other',
-      deduction: 'lorem',
-      amount: 'Rs. 0',
-    },
-  ];
+  //   {
+  //     Compound: 'ESIC Employee 0.75%',
+  //     deduction: 'lorem',
+  //     amount: 'Rs.0',
+  //   },
+  //   {
+  //     Compound: 'Provident Fund(Employer) (EPF)',
+  //     deduction: 'lorem',
+  //     amount: 'Rs. 1000',
+  //   },
+  //   {
+  //     Compound: 'Advance Salary',
+  //     deduction: 'lorem',
+  //     amount: 'Rs. 0',
+  //   },
+  //   {
+  //     Compound: 'Other',
+  //     deduction: 'lorem',
+  //     amount: 'Rs. 0',
+  //   },
+  // ];
 
   columnDefs: ColDef[] = [
-     {
-      headerName: 'Employee Name',
-      field: 'emp_name',
-      sortable: true,
-      filter: true,
-      flex: 1,
-      maxWidth:250,
-    },
+    //  {
+    //   headerName: 'Employee Id',
+    //   field: 'employee_id',
+    //   sortable: true,
+    //   filter: true,
+    //   flex: 1,
+    //   maxWidth:250,
+    // },
     {
       headerName: 'First Installment Date',
       field: 'first_InstallmentDate',
       sortable: true,
       filter: true,
       flex: 1,
-      maxWidth:200,
+      maxWidth:260,
     },
     {
       headerName: 'Installment End Date',
@@ -194,7 +227,7 @@ export class PayrollSummariesComponent {
       sortable: true,
       filter: true,
       flex: 1,
-      maxWidth:200,
+      maxWidth:280,
     },
     {
       headerName: 'Tenure',
@@ -202,6 +235,7 @@ export class PayrollSummariesComponent {
       sortable: true,
       filter: true,
       flex: 1,
+      maxWidth:130,
     },
     {
       headerName: 'Amount',
@@ -209,19 +243,21 @@ export class PayrollSummariesComponent {
       sortable: true,
       filter: true,
       flex: 1,
+      maxWidth:130,
     },
     {
       headerName: 'Status',
-      field: 'emi_status',
+      field: 'status',
       sortable: true,
       filter: true,
       flex: 1,
+      maxWidth:120,
     },
     {
       headerName: 'Actions',
       // field: 'inquiry_id',
       cellStyle: { border: '1px solid #ddd' },
-      maxWidth: 100,
+      maxWidth: 120,
       cellRenderer: AdvanceSalaryBtnComponent,
       cellRendererParams: {
         // clickedEdit: (field: any) => this.getqutation(field),

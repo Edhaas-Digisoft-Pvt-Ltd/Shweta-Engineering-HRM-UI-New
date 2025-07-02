@@ -4,6 +4,8 @@ import { ColDef } from 'ag-grid-community';
 import { PayrollActionBtnComponent } from './payroll-action-btn/payroll-action-btn.component';
 import { Router } from '@angular/router';
 import { HrmserviceService } from 'src/app/hrmservice.service';
+import { ToastrService } from 'ngx-toastr';
+
 @Component({
   selector: 'app-payroll-list',
   templateUrl: './payroll-list.component.html',
@@ -15,9 +17,11 @@ export class PayrollListComponent {
   selectedYear: any;
   selectedMonth: any;
   rowData: any = [];
+  selectedRowData: any[] = [];
+  activeTab: string = 'tab1';
   
   today: string = new Date().toISOString().split('T')[0];
-  constructor(private router: Router, private service: HrmserviceService) {}
+  constructor(private router: Router, private service: HrmserviceService, private toastr: ToastrService) {}
 
   rowSelection: string = 'multiple';
   public defaultColDef: ColDef = {
@@ -41,6 +45,11 @@ export class PayrollListComponent {
     { id: 11, value: 'November' },
     { id: 12, value: 'December' }
   ];
+
+  selectTab(tab: string) {
+    this.activeTab = tab;
+  }
+
 
   ngOnInit() {
     this.selectedYear = new Date().getFullYear();
@@ -171,9 +180,14 @@ export class PayrollListComponent {
     console.log("editApp",params);
   }
 
+  // onSelectionChanged(event: any): void {
+  //   const selectedRows = event.api.getSelectedRows();
+  //   console.log('Selected rows:', selectedRows);
+  // }
+
   onSelectionChanged(event: any): void {
-    const selectedRows = event.api.getSelectedRows();
-    console.log('Selected rows:', selectedRows);
+   this.selectedRowData = event.api.getSelectedRows();
+    console.log('Selected rows:', this.selectedRowData);
   }
 
   create_user() {
@@ -188,5 +202,32 @@ export class PayrollListComponent {
     paginationPageSize: 10,
     paginationPageSizeSelector: [10, 50, 100],
   };
+
+  approveRejectPayrollList(status: any) {
+    if (this.selectedRowData.length === 0) {
+      this.toastr.warning('Please select at least one employee.');
+      return;
+    }
+
+    const payrolls  = this.selectedRowData.map((emp: any) => ({
+      employee_id: emp.employe_id,
+      year: this.selectedYear,
+      month: this.selectedMonth,
+      payroll_status: status,
+    }));
+    const payload = { payrolls };
+    console.log('payloadArray',payload)
+    this.service.post("update/payroll_list", payload).subscribe({
+      next: (res) => {
+        console.log(res);
+        this.toastr.success('Payroll List status updated successfully.');
+        this.getpayrollList();
+      },
+      error: (err) => {
+        console.error(err);
+        this.toastr.error('Failed to update status.');
+      }
+    });
+  }
 
 }

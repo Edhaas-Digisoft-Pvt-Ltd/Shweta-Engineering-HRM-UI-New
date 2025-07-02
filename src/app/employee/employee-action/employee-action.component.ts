@@ -6,9 +6,6 @@ import { Router } from '@angular/router';
   selector: 'app-employee-action',
   template: `
     <div class="d-flex align-items-center  mt-1">
-     <button class="btn btn-sm " >
-        <i class="bi bi-printer"></i>
-      </button>
       <button class="btn btn-sm  me-2" (click)="viewEmployee()" style="background-color:#C8E3FF"
       >
         <i class="bi bi-eye"></i>

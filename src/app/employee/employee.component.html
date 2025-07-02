@@ -33,16 +33,22 @@
                 <div class="">
                     <input type="file" #fileInput style="display: none"
                      (change)="onFileChange($event)" accept=".xlsx, .xls"  />
+                    <button class="btn importExcel"  style="background-color: #3674b5; color: white;" (click)="downloadTemplate()"><i class="bi bi-download"></i>&nbsp;Template
+                    </button>       
+                </div>
+                <div class="">
+                    <input type="file" #fileInput style="display: none"
+                     (change)="onFileChange($event)" accept=".xlsx, .xls"  />
                     <button class="btn importExcel"  style="background-color: #3674b5; color: white;" (click)="fileInput.click()">Import Excel
                     </button>       
                 </div>
                 <div class="">
-                    <button class="btn createEmployee"  (click)="create_user()" style="background-color: #3674b5; color: white;"><i class="bi bi-plus"></i>Create
+                    <button class="btn createEmployee"  (click)="create_user()" style="background-color: #3674b5; color: white;">Create
                         Employee</button>
                 </div>
                 <div class="d-flex mt-4">    
-                    <button class="btn exportExcelBtn btn-primary" (click)="exportExcel()">
-                        <i class="bi bi-file-earmark-excel me-1"></i> Export
+                    <button class="btn exportExcelBtn btn-primary me-2" (click)="exportExcel()">
+                        <i class="bi bi-file-earmark-excel"></i>
                     </button>
                 </div>
                 

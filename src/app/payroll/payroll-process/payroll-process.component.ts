@@ -150,6 +150,7 @@ export class PayrollProcessComponent {
     this.service.post("craete/payroll", payload).subscribe({
       next: (res) => {
         this.toastr.success('Payroll processed successfully.');
+        this.getPayrollProcess();
       },
       error: (err) => {
         console.error(err);
@@ -211,14 +212,14 @@ export class PayrollProcessComponent {
       filter: true,
       maxWidth: 140,
     },
-    {
-      headerName: 'Gross Amount',
-      field: 'grossAmount',
-      sortable: true,
-      filter: true,
-      maxWidth: 150,
-      // flex:1
-    },
+    // {
+    //   headerName: 'Gross Amount',
+    //   field: 'grossAmount',
+    //   sortable: true,
+    //   filter: true,
+    //   maxWidth: 150,
+    //   // flex:1
+    // },
   ];
 
   onSelectionChanged(event: any): void {

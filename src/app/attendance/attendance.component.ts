@@ -17,10 +17,13 @@ export class AttendanceComponent {
   activeTab: string = 'tab1';
   searchInputValue: string = '';
   gridApiActive: any;
+  role: string = '';
 
   constructor(private toastr: ToastrService, private service: HrmserviceService) { }
 
   ngOnInit() {
+    this.role = this.service.getRole();
+    
     this.loadTodayDataFromStorage();
     this.fetchAttendance();
   }

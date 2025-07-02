@@ -236,7 +236,7 @@ export class AdvancePaymentComponent {
         cellRenderer: this.statusButtonRenderer,
       },
     ];
-    if (this.role !== 'accountant') {
+    if (this.role === 'admin') {
       this.columnDefs.push({
         headerName: 'Actions',
         maxWidth:120,

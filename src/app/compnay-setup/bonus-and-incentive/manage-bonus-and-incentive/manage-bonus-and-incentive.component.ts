@@ -30,6 +30,7 @@ export class ManageBonusAndIncentiveComponent {
   blockEnd = ''; 
   defaultDate = '';
   isEditSubmitted = false;
+  role: string = '';
 
   constructor(private fb: FormBuilder, private service: HrmserviceService, private toastr: ToastrService) {}
   
@@ -60,6 +61,8 @@ export class ManageBonusAndIncentiveComponent {
   }
 
   ngOnInit() {
+    this.role = this.service.getRole();
+    
     this.selectedYear = new Date().getFullYear();
     this.selectedMonth = new Date().getMonth() + 1;
     this.getCompanyNames();

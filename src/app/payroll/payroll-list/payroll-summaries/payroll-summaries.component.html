@@ -197,28 +197,28 @@
                                     </tr>
                                     <tr>
                                         <td data-label="Compound">CTC</td>
-                                        <td data-label="Calculation">Jacob</td>
-                                        <td data-label="Amount (in ₹)">Thornton</td>
+                                        <td data-label="Calculation">-</td>
+                                        <td data-label="Amount (in ₹)">{{ calculationData?.CTC }}</td>
                                     </tr>
                                     <tr>
                                         <td data-label="Compound">Gross Salary</td>
-                                        <td data-label="Calculation">John</td>
-                                        <td data-label="Amount (in ₹)">Doe</td>
+                                        <td data-label="Calculation">Basic_Salary+Bonus+Incentive+OT</td>
+                                        <td data-label="Amount (in ₹)">{{calculationData?.gross_salary}}</td>
                                     </tr>
                                     <tr>
-                                        <td data-label="Compound">Over Time Salary (OT Late in 4 hrs deb)</td>
-                                        <td data-label="Calculation">John</td>
-                                        <td data-label="Amount (in ₹)">Doe</td>
+                                        <td data-label="Compound">Over Time Salary</td>
+                                        <td data-label="Calculation">hrs * 200</td>
+                                        <td data-label="Amount (in ₹)">{{calculationData?.total_overtime}}</td>
                                     </tr>
                                     <tr>
                                         <td data-label="Compound">Present Day Hrs Salary</td>
-                                        <td data-label="Calculation">John</td>
-                                        <td data-label="Amount (in ₹)">Doe</td>
+                                        <td data-label="Calculation">-</td>
+                                        <td data-label="Amount (in ₹)">-</td>
                                     </tr>
                                     <tr>
                                         <td data-label="Compound">total Salary</td>
-                                        <td data-label="Calculation">John</td>
-                                        <td data-label="Amount (in ₹)">Doe</td>
+                                        <td data-label="Calculation">-</td>
+                                        <td data-label="Amount (in ₹)">{{ calculationData?.basic_salary}}</td>
                                     </tr>
                                     <tr>
                                         <!-- <th  scope="row">1</th> -->
@@ -241,8 +241,8 @@
                                     </tr>
                                     <tr class="insentive">
                                         <td data-label="Compound">Incentive</td>
-                                        <td data-label="Calculation">lorem</td>
-                                        <td data-label="Amount (in ₹)" >Rs.0</td>
+                                        <td data-label="Calculation">-</td>
+                                        <td data-label="Amount (in ₹)" >{{calculationData?.bonus_incentive_amount}}</td>
                                     </tr>
                                     <tr class="total">
                                         <td data-label="Compound">Total</td>

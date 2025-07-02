@@ -4,7 +4,7 @@
             <div class="row">
                 <div class="col text-end p-0">
                     <!-- Button trigger modal -->
-                    <button type="button" class="btn text-white  add_company  mb-3" style="background-color: #3674B5;"
+                    <button *ngIf="role === 'accountant'" type="button" class="btn text-white  add_company  mb-3" style="background-color: #3674B5;"
                         data-bs-toggle="modal" data-bs-target="#bonusIncentiveModal">
                         <i class="bi bi-plus-lg me-2"></i> Add Bonus And Incentive
                     </button>

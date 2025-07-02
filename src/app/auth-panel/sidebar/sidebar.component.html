@@ -11,6 +11,7 @@
         </button>
 
         <div class="nav-content flex-grow-1 d-flex flex-column">
+          <div class="navbarList">
             <ul class="navbar-nav gap-2 vertical-nav flex-grow-1">
                 <li [routerLink]="['Dashboard']" class="nav-item" *ngIf="role === 'admin'">
                     <a type="button" routerLinkActive="active-link" (click)="closeAccordion()"
@@ -53,26 +54,26 @@
                             data-bs-parent="#accordionFlushExample">
                             <div class="accordion-body">
                                 <ul class="gap-3 py-2 d-flex flex-column">
-                                    <li>
+                                    <li *ngIf="role === 'accountant'">
                                         <a type="button" [routerLink]="['payrollProcess']"
                                             routerLinkActive="active-link" (click)="closeAccordion()"
                                             class="d-flex align-items-center">
                                             Process Payroll
                                         </a>
                                     </li>
-                                    <li [routerLink]="['payrollList']">
+                                    <li [routerLink]="['payrollList']" *ngIf="role === 'admin'">
                                         <a type="button" routerLinkActive="active-link" (click)="closeAccordion()"
                                             class="d-flex align-items-center">
                                             Payroll List
                                         </a>
                                     </li>
-                                    <li>
+                                    <!-- <li *ngIf="role === 'admin'">
                                         <a type="button" [routerLink]="['salaryRevision']"
                                             routerLinkActive="active-link" (click)="closeAccordion()"
                                             class="d-flex align-items-center">
                                             Salary Revisions
                                         </a>
-                                    </li>
+                                    </li> -->
                                 </ul>
                             </div>
                         </div>
@@ -111,7 +112,7 @@
                     </a>
                 </li> -->
                 <div class="accordion accordion-flush rounded-2 overflow-hidden bg-transparent mb-2"
-                    id="accordionFlushExample2" *ngIf="role === 'admin'">
+                    id="accordionFlushExample2" *ngIf="role === 'admin' || role === 'accountant'">
                     <div class="accordion-item ">
                         <h2 class="accordion-header ">
                             <button class="accordion-button collapsed px-2" type="button" data-bs-toggle="collapse"
@@ -124,26 +125,26 @@
                             data-bs-parent="#accordionFlushExample2">
                             <div class="accordion-body">
                                 <ul class="gap-3 py-2 d-flex flex-column">
-                                    <li>
-                                        <a type="button" [routerLink]="['companyList']" routerLinkActive="active-link"
+                                    <li [routerLink]="['companyList']" class="nav-item" *ngIf="role === 'admin'">
+                                        <a type="button" routerLinkActive="active-link"
                                             (click)="closeAccordion()" class="d-flex align-items-center">
                                             Company List
                                         </a>
                                     </li>
-                                    <li [routerLink]="['comMange&Plolicies']">
+                                    <li [routerLink]="['comMange&Plolicies']" class="nav-item" *ngIf="role === 'admin'">
                                         <a type="button" routerLinkActive="active-link" (click)="closeAccordion()"
                                             class="d-flex align-items-center">
                                             manage & Policies
                                         </a>
                                     </li>
-                                    <li>
-                                        <a type="button" [routerLink]="['LeaveSetup']" routerLinkActive="active-link"
+                                    <li  [routerLink]="['LeaveSetup']" class="nav-item" *ngIf="role === 'admin'">
+                                        <a type="button" routerLinkActive="active-link"
                                             (click)="closeAccordion()" class="d-flex align-items-center">
                                             Leave Config
                                         </a>
                                     </li>
-                                    <li>
-                                        <a type="button" [routerLink]="['BonusAndIncentive']" routerLinkActive="active-link"
+                                    <li [routerLink]="['BonusAndIncentive']" class="nav-item" *ngIf="role === 'accountant'">
+                                        <a type="button" routerLinkActive="active-link"
                                             (click)="closeAccordion()" class="d-flex align-items-center">
                                             Bonus And Incentive
                                         </a>
@@ -171,21 +172,28 @@
                     </a>
                 </li> -->
             </ul>
+          </div>
             <!-- Logout Button at the Bottom -->
-            <div class="d-flex flex-column align-items-start gap-1 flex-nowrap userLogin">
+             <hr>
+            <!-- <div class="d-flex flex-column align-items-start gap-1 flex-nowrap userLogin mb-2">
                 <div>
-                    <h5>User</h5>
-                </div>
-                <div class="login-Details ms-2">
+                    <span class="fs-5 ms-2">User  :</span>
+                    <span class="fs-6 ms-2"> {{empName}}</span> <br>
+                    <span class="fs-6 ms-n2"> {{roleName}}</span>
+                </div> -->
+                <!-- <div class="login-Details ms-2">
                     <i class="bi bi-box-arrow-right me-2"></i>
                     <span>
                         {{empName}}<br>
                         <span>{{roleName}}</span>
                     </span>
-                </div>
-                <div>
+                </div> -->
+                <!-- </div>    -->
+                <!-- <hr> -->
+               <div class="d-flex flex-column align-items-start gap-1 flex-nowrap userLogin">
+                <div class="mt-1">
                     <button class="btn fw-medium text-white" (click)="logout()">
-                        <i class="bi bi-box-arrow-right me-2"></i> Logout
+                        <i class="bi bi-box-arrow-right"></i>&nbsp; &nbsp; Logout
                     </button>
                 </div>
             </div>

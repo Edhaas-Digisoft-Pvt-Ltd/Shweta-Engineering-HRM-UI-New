@@ -9,13 +9,18 @@ import { Router } from '@angular/router';
 })
 export class AuthPanelComponent {
   isDarkTheme = false;
-
+  empName: any;
+  roleName: any;
+  
   constructor(private router: Router, private renderer: Renderer2) { }
 
   ngOnInit(): void {
     const theme = localStorage.getItem('theme');
     this.isDarkTheme = theme === 'dark';
     this.applyTheme();
+
+    this.empName = sessionStorage.getItem('employeeName')
+    this.roleName = sessionStorage.getItem('roleName')
   }
 
   toggleTheme() {
