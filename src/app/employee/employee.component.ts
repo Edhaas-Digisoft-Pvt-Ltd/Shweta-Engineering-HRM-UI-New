@@ -4,6 +4,8 @@ import { EmployeeActionComponent } from './employee-action/employee-action.compo
 import { Router } from '@angular/router';
 import { HrmserviceService } from 'src/app/hrmservice.service';
 import { ToastrService } from 'ngx-toastr';
+import * as XLSX from 'xlsx';
+import { saveAs } from 'file-saver';
 
 @Component({
   selector: 'app-employee',
@@ -121,7 +123,23 @@ export class EmployeeComponent {
     }
   ];
 
+  downloadTemplate(): void {
+    const userConfirmed = confirm("Do you want to download the employee template?");
+      if (userConfirmed) {
+        const headers = ['company_id','role_id','emp_title','emp_name','emp_email','emp_gender','department_id','designation_id','CTC','statutory_list','bank_name','account_num','ifsc_code','doj','emp_contact','emp_address'];
+        const exampleRow = [
+         '1','3','mr','abc','abc@gmail.com','male','1','2','4','xyz','SBI','458438236526','SBIN0005088','2/1/2022','Pune'
+        ];
 
+        const worksheet: XLSX.WorkSheet = XLSX.utils.aoa_to_sheet([headers, exampleRow]);
+        const workbook: XLSX.WorkBook = { Sheets: { 'Template': worksheet }, SheetNames: ['Template'] };
+        const excelBuffer: any = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+        const blob: Blob = new Blob([excelBuffer], { type: 'application/octet-stream' });
+        saveAs(blob, 'Employee_Template.xlsx');
+
+        this.toastr.success('Download successfully !');
+      }
+  }
 
   onGridReady(params: { api: any }) {
     this.gridApiActive = params.api;

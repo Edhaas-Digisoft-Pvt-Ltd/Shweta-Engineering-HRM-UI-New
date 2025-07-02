@@ -109,7 +109,7 @@
                             <!-- <div class="btn w-100 dashboard-btn">
                                 Edit
                             </div> -->
-                            <button type="button" class="btn dashboard-btn w-100" data-bs-toggle="modal"
+                            <button *ngIf="role === 'admin'" type="button" class="btn dashboard-btn w-100" data-bs-toggle="modal"
                                 data-bs-target="#editProfileModal" (click)="updateData()">
                                 Edit
                             </button>
@@ -265,40 +265,22 @@
 
         <div class="row">
             <div class="col attendaceWrapper">
-                <div class=" attendenceCard p-3 border te xt-center" style="border-radius: 10px;">
+                <div class=" attendenceCard p-3 border text-center" style="border-radius: 10px;">
 
                     <h6> <i class="bi bi-clock me-2 " style="color:#3674B5"></i> Total Hours Today</h6>
-                    <h5 class=" border-bottom border-primary pb-3 text-center">5.5/6</h5>
-                    <p class="mb-0 text-center">
-                        <span><i class="bi bi-graph-up-arrow me-2"></i></span> 5% this week
-                    </p>
+                    <h5 class="pb-0 text-center">5.5/6</h5>
                 </div>
-                <div class=" attendenceCard p-3 border text-center
-                " style="border-radius: 10px;">
+                <div class=" attendenceCard p-3 border text-center" style="border-radius: 10px;">
                     <h6> <i class="bi bi-clock me-2" style="color:#3674B5"></i> Total Hours Week</h6>
-                    <h5 class=" border-bottom border-primary pb-3 text-center">10/40</h5>
-                    <p class="mb-0">
-                        <span><i class="bi bi-graph-down-arrow me-2"></i></span> 5% this week
-                    </p>
-
+                    <h5 class="pb-0 text-center">10/40</h5>
                 </div>
-                <div class=" attendenceCard p-3 border te xt-center
-                " style="border-radius: 10px;">
+                <div class=" attendenceCard p-3 border text-center" style="border-radius: 10px;">
                     <h6> <i class="bi bi-clock me-2" style="color:#3674B5"></i> Total Hours Month</h6>
-                    <h5 class=" border-bottom border-primary pb-3 text-center">75/98</h5>
-                    <p class="mb-0">
-                        <span><i class="bi bi-graph-up-arrow me-2"></i></span> 5% this week
-                    </p>
-
+                    <h5 class="pb-0 text-center">75/98</h5>
                 </div>
-                <div class=" attendenceCard p-3 border te xt-center
-                " style="border-radius: 10px;">
+                <div class=" attendenceCard p-3 border text-center" style="border-radius: 10px;">
                     <h6> <i class="bi bi-clock me-2" style="color:#3674B5"></i> Total Overtime</h6>
-                    <h5 class=" border-bottom border-primary pb-3 text-center">16(Hours)</h5>
-                    <p class="mb-0">
-                        <span><i class="bi bi-graph-up-arrow me-2"></i></span> 5% this week
-                    </p>
-
+                    <h5 class="pb-0 text-center">16(Hours)</h5>
                 </div>
             </div>
         </div>
