@@ -16,7 +16,7 @@
                     </div> -->
                     <div class="col-3">
                         <label for="">Select Company</label>
-                         <select class="form-select">
+                         <select class="form-select" (change)="onCompanyChange($event)">
                             <option *ngFor="let item of CompanyNames" [value]="item.company_id">{{ item.company_name }}</option>
                         </select>
                     </div>

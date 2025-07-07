@@ -5,11 +5,11 @@ import { Component } from '@angular/core';
   standalone: true,
    template: `
     <div class="d-flex w-100">
-      <button (click)="editID(params)" class="btn btn-outline-dark me-3" title="Edit" data-bs-toggle="modal"
-        data-bs-target="#exampleModal2">
-        <i class="bi bi-pencil-fill"></i>
+      <button (click)="editID(params)" class="btn btn-sm mb-1" title="Edit" data-bs-toggle="modal"
+        data-bs-target="#exampleModal2" style="background-color:#C8E3FF">
+        <i class="bi bi-eye"></i>
       </button>
-    <button (click)="deleteID(params)" class="btn btn-outline-dark"><i class="bi bi-trash"></i></button>
+      <button (click)="deleteID(params)" class="btn btn-sm mb-1 ms-2" style="background-color:#C8E3FF"><i class="bi bi-trash"></i></button>
     </div>
   `,
 })

@@ -38,6 +38,9 @@ export class PayrollSummariesComponent {
   deduct: any[] = [];
   today: string = new Date().toISOString().split('T')[0];
 
+  selectedRejectedReason : any;
+  rejectreasons: any[] = ['Leaves', 'OverTime',  'Advance Salary', 'Bonus & Incentive', 'Tax'];
+
   constructor(private route: ActivatedRoute, private router: Router, private formBuilder: FormBuilder, private service: HrmserviceService) {
     this.payrollDetails = this.formBuilder.group({
       id: ['', [Validators.required]],
@@ -346,6 +349,17 @@ export class PayrollSummariesComponent {
       this.gridApi.ensureColumnVisible(this.selectedColumn);
     }
   }
+
+  rejectPayroll() {
+    const payload = {
+      reject_reason: this.selectedRejectedReason,
+      employee_code: this.employeeDetails.employee_code
+    }
+    this.service.post('reject/payroll', { payload }).subscribe((res: any) => {
+
+    });
+  }
+
   onGridReady(params: GridReadyEvent) {
     this.gridApi = params.api;
   }

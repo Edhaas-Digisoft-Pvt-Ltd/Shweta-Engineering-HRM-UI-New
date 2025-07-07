@@ -90,6 +90,10 @@ label{
 a.nav-link{
     position: relative;;
 }
+.BtnColor{
+    background-color: #3674B5;
+}
+
 @media(max-width:768px){
     .main-content{
         padding:15px 0px;

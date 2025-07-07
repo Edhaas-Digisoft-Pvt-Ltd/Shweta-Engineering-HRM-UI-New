@@ -7,7 +7,6 @@ import { Router } from '@angular/router';
   selector: 'app-payroll-action-btn',
   template: `
     <div class="">
-      <button class="btn btn-sm btn-print" ><i class="bi bi-printer"></i></button>
       <button class="btn btn-sm ms-2 btn-view" (click)="viewPayroll()"><i class="bi bi-eye"></i></button>
     </div>
   `,

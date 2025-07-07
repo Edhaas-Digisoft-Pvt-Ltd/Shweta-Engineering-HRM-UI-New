@@ -252,7 +252,7 @@
                     <div class="col d-flex align-items-center border px-4 mt-4"
                         style="border-radius: 10px; height: 122px;"
                         *ngIf="role === 'employee'">
-                        <button class="btn  w-100 " style="background-color:#94C8FF" data-bs-toggle="modal"
+                        <button class="btn dashboard-btn w-100" data-bs-toggle="modal"
                             data-bs-target="#advanceSalaryModal">
                             Apply for Advance Salary
                         </button>
@@ -517,7 +517,7 @@
                              [ngClass]="{'input-error': isLeaveSubmitted && leaveForm.get('leave_id')?.invalid,
                                 'is-invalid': isLeaveSubmitted && leaveForm.get('leave_id')?.invalid }">
                                 <option value="">-- Select Leave Type --</option>
-                                <option *ngFor="let leave of leaveTypes" [value]="leave.id">{{ leave.value }}</option>
+                                <option *ngFor="let leave of leaveTypes" [value]="leave.leave_id">{{ leave.leave_name }}</option>
                             </select>
                             <small class="text-danger"
                                 *ngIf="isLeaveSubmitted && leaveForm.get('leaveType')?.hasError('required')">
@@ -544,7 +544,7 @@
                             [ngClass]="{'input-error': isLeaveSubmitted && leaveForm.get('start_date')?.invalid,
                                 'is-invalid': isLeaveSubmitted && leaveForm.get('start_date')?.invalid }"/>
                             <small class="text-danger"
-                                *ngIf="isLeaveSubmitted && leaveForm.get('fromDate')?.hasError('required')">
+                                *ngIf="isLeaveSubmitted && leaveForm.get('start_date')?.hasError('required')">
                                 This field is required.
                             </small>
                         </div>
@@ -581,7 +581,7 @@
                 </div>
 
                 <div class="modal-footer d-flex justify-content-end">
-                    <button type="submit" class="btn btn-primary me-2">Apply</button>
+                    <button type="submit" class="btn btn-primary me-2 dashboard-btn">Apply</button>
                     <button type="button" class="btn btn-outline-dark" data-bs-dismiss="modal">Cancel</button>
                 </div>
             </form>
@@ -658,7 +658,7 @@
                 </div>
 
                 <div class="modal-footer d-flex justify-content-end">
-                    <button type="submit" class="btn btn-primary">Apply</button>
+                    <button type="submit" class="btn btn-primary dashboard-btn">Apply</button>
                     <button type="button" class="btn btn-outline-dark" data-bs-dismiss="modal">Cancel</button>
                 </div>
             </form>

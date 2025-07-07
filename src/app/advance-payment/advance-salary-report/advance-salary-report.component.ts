@@ -60,6 +60,7 @@ export class AdvanceSalaryReportComponent {
   }
 
   searchEmployeeAdvanceSalary() {
+    this.rowData = [];
     const code = this.searchValue?.trim();
     if (!code) {
       this.rowData = []; 
@@ -67,7 +68,7 @@ export class AdvanceSalaryReportComponent {
     }
 
     const payload = {
-      employee_id: code,
+      employee_code: code,
       year: this.selectedYear,
       month: this.selectedMonth,
     };
@@ -153,7 +154,7 @@ export class AdvanceSalaryReportComponent {
 
   initializeColumns() {
     this.columnDefs = [
-     { headerName: 'ID', field: 'employee_code', sortable: true, filter: true, maxWidth: 150 },
+     { headerName: 'Emp Code', field: 'employee_code', sortable: true, filter: true, maxWidth: 150 },
       { headerName: 'Employee Name', field: 'emp_name', sortable: true, filter: true, maxWidth:180 },
       { headerName: 'Apply Date', field: 'apply_date', sortable: true, filter: true, maxWidth:150 },
       { headerName: 'Adv. Amount', field: 'advance_amount', sortable: true, filter: true, maxWidth:150 },
@@ -168,7 +169,7 @@ export class AdvanceSalaryReportComponent {
       maxWidth:120,
       cellStyle: { border: '1px solid #ddd' },
       cellRenderer: (params: any) => {
-        return `<button type="button" class="btn btn-outline-dark mb-1" data-bs-toggle="modal" data-bs-target="#salaryReport">
+        return `<button type="button" class="btn btn-sm mb-1" data-bs-toggle="modal" data-bs-target="#salaryReport" style="background-color:#C8E3FF">
           <i class="bi bi-eye "></i>
         </button>`;
       },

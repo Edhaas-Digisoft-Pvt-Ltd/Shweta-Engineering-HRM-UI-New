@@ -102,7 +102,7 @@
 
                                             <div class="d-grid gap-2 d-md-flex justify-content-md-end">
                                                 <button type="submit"
-                                                    class="btn btn-primary mt-3 ml-auto btn-end submit-btn">Submit</button>
+                                                    class="btn btn-primary mt-3 ml-auto btn-end submit-btn BtnColor">Submit</button>
                                             </div>
                                         </div>
 
@@ -234,7 +234,8 @@
                                              <div class="modal-footer">
                                            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
                                                 <button type="submit"
-                                                    class="btn btn-primary mt-3 ml-auto btn-end submit-btn">Update</button>
+                                                    [disabled]="editBonusAndIncentiveData?.status === 'Approved' || editBonusAndIncentiveData?.status === 'Rejected'"
+                                                    class="btn btn-primary mt-3 ml-auto btn-end submit-btn BtnColor">Update</button>
                                             </div>
                                         </div> 
                                         </div>

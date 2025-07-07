@@ -76,7 +76,9 @@ export class LoginComponent {
         this.service.setRole(role); // Session storage for role
 
         if (role === 'employee') {
-          this.router.navigate(['/authPanal/EmployeeInDetail']);
+          this.router.navigate(['/authPanal/EmployeeInDetail'], {
+            queryParams: { id: this.logindata.employe_id }
+          });
         }
         if (role === 'accountant') {
           this.router.navigate(['/authPanal/payrollProcess']);

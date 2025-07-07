@@ -147,7 +147,7 @@ export class ManageBonusAndIncentiveComponent {
   }
 
   columnDefs: ColDef[] = [
-    { headerName: 'ID', field: 'employee_id', sortable: true, filter: true, minWidth:200 },
+    { headerName: 'Employee Code', field: 'employee_code', sortable: true, filter: true, minWidth:200 },
     { headerName: 'Employee Name', field: 'emp_name', sortable: true, filter: true, minWidth:250 },
     { headerName: 'Date', field: 'bonus_incentive_date', sortable: true, filter: true, minWidth:240 },
     { headerName: 'Status', field: 'status',  sortable: true, filter: true, minWidth:250,
@@ -273,7 +273,7 @@ export class ManageBonusAndIncentiveComponent {
       try {
         if (res.status === 'success') {
           this.rowData = res.Data.map((item:any)=>({
-            employee_id:item.employee_code,
+            employee_code:item.employee_code,
             emp_name:item.emp_name,
             bonus_incentive_date:item.bonus_incentive_date,
             status:item.status,

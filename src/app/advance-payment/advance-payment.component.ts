@@ -91,6 +91,7 @@ export class AdvancePaymentComponent {
   }
 
   // getAllAdvSalary() {
+      //  this.rowData = [];
   //   this.service.post('fetch/allcompanyrequest', { 
   //     // company_id: this.selectedCompanyId, 
   //     company_id: 2, 
@@ -118,12 +119,12 @@ export class AdvancePaymentComponent {
   // }
 
   getAllAdvSalary() {
+    this.rowData = [];
     this.service.post('all/advancesaraly', { 
       // company_id: this.selectedCompanyId, 
       // year: this.selectedYear,
       // month: this.selectedMonth,
     }).subscribe((res: any) => {
-      console.log(res)
       try {
         if (res.status === 'success') {
           this.rowData = res.data.map((item:any)=>({
@@ -209,7 +210,7 @@ export class AdvancePaymentComponent {
 
   initializeColumns() {
     this.columnDefs = [
-      { headerName: 'ID', field: 'employee_code', sortable: true, filter: true, maxWidth:150, },
+      { headerName: 'Emp Code', field: 'employee_code', sortable: true, filter: true, maxWidth:150, },
       { headerName: 'Apply Date', field: 'apply_date', sortable: true, filter: true, maxWidth:150, },
       {
         headerName: 'Employee Name',
@@ -242,7 +243,7 @@ export class AdvancePaymentComponent {
         maxWidth:120,
         cellStyle: { border: '1px solid #ddd' },
         cellRenderer: (params: any) => {
-          return `<button type="button" class="btn btn-outline-dark mb-1" data-bs-toggle="modal" data-bs-target="#advanceRequestModal">
+          return `<button type="button" class="btn btn-sm mb-1" data-bs-toggle="modal" data-bs-target="#advanceRequestModal" style="background-color:#C8E3FF">
             <i class="bi bi-pencil"></i>
           </button>`;
         },

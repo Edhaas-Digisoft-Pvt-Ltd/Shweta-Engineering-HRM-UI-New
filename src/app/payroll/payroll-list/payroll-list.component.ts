@@ -50,7 +50,6 @@ export class PayrollListComponent {
     this.activeTab = tab;
   }
 
-
   ngOnInit() {
     this.selectedYear = new Date().getFullYear();
     this.selectedMonth = new Date().getMonth() + 1;
@@ -77,34 +76,44 @@ export class PayrollListComponent {
     );
   }
 
+  onCompanyChange(event: Event): void {
+    this.selectedCompanyId = (event.target as HTMLSelectElement).value;
+    console.log('Selected Company ID:', this.selectedCompanyId);
+    this.getpayrollList();
+  }
+
   onYearMonthChange() {
     this.getpayrollList();
   }
 
-  getpayrollList() {
-    this.service.post('get/payroll_list', { 
-      company_id: this.selectedCompanyId, 
-      year: this.selectedYear,
-      month: this.selectedMonth,
-    }).subscribe((res: any) => {
-      console.log(res)
-      try {
-        if (res.status === 'success') {
-          this.rowData = res.data.map((item:any)=>({
-            employee_code: item.employee_code,
-            employeeName : item.emp_name,
-            grossAmount : item.gross_salary,
-            overTime : item.total_overtime,
-            netAmount : item.net_salary,
-            deduction : item.deduction,
-            employe_id : item.employe_id
-          }));
-        } 
-      } catch (error) {
-        console.log(error);
+getpayrollList() {
+  this.rowData = [];
+  this.service.post('get/payroll_list', { 
+    company_id: this.selectedCompanyId, 
+    year: this.selectedYear,
+    month: this.selectedMonth,
+  }).subscribe((res: any) => {
+    try {
+      if (res.status === 'success' && res.data?.length > 0) {
+        this.rowData = res.data.map((item: any) => ({
+          employee_code: item.employee_code,
+          employeeName: item.emp_name,
+          grossAmount: item.gross_salary,
+          overTime: item.total_overtime,
+          netAmount: item.net_salary,
+          deduction: item.deduction,
+          employe_id: item.employe_id
+        }));
+      } else {
+        this.rowData = []; 
       }
-    })
-  }
+    } catch (error) {
+      console.log(error);
+      this.rowData = [];
+    }
+  });
+}
+
 
   columnDefs: ColDef[] = [
     {

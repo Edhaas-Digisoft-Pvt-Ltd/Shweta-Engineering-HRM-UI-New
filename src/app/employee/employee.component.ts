@@ -6,7 +6,7 @@ import { HrmserviceService } from 'src/app/hrmservice.service';
 import { ToastrService } from 'ngx-toastr';
 import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
-
+declare var bootstrap: any;
 @Component({
   selector: 'app-employee',
   templateUrl: './employee.component.html',
@@ -22,12 +22,23 @@ export class EmployeeComponent {
   Employee_Data: any;
   selectedCompanyId: any = 1;
   rowData: any = [];
+  importExcelCompanyId: string = ''; 
   
   constructor(private router: Router, private service: HrmserviceService, private toastr: ToastrService) { }
 
   ngOnInit() {
     this.getEmployee();
     this.getCompanyNames();
+  }
+
+  closeAllModals(): void {
+    const modals = document.querySelectorAll('.modal.show');
+    modals.forEach((modalElement: any) => {
+      const modalInstance = bootstrap.Modal.getInstance(modalElement);
+      if (modalInstance) {
+        modalInstance.hide();
+      }
+    });
   }
 
   getCompanyNames() {
@@ -59,10 +70,10 @@ export class EmployeeComponent {
   columnDefs: ColDef[] = [
     { headerName: 'Emp Code', field:'employee_code' ,sortable: true, filter: true, minWidth: 160, },
     { headerName: 'Employee Name', field:'emp_name' ,sortable: true, filter: true, minWidth: 180, },
-    { headerName: 'Contact', field: 'emp_contact', sortable: true, filter: true },
-    { headerName: 'Joining Date', field: 'doj', sortable: true, filter: true },
     { headerName: 'Department', field: 'department_name', sortable: true, filter: true },
     { headerName: 'Role', field: 'designation_name', sortable: true, filter: true },
+    { headerName: 'Contact', field: 'emp_contact', sortable: true, filter: true },
+    { headerName: 'Joining Date', field: 'doj', sortable: true, filter: true },
     // { headerName: 'Status', field: 'status', sortable: true, filter: true, cellRenderer: (params: { value: any; }) => {
     //   const status = params.value;
     //   const className = status === 'Active' ? 'status-active' : 'status-inactive';
@@ -113,7 +124,7 @@ export class EmployeeComponent {
       }
     },
     {
-      headerName: 'Actions',
+      headerName: 'Action',
       field: 'employee_id',
       cellStyle: { border: '1px solid #ddd' },
       cellRenderer: EmployeeActionComponent,
@@ -126,9 +137,9 @@ export class EmployeeComponent {
   downloadTemplate(): void {
     const userConfirmed = confirm("Do you want to download the employee template?");
       if (userConfirmed) {
-        const headers = ['company_id','role_id','emp_title','emp_name','emp_email','emp_gender','department_id','designation_id','CTC','statutory_list','bank_name','account_num','ifsc_code','doj','emp_contact','emp_address'];
+        const headers = ['role_id','emp_title','emp_name','emp_email','emp_gender','department_id','designation_id','CTC','statutory_list','bank_name','account_num','ifsc_code','doj','emp_contact','emp_address'];
         const exampleRow = [
-         '1','3','mr','abc','abc@gmail.com','male','1','2','4','xyz','SBI','458438236526','SBIN0005088','2/1/2022','Pune'
+        '3','mr','abc','abc@gmail.com','male','1','2','4','xyz','SBI','458438236526','SBIN0005088','2/1/2022','9999999999','Pune'
         ];
 
         const worksheet: XLSX.WorkSheet = XLSX.utils.aoa_to_sheet([headers, exampleRow]);
@@ -175,26 +186,39 @@ export class EmployeeComponent {
   
   selectedFile: File | null = null;
 
-  onFileChange(event: any) {
-    const file = event.target.files[0];
-    console.log(file);
+onFileChange(event: any) {
+  const fileInput = event.target as HTMLInputElement;
+  const file = fileInput.files?.[0];
+  if (!file) return;
 
-    if (!file) return;
+  this.selectedFile = file;
 
-    this.selectedFile = file;
+  const formData = new FormData();
+  formData.append('upload_file', file);
+  formData.append('company_id', this.importExcelCompanyId); 
 
-    const formData = new FormData();
-    formData.append('upload_file', file);
+  this.service.post('import/employee/excel', formData).subscribe((res: any) => {
+    if (res.status === 'success') {
+      this.toastr.success('File uploaded successfully!');
+      const skippedInfo = res.skipped?.map((row: any) => `Row ${row.row}: skipped due to ${row.reason}`).join('\n');
+      if (skippedInfo) this.toastr.warning(skippedInfo);
+      this.closeAllModals();
+      this.importExcelCompanyId = '';
+      this.getEmployee();
+    } else {
+      const skippedInfo = res.skipped?.map((row: any) => `Row ${row.row}: skipped due to ${row.reason}`).join('\n');
+      this.toastr.error(skippedInfo || 'Upload failed.');
+      this.importExcelCompanyId = '';
+      this.closeAllModals();
+    }
 
-    this.service.post('import/employee/excel', formData).subscribe((res: any) => {
-      if (res.status === 'success') {
-        this.toastr.success('File Upload successfully !');
-        this.getEmployee();
-      } else {
-        console.log(res.error);
-      }
-    });
-  }
+    fileInput.value = '';
+  });
+}
+
+
+// const skippedInfo = res.skipped?.map((row: any) => `Row ${row.row}: ${row.reason}`).join('\n');
+// this.toastr.warning(`${message}\n${skippedInfo}`, 'Upload Notice');
 
   onOptionSelected() {
     console.log('Selected option:', this.selectedValue);
@@ -212,8 +236,14 @@ export class EmployeeComponent {
   }
 
   exportExcel() {
+    console.log('called');
+    
     if (this.gridApiActive) {
-      this.gridApiActive.exportDataAsCsv();
+      this.gridApiActive.exportDataAsExcel({
+        columnKeys: ['employee_code', 'emp_name', 'emp_contact', 'doj', 'department_name', 'designation_name', 'status'],
+        fileName: 'Employee_List.xlsx',
+        columnWidth: 120, // ✅ default width for all columns
+      });
     }
   }
 

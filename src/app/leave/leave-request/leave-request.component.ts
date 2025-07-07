@@ -130,11 +130,12 @@ export class LeaveRequestComponent {
   }
 
   getLeaveRequests(){
+     this.rowData = [];
      this.service.post('leave/request', { company_id: this.selectedCompanyId }).subscribe(
       (res: any) => {
         if (res.status === 'success') {
           this.rowData = res.data.map((item:any)=>({
-            employee_code:item.employe_id,
+            employee_code:item.employee_code,
             emp_name:item.emp_name,
             company_name:item.company_name,
             department_name:item.department_name,
@@ -147,7 +148,7 @@ export class LeaveRequestComponent {
         } 
       },
        (error) => {
-        console.error('Error fetching leave request:', error);
+        console.error(error);
       }
     );
   }

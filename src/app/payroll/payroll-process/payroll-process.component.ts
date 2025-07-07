@@ -69,6 +69,11 @@ export class PayrollProcessComponent {
       }
     );
   }
+  onCompanyChange(event: Event): void {
+    this.selectedCompanyId = (event.target as HTMLSelectElement).value;
+    console.log('Selected Company ID:', this.selectedCompanyId);
+    this.getPayrollProcess();
+  }
 
   onYearMonthChange() {
     this.getPayrollProcess();
@@ -79,6 +84,7 @@ export class PayrollProcessComponent {
   }
 
   getPayrollProcess() {
+    this.rowData = [];
     this.service.post('fetch/payroll', {
       company_id: this.selectedCompanyId,
       year: this.selectedYear,

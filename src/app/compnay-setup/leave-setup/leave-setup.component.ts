@@ -160,6 +160,7 @@ export class LeaveSetupComponent {
   }
 
   getAllLeaves() {
+    this.rowData = [];
     this.service.post("fetch/companyleave", { company_id: this.selectedCompanyId }).subscribe((res: any) => {
       if (res.status === 'success') {
         this.rowData = res.data.map((item: any) => ({

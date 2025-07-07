@@ -91,7 +91,7 @@ export class ConsolidateAttendanceSummaryComponent {
 
   loadData() {
     const baseCols: (ColDef | ColGroupDef)[] = [
-      { headerName: 'ID', field: 'id', pinned: 'left' },
+      { headerName: 'Employee Code', field: 'id', pinned: 'left', width: 150},
       { headerName: 'Employee Name', field: 'employeeName', pinned: 'left' },
     ];
 
@@ -138,7 +138,7 @@ export class ConsolidateAttendanceSummaryComponent {
           const monthIndex = parseInt(monthKey.split('-')[1]) - 1; // e.g., '2025-06' -> 5
 
           result[monthKey].forEach((item: any) => {
-            const empId = item.employe_id;
+            const empId = item.employee_code;
 
             if (!employeeMap.has(empId)) {
               employeeMap.set(empId, {

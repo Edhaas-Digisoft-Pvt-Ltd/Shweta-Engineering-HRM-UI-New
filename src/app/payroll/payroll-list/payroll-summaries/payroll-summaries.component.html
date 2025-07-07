@@ -5,9 +5,19 @@
                 <!-- <img src="assets/img/Animation - 1743094888648.gif" alt=""> -->
 
                 <h2> <i class="bi bi-currency-rupee me-2"></i> Payroll</h2>
-                <p><span (click)="backtoPayroll()" style="cursor: pointer;">Payroll List</span> / <span style="color: #3674B5;">Payroll
+                <p><span (click)="backtoPayroll()" style="cursor: pointer;">Payroll List</span> / <span
+                        style="color: #3674B5;">Payroll
                         Summaries</span></p>
             </div>
+
+            <div class="col-12 mb-2">
+                <div class="col-md-2 float-end me-3">
+                    <button class="btn comBtn text-white float-end" data-bs-toggle="modal"
+                        data-bs-target="#RejectPayrollModal">Reject Payroll
+                    </button>
+                </div>
+            </div>
+
             <div class="col-12  mt-2">
                 <div>
                     <form class="row m-0 p-0" action="" [formGroup]="payrollDetails">
@@ -31,23 +41,23 @@
                                 <input class="form-control readOnlyInput" formControlName="companyName" type="text"
                                     name="" id="">
                             </div>
-                        </div>  
+                        </div>
                         <div class="col-12 col-sm-1">
                             <div class="payrollSummaryDetails">
                                 <label for="">Year</label>
-                                <input class="form-control readOnlyInput" [value]="selectedYear"/>
+                                <input class="form-control readOnlyInput" [value]="selectedYear" />
                             </div>
-                           
+
                             <!-- <div class="payrollSummaryDetails">
                                 <label for="payrollId"><i class="bi bi-calendar3 me-2"></i>Date</label>
                                 <input class="form-control readOnlyInput" formControlName="date" type="text" name=""
                                     id="">
                             </div> -->
                         </div>
-                         <div class="col-12 col-sm-2">
+                        <div class="col-12 col-sm-2">
                             <div class="payrollSummaryDetails">
                                 <label for="">Month</label>
-                                <input class="form-control readOnlyInput" [value]="getMonthName(selectedMonth)"/>
+                                <input class="form-control readOnlyInput" [value]="getMonthName(selectedMonth)" />
                             </div>
                         </div>
                     </form>
@@ -73,7 +83,7 @@
                         </div>
 
                     </div>
-                    <div class="row m-0 p-0 mt-3">  
+                    <div class="row m-0 p-0 mt-3">
                         <div class="col-12 col-sm-6">
                             <div
                                 class="d-flex flex-column align-items-center justify-content-center p-2 py-2 attandance-summary">
@@ -99,75 +109,82 @@
                             <div class="card-header">
                                 Advance Salary Tenure
                             </div>
-                            <div class="card-body" >
+                            <div class="card-body">
                                 <div *ngIf="!hasAdvanceSalary" class="mt-2 mb-5">
                                     <p class="text-center">Advance Salary Not Available</p>
                                 </div>
-                                <div  *ngIf="hasAdvanceSalary">
-                                <div class="progress-Section">
-                                    <div class="row m-0 p-0">
-                                        <div class="col" >
-                                            <label for="">Loan Amount</label>
-                                            <p class="m-0">₹ {{AdvanceSalaryDetails.advance_amount}}</p>
-                                        </div>
-                                        <div class="progress  col-12 p-0 mt-2" role="progressbar"
-                                            [attr.aria-valuenow]="calculateProgress()" aria-valuemin="0" aria-valuemax="100">
-                                            <div  class="progress-bar" [style.width.%]="calculateProgress()">{{ calculateProgress() }}%</div>
-                                        </div>
-                                    </div>
-                                    <div class=" px-2 mt-2 d-flex justify-content-between">
-                                        <div class="loanAmount">
-                                            <label for=""> <span class="me-1"></span> Loan Amount</label>
-                                            <p class="m-0">₹ {{AdvanceSalaryDetails.advance_amount}}</p>
-                                        </div>
-                                        <div class="RemainingAmount">
-                                            <label for=""> <span class="me-1"></span> Remaining</label>
-                                            <p class="m-0">₹ {{AdvanceSalaryDetails.remaining_balance}}</p>
-                                        </div>
-                                    </div>
-                                </div>
-                                <hr>
-                                <div class="Advance-Salary-details mt-2">
-                                    <form action="">
+                                <div *ngIf="hasAdvanceSalary">
+                                    <div class="progress-Section">
                                         <div class="row m-0 p-0">
-                                            <div class="col-12 col-sm-3">
-                                                <label for="">Tenure</label>
-                                                <input class="form-control readOnlyInput" type="text" [value]="AdvanceSalaryDetails.tenure">
+                                            <div class="col">
+                                                <label for="">Loan Amount</label>
+                                                <p class="m-0">₹ {{AdvanceSalaryDetails.advance_amount}}</p>
                                             </div>
-                                            <div class="col-12 col-sm">
-                                                <label for="">First Payment Date</label>
-                                                <input class="form-control readOnlyInput" type="text" [value]="AdvanceSalaryDetails.apply_date">
-                                            </div>
-                                            <div class="col-12 col-sm">
-                                                <label for="">Payment End Date</label>
-                                                <input class="form-control readOnlyInput" type="text" [value]="AdvanceSalaryDetails.updated_on">
+                                            <div class="progress  col-12 p-0 mt-2" role="progressbar"
+                                                [attr.aria-valuenow]="calculateProgress()" aria-valuemin="0"
+                                                aria-valuemax="100">
+                                                <div class="progress-bar" [style.width.%]="calculateProgress()">{{
+                                                    calculateProgress() }}%</div>
                                             </div>
                                         </div>
-                                        <div class="row m-0 p-0 mt-3">
-                                            <div class="col-12 col-sm-3">
-                                                <label for="">Amount</label>
-                                                <input class="form-control readOnlyInput" type="text" [value]="AdvanceSalaryDetails.advance_amount">
+                                        <div class=" px-2 mt-2 d-flex justify-content-between">
+                                            <div class="loanAmount">
+                                                <label for=""> <span class="me-1"></span> Loan Amount</label>
+                                                <p class="m-0">₹ {{AdvanceSalaryDetails.advance_amount}}</p>
                                             </div>
-                                            <div class="col-12 col-sm">
-                                                <label for="">Last Payment Date</label>
-                                                <input class="form-control readOnlyInput" type="text" [value]="AdvanceSalaryDetails.updated_on">
-                                            </div>
-                                            <div class="col-12 col-sm">
-                                                <label for="">Next Payment Due Date</label>
-                                                <input class="form-control readOnlyInput" type="text" value="-">
+                                            <div class="RemainingAmount">
+                                                <label for=""> <span class="me-1"></span> Remaining</label>
+                                                <p class="m-0">₹ {{AdvanceSalaryDetails.remaining_balance}}</p>
                                             </div>
                                         </div>
-                                    </form>
-                                </div> 
-                                </div>  
-                                 <div class="row d-flex p-0 mt-3 ">
-                                <div class="col">
-                                    <button class="btn preVieBtn w-100 " data-bs-toggle="modal"
-                                    data-bs-target="#exampleModal"><i
-                                        class="bi bi-file-earmark-text me-2"></i>Previous Advance
-                                    Salary</button>
+                                    </div>
+                                    <hr>
+                                    <div class="Advance-Salary-details mt-2">
+                                        <form action="">
+                                            <div class="row m-0 p-0">
+                                                <div class="col-12 col-sm-3">
+                                                    <label for="">Tenure</label>
+                                                    <input class="form-control readOnlyInput" type="text"
+                                                        [value]="AdvanceSalaryDetails.tenure">
+                                                </div>
+                                                <div class="col-12 col-sm">
+                                                    <label for="">First Payment Date</label>
+                                                    <input class="form-control readOnlyInput" type="text"
+                                                        [value]="AdvanceSalaryDetails.apply_date">
+                                                </div>
+                                                <div class="col-12 col-sm">
+                                                    <label for="">Payment End Date</label>
+                                                    <input class="form-control readOnlyInput" type="text"
+                                                        [value]="AdvanceSalaryDetails.updated_on">
+                                                </div>
+                                            </div>
+                                            <div class="row m-0 p-0 mt-3">
+                                                <div class="col-12 col-sm-3">
+                                                    <label for="">Amount</label>
+                                                    <input class="form-control readOnlyInput" type="text"
+                                                        [value]="AdvanceSalaryDetails.advance_amount">
+                                                </div>
+                                                <div class="col-12 col-sm">
+                                                    <label for="">Last Payment Date</label>
+                                                    <input class="form-control readOnlyInput" type="text"
+                                                        [value]="AdvanceSalaryDetails.updated_on">
+                                                </div>
+                                                <div class="col-12 col-sm">
+                                                    <label for="">Next Payment Due Date</label>
+                                                    <input class="form-control readOnlyInput" type="text" value="-">
+                                                </div>
+                                            </div>
+                                        </form>
+                                    </div>
                                 </div>
-                            </div>                            
+                                <div class="row d-flex p-0 mt-3 ">
+                                    <div class="col">
+                                        <button class="btn preVieBtn w-100 " data-bs-toggle="modal"
+                                            data-bs-target="#exampleModal"><i
+                                                class="bi bi-file-earmark-text me-2"></i>Previous Advance
+                                            Salary</button>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -228,9 +245,9 @@
                                         <!-- <td>Otto</td> -->
                                     </tr>
                                     <tr class="deduction" *ngFor="let deductions of deduct">
-                                        <td data-label="Compound" >{{deductions.Compound}}</td>
-                                        <td data-label="Calculation" >{{deductions.deduction}}</td>
-                                        <td data-label="Amount (in ₹)" >{{deductions.amount}}</td>
+                                        <td data-label="Compound">{{deductions.Compound}}</td>
+                                        <td data-label="Calculation">{{deductions.deduction}}</td>
+                                        <td data-label="Amount (in ₹)">{{deductions.amount}}</td>
                                     </tr>
                                     <tr>
                                         <!-- <th  scope="row">1</th> -->
@@ -242,7 +259,7 @@
                                     <tr class="insentive">
                                         <td data-label="Compound">Incentive</td>
                                         <td data-label="Calculation">-</td>
-                                        <td data-label="Amount (in ₹)" >{{calculationData?.bonus_incentive_amount}}</td>
+                                        <td data-label="Amount (in ₹)">{{calculationData?.bonus_incentive_amount}}</td>
                                     </tr>
                                     <tr class="total">
                                         <td data-label="Compound">Total</td>
@@ -350,25 +367,20 @@
                     <div class="col-2">
                         <div class="payrollSummaryDetails">
                             <label for="">Year</label>
-                            <input class="form-control readOnlyInput" [value]="selectedYear"/>
-                            
+                            <input class="form-control readOnlyInput" [value]="selectedYear" />
+
                         </div>
                     </div>
                     <div class="col-2">
                         <div class="payrollSummaryDetails">
                             <label for="">Month</label>
-                            <input class="form-control readOnlyInput" [value]="getMonthName(selectedMonth)"/>
+                            <input class="form-control readOnlyInput" [value]="getMonthName(selectedMonth)" />
                         </div>
                     </div>
                 </form>
-                <div class="mt-2">        
-                    <ag-grid-angular
-                        class="ag-theme-alpine"
-                        style="width: 100%; height: 30vh;"
-                        [rowData]="attendanceDetails"
-                        [columnDefs]="columnDefs2"
-                        [defaultColDef]="defaultColDef"
-                    >
+                <div class="mt-2">
+                    <ag-grid-angular class="ag-theme-alpine" style="width: 100%; height: 30vh;"
+                        [rowData]="attendanceDetails" [columnDefs]="columnDefs2" [defaultColDef]="defaultColDef">
                     </ag-grid-angular>
                     <!-- <ag-grid-angular id="ViewAttendanceDetails" style="width: 100%; height: 30vh;" class="ag-theme-alpine"
                         [rowData]="attandanceDetails" [columnDefs]="columnDefs2" (gridReady)="onGridReady($event)"
@@ -377,6 +389,41 @@
                 </div>
 
             </div>
+        </div>
+    </div>
+</div>
+
+<!-- modal -->
+<div class="modal fade" id="RejectPayrollModal" tabindex="-1">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content rounded-4">
+            <div class="modal-header text-white rounded-top-4">
+                <h5 class="modal-title" id="applyLeaveLabel">Reject Payroll</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                    aria-label="Close"></button>
+            </div>
+
+            <form>
+                <div class="modal-body">
+                    <div class="row mb-3 align-items-end">
+                        <div class="col-md-7">
+                            <label class="form-label">Reject Reason</label>
+                            <select class="form-select" [(ngModel)]="selectedRejectedReason" name="company">
+                                <option value="" disabled selected>-- Choose reason --</option>
+                                <option *ngFor="let item of rejectreasons" [value]="item">
+                                    {{ item }}
+                                </option>
+                            </select>
+                        </div>
+                        <div class="col-md-4 d-flex align-items-end">
+                            <button type="button" class="btn importExcel" (click)="rejectPayroll()"
+                                style="background-color: #3674b5; color: white;">
+                                Reject
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </form>
         </div>
     </div>
 </div>

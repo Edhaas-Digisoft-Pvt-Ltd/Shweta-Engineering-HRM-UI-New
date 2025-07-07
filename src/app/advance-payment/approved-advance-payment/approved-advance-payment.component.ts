@@ -74,6 +74,7 @@ export class ApprovedAdvancePaymentComponent {
   }
 
   getAllApprovedRequest() {
+    this.rowData = [];
     this.service.post('all/approvedrequest', { 
       // company_id: this.selectedCompanyId, 
       // year: this.selectedYear,
@@ -177,7 +178,7 @@ export class ApprovedAdvancePaymentComponent {
   };
   initializeColumns() {
     this.columnDefs = [
-      { headerName: 'ID', field: 'emp_id', sortable: true, filter: true, maxWidth: 160 },
+      { headerName: 'Emp Code', field: 'emp_id', sortable: true, filter: true, maxWidth: 160 },
       {
         headerName: 'Employee Name',
         field: 'emp_name',
@@ -229,8 +230,8 @@ export class ApprovedAdvancePaymentComponent {
         maxWidth:120,
         cellStyle: { border: '1px solid #ddd' },
         cellRenderer: (params: any) => {
-          return `<button type="button" class="btn btn-outline-dark mb-1" data-bs-toggle="modal" data-bs-target="#advanceSalaryModalinfo">
-           <i class="bi bi-eye-fill"></i>
+          return `<button type="button" class="btn btn-sm mb-1" data-bs-toggle="modal" data-bs-target="#advanceSalaryModalinfo" style="background-color:#C8E3FF">
+          <i class="bi bi-eye"></i>
           </button>`;
         },
         onCellClicked: (event: any) => {

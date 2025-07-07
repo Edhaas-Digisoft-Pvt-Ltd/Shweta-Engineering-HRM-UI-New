@@ -55,7 +55,7 @@ export class AttendanceSummaryComponent {
     const daysInMonth = new Date(this.selectedYear, this.selectedMonth + 1, 0).getDate();
 
     this.columnDefs = [
-      { headerName: 'ID', field: 'id', pinned: 'left', width: 70 },
+      { headerName: 'Employee Code', field: 'id', pinned: 'left', width: 150 },
       { headerName: 'Employee Name', field: 'name', pinned: 'left', width: 200 },
     ];
 
@@ -173,14 +173,14 @@ export class AttendanceSummaryComponent {
     const employeeMap: { [key: string]: any } = {};
 
     data.forEach((item) => {
-      const key = item.employe_id;
+      const key = item.employee_code;
       const date = new Date(item.attendance_date);
       const field = this.formatDateKey(date); 
       const status = (item.status || '').toUpperCase();
 
       if (!employeeMap[key]) {
         employeeMap[key] = {
-          id: item.employe_id,
+          id: item.employee_code,
           name: item.emp_name,
           _dates: new Set<string>() 
         };
