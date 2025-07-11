@@ -37,7 +37,7 @@ export class AttendanceComponent {
   };
 
   columnDefs: ColDef[] = [
-    { headerName: 'Employee Code', field: 'employee_code' },
+    { headerName: 'Employee Code', field: 'employee_code', editable:true },
     { headerName: 'Date', field: 'attendance_date' },
     { headerName: 'CheckIn', field: 'check_in' },
     { headerName: 'CheckOut', field: 'check_out' },
@@ -95,7 +95,7 @@ export class AttendanceComponent {
   fetchAttendance(): void {
     this.service.post('fetch/attendance', {}).subscribe((res: any) => {
       if (res.status === 'success') {
-        this.rowData = res.data
+        this.rowData = res.data.reverse()
       } else {
         console.log(res.error);
       }

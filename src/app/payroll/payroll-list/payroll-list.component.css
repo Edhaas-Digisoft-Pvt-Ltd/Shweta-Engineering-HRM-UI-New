@@ -153,6 +153,11 @@ label{
     font-size: 18px;
 }
 
+.BtnColor{
+    background-color: #3674B5;
+    color: white;
+}
+
 @media(max-width:768px){
     .main-content{
         padding:15px 0px;

@@ -5,11 +5,11 @@ import { HrmserviceService } from 'src/app/hrmservice.service';
 import { ToastrService } from 'ngx-toastr';
 
 @Component({
-  selector: 'app-payroll-status',
-  templateUrl: './payroll-status.component.html',
-  styleUrls: ['./payroll-status.component.css']
+  selector: 'app-payroll-rejected',
+  templateUrl: './payroll-rejected.component.html',
+  styleUrls: ['./payroll-rejected.component.css']
 })
-export class PayrollStatusComponent {
+export class PayrollRejectedComponent {
   CompanyNames: any = [];
   selectedCompanyId: any = 1;
   selectedYear: any;

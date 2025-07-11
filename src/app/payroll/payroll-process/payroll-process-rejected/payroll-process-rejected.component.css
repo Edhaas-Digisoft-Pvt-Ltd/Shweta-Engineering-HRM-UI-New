@@ -6,6 +6,11 @@
     border-right : 1px dashed gray;padding-right:12px;
 }
 
+label{
+    font-size:18px;
+    font-weight: 500;
+    margin-bottom:5px;
+}
 .company_card {
     padding: 20px;
     margin: 20px 0px;
@@ -98,60 +103,12 @@ label{
 a.nav-link{
     position: relative;;
 }
-
-/* modal styling */
-.modal-header {
-    background:  #3674B5;
-    color: white;
-    border-radius: 20px 20px 0px 0px;
-}
-label{
-    font-size:18px;
-    font-weight: 500;
-    margin-bottom:5px;
-}
-.modal-body{
-    padding: 10px 20px !important;
-}
-.modal-content{
-    border-radius: 20px;
-}
-.custom-bg-warning{
-    background-color: #FFF291;
-    border-radius: 20px;
-    text-align: center;
-    color: #716300;
-}
-.custom-bg-success{
-    background-color: #CAFFEA;
-    border-radius: 20px;
-    text-align: center;
-    color: black;
-}
-.custom-bg-danger{
-    background-color: #FFAFAF;
-    border-radius: 20px;
-    text-align: center;
-    color: black;
-}
-
-
-/* modal footer btn */
-.approveBtn{
+.exportExcelBtn {
     background-color: #3674B5;
-    color: white ;
-    border-radius: 5px ;
-    width: 204px ;
-    height: 40px;
-    font-size: 18px;
 }
-.declineBtn{
-    background-color: #88304E;
-    color: white ;
-    border-radius: 5px ;
-    width: 204px ;
-    height: 40px;
-    font-size: 18px;
+
+.dotted-line {
+    border-right : 1px dashed gray;padding-right:12px;
 }
 
 @media(max-width:768px){
@@ -173,10 +130,6 @@ label{
         width: 70% ;
         margin-left: 0px
     }
-    .attendanceButtons{
-        border-right : none;
-        position: relative;
-    }
 }
 
 label{
@@ -190,3 +143,52 @@ label{
     width: 150px;
     position: relative;
 }
+/* .attendanceButtons::after {
+    position: absolute;
+    content: "";
+    height: 2px;
+    width: 27px;
+    top: 52px;
+    background-color: #578fca;
+} */
+.attendanceButtons{
+    /* border-right : 1px dashed gray; */
+    position: relative;
+}
+
+
+/* modal styling */
+.modal-header {
+    background:  #3674B5;
+    color: white;
+   
+}
+label{
+    font-size:18px;
+    font-weight: 500;
+    margin-bottom:5px;
+}
+.modal-body{
+    padding: 10px 20px !important;
+}
+.modal-content{
+    border-radius: 20px;
+}
+/* modal footer btn */
+.approveBtn{
+    background-color: #3674B5;
+    color: white ;
+    border-radius: 5px ;
+    width: 204px ;
+    height: 40px;
+    font-size: 18px;
+}
+.declineBtn{
+    background-color: #88304E;
+    color: white ;
+    border-radius: 5px ;
+    width: 204px ;
+    height: 40px;
+    font-size: 18px;
+}
+

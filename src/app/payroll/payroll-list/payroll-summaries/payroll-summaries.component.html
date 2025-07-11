@@ -394,9 +394,10 @@
 </div>
 
 <!-- modal -->
-<div class="modal fade" id="RejectPayrollModal" tabindex="-1">
+<div class="modal fade" id="RejectPayrollModal" tabindex="-1" aria-labelledby="applyLeaveLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content rounded-4">
+
             <div class="modal-header text-white rounded-top-4">
                 <h5 class="modal-title" id="applyLeaveLabel">Reject Payroll</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
@@ -405,25 +406,37 @@
 
             <form>
                 <div class="modal-body">
-                    <div class="row mb-3 align-items-end">
+
+                    <div class="row mb-3">
                         <div class="col-md-7">
                             <label class="form-label">Reject Reason</label>
-                            <select class="form-select" [(ngModel)]="selectedRejectedReason" name="company">
+                            <select class="form-select" [(ngModel)]="selectedRejectedReason" name="rejectReason"
+                                [ngClass]="{ 'is-invalid': showReasonError }">
                                 <option value="" disabled selected>-- Choose reason --</option>
-                                <option *ngFor="let item of rejectreasons" [value]="item">
-                                    {{ item }}
-                                </option>
+                                <option *ngFor="let item of rejectreasons" [value]="item">{{ item }}</option>
                             </select>
                         </div>
-                        <div class="col-md-4 d-flex align-items-end">
-                            <button type="button" class="btn importExcel" (click)="rejectPayroll()"
-                                style="background-color: #3674b5; color: white;">
+                    </div>
+
+                    <div class="row mb-3" *ngIf="selectedRejectedReason === 'Other'">
+                        <div class="col-md-7">
+                            <label class="form-label">Enter Reason</label>
+                            <input type="text" class="form-control" [(ngModel)]="otherReason" name="otherReason"
+                                [ngClass]="{ 'is-invalid': showOtherReasonError }" placeholder="Enter reason" />
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-12 d-flex justify-content-end">
+                            <button type="button" class="btn BtnColor" (click)="rejectPayroll()">
                                 Reject
                             </button>
                         </div>
                     </div>
+
                 </div>
             </form>
+
         </div>
     </div>
 </div>

@@ -13,7 +13,7 @@ import {
   Validators,
   FormControl,
 } from '@angular/forms';
-import { AdvanceSalaryBtnComponent } from './advance-salary-btn/advance-salary-btn.component';
+import { PayrollSummariesBtnComponent } from './Payroll-summaries-btn/Payroll-summaries-btn.component';
 import { ToastrService } from 'ngx-toastr';
 import { HrmserviceService } from 'src/app/hrmservice.service';
 
@@ -24,22 +24,26 @@ import { HrmserviceService } from 'src/app/hrmservice.service';
 })
 export class PayrollSummariesComponent {
   payrollDetails!: FormGroup;
-  employee_id : any;
-  employeeDetails : any;
-  attendanceDetails : any;
+  employee_id: any;
+  employeeDetails: any;
+  attendanceDetails: any;
   selectedYear: any;
   selectedMonth: any;
   columnDefs2: any;
-  rowData : any;
-  AdvanceSalaryDetails : any;
-  hasAdvanceSalary : any;
+  rowData: any;
+  AdvanceSalaryDetails: any;
+  hasAdvanceSalary: any;
   prevAdvanceSalaryDetails: any;
   calculationData: any;
   deduct: any[] = [];
   today: string = new Date().toISOString().split('T')[0];
 
-  selectedRejectedReason : any;
-  rejectreasons: any[] = ['Leaves', 'OverTime',  'Advance Salary', 'Bonus & Incentive', 'Tax'];
+  rejectreasons: string[] = ['Leaves', 'OverTime', 'Other'];
+  selectedRejectedReason: string = '';
+  otherReason: string = '';
+
+  showReasonError: boolean = false;
+  showOtherReasonError: boolean = false;
 
   constructor(private route: ActivatedRoute, private router: Router, private formBuilder: FormBuilder, private service: HrmserviceService) {
     this.payrollDetails = this.formBuilder.group({
@@ -86,14 +90,14 @@ export class PayrollSummariesComponent {
   }
 
   getSinglePayroll() {
-    this.service.post('get/single/payroll_list', { employee_id : this.employee_id }).subscribe((res: any) => {
-      if(res.status == 'success'){
+    this.service.post('get/single/payroll_list', { employee_id: this.employee_id }).subscribe((res: any) => {
+      if (res.status == 'success') {
         this.employeeDetails = res.data.payroll_summary[0];
         const attendanceData = res.data.attendance_summary[0];
-        this.AdvanceSalaryDetails =  res.data.advance_salary.length > 0 ? res.data.advance_salary[0] : null;
+        this.AdvanceSalaryDetails = res.data.advance_salary.length > 0 ? res.data.advance_salary[0] : null;
         this.hasAdvanceSalary = !!this.AdvanceSalaryDetails;
         this.calculationData = res.data.calculation[0];
-       
+
         this.payrollDetails.patchValue({
           id: this.employeeDetails.employee_code,
           employeeName: this.employeeDetails.emp_name,
@@ -116,7 +120,7 @@ export class PayrollSummariesComponent {
           }
         ]
 
-       if (res.data.prvadvancesalary.length > 0) {
+        if (res.data.prvadvancesalary.length > 0) {
           this.prevAdvanceSalaryDetails = res.data.prvadvancesalary[0];
           this.rowData = [{
             emp_name: this.prevAdvanceSalaryDetails.emp_name,
@@ -127,16 +131,16 @@ export class PayrollSummariesComponent {
             status: this.prevAdvanceSalaryDetails.status,
           }];
         } else {
-          this.rowData = []; 
+          this.rowData = [];
         }
 
         this.deduct = [
           {
             Compound: 'Provident Fund (PF)',
             deduction: 'Fixed %',
-            amount: 'Rs. 1000' 
+            amount: 'Rs. 1000'
           },
-  
+
           {
             Compound: 'Professional Tax (PT)',
             deduction: 'Tax Deduction',
@@ -146,7 +150,7 @@ export class PayrollSummariesComponent {
           {
             Compound: 'ESIC',
             deduction: 'Fixed %',
-            amount: 'Rs. 0' 
+            amount: 'Rs. 0'
           },
           {
             Compound: 'Advance Salary',
@@ -222,7 +226,7 @@ export class PayrollSummariesComponent {
       sortable: true,
       filter: true,
       flex: 1,
-      maxWidth:260,
+      maxWidth: 260,
     },
     {
       headerName: 'Installment End Date',
@@ -230,7 +234,7 @@ export class PayrollSummariesComponent {
       sortable: true,
       filter: true,
       flex: 1,
-      maxWidth:280,
+      maxWidth: 280,
     },
     {
       headerName: 'Tenure',
@@ -238,7 +242,7 @@ export class PayrollSummariesComponent {
       sortable: true,
       filter: true,
       flex: 1,
-      maxWidth:130,
+      maxWidth: 130,
     },
     {
       headerName: 'Amount',
@@ -246,7 +250,7 @@ export class PayrollSummariesComponent {
       sortable: true,
       filter: true,
       flex: 1,
-      maxWidth:130,
+      maxWidth: 130,
     },
     {
       headerName: 'Status',
@@ -254,14 +258,14 @@ export class PayrollSummariesComponent {
       sortable: true,
       filter: true,
       flex: 1,
-      maxWidth:120,
+      maxWidth: 120,
     },
     {
       headerName: 'Actions',
       // field: 'inquiry_id',
       cellStyle: { border: '1px solid #ddd' },
       maxWidth: 120,
-      cellRenderer: AdvanceSalaryBtnComponent,
+      cellRenderer: PayrollSummariesBtnComponent,
       cellRendererParams: {
         // clickedEdit: (field: any) => this.getqutation(field),
         // clickedView: (field: any) => this.viewqutation(field),
@@ -351,12 +355,26 @@ export class PayrollSummariesComponent {
   }
 
   rejectPayroll() {
-    const payload = {
-      reject_reason: this.selectedRejectedReason,
-      employee_code: this.employeeDetails.employee_code
-    }
-    this.service.post('reject/payroll', { payload }).subscribe((res: any) => {
+    this.showReasonError = false;
+    this.showOtherReasonError = false;
 
+    if (!this.selectedRejectedReason) {
+      this.showReasonError = true;
+      return;
+    }
+
+    if (this.selectedRejectedReason === 'Other' && (!this.otherReason || this.otherReason.trim() === '')) {
+      this.showOtherReasonError = true;
+      return;
+    }
+
+    const payload = {
+      reject_reason: this.selectedRejectedReason === 'Other' ? this.otherReason.trim() : this.selectedRejectedReason,
+      employee_code: this.employeeDetails.employee_code
+    };
+    console.log(payload)
+    this.service.post('reject/payroll', { payload }).subscribe((res: any) => {
+      console.log('Payroll rejected successfully', res);
     });
   }
 

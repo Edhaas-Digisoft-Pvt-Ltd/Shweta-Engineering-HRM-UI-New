@@ -17,25 +17,6 @@ export class EmployeeDashboardComponent {
   editForm!: FormGroup;
   leaveForm!: FormGroup;
 
-  leaveTypes: any[] = [
-    {
-      "leave_id": 8,
-      "company_id": 2,
-      "leave_type": "monthly",
-      "leave_name": "sick leave",
-      "leave_count": 1,
-      "leave_carryforwad": "FALSE"
-    },
-    {
-      "leave_id": 9,
-      "company_id": 2,
-      "leave_type": "yearly",
-      "leave_name": "Casual leave",
-      "leave_count": 10,
-      "leave_carryforwad": "FALSE"
-    }
-  ]
-
   advanceSalaryForm!: FormGroup;
   tenures: string[] = ['3 Month', '6 Month'];
   installmentAmount: number = 0;
@@ -58,7 +39,7 @@ export class EmployeeDashboardComponent {
   company_id: any;
   Employee_Data: any;
   role: string = '';
-  // leaveTypes: any;
+  leaveTypes: any;
 
   constructor(private route: ActivatedRoute, private fb: FormBuilder, private router: Router, private toastr: ToastrService, private service: HrmserviceService,) {
     // Generate last 20 years dynamically
@@ -89,7 +70,7 @@ export class EmployeeDashboardComponent {
     });
 
     this.leaveForm = this.fb.group({
-      leave_id: ['', Validators.required],
+      leave_id: [null, Validators.required],
       noOfDays: [1, [Validators.required, Validators.min(1)]],
       start_date: ['', Validators.required],
       end_date: ['', Validators.required],
@@ -97,7 +78,7 @@ export class EmployeeDashboardComponent {
     });
 
     this.advanceSalaryForm = this.fb.group({
-      tenure: ['', Validators.required],
+      tenure: [null, Validators.required],
       advance_amount: [0, [Validators.required, Validators.min(1)]],
       remarks: ['', [Validators.required, Validators.pattern(/^[A-Za-z ]+$/), this.NoWhitespaceValidator]]
     });
@@ -273,6 +254,7 @@ export class EmployeeDashboardComponent {
   //apply leave 
   addLeaveRequest() {
     this.isLeaveSubmitted = true;
+
     if (this.leaveForm.valid) {
       const leaveData = {
         employe_id: this.employee_id,
@@ -283,34 +265,52 @@ export class EmployeeDashboardComponent {
         leave_reason: this.leaveForm.value.leave_reason,
       };
 
+      console.log('Submitting leave request with data:', leaveData);
+
       this.service.post("apply/leave", leaveData).subscribe({
         next: (res: any) => {
           if (res.status === 'success') {
-            this.toastr.success('Leave applied successfully !');
+            this.toastr.success('Leave applied successfully!');
             this.router.navigate(['/authPanal/EmployeeInDetail'], {
               queryParams: { id: this.employee_id }
             });
-            this.leaveForm.reset();
-            this.leaveForm.markAsPristine();
+
+            this.leaveForm.reset({
+              leave_id: null,
+              noOfDays: 1,
+              start_date: '',
+              end_date: '',
+              leave_reason: ''
+            });
             this.leaveForm.markAsUntouched();
+            this.leaveForm.markAsPristine();
+            this.isLeaveSubmitted = false;
+
             this.closeAllModals();
           } else {
             this.toastr.error(res.data);
-            this.leaveForm.reset();
-            this.leaveForm.markAsPristine();
+            this.leaveForm.reset({
+              leave_id: null,
+              noOfDays: 1,
+              start_date: '',
+              end_date: '',
+              leave_reason: ''
+            });
             this.leaveForm.markAsUntouched();
+            this.leaveForm.markAsPristine();
+            this.isLeaveSubmitted = false;
+
             this.closeAllModals();
           }
         },
         error: (err: any) => {
-          this.toastr.error(err.error?.data);
-          this.leaveForm.reset();
-          this.leaveForm.markAsPristine();
-          this.leaveForm.markAsUntouched();
+          this.toastr.error(err.error?.data || 'Server error');
           this.closeAllModals();
         }
       });
-
+    } else {
+      this.toastr.error('Invalid Cedentials!');
+      this.leaveForm.markAllAsTouched();
     }
   }
 
@@ -345,8 +345,11 @@ export class EmployeeDashboardComponent {
           this.closeAllModals();
         }
       });
+    }else {
+      this.toastr.error('Invalid Credentials!');
+      this.leaveForm.markAllAsTouched();
+    }
   }
-}
 
 
 

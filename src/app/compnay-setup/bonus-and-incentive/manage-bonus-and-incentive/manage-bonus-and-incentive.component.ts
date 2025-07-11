@@ -153,6 +153,7 @@ export class ManageBonusAndIncentiveComponent {
     { headerName: 'Status', field: 'status',  sortable: true, filter: true, minWidth:250,
       cellRenderer: this.statusButtonRenderer,
     },
+
     {
       headerName: 'Actions',
       cellStyle: { border: '1px solid #ddd' },
@@ -167,6 +168,7 @@ export class ManageBonusAndIncentiveComponent {
       // },  
       cellRenderer: EditBonusAndIncentiveComponent,
       cellRendererParams: {
+        userRole: this.role, // <-- assuming this.userRole contains 'accountant' or 'admin'
         editCallback: (data: string) => this.getSingleBonusIncentiveforEdit(data),
         editStatusCallback: (data: string) => this.getSingleBonusIncentive(data),
       },
@@ -254,7 +256,9 @@ export class ManageBonusAndIncentiveComponent {
       this.service.post("insert/bonusincentive", current_data).subscribe({
         next: (res) => {
           this.toastr.success('Form Submitted Successfully!');
-          this.bonusAndIncentive.reset(); // reset only after success
+          this.bonusAndIncentive.reset(); 
+          this.bonusAndIncentive.markAllAsTouched();
+          this.isSubmitted = false;
           this.closeAllModals();
         },
         error: (err) => {
@@ -264,7 +268,7 @@ export class ManageBonusAndIncentiveComponent {
       });
 
     } else {
-      this.toastr.error('Please fill all required fields !');
+      this.toastr.error('Invalid Credentials!');
     }
   }
 
@@ -277,7 +281,8 @@ export class ManageBonusAndIncentiveComponent {
             emp_name:item.emp_name,
             bonus_incentive_date:item.bonus_incentive_date,
             status:item.status,
-            tbi_id:item.tbi_id
+            tbi_id:item.tbi_id,
+            role:sessionStorage.getItem('roleName')
           }));
         } 
       } catch (error) {
@@ -357,7 +362,6 @@ export class ManageBonusAndIncentiveComponent {
     } else {
       this.editBonusAndIncentive.markAllAsTouched();
       this.toastr.error('Invalid Credentials!');
-      this.isEditSubmitted = false;
     }
   }
 

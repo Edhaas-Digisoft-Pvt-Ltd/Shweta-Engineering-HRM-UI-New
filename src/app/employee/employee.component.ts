@@ -180,7 +180,12 @@ export class EmployeeComponent {
           designation_name : item.designation_name, 
           status:item.status ==="Active"?"active":"Inactive",
         }));
+      }else {
+        this.rowData = []; 
       }
+    }, (error) => {
+      this.rowData = [];
+      console.error('Error fetching employees:', error);
     });
   }
   
@@ -238,13 +243,24 @@ onFileChange(event: any) {
   exportExcel() {
     console.log('called');
     
-    if (this.gridApiActive) {
-      this.gridApiActive.exportDataAsExcel({
-        columnKeys: ['employee_code', 'emp_name', 'emp_contact', 'doj', 'department_name', 'designation_name', 'status'],
-        fileName: 'Employee_List.xlsx',
-        columnWidth: 120, // ✅ default width for all columns
-      });
-    }
+  if (this.gridApiActive) {
+    this.gridApiActive.exportDataAsCsv({
+      fileName: 'Employee_List.csv',
+      columnKeys: [
+        'employee_code',
+        'emp_name',
+        'emp_contact',
+        'doj',
+        'department_name',
+        'designation_name',
+        'status'
+      ],
+      allColumns: false,        
+      onlySelected: false,      
+    });
+  } else {
+    console.error('Grid API not initialized.');
   }
+}
 
 }

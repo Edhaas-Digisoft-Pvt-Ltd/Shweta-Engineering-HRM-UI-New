@@ -8,13 +8,13 @@
             </div>
             <div class="col-md-4 text-end p-0">
 
-                <div class="container-fluid ">
+                <!-- <div class="container-fluid ">
                     <div class="">
                         <input class="py-1 px-3 form-control" type="text" #searchBox placeholder="Search Here"
                             [(ngModel)]="searchValue" (ngModelChange)="onFilterBoxChange()"
                             style="background-color: #EDEDED;" />
                     </div>
-                </div>
+                </div> -->
 
                 <!-- <input type="text" name="" class="form-control" placeholder="Search Employee" id=""> -->
             </div>
@@ -486,7 +486,7 @@
                 </div>
 
                 <div class="modal-footer">
-                    <button type="submit" class="btn btn-primary">Update</button>
+                    <button type="submit" class="btn BtnColor">Update</button>
                     <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
                 </div>
             </form>
@@ -516,13 +516,10 @@
                             <select class="form-select" formControlName="leave_id" 
                              [ngClass]="{'input-error': isLeaveSubmitted && leaveForm.get('leave_id')?.invalid,
                                 'is-invalid': isLeaveSubmitted && leaveForm.get('leave_id')?.invalid }">
-                                <option value="">-- Select Leave Type --</option>
+                                <option [value]="null" disabled selected>-- Select Leave Type --</option>
                                 <option *ngFor="let leave of leaveTypes" [value]="leave.leave_id">{{ leave.leave_name }}</option>
                             </select>
-                            <small class="text-danger"
-                                *ngIf="isLeaveSubmitted && leaveForm.get('leaveType')?.hasError('required')">
-                                This field is required.
-                            </small>
+                           
                         </div>
 
                         <!-- No Of Leaves -->
@@ -543,10 +540,7 @@
                             <input type="date" class="form-control" formControlName="start_date" 
                             [ngClass]="{'input-error': isLeaveSubmitted && leaveForm.get('start_date')?.invalid,
                                 'is-invalid': isLeaveSubmitted && leaveForm.get('start_date')?.invalid }"/>
-                            <small class="text-danger"
-                                *ngIf="isLeaveSubmitted && leaveForm.get('start_date')?.hasError('required')">
-                                This field is required.
-                            </small>
+                           
                         </div>
 
                         <!-- To Date -->
@@ -555,10 +549,7 @@
                             <input type="date" class="form-control" formControlName="end_date" 
                             [ngClass]="{'input-error': isLeaveSubmitted && leaveForm.get('end_date')?.invalid,
                                 'is-invalid': isLeaveSubmitted && leaveForm.get('end_date')?.invalid }" />
-                            <small class="text-danger"
-                                *ngIf="isLeaveSubmitted && leaveForm.get('toDate')?.hasError('required')">
-                                This field is required.
-                            </small>
+                           
                         </div>
                     </div>
 
@@ -570,11 +561,7 @@
                             [ngClass]="{'input-error': isLeaveSubmitted && leaveForm.get('leave_reason')?.invalid,
                                 'is-invalid': isLeaveSubmitted && leaveForm.get('leave_reason')?.invalid }"></textarea>
                         <small class="text-danger"
-                            *ngIf="isLeaveSubmitted && leaveForm.get('reason')?.hasError('required')">
-                            This field is required.
-                        </small>
-                        <small class="text-danger"
-                            *ngIf="leaveForm.get('reason')?.value && leaveForm.get('reason')?.hasError('pattern')">
+                            *ngIf="leaveForm.get('leave_reason')?.value && leaveForm.get('leave_reason')?.hasError('pattern')">
                             No special characters are allowed.
                         </small>
                     </div>
@@ -582,12 +569,10 @@
 
                 <div class="modal-footer d-flex justify-content-end">
                     <button type="submit" class="btn btn-primary me-2 dashboard-btn">Apply</button>
+                     <!-- <button [disabled]="leaveForm.invalid || isLeaveSubmitted">Submit</button> -->
                     <button type="button" class="btn btn-outline-dark" data-bs-dismiss="modal">Cancel</button>
                 </div>
             </form>
-
-
-
         </div>
     </div>
 </div>
@@ -613,7 +598,7 @@
                              [ngClass]="{'input-error': isAdvanceSalary && advanceSalaryForm.get('tenure')?.invalid,
                                 'is-invalid': isAdvanceSalary && advanceSalaryForm.get('tenure')?.invalid }"
                             >
-                                <option value="">-- Select Tenure --</option>
+                                <option [value]="null" disabled selected>-- Select Tenure --</option>
                                 <option *ngFor="let option of tenures" [value]="option">{{ option }}</option>
                             </select>
                             <!-- <div *ngIf="advanceSalaryForm.get('tenure')?.invalid && advanceSalaryForm.get('tenure')?.touched"

@@ -67,12 +67,12 @@
 
                         <!-- Company -->
                         <div class="col-md-3 text-start select-company">
-                            <label class="fw-bold">Select Company</label>
+                            <label class="fw-bold" disabled selected>Select Company</label>
                             <select class="form-select" formControlName="companyid" [ngClass]="{
                                 'input-error': isSubmitted && LeaveRule.get('companyid')?.invalid,
                                 'is-invalid': isSubmitted && LeaveRule.get('companyid')?.invalid
                             }">
-                                <option value="" disabled>Select Company</option>
+                                <option [value]="null" disabled>Select Company</option>
                                 <option *ngFor="let item of CompanyNames" [value]="item.company_id">
                                     {{ item.company_name }}
                                 </option>
@@ -90,7 +90,7 @@
           'input-error': isSubmitted && LeaveRule.get('leavetype')?.invalid,
           'is-invalid': isSubmitted && LeaveRule.get('leavetype')?.invalid
         }">
-                                <option value="" disabled>Select Leave Type</option>
+                                <option [value]="null" disabled selected>Select Leave Type</option>
                                 <option value="Every Month">Every Month</option>
                                 <option value="Every Year">Every Year</option>
                             </select>
@@ -131,7 +131,7 @@
                     </div>
 
                     <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-                        <button type="submit" class="btn btn-primary mt-3 ml-auto btn-end">Submit</button>
+                        <button type="submit" class="btn btn-primary mt-3 ml-auto btn-end submit-btn">Submit</button>
                     </div>
                 </form>
 

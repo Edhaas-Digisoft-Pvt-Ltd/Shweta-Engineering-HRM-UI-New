@@ -244,9 +244,7 @@ export class CompnaySetupComponent {
       });
 
     } else {
-      // this.companyForm.markAllAsTouched();
       this.toastr.error('Please fill all required fields !');
-      console.log(this.companyForm.value);
     }
   }
 

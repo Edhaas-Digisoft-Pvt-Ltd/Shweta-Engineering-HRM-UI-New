@@ -31,7 +31,7 @@ import { AdvancePaymentComponent } from './advance-payment/advance-payment.compo
 import { PayrollListComponent } from './payroll/payroll-list/payroll-list.component';
 import { PayrollActionBtnComponent } from './payroll/payroll-list/payroll-action-btn/payroll-action-btn.component';
 import { PayrollSummariesComponent } from './payroll/payroll-list/payroll-summaries/payroll-summaries.component';
-import { AdvanceSalaryBtnComponent } from './payroll/payroll-list/payroll-summaries/advance-salary-btn/advance-salary-btn.component';
+import { PayrollSummariesBtnComponent } from './payroll/payroll-list/payroll-summaries/Payroll-summaries-btn/Payroll-summaries-btn.component';
 import { PayrollProcessComponent } from './payroll/payroll-process/payroll-process.component';
 import { SalaryRevisionComponent } from './payroll/salary-revision/salary-revision.component';
 import { HttpClientModule } from '@angular/common/http';
@@ -52,7 +52,10 @@ import { CreateEmployeeComponent } from './employee/create-employee/create-emplo
 import { BonusAndIncentiveComponent } from './compnay-setup/bonus-and-incentive/bonus-and-incentive.component';
 import { ManageBonusAndIncentiveComponent } from './compnay-setup/bonus-and-incentive/manage-bonus-and-incentive/manage-bonus-and-incentive.component';
 import { BonuseAndInsentiveReportsComponent } from './compnay-setup/bonus-and-incentive/bonuse-and-insentive-reports/bonuse-and-insentive-reports.component';
-import { PayrollStatusComponent } from './payroll/payroll-list/payroll-status/payroll-status.component';
+import { PayrollApprovedComponent } from './payroll/payroll-list/payroll-approved/payroll-approved.component';
+import { PayrollRejectedComponent } from './payroll/payroll-list/payroll-rejected/payroll-rejected.component';
+import { PayrollProcessRejectedComponent } from './payroll/payroll-process/payroll-process-rejected/payroll-process-rejected.component';
+import { PayrollProcessApprovedComponent } from './payroll/payroll-process/payroll-process-approved/payroll-process-approved.component';
 
 
 // FullCalendarModule.registerPlugins([dayGridPlugin]);
@@ -82,7 +85,7 @@ import { PayrollStatusComponent } from './payroll/payroll-list/payroll-status/pa
     PayrollListComponent,
     PayrollActionBtnComponent,
     PayrollSummariesComponent,
-    AdvanceSalaryBtnComponent,
+    PayrollSummariesBtnComponent,
     PayrollProcessComponent,
     SalaryRevisionComponent,
     CompanyListComponent,
@@ -100,7 +103,10 @@ import { PayrollStatusComponent } from './payroll/payroll-list/payroll-status/pa
     BonusAndIncentiveComponent,
     ManageBonusAndIncentiveComponent,
     BonuseAndInsentiveReportsComponent,
-    PayrollStatusComponent,
+    PayrollApprovedComponent,
+    PayrollRejectedComponent,
+    PayrollProcessRejectedComponent,
+    PayrollProcessApprovedComponent,
 
   ],
   imports: [

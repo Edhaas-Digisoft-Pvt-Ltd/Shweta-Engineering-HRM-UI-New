@@ -12,16 +12,21 @@ import { ToastrService } from 'ngx-toastr';
   styleUrls: ['./payroll-list.component.css'],
 })
 export class PayrollListComponent {
-  CompanyNames: any = [] ;
-  selectedCompanyId : any = 1 ;
+  CompanyNames: any = [];
+  selectedCompanyId: any = 1;
   selectedYear: any;
   selectedMonth: any;
   rowData: any = [];
   selectedRowData: any[] = [];
   activeTab: string = 'tab1';
-  
+  isRejectConfirmed: boolean = false;
+  randomText: string = '';
+  codeInput: string = '';
+  gridApi: any;
+  gridColumnApi: any;
+
   today: string = new Date().toISOString().split('T')[0];
-  constructor(private router: Router, private service: HrmserviceService, private toastr: ToastrService) {}
+  constructor(private router: Router, private service: HrmserviceService, private toastr: ToastrService) { }
 
   rowSelection: string = 'multiple';
   public defaultColDef: ColDef = {
@@ -86,33 +91,33 @@ export class PayrollListComponent {
     this.getpayrollList();
   }
 
-getpayrollList() {
-  this.rowData = [];
-  this.service.post('get/payroll_list', { 
-    company_id: this.selectedCompanyId, 
-    year: this.selectedYear,
-    month: this.selectedMonth,
-  }).subscribe((res: any) => {
-    try {
-      if (res.status === 'success' && res.data?.length > 0) {
-        this.rowData = res.data.map((item: any) => ({
-          employee_code: item.employee_code,
-          employeeName: item.emp_name,
-          grossAmount: item.gross_salary,
-          overTime: item.total_overtime,
-          netAmount: item.net_salary,
-          deduction: item.deduction,
-          employe_id: item.employe_id
-        }));
-      } else {
-        this.rowData = []; 
+  getpayrollList() {
+    this.rowData = [];
+    this.service.post('get/payroll_list', {
+      company_id: this.selectedCompanyId,
+      year: this.selectedYear,
+      month: this.selectedMonth,
+    }).subscribe((res: any) => {
+      try {
+        if (res.status === 'success' && res.data?.length > 0) {
+          this.rowData = res.data.map((item: any) => ({
+            employee_code: item.employee_code,
+            employeeName: item.emp_name,
+            grossAmount: item.gross_salary,
+            overTime: item.total_overtime,
+            netAmount: item.net_salary,
+            deduction: item.deduction,
+            employe_id: item.employe_id
+          }));
+        } else {
+          this.rowData = [];
+        }
+      } catch (error) {
+        console.log(error);
+        this.rowData = [];
       }
-    } catch (error) {
-      console.log(error);
-      this.rowData = [];
-    }
-  });
-}
+    });
+  }
 
 
   columnDefs: ColDef[] = [
@@ -175,18 +180,18 @@ getpayrollList() {
       maxWidth: 100,
       cellRenderer: PayrollActionBtnComponent,
       cellRendererParams: {
-        viewEmployee : (field: any) => this.editApp(field), 
+        viewEmployee: (field: any) => this.editApp(field),
         // clickedEdit: (field: any) => this.getqutation(field),
         // clickedView: (field: any) => this.viewqutation(field),
         // quotationEdit: (field: any) => this.editqutation(field),
       },
-      flex:1
+      flex: 1
 
     },
   ];
 
-  editApp(params :any ){
-    console.log("editApp",params);
+  editApp(params: any) {
+    console.log("editApp", params);
   }
 
   // onSelectionChanged(event: any): void {
@@ -195,7 +200,7 @@ getpayrollList() {
   // }
 
   onSelectionChanged(event: any): void {
-   this.selectedRowData = event.api.getSelectedRows();
+    this.selectedRowData = event.api.getSelectedRows();
     console.log('Selected rows:', this.selectedRowData);
   }
 
@@ -218,14 +223,14 @@ getpayrollList() {
       return;
     }
 
-    const payrolls  = this.selectedRowData.map((emp: any) => ({
+    const payrolls = this.selectedRowData.map((emp: any) => ({
       employee_id: emp.employe_id,
       year: this.selectedYear,
       month: this.selectedMonth,
       payroll_status: status,
     }));
     const payload = { payrolls };
-    console.log('payloadArray',payload)
+    console.log('payloadArray', payload)
     this.service.post("update/payroll_list", payload).subscribe({
       next: (res) => {
         console.log(res);
@@ -239,4 +244,62 @@ getpayrollList() {
     });
   }
 
+  onGridReady(params: any): void {
+    this.gridApi = params.api;
+    this.gridColumnApi = params.columnApi;
+  }
+
+
+  onRejectAllClick() {
+    this.gridApi.selectAll();
+    this.selectedRowData = this.gridApi.getSelectedRows();
+
+
+
+    this.isRejectConfirmed = false;
+    this.codeInput = '';
+    this.randomText = this.generaterandomText();
+
+
+  }
+
+  generaterandomText(): string {
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    let code = '';
+    for (let i = 0; i < 4; i++) {
+      code += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return code;
+  }
+
+
+  canSubmitRejectAll(): boolean {
+    return this.isRejectConfirmed && this.codeInput === this.randomText;
+  }
+
+  submitRejectAll() {
+    const payrolls = this.selectedRowData.map(emp => ({
+      employee_id: emp.employe_id,
+      year: this.selectedYear,
+      month: this.selectedMonth,
+      payroll_status: 'Rejected'
+    }));
+
+    const payload = { payrolls };
+    console.log(payload)
+
+    this.service.post('reject/all', payload).subscribe({
+      next: (res) => {
+        this.toastr.success('All payroll rejected successfully.');
+        this.getpayrollList();
+      },
+      error: (err) => {
+        console.error(err);
+        this.toastr.error('Failed to reject payroll.');
+      }
+    });
+  }
+
 }
+
+

@@ -116,6 +116,10 @@ label {
     font-size: 14px;
     font-weight: bold;
 }
+.BtnColor{
+    background-color: #3674B5;
+    color: white;
+}
 @media(max-width:768px) {
     .employeeProfile {
         width: 48%;
