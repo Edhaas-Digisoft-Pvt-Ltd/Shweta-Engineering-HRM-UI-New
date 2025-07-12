@@ -10,18 +10,21 @@ import { ToastrService } from 'ngx-toastr';
   styleUrls: ['./payroll-process.component.css'],
 })
 export class PayrollProcessComponent {
-    @ViewChild('fileInput') fileInput!: ElementRef<HTMLInputElement>;
-  
+  @ViewChild('fileInput') fileInput!: ElementRef<HTMLInputElement>;
+
   CompanyNames: any = [];
   selectedCompanyId: any = 1;
   selectedYear: any;
   selectedMonth: any;
   rowData: any = [];
   selectedRowData: any[] = [];
+  tempRowData: any[] = [];
   gridApiActive!: GridApi;
+  gridApiTemp!: GridApi;
   activeTab: string = 'tab1';
   isProcess: any = false;
   columnDefs: ColDef[] = [];
+  tempColumnDefs: ColDef[] = [];
   selectedEmployee: any = null;
 
   today: string = new Date().toISOString().split('T')[0];
@@ -34,7 +37,6 @@ export class PayrollProcessComponent {
     resizable: true,
   };
 
-  // financialYears = [2022, 2023, 2024, 2025];
   months = [
     { id: 1, value: 'January' },
     { id: 2, value: 'February' },
@@ -57,11 +59,11 @@ export class PayrollProcessComponent {
   ngOnInit() {
     this.selectedYear = new Date().getFullYear();
     this.selectedMonth = new Date().getMonth() + 1;
-    const currentDate = new Date();
-    this.today = currentDate.toISOString().split('T')[0];
     this.getCompanyNames();
     this.getPayrollProcess();
     this.initializeColumns();
+    this.initializeColumnsforProcess();
+    this.getTempPayroll();
   }
 
   getMonthName(monthId: number): string {
@@ -72,26 +74,30 @@ export class PayrollProcessComponent {
   getCompanyNames() {
     this.service.post('fetch/company', {}).subscribe((res: any) => {
       if (res.status == "success") {
-        this.CompanyNames = res.data
+        this.CompanyNames = res.data;
       }
-    },
-      (error) => {
-        console.error('Error fetching companies:', error);
-      }
-    );
+    }, (error) => {
+      console.error('Error fetching companies:', error);
+    });
   }
+
   onCompanyChange(event: Event): void {
     this.selectedCompanyId = (event.target as HTMLSelectElement).value;
-    console.log('Selected Company ID:', this.selectedCompanyId);
     this.getPayrollProcess();
+    this.getTempPayroll();
   }
 
   onYearMonthChange() {
     this.getPayrollProcess();
+    this.getTempPayroll();
   }
 
   onGridReady(params: { api: any }) {
     this.gridApiActive = params.api;
+  }
+
+  onTempGridReady(params: { api: any }) {
+    this.gridApiTemp = params.api;
   }
 
   getPayrollProcess() {
@@ -101,214 +107,170 @@ export class PayrollProcessComponent {
       year: this.selectedYear,
       month: this.selectedMonth,
     }).subscribe((res: any) => {
-      console.log(res)
-      try {
-        if (res.status === 'success') {
-          this.rowData = res.data.map((item: any) => ({
-            employeeName: item.emp_name,
-            department: item.department_name,
-            role: item.role_name,
-            presentDays: item.present_days,
-            absentDays: item.absent_days,
-            hours: item.total_hours,
-            overTime: item.total_overtime,
-            employe_id: item.employe_id,
-            bonus: item.bonus,
-            incentive: item.incentive,
-            advance_salary: item.advance_salary,
-            net_salary: item.net_salary
-          }));
-        }
-      } catch (error) {
-        console.log(error);
+      if (res.status === 'success') {
+        this.rowData = res.data.map((item: any) => ({
+          employeeName: item.emp_name,
+          department: item.department_name,
+          role: item.role_name,
+          presentDays: item.present_days,
+          absentDays: item.absent_days,
+          hours: item.total_hours,
+          overTime: item.total_overtime,
+          employe_id: item.employe_id,
+        }));
       }
-    })
+    });
   }
 
-  // processPayroll() {
-  //   if (this.selectedRowData.length === 0) {
-  //     this.toastr.warning('Please select at least one employee.');
-  //     return;
-  //   }
+  getTempPayroll() {
+    const payload = {
+      company_id: this.selectedCompanyId,
+      year: this.selectedYear,
+      month: this.selectedMonth
+    };
 
-  //   this.selectedRowData.forEach((emp: any) => {
-  //     const payload = {
-  //       employee_id: emp.employe_id, 
-  //       year: this.selectedYear,
-  //       month: this.selectedMonth,
-  //       // basic_salary: 20000, 
-  //       // total_tax_deduction: 200, 
-  //     };
+    this.service.post('fetch/temp/payroll', payload).subscribe({
+      next: (res: any) => {
+        if (res.status === 'success' && res.data && res.data.length > 0) {
+          this.isProcess = true;
+          this.tempRowData = res.data.map((item: any) => ({
+            emp_name: item.emp_name,
+            department_name: item.department_name,
+            present_days: item.present_days,
+            absent_days: item.absent_days,
+            total_hours: item.total_hours,
+            total_overtime: item.total_overtime ?? '-',
+            employe_id: item.employe_id,
+            bonus_incentive_amount: item.bonus_incentive_amount ?? '-',
+            advance_salary: item.advance_salary ?? '-',
+            net_salary: item.net_salary,
+          }));
+        }
+        else {
+          this.isProcess = false;
+          this.tempRowData = [];
+        }
+      },
+      error: () => {
+        this.isProcess = false;
+        this.tempRowData = [];
+      }
+    });
+  }
 
-  //     this.service.post("craete/payroll", payload).subscribe({
-  //       next: () => {
-  //         this.toastr.success(`Payroll processed successfully`);
-  //         this.getPayrollProcess();
-  //       },
-  //       error: (err) => {
-  //         console.error(err);
-  //       }
-  //     });
-  //   });
-  // }
+  generatePayroll() {
+    const payrolls = this.rowData.map((emp: any) => ({
+      employee_id: emp.employe_id,
+      year: this.selectedYear,
+      month: this.selectedMonth
+    }));
 
-  //for multiple selection
+    const payload = { payrolls };
+
+    this.service.post('craete/temp/payroll', payload).subscribe({
+      next: () => {
+        this.toastr.success('Temporary payroll created.');
+        this.getTempPayroll();
+      },
+      error: () => {
+        this.toastr.error('Failed to create temp payroll.');
+      }
+    });
+  }
+
   processPayroll() {
-    if (this.selectedRowData.length === 0) {
-      this.toastr.warning('Please select at least one employee.');
+    if (!this.tempRowData || this.tempRowData.length === 0) {
+      this.toastr.warning('No employee data available.');
       return;
     }
 
-    const payrolls = this.selectedRowData.map((emp: any) => ({
+    const payrolls = this.tempRowData.map((emp: any) => ({
       employee_id: emp.employe_id,
       year: this.selectedYear,
-      month: this.selectedMonth,
-      // basic_salary: 20000, 
-      // total_tax_deduction: 500, 
+      month: this.selectedMonth
     }));
+
     const payload = { payrolls };
-    console.log('payloadArray', payload)
-    this.service.post("craete/payroll", payload).subscribe({
-      next: (res) => {
+
+    this.service.post('craete/payroll', payload).subscribe({
+      next: () => {
         this.toastr.success('Payroll processed successfully.');
         this.getPayrollProcess();
+        this.getTempPayroll();
       },
-      error: (err) => {
-        console.error(err);
+      error: () => {
         this.toastr.error('Failed to process payroll.');
       }
     });
   }
 
- generatePayroll() {
-  this.isProcess = true;
-  this.initializeColumns(); 
-  if (this.gridApiActive) {
-    this.gridApiActive.setColumnDefs(this.columnDefs); 
-  }
-}
-
 
   initializeColumns() {
     this.columnDefs = [
-      {
-        headerName: 'Emp Name',
-        field: 'employeeName',
-        sortable: true,
-        filter: true,
-        minWidth: 150,
-      },
-      {
-        headerName: 'Department',
-        field: 'department',
-        sortable: true,
-        filter: true,
-        minWidth: 140,
-      },
-      // {
-      //   headerName: 'Role',
-      //   field: 'role',
-      //   sortable: true,
-      //   filter: true,
-      // },
-      {
-        headerName: 'PD',
-        field: 'presentDays',
-        sortable: true,
-        filter: true,
-        minWidth: 80,
-      },
-      {
-        headerName: 'A',
-        field: 'absentDays',
-        sortable: true,
-        filter: true,
-        minWidth: 80,
-      },
-      {
-        headerName: 'hours',
-        field: 'hours',
-        sortable: true,
-        filter: true,
-        minWidth: 100,
-      },
-      {
-        headerName: 'OT',
-        field: 'overTime',
-        sortable: true,
-        filter: true,
-        minWidth: 100,
-      },
+      { headerName: 'Emp Name', field: 'employeeName', sortable: true, filter: true },
+      { headerName: 'Department', field: 'department', sortable: true, filter: true },
+      { headerName: 'Role', field: 'role', sortable: true, filter: true },
+      { headerName: 'Present Days', field: 'presentDays', sortable: true, filter: true },
+      { headerName: 'Absent', field: 'absentDays', sortable: true, filter: true },
+      { headerName: 'hours', field: 'hours', sortable: true, filter: true },
+      { headerName: 'OT', field: 'overTime', sortable: true, filter: true },
     ];
-    if (this.isProcess == true) {
-      this.columnDefs.push(
-        {
-          headerName: 'Bonus',
-          field: 'bonus',
-          sortable: true,
-          filter: true,
-          minWidth: 120,
-        },
-        {
-          headerName: 'Incentive',
-          field: 'incentive',
-          sortable: true,
-          filter: true,
-          minWidth: 120,
-        },
-        {
-          headerName: 'Adv Salary',
-          field: 'advance_salary',
-          sortable: true,
-          filter: true,
-          minWidth: 140,
-        },
-        {
-          headerName: 'Net Salary',
-          field: 'net_salary',
-          sortable: true,
-          filter: true,
-          minWidth: 140,
-        },
-        {
-          headerName: 'Action',
-          minWidth: 100,
-          cellStyle: { border: '1px solid #ddd' },
-          cellRenderer: () => {
-            return `<button type="button" class="btn btn-sm mb-1 import-btn" style="background-color:#C8E3FF">
-              <i class="bi bi-pencil"></i>
-            </button>`;
-          },
-          onCellClicked: (params: any) => {
-            this.selectedEmployee = params.data;
-            this.fileInput.nativeElement.click();
-          }
-        },
-      );
-    }
   }
+
+  initializeColumnsforProcess() {
+    this.tempColumnDefs = [
+      { headerName: 'Emp Name', field: 'emp_name', sortable: true, filter: true },
+      { headerName: 'Department', field: 'department_name', sortable: true, filter: true },
+      { headerName: 'PD', field: 'present_days', sortable: true, filter: true },
+      { headerName: 'A', field: 'absent_days', sortable: true, filter: true },
+      { headerName: 'Hrs', field: 'total_hours', sortable: true, filter: true },
+      { headerName: 'OT', field: 'total_overtime', sortable: true, filter: true },
+      { headerName: 'B&I', field: 'bonus_incentive_amount', sortable: true, filter: true },
+      { headerName: 'Adv Salary', field: 'advance_salary', sortable: true, filter: true },
+      { headerName: 'Net Salary', field: 'net_salary', sortable: true, filter: true },
+      {
+        headerName: 'Action',
+        minWidth: 100,
+        cellStyle: { border: '1px solid #ddd' },
+        cellRenderer: () => {
+          return `<button type="button" class="btn btn-sm mb-1 import-btn" style="background-color:#C8E3FF">
+                    <i class="bi bi-pencil"></i>
+                  </button>`;
+        },
+        onCellClicked: (params: any) => {
+          this.selectedEmployee = params.data;
+          this.fileInput.nativeElement.click(); 
+        }
+      }
+    ];
+  }
+
+  gridOptions = {
+    rowHeight: 45,
+    rowClass: 'custom-row-class',
+    pagination: true,
+    paginationPageSize: 10,
+    paginationPageSizeSelector: [10, 50, 100],
+  };
+  tempGridOptions = {
+    rowHeight: 45,
+    rowClass: 'custom-row-class',
+    pagination: true,
+    paginationPageSize: 10,
+    paginationPageSizeSelector: [10, 50, 100],
+  };
+
 
 
   onSelectionChanged(event: any): void {
     this.selectedRowData = event.api.getSelectedRows();
-    console.log('Selected rows:', this.selectedRowData);
   }
 
   create_user() {
-    // alert("Create User");
     this.router.navigate(['/authPanal/CreateEmployee']);
   }
-  gridOptions = {
-    rowHeight: 45,
-    rowClass: 'custom-row-class',
-    pagination: false,
-    paginationPageSize: 10,
-    paginationPageSizeSelector: [10, 50, 100],
-
-  };
 
   exportExcel() {
-    console.log('called')
     if (this.gridApiActive) {
       this.gridApiActive.exportDataAsCsv();
     }
@@ -321,8 +283,6 @@ export class PayrollProcessComponent {
     const formData = new FormData();
     formData.append('upload_file', file);
 
-    console.log('Importing Excel for:', this.selectedEmployee); // Optional use
-
     this.service.post('import-attendance', formData).subscribe((res: any) => {
       if (res.status === 'success') {
         this.toastr.success(res.data);
@@ -334,5 +294,4 @@ export class PayrollProcessComponent {
 
     this.fileInput.nativeElement.value = '';
   }
-
 }
