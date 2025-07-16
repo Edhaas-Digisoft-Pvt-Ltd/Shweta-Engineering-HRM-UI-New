@@ -219,6 +219,17 @@ button.accordion-button.collapsed {
     background: rgb(54 116 181);
     color: white;
 }
+.navbarList {
+    max-height: 500px;
+    overflow: auto;
+    margin-bottom: 10px;
+    /* padding: 0.5rem 0.5rem; */
+    /* box-shadow: rgba(0, 0, 0, 0.16) 0px 1px 4px; */
+    /* background-color: #24588f; */
+    border-radius: 10px;
+    scrollbar-color: #3674b5 #1c5694;
+  scrollbar-width: thin;
+}
 
 @media(max-width:425px) {
     .accordion-body .nav-link {

@@ -104,7 +104,7 @@ export class LeaveSetupComponent {
     });
 
     this.LeaveRule = this.fb.group({
-      companyid: ['', [
+      companyid: [null, [
         Validators.required,
         // Validators.pattern(/^\d+$/)  // only digits allowed (CompanyID is numeric)
       ]],
@@ -120,7 +120,7 @@ export class LeaveSetupComponent {
         Validators.pattern(/^[A-Za-z ]+$/),  // letters and spaces only
         this.noWhitespaceValidator
       ]],
-      leavetype: ['', [
+      leavetype: [null, [
         Validators.required,
         Validators.pattern(/^[A-Za-z ]+$/),
         this.noWhitespaceValidator
@@ -160,6 +160,7 @@ export class LeaveSetupComponent {
   }
 
   getAllLeaves() {
+    this.rowData = [];
     this.service.post("fetch/companyleave", { company_id: this.selectedCompanyId }).subscribe((res: any) => {
       if (res.status === 'success') {
         this.rowData = res.data.map((item: any) => ({
@@ -301,6 +302,7 @@ export class LeaveSetupComponent {
           if (res.status === 'success') {
             this.toastr.success('Leave Rule Added!');
             this.LeaveRule.reset();
+            this.isSubmitted = false;
             this.closeAllModals();
             this.getAllLeaves();
           }
@@ -311,6 +313,7 @@ export class LeaveSetupComponent {
         }
       );
     } else {
+      this.toastr.error('Invalid Credentials!');
       this.LeaveRule.markAllAsTouched();
     }
   }

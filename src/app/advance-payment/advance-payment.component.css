@@ -108,6 +108,29 @@ label{
 .modal-content{
     border-radius: 20px;
 }
+.custom-bg-warning{
+    background-color: #FFF291;
+    border-radius: 20px;
+    text-align: center;
+    color: #716300;
+}
+.custom-bg-success{
+    background-color: #CAFFEA;
+    border-radius: 20px;
+    text-align: center;
+    color: black;
+}
+.custom-bg-danger{
+    background-color: #FFAFAF;
+    border-radius: 20px;
+    text-align: center;
+    color: black;
+}
+
+.exportExcelBtn {
+    background-color: #3674B5;
+}
+
 /* modal footer btn */
 .approveBtn{
     background-color: #3674B5;
@@ -126,6 +149,9 @@ label{
     font-size: 18px;
 }
 
+.dotted-line {
+    border-right : 1px dashed gray;padding-right:12px;
+}
 
 @media(max-width:768px){
     .main-content{

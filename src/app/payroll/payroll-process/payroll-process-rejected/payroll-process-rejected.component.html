@@ -1,0 +1,86 @@
+<div class="row gx-3  align-items-center rounded-2">
+    <div class="col-12">
+        <div class="row justify-content-end">
+            <div class="col-3">
+                <label for="">Select Company</label>
+                <select class="form-select" (change)="onCompanyChange($event)">
+                    <option *ngFor="let item of CompanyNames" [value]="item.company_id">{{ item.company_name }}
+                    </option>
+                </select>
+            </div>
+
+            <div class="col-2 dotted-line">
+                <label for="">Year</label>
+                <input class="form-control" [value]="selectedYear" readonly />
+            </div>
+            <div class="col-2">
+                <label for="">Month</label>
+                <input class="form-control" [value]="getMonthName(selectedMonth)" readonly />
+            </div>
+
+            <!-- <div class="col-auto d-flex align-items-end">
+                <button class="btn exportExcelBtn btn-primary me-2" (click)="exportExcel()">
+                    <i class="bi bi-file-earmark-excel"></i>
+                </button>
+            </div> -->
+            <div class="col-auto d-flex align-items-end">
+                <button class="btn exportExcelBtn btn-primary me-3" (click)="openEditModal()">
+                    Action
+                </button>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12 mt-4">
+        <ag-grid-angular style="width: 100%; height: 60vh;" class="ag-theme-alpine" [rowData]="rowData"
+            [columnDefs]="columnDefs" [gridOptions]="gridOptions" [pagination]="true" (gridReady)="onGridReady($event)"
+            (selectionChanged)="onSelectionChanged($event)" rowSelection="multiple" [rowMultiSelectWithClick]="true"
+            [defaultColDef]="defaultColDef">
+        </ag-grid-angular>
+    </div>
+</div>
+
+<div class="modal fade" id="rejectpayrollModalinfo" tabindex="-1" aria-labelledby="rejectpayrollModallabel"
+    aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+        <div class="modal-content">
+
+            <div class="modal-header text-white">
+                <h5 class="modal-title" id="rejectpayrollModallabel">Update Attendance for Rejected Payroll</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                    aria-label="Close"></button>
+            </div>
+
+            <div class="modal-body">
+                <table class="table table-bordered table-hover">
+                    <thead>
+                        <tr>
+                            <th>Employee Code</th>
+                            <th>Employee Name</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr *ngFor="let emp of selectedEmployeesForModal">
+                            <td>{{ emp.employe_id }}</td>
+                            <td>{{ emp.employeeName }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="text-center mt-3">
+                    <div>
+                        <input type="file" #fileInput style="display: none" (change)="onFileChange($event)"
+                            accept=".xlsx, .xls" />
+                        <button type="button" class="btn importExcel" style="background-color: #3674b5; color: white;"
+                            (click)="fileInput.click()">
+                            Import Excel
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

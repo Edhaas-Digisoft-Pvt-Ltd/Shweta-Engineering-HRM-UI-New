@@ -18,13 +18,19 @@
                     </option>
                 </select>
               </div>
+
+              <div class="ms-3 mt-4">    
+              <button class="btn exportExcelBtn btn-primary me-2">
+                <i class="bi bi-file-earmark-excel"></i>
+              </button>
+            </div>
             </div>
         </div>
 
         <div class="row">
             <div class="col-12 mt-4 p-0">
                 <ag-grid-angular style="width: 100%; height: 60vh;" class="ag-theme-alpine" [rowData]="rowData"
-                    [columnDefs]="columnDefs" [defaultColDef]="defaultColDef" (gridReady)="onGridReady($event)">
+                    [columnDefs]="columnDefs" [defaultColDef]="defaultColDef" (gridReady)="onGridReady($event)" [gridOptions]="gridOptions" [pagination]="true">
                 </ag-grid-angular>
             </div>
         </div>
@@ -36,8 +42,8 @@
 <!-- Modal  -->
 
     <div class="modal fade" id="leaveRequestModal" tabindex="-1" aria-labelledby="exampleModalLabel" >
-        <div class="modal-dialog modal-dialog-centered modal-xl">
-            <div class="modal-content">
+        <div class="modal-dialog modal-dialog-centered modal-xl" style="max-height: 60vh;">
+          <div class="modal-content" style="max-height: 60vh; overflow-y: auto;">
                 <div class="modal-header " style="padding: 20px 40px !important">
                     <h1 class="modal-title fs-5" id="exampleModalLabel">Leave Request Info</h1>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
@@ -137,101 +143,7 @@
                                     </div>
                                     
                                 </div>
-                            </div>
-                            <div class="col-lg-5 p-4">
-                                <div class="leavesSchedule p-0" style="border-radius: 10px; border:1px solid rgb(188, 188, 188); overflow:hidden">
-                                  <div class="row">
-                                    <p class="py-2 px-4 leaveBalance">Leave Balance</p>
-                                  </div>
-                              
-                                  <div class="row gx-3 px-3 pb-3">
-                                    <!-- Casual Leaves -->
-                                    <div class="col-12 text-dark fw-semibold">
-                                      Casual Leaves
-                                      <hr class="m-0">
-                                    </div>
-                              
-                                    <div class="col-md-4 col-sm-6 my-2" *ngIf="leaveBalance.casual">
-                                      <div class="leaveStatusCard text-center border" style="border-radius: 5px">
-                                        <div class="heading p-2" style="background-color: #C8E3FF; border-radius: 5px 5px 0px 0px; font-size: 13px;">
-                                          Total Leaves
-                                        </div>
-                                        <div class="content p-2">
-                                          {{ leaveBalance.casual.total }}
-                                        </div>
-                                      </div>
-                                    </div>
-                              
-                                    <div class="col-md-4 col-sm-6 my-2">
-                                      <div class="leaveStatusCard text-center border" style="border-radius: 5px">
-                                        <div class="heading p-2" style="background-color: #C8E3FF; border-radius: 5px 5px 0px 0px; font-size: 13px;">
-                                          Taken Leaves
-                                        </div>
-                                        <div class="content p-2">
-                                          {{ leaveBalance.casual.taken }}
-                                        </div>
-                                      </div>
-                                    </div>
-                              
-                                    <div class="col-md-4 col-sm-6 my-2">
-                                      <div class="leaveStatusCard text-center border" style="border-radius: 5px">
-                                        <div class="heading p-2" style="background-color: #C8E3FF; border-radius: 5px 5px 0px 0px; font-size: 13px;">
-                                          Balance Leaves
-                                        </div>
-                                        <div class="content p-2">
-                                          {{ leaveBalance.casual.balance }}
-                                        </div>
-                                      </div>
-                                    </div>
-                              
-                                    <!-- Sick Leaves -->
-                                    <div class="col-12 mt-2 text-dark fw-semibold">
-                                      Sick Leaves
-                                      <hr class="m-0">
-                                    </div>
-                              
-                                    <div class="col-md-4 col-sm-6 my-2">
-                                      <div class="leaveStatusCard text-center border" style="border-radius: 5px">
-                                        <div class="heading p-2" style="background-color: #C8E3FF; border-radius: 5px 5px 0px 0px; font-size: 13px;">
-                                          Total Leaves
-                                        </div>
-                                        <div class="content p-2">
-                                          {{ leaveBalance.sick.total }}
-                                        </div>
-                                      </div>
-                                    </div>
-                              
-                                    <div class="col-md-4 col-sm-6 my-2">
-                                      <div class="leaveStatusCard text-center border" style="border-radius: 5px">
-                                        <div class="heading p-2" style="background-color: #C8E3FF; border-radius: 5px 5px 0px 0px; font-size: 13px;">
-                                          Taken Leaves
-                                        </div>
-                                        <div class="content p-2">
-                                          {{ leaveBalance.sick.taken }}
-                                        </div>
-                                      </div>
-                                    </div>
-                              
-                                    <div class="col-md-4 col-sm-6 my-2">
-                                      <div class="leaveStatusCard text-center border" style="border-radius: 5px">
-                                        <div class="heading p-2" style="background-color: #C8E3FF; border-radius: 5px 5px 0px 0px; font-size: 13px;">
-                                          Balance Leaves
-                                        </div>
-                                        <div class="content p-2">
-                                          {{ leaveBalance.sick.balance }}
-                                        </div>
-                                      </div>
-                                    </div>
-                                  </div>
-                                </div>
-                              </div>
-                              
-                        </div>
-
-                    </div>
-                </form>
-
-                <div class="modal-footer">
+                                  <div class="modal-footer">
                     <button 
                       type="button" 
                       class="btn approveBtn" 
@@ -248,8 +160,131 @@
                     >
                       Decline Leave
                     </button>
-                    <button type="button" class="btn btn-outline-dark fw-semobild " data-bs-dismiss="modal">Cancel</button>
                 </div>
+                            </div>
+                            <div class="col-lg-5 p-4">
+                                <div class="leavesSchedule p-0" style="border-radius: 10px; border:1px solid rgb(188, 188, 188); overflow:hidden">
+                                  <div class="row">
+                                    <p class="py-2 px-4 leaveBalance">Leave Balance</p>
+                                  </div>
+                              
+                                  <div class="row gx-3 px-3 pb-3">
+                                    <!-- Casual Leaves -->
+                                    <div class="col-12 text-dark fw-semibold">
+                                      Casual Leaves
+                                      <hr class="m-0">
+                                    </div>
+                              
+                                    <div class="col-md-4 col-sm-6 my-2">
+                                      <div class="leaveStatusCard text-center border" style="border-radius: 5px">
+                                        <div class="heading p-2" style="background-color: #C8E3FF; border-radius: 5px 5px 0px 0px; font-size: 13px;">
+                                          Total Leaves
+                                        </div>
+                                        <div class="content p-2">
+                                          {{ leaveBalance?.leave_count }}
+                                        </div>
+                                      </div>
+                                    </div>
+                              
+                                    <div class="col-md-4 col-sm-6 my-2">
+                                      <div class="leaveStatusCard text-center border" style="border-radius: 5px">
+                                        <div class="heading p-2" style="background-color: #C8E3FF; border-radius: 5px 5px 0px 0px; font-size: 13px;">
+                                          Taken Leaves
+                                        </div>
+                                        <div class="content p-2">
+                                          {{ leaveBalance?.apply_leave_count}}
+                                        </div>
+                                      </div>
+                                    </div>
+                              
+                                    <div class="col-md-4 col-sm-6 my-2">
+                                      <div class="leaveStatusCard text-center border" style="border-radius: 5px">
+                                        <div class="heading p-2" style="background-color: #C8E3FF; border-radius: 5px 5px 0px 0px; font-size: 13px;">
+                                          Balance Leaves
+                                        </div>
+                                        <div class="content p-2">
+                                          {{ leaveBalance?.leave_balance_count }}
+                                        </div>
+                                      </div>
+                                    </div>
+                              
+                                    <!-- Sick Leaves -->
+                                    <div class="col-12 mt-2 text-dark fw-semibold">
+                                      Sick Leaves
+                                      <hr class="m-0">
+                                    </div>
+                              
+                                    <div class="col-md-4 col-sm-6 my-2">
+                                      <div class="leaveStatusCard text-center border" style="border-radius: 5px">
+                                        <div class="heading p-2" style="background-color: #C8E3FF; border-radius: 5px 5px 0px 0px; font-size: 13px;">
+                                          Total Leaves
+                                        </div>
+                                        <div class="content p-2">
+                                          {{ leaveBalance?.leave_count }}
+                                        </div>
+                                      </div>
+                                    </div>
+                              
+                                    <div class="col-md-4 col-sm-6 my-2">
+                                      <div class="leaveStatusCard text-center border" style="border-radius: 5px">
+                                        <div class="heading p-2" style="background-color: #C8E3FF; border-radius: 5px 5px 0px 0px; font-size: 13px;">
+                                          Taken Leaves
+                                        </div>
+                                        <div class="content p-2">
+                                          {{ leaveBalance?.leave_count }}
+                                        </div>
+                                      </div>
+                                    </div>
+                              
+                                    <div class="col-md-4 col-sm-6 my-2">
+                                      <div class="leaveStatusCard text-center border" style="border-radius: 5px">
+                                        <div class="heading p-2" style="background-color: #C8E3FF; border-radius: 5px 5px 0px 0px; font-size: 13px;">
+                                          Balance Leaves
+                                        </div>
+                                        <div class="content p-2">
+                                          {{ leaveBalance?.leave_count }}
+                                        </div>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                              
+                        </div>
+
+                    </div>
+
+                    <div class="row my-3" *ngIf="previousLeaves?.length">
+                      <div class="col-12 p-5">
+                        <div class="table-responsive" style="border: 1px solid #ccc;">
+                          <table class="table table-hover text-center align-middle">
+                            <thead class="sticky-top" style="top: 0; z-index: 1;">
+                              <tr>
+                                <th>Emp Code</th>
+                                <th>Start Date</th>
+                                <th>End Date</th>
+                                <th>Leave Type</th>
+                                <th>Status</th>
+                              </tr>
+                            </thead>
+                            <tbody *ngFor="let item of previousLeaves">
+                              <tr>
+                                <td>{{ item.employee_code }}</td>
+                                <td>{{ item.start_date }}</td>
+                                <td>{{ item.end_date }}</td>
+                                <td>{{ item.leave_name }}</td>
+                                <td>{{ item.leave_status }}</td>
+                              </tr>
+                            </tbody>
+                          </table>
+                        </div>
+                      </div>
+                    </div>
+                </form>
+
+              <div class="row">
+                
+              </div>
             </div>
         </div>
     </div>

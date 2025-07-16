@@ -109,6 +109,21 @@ label {
     background-color: #578fca;
 } */
 
+.ag-header-cell-label {
+  justify-content: center;
+  text-align: center;
+  white-space: pre-line !important; /* This allows \n to break lines */
+  line-height: 1.2;
+  font-size: 11px;
+}
+.ag-header-cell {
+  padding: 4px !important;
+}
+
 .exportExcelBtn {
     background-color: #3674B5;
+}
+
+.dotted-line {
+    border-right : 1px dashed gray;padding-right:12px;
 }

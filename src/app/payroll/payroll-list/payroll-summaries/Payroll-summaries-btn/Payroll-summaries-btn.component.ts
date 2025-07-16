@@ -4,7 +4,7 @@ import { ICellRendererAngularComp } from 'ag-grid-angular';
 import { ICellRendererParams } from 'ag-grid-community';
 
 @Component({
-  selector: 'app-advance-salary-btn',
+  selector: 'app-payroll-summaries-btn',
   template: `
     <button class="btn btn-sm btn-print" (click)="printEmployee()">
         <i class="bi bi-printer"></i>
@@ -18,7 +18,7 @@ import { ICellRendererParams } from 'ag-grid-community';
     `
   ]
 })
-export class AdvanceSalaryBtnComponent implements ICellRendererAngularComp {
+export class PayrollSummariesBtnComponent implements ICellRendererAngularComp {
    params: any;
 
 

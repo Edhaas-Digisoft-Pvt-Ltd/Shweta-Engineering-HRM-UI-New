@@ -6,8 +6,6 @@ import { LeaveactionComponent } from '../leaveaction/leaveaction.component';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { HrmserviceService } from 'src/app/hrmservice.service';
 
-
-
 @Component({
   selector: 'app-leave',
   templateUrl: './leave.component.html',

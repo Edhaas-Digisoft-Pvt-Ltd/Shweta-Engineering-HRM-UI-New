@@ -175,7 +175,6 @@ export class CompnaySetupComponent {
   }
 
   getleaveData(id: any) {
-
     this.service.post("fetch/leave", {"leave_id":id}).subscribe((res: any) => {
       if (res.status == "success") {
         this.leaveData = res.Data.filter((item: any) => item.leave_id == id);
@@ -245,9 +244,7 @@ export class CompnaySetupComponent {
       });
 
     } else {
-      // this.companyForm.markAllAsTouched();
       this.toastr.error('Please fill all required fields !');
-      console.log(this.companyForm.value);
     }
   }
 

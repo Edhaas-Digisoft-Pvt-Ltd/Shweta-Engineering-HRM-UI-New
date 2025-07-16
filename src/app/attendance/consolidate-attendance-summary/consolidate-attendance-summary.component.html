@@ -19,28 +19,23 @@
         </div> -->
   </div>
 
-  <div class="col col-lg-4 d-flex justify-content-around attendanceButtons text-start align-items-end">
-    <!-- select month -->
-    <div>
+  <div class="col col-lg-4 d-flex gap-2 attendanceButtons text-start align-items-end">
+    <div >
       <label>Select Month</label><br />
-
-
-      <div class="ms-2">
-          <select class="form-control selectdata3" [(ngModel)]="selectedMonth" (change)="onMonthYearChange()">
-            <option *ngFor="let month of months" [value]="month.value">{{ month.name }}</option>
-          </select>
-
+      <div class="d-flex align-items-center w-100">
+        <select class="form-control selectdata3" style="width: 150px;"
+          [(ngModel)]="selectedMonth" (change)="onMonthYearChange()">
+          <option *ngFor="let month of months" [ngValue]="month.value">{{ month.name }}</option>
+        </select>
       </div>
-
-      
     </div>
 
     <div>
-      <button class="btn  exportExcelBtn text-white" (click)="exportToExcel()">
-        Export To Excel
+      <button class="btn btn-primary exportExcelBtn w-100 me-2" (click)="exportToExcel()">
+        <i class="bi bi-file-earmark-excel"></i>
       </button>
     </div>
-  </div>
+  </div>      
 
 
 </div>

@@ -48,7 +48,7 @@
                                                         * Please Fill All Required Fields.
                                                     </div>
                                                 </div> -->
-                                                <form [formGroup]="companyForm" (ngSubmit)="addCompany()">
+                                                <form [formGroup]="companyForm">
                                                     <div class="row">
 
                                                         <!-- Company Name -->
@@ -170,7 +170,7 @@
 
                                                     <div class="d-grid gap-2 d-md-flex justify-content-md-end">
                                                         <button type="submit"
-                                                            class="btn btn-primary mt-3 ml-auto btn-end submit-btn">Submit</button>
+                                                            class="btn btn-primary mt-3 ml-auto btn-end submit-btn" (click)="addCompany()">Submit</button>
                                                     </div>
                                                 </form>
 

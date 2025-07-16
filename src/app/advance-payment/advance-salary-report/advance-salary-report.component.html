@@ -1,38 +1,31 @@
-<div class="row gap-2 mb-0 align-items-center justify-content-end">
-    <div class="col col-lg-4 d-flex align-items-end search-box text-start">
-        <input class="py-1 mx-2 form-control me-2" type="text" #searchBox placeholder="Search Employee code"
-            [(ngModel)]="searchValue" value=""/>
+<div class="row gx-3  align-items-center rounded-2">
+    <div class="col-12">
+        <div class="row justify-content-end">
+            <div class="col-3">
+                <label class="fw-bold">Search Emp Code</label>
+                  <input class="form-control" type="text" #searchBox placeholder="Search Employee Code"
+                [(ngModel)]="searchValue" />
+            </div>
 
-          <!-- <div class="w-50 text-start">
-            <label class="fw-bold">Select Employee </label>
-            <br>
-            <select class="form-select">
-              <option *ngFor="let item of employees" [value]="item.employee_id">{{ item.employee_name }}</option>
-            </select>
-          </div> -->
-        <div>
-            <label>Select Year</label><br />
-            <select class="form-control selectdata" style="width: 150px;" [(ngModel)]="selectedYear">
-                <option *ngFor="let year of years" [value]="year">{{ year }}</option>
-            </select>
-        </div>
-    </div>
-    <span class="devider p-0"></span>
-    <div class="col col-lg-4 d-flex gap-2 attendanceButtons text-start align-items-end">
-        <div>
-            <label>Select Month</label><br />
-            <div class="d-flex align-items-center w-100">
-                <select class="form-control selectdata3" style="width: 150px;" [(ngModel)]="selectedMonth"
-                   >
-                    <option *ngFor="let month of months" [ngValue]="month.id">{{ month.value }}</option>
+            <div class="col-2">
+                <label for="">Select Year</label>
+                <select class="form-select" [(ngModel)]="selectedYear">
+                  <option *ngFor="let year of years" [value]="year">{{ year }}</option>
                 </select>
             </div>
-        </div>
+            <div class="col vector">
+                <span class="mt-4"></span>
+            </div>
+            <div class="col-2">
+                <label for="">Select Month</label>
+                <select class="form-select" [(ngModel)]="selectedMonth">
+                  <option *ngFor="let month of months" [value]="month.id">{{ month.value }}</option>
+                </select>
+            </div>
 
-        <div class="flex-grow-1">
-            <button class="btn btn-primary exportExcelBtn w-75  float-end" (click)="searchEmployeeAdvanceSalary()">
-                Search
-            </button>
+            <div class="col-auto d-flex align-items-end">
+              <button class="btn btn-primary searchBtn" (click)="searchEmployeeAdvanceSalary()">Search</button>
+            </div>
         </div>
     </div>
 </div>
