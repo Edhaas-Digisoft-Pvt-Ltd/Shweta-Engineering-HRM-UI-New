@@ -55,7 +55,7 @@ export class PayrollApprovedComponent {
     const currentDate = new Date();
     this.today = currentDate.toISOString().split('T')[0];
     this.getCompanyNames();
-    this.ApproveRejectPayrollList();
+    this.ApprovePayrollList();
   }
 
 
@@ -74,15 +74,15 @@ export class PayrollApprovedComponent {
   onCompanyChange(event: Event): void {
     this.selectedCompanyId = (event.target as HTMLSelectElement).value;
     console.log('Selected Company ID:', this.selectedCompanyId);
-    this.ApproveRejectPayrollList();
+    this.ApprovePayrollList();
   }
 
   onYearMonthChange() {
-    this.ApproveRejectPayrollList();
+    this.ApprovePayrollList();
   }
 
-  ApproveRejectPayrollList() {
-    this.service.post('payroll_list/status', {
+  ApprovePayrollList() {
+    this.service.post('fetch/approved/payroll', {
       company_id: this.selectedCompanyId,
       year: this.selectedYear,
       month: this.selectedMonth,

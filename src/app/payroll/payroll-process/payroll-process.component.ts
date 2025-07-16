@@ -178,30 +178,47 @@ export class PayrollProcessComponent {
     });
   }
 
-  processPayroll() {
-    if (!this.tempRowData || this.tempRowData.length === 0) {
-      this.toastr.warning('No employee data available.');
-      return;
-    }
+  // processPayroll() {
+  //   if (!this.tempRowData || this.tempRowData.length === 0) {
+  //     this.toastr.warning('Data Not Available.');
+  //     return;
+  //   }
 
+  //   const payrolls = this.tempRowData.map((emp: any) => ({
+  //     employee_id: emp.employe_id,
+  //     year: this.selectedYear,
+  //     month: this.selectedMonth
+  //   }));
+
+  //   const payload = { payrolls };
+
+  //   this.service.post('craete/payroll', payload).subscribe({
+  //     next: () => {
+  //       this.toastr.success('Payroll processed successfully.');
+  //       this.getPayrollProcess();
+  //       this.getTempPayroll();
+  //     },
+  //     error: () => {
+  //       this.toastr.error('Failed to process payroll.');
+  //     }
+  //   });
+  // }
+
+  processPayroll() {
     const payrolls = this.tempRowData.map((emp: any) => ({
       employee_id: emp.employe_id,
       year: this.selectedYear,
       month: this.selectedMonth
     }));
-
-    const payload = { payrolls };
-
-    this.service.post('craete/payroll', payload).subscribe({
-      next: () => {
+     const payload = { payrolls };
+    this.service.post('craete/payroll', payload).subscribe((res: any) => {
+      if(res.status == 'success'){
         this.toastr.success('Payroll processed successfully.');
         this.getPayrollProcess();
-        this.getTempPayroll();
-      },
-      error: () => {
-        this.toastr.error('Failed to process payroll.');
+      }else {
+        this.toastr.error('Something went wrong');
       }
-    });
+    })
   }
 
 
@@ -221,10 +238,10 @@ export class PayrollProcessComponent {
     this.tempColumnDefs = [
       { headerName: 'Emp Name', field: 'emp_name', sortable: true, filter: true },
       { headerName: 'Department', field: 'department_name', sortable: true, filter: true },
-      { headerName: 'PD', field: 'present_days', sortable: true, filter: true },
+      { headerName: 'P', field: 'present_days', sortable: true, filter: true },
       { headerName: 'A', field: 'absent_days', sortable: true, filter: true },
-      { headerName: 'Hrs', field: 'total_hours', sortable: true, filter: true },
       { headerName: 'OT', field: 'total_overtime', sortable: true, filter: true },
+      { headerName: 'Hrs', field: 'total_hours', sortable: true, filter: true },
       { headerName: 'B&I', field: 'bonus_incentive_amount', sortable: true, filter: true },
       { headerName: 'Adv Salary', field: 'advance_salary', sortable: true, filter: true },
       { headerName: 'Net Salary', field: 'net_salary', sortable: true, filter: true },

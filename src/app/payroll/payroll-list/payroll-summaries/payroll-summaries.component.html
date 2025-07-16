@@ -5,15 +5,16 @@
                 <!-- <img src="assets/img/Animation - 1743094888648.gif" alt=""> -->
 
                 <h2> <i class="bi bi-currency-rupee me-2"></i> Payroll</h2>
-                <p><span (click)="backtoPayroll()" style="cursor: pointer;">Payroll List</span> / <span
+                <p><span (click)="backtoPayroll()" style="cursor: pointer;"><i class="bi bi-arrow-left-circle"></i>
+Back</span> / <span
                         style="color: #3674B5;">Payroll
-                        Summaries</span></p>
+                        Summaries for {{employeeDetails.employee_code}}</span></p>
             </div>
 
             <div class="col-12 mb-2">
                 <div class="col-md-2 float-end me-3">
                     <button class="btn comBtn text-white float-end" data-bs-toggle="modal"
-                        data-bs-target="#RejectPayrollModal">Reject Payroll
+                        data-bs-target="#RejectPayrollModal" (click)="getRejectReasons()">Reject Payroll
                     </button>
                 </div>
             </div>
@@ -413,7 +414,7 @@
                             <select class="form-select" [(ngModel)]="selectedRejectedReason" name="rejectReason"
                                 [ngClass]="{ 'is-invalid': showReasonError }">
                                 <option value="" disabled selected>-- Choose reason --</option>
-                                <option *ngFor="let item of rejectreasons" [value]="item">{{ item }}</option>
+                                <option *ngFor="let item of rejectreasons" [value]="item.rejection_id">{{ item.rejection_reason }}</option>
                             </select>
                         </div>
                     </div>

@@ -107,7 +107,8 @@ export class PayrollListComponent {
             overTime: item.total_overtime,
             netAmount: item.net_salary,
             deduction: item.deduction,
-            employe_id: item.employe_id
+            employe_id: item.employe_id,
+            temp_payroll_id: item.temp_payroll_id
           }));
         } else {
           this.rowData = [];
@@ -217,24 +218,22 @@ export class PayrollListComponent {
     paginationPageSizeSelector: [10, 50, 100],
   };
 
-  approveRejectPayrollList(status: any) {
+  approvePayrollList() {
     if (this.selectedRowData.length === 0) {
       this.toastr.warning('Please select at least one employee.');
       return;
     }
 
-    const payrolls = this.selectedRowData.map((emp: any) => ({
-      employee_id: emp.employe_id,
-      year: this.selectedYear,
-      month: this.selectedMonth,
-      payroll_status: status,
+    const temp_payroll_ids = this.selectedRowData.map((emp: any) => ({
+      temp_payroll_id : emp.temp_payroll_id
+     
     }));
-    const payload = { payrolls };
+    const payload = { temp_payroll_ids };
     console.log('payloadArray', payload)
-    this.service.post("update/payroll_list", payload).subscribe({
+    this.service.post("approved/payroll", payload).subscribe({
       next: (res) => {
         console.log(res);
-        this.toastr.success('Payroll List status updated successfully.');
+        this.toastr.success('Payrolls approved successfully.');
         this.getpayrollList();
       },
       error: (err) => {

@@ -1,26 +1,20 @@
 import { Component } from '@angular/core';
+import { HrmserviceService } from 'src/app/hrmservice.service';
 
 @Component({
   selector: 'app-edit-bonus-and-incentive',
   standalone: true,
-  template: `
-    <div class="d-flex w-100">
-      <button  (click)="editID(params)" class="btn btn-sm mb-1 me-3" title="Edit" data-bs-toggle="modal"
-        data-bs-target="#editBonusIncentiveModal" style="background-color:#C8E3FF">
-        AC<i class="bi bi-pencil"></i>
-      </button>
-      <button (click)="StatusEditId(params)" class="btn btn-sm mb-1 me-3" title="Edit" data-bs-toggle="modal"
-        data-bs-target="#requestBonusIncentiveModal" style="background-color:#C8E3FF">
-        AD<i class="bi bi-power"></i>
-      </button>
-  `,
+   templateUrl: './edit-bonus-and-incentive.component.html',
 })
 export class EditBonusAndIncentiveComponent {
   params: any;
+  role: string = '';
+  constructor( private service: HrmserviceService) {}
 
   agInit(params: any): void {
     this.params = params;
-
+    this.role = this.service.getRole();
+    console.log(this.role);
   }
 
   refresh(params: any): boolean {

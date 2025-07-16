@@ -82,7 +82,7 @@ export class PayrollRejectedComponent {
   }
 
   ApproveRejectPayrollList() {
-    this.service.post('payroll_list/status', {
+    this.service.post('fetch/rejected/payroll', {
       company_id: this.selectedCompanyId,
       year: this.selectedYear,
       month: this.selectedMonth,
@@ -93,12 +93,11 @@ export class PayrollRejectedComponent {
             this.rowData = res.data.map((item: any) => ({
               employee_code: item.employee_code,
               employeeName: item.emp_name,
-              grossAmount: item.gross_salary,
               overTime: item.total_overtime,
+              bonus_Incentive: item.bonus_incentive_amount,
+              advance_salary: item.advance_salary,
               netAmount: item.net_salary,
-              deduction: item.deduction,
               employe_id: item.employe_id,
-              payroll_status: item.payroll_status
             }));
           } else {
             this.rowData = [];
@@ -128,13 +127,6 @@ export class PayrollRejectedComponent {
       sortable: true,
       filter: true,
     },
-
-    {
-      headerName: 'Gross Amount',
-      field: 'grossAmount',
-      sortable: true,
-      filter: true,
-    },
     {
       headerName: 'Over Time',
       field: 'overTime',
@@ -142,8 +134,14 @@ export class PayrollRejectedComponent {
       filter: true,
     },
     {
-      headerName: 'Deductions',
-      field: 'deduction',
+      headerName: 'Bonus & incentive',
+      field: 'bonus_Incentive',
+      sortable: true,
+      filter: true,
+    },
+    {
+      headerName: 'Adv Salary',
+      field: 'advance_salary',
       sortable: true,
       filter: true,
     },
@@ -152,13 +150,6 @@ export class PayrollRejectedComponent {
       field: 'netAmount',
       sortable: true,
       filter: true,
-    },
-    {
-      headerName: 'Status',
-      field: 'payroll_status',
-      sortable: true,
-      filter: true,
-      cellRenderer: this.statusButtonRenderer,
     },
   ];
 

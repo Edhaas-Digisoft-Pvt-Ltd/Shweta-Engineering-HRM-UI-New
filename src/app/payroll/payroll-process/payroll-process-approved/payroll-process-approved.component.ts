@@ -58,37 +58,37 @@ export class PayrollProcessApprovedComponent {
     const currentDate = new Date();
     this.today = currentDate.toISOString().split('T')[0];
     this.getCompanyNames();
-    this.getRejectedPayroll();
+    this.getApprovedPayroll();
     this.initializeColumns();
 
-    this.rowData = [
-      {
-        employeeName: 'Amit Sharma',
-        department: 'Sales',
-        presentDays: 22,
-        absentDays: 2,
-        hours: 176,
-        overTime: 7,
-        bonus: 1200,
-        incentive: 800,
-        advance_salary: 1000,
-        net_salary: 32000,
-        employe_id: 101,
-      },
-      {
-        employeeName: 'Neha Verma',
-        department: 'Support',
-        presentDays: 21,
-        absentDays: 3,
-        hours: 168,
-        overTime: 4,
-        bonus: 1400,
-        incentive: 950,
-        advance_salary: 1200,
-        net_salary: 34000,
-        employe_id: 102,
-      }
-    ];
+    // this.rowData = [
+    //   {
+    //     employeeName: 'Amit Sharma',
+    //     department: 'Sales',
+    //     presentDays: 22,
+    //     absentDays: 2,
+    //     hours: 176,
+    //     overTime: 7,
+    //     bonus: 1200,
+    //     incentive: 800,
+    //     advance_salary: 1000,
+    //     net_salary: 32000,
+    //     employe_id: 101,
+    //   },
+    //   {
+    //     employeeName: 'Neha Verma',
+    //     department: 'Support',
+    //     presentDays: 21,
+    //     absentDays: 3,
+    //     hours: 168,
+    //     overTime: 4,
+    //     bonus: 1400,
+    //     incentive: 950,
+    //     advance_salary: 1200,
+    //     net_salary: 34000,
+    //     employe_id: 102,
+    //   }
+    // ];
 
 
   }
@@ -112,46 +112,46 @@ export class PayrollProcessApprovedComponent {
   onCompanyChange(event: Event): void {
     this.selectedCompanyId = (event.target as HTMLSelectElement).value;
     console.log('Selected Company ID:', this.selectedCompanyId);
-    this.getRejectedPayroll();
+    this.getApprovedPayroll();
   }
 
   onYearMonthChange() {
-    this.getRejectedPayroll();
+    this.getApprovedPayroll();
   }
 
   onGridReady(params: { api: any }) {
     this.gridApiActive = params.api;
   }
 
-  getRejectedPayroll() {
-    // this.rowData = [];
-    // this.service.post('fetch/payroll', {
-    //   company_id: this.selectedCompanyId,
-    //   year: this.selectedYear,
-    //   month: this.selectedMonth,
-    // }).subscribe((res: any) => {
-    //   console.log(res)
-    //   try {
-    //     if (res.status === 'success') {
-    //       this.rowData = res.data.map((item: any) => ({
-    //         employeeName: item.emp_name,
-    //         department: item.department_name,
-    //         role: item.role_name,
-    //         presentDays: item.present_days,
-    //         absentDays: item.absent_days,
-    //         hours: item.total_hours,
-    //         overTime: item.total_overtime,
-    //         employe_id: item.employe_id,
-    //         bonus: item.bonus,
-    //         incentive: item.incentive,
-    //         advance_salary: item.advance_salary,
-    //         net_salary: item.net_salary
-    //       }));
-    //     }
-    //   } catch (error) {
-    //     console.log(error);
-    //   }
-    // })
+  getApprovedPayroll() {
+    this.rowData = [];
+    this.service.post('fetch/approved/payroll', {
+      company_id: this.selectedCompanyId,
+      year: this.selectedYear,
+      month: this.selectedMonth,
+    }).subscribe((res: any) => {
+      console.log(res)
+      try {
+        if (res.status === 'success') {
+          this.rowData = res.data.map((item: any) => ({
+            employeeName: item.emp_name,
+            department: item.department_name,
+            role: item.role_name,
+            presentDays: item.present_days,
+            absentDays: item.absent_days,
+            hours: item.total_hours,
+            overTime: item.total_overtime,
+            employe_id: item.employe_id,
+            bonus: item.bonus,
+            incentive: item.incentive,
+            advance_salary: item.advance_salary,
+            net_salary: item.net_salary
+          }));
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    })
   }
 
   initializeColumns() {

@@ -16,6 +16,7 @@ import {
 import { PayrollSummariesBtnComponent } from './Payroll-summaries-btn/Payroll-summaries-btn.component';
 import { ToastrService } from 'ngx-toastr';
 import { HrmserviceService } from 'src/app/hrmservice.service';
+declare var bootstrap: any;
 
 @Component({
   selector: 'app-payroll-summaries',
@@ -34,18 +35,23 @@ export class PayrollSummariesComponent {
   AdvanceSalaryDetails: any;
   hasAdvanceSalary: any;
   prevAdvanceSalaryDetails: any;
+  tempPayrollId: any;
   calculationData: any;
   deduct: any[] = [];
   today: string = new Date().toISOString().split('T')[0];
+  rejectreasons: any;
 
-  rejectreasons: string[] = ['Leaves', 'OverTime', 'Other'];
+  // rejectreasons=[
+  //   {value:1, name:'leaves'},
+  //   {value:2, name:'OverTime'},
+  // ];
   selectedRejectedReason: string = '';
   otherReason: string = '';
 
   showReasonError: boolean = false;
   showOtherReasonError: boolean = false;
 
-  constructor(private route: ActivatedRoute, private router: Router, private formBuilder: FormBuilder, private service: HrmserviceService) {
+  constructor(private route: ActivatedRoute, private router: Router, private formBuilder: FormBuilder, private service: HrmserviceService, private toastr: ToastrService) {
     this.payrollDetails = this.formBuilder.group({
       id: ['', [Validators.required]],
       employeeName: ['', [Validators.required]],
@@ -69,6 +75,17 @@ export class PayrollSummariesComponent {
     { id: 12, value: 'December' }
   ];
 
+  
+  closeAllModals(): void {
+    const modals = document.querySelectorAll('.modal.show');
+    modals.forEach((modalElement: any) => {
+      const modalInstance = bootstrap.Modal.getInstance(modalElement);
+      if (modalInstance) {
+        modalInstance.hide();
+      }
+    });
+  }
+
   ngOnInit() {
     this.selectedYear = new Date().getFullYear();
     this.selectedMonth = new Date().getMonth() + 1;
@@ -77,7 +94,9 @@ export class PayrollSummariesComponent {
 
     this.route.queryParams.subscribe(params => {
       this.employee_id = params['id'];
-      console.log('Received employee  payroll:', params['id']);
+      this.tempPayrollId = params['temp_payroll_id']
+      console.log('Received employee  payroll:', this.employee_id );
+      console.log('tempPayrollId:', this.tempPayrollId );
     });
     this.getSinglePayroll()
     this.setMonthGroupHeader();
@@ -87,6 +106,14 @@ export class PayrollSummariesComponent {
   getMonthName(monthId: number): string {
     const month = this.months.find(m => m.id === monthId);
     return month ? month.value : '';
+  }
+
+  getRejectReasons() {
+      this.service.post('fetch/rejection/reason', { employee_id: this.employee_id }).subscribe((res: any) => {
+      if (res.status == 'success') {
+        this.rejectreasons = res.data
+      }
+    });
   }
 
   getSinglePayroll() {
@@ -368,13 +395,15 @@ export class PayrollSummariesComponent {
       return;
     }
 
-    const payload = {
-      reject_reason: this.selectedRejectedReason === 'Other' ? this.otherReason.trim() : this.selectedRejectedReason,
-      employee_code: this.employeeDetails.employee_code
-    };
-    console.log(payload)
-    this.service.post('reject/payroll', { payload }).subscribe((res: any) => {
-      console.log('Payroll rejected successfully', res);
+    this.service.post('rejected/payroll',  {temp_payroll_id: this.tempPayrollId, rejection_id: this.selectedRejectedReason}).subscribe((res: any) => {
+      if(res.status == 'success'){
+        this.toastr.success('Payroll rejected successfully');
+        this.closeAllModals();
+        this.router.navigate(['/authPanal/payrollList']);
+      }
+      else{
+        this.toastr.error('Something went wrong');
+      }
     });
   }
 
