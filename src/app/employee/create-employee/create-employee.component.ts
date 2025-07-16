@@ -346,7 +346,7 @@ export class CreateEmployeeComponent {
 
         "company_id": this.selectedCompanyId,
         "emp_title": this.multiStepForm.value.title,
-        "emp_name": this.multiStepForm.value.fname + this.multiStepForm.value.lname,
+        "emp_name": this.multiStepForm.value.fname +" "+ this.multiStepForm.value.lname,
         "emp_email": this.multiStepForm.value.email,
         "emp_gender": this.multiStepForm.value.gender,
         "department_id":this.multiStepForm.value.department,
@@ -360,6 +360,7 @@ export class CreateEmployeeComponent {
         "emp_contact": this.multiStepForm.value.contact,
         "status": "Active",
         "emp_address": this.multiStepForm.value.address,
+        "role_id": 3,
         // "department_name": this.multiStepForm.value.department,
         // "designation_name": this.multiStepForm.value.designation
       }

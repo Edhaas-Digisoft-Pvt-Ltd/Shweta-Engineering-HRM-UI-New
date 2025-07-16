@@ -29,7 +29,7 @@ export class SidebarComponent implements OnInit {
     this.role = this.service.getRole();
     // this.adminData= this.service.getRole();
     // this.checkLoginBtn();
-    this.empName = sessionStorage.getItem('empName')
+    this.empName = sessionStorage.getItem('employeeName')
     this.roleName = sessionStorage.getItem('roleName')
     
   }

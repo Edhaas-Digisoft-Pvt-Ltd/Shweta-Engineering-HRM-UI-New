@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
-import { ColDef } from 'ag-grid-community';
+import { ColDef, GridApi } from 'ag-grid-community';
 import { EmployeeActionComponent } from 'src/app/employee/employee-action/employee-action.component';
 import { HrmserviceService } from 'src/app/hrmservice.service';
 
@@ -13,7 +13,7 @@ export class ApprovedAdvancePaymentComponent {
   today: string = new Date().toISOString().split('T')[0];
   title: String = 'Company Demo';
   activeTab: string = 'tab1';
-  gridApiActive: any;
+  gridApiActive!: GridApi;;
   role: string = '';
   columnDefs: ColDef[] = [];
   rowData: any = [];
@@ -74,6 +74,7 @@ export class ApprovedAdvancePaymentComponent {
   }
 
   getAllApprovedRequest() {
+    this.rowData = [];
     this.service.post('all/approvedrequest', { 
       // company_id: this.selectedCompanyId, 
       // year: this.selectedYear,
@@ -177,15 +178,15 @@ export class ApprovedAdvancePaymentComponent {
   };
   initializeColumns() {
     this.columnDefs = [
-      { headerName: 'ID', field: 'emp_id', sortable: true, filter: true, maxWidth: 150 },
+      { headerName: 'Emp Code', field: 'emp_id', sortable: true, filter: true, maxWidth: 160 },
       {
         headerName: 'Employee Name',
         field: 'emp_name',
         sortable: true,
         filter: true,
-        maxWidth:180
+        maxWidth:200
       },
-      { headerName: 'Apply Date', field: 'apply_date', sortable: true, filter: true, maxWidth:140 },
+      { headerName: 'Apply Date', field: 'apply_date', sortable: true, filter: true, maxWidth:150 },
       {
         headerName: 'Adv. Amount',
         field: 'advance_amount',
@@ -205,23 +206,23 @@ export class ApprovedAdvancePaymentComponent {
         field: 'emi',
         sortable: true,
         filter: true,
-        maxWidth:100
+        maxWidth:120
       },
-      {
-        headerName: 'Updated On',
-        field: 'updated_on',
-        sortable: true,
-        filter: true,
-        maxWidth:140
-      },
-        {
-        headerName: 'Deducted On',
-        field: 'deducted_on',
-        sortable: true,
-        filter: true,
-        maxWidth:150
-      },
-      { headerName: 'Status', field: 'status', cellRenderer: this.statusButtonRenderer, sortable: true, filter: true,  maxWidth:140},
+      // {
+      //   headerName: 'Updated On',
+      //   field: 'updated_on',
+      //   sortable: true,
+      //   filter: true,
+      //   maxWidth:140
+      // },
+      //   {
+      //   headerName: 'Deducted On',
+      //   field: 'deducted_on',
+      //   sortable: true,
+      //   filter: true,
+      //   maxWidth:150
+      // },
+      // { headerName: 'Status', field: 'status', cellRenderer: this.statusButtonRenderer, sortable: true, filter: true,  maxWidth:140},
       { headerName: 'Tenure', field: 'tenure', sortable: true, filter: true,  maxWidth:110},
     ];
       this.columnDefs.push({
@@ -229,8 +230,8 @@ export class ApprovedAdvancePaymentComponent {
         maxWidth:120,
         cellStyle: { border: '1px solid #ddd' },
         cellRenderer: (params: any) => {
-          return `<button type="button" class="btn btn-outline-dark mb-1" data-bs-toggle="modal" data-bs-target="#advanceSalaryModalinfo">
-           <i class="bi bi-eye-fill"></i>
+          return `<button type="button" class="btn btn-sm mb-1" data-bs-toggle="modal" data-bs-target="#advanceSalaryModalinfo" style="background-color:#C8E3FF">
+          <i class="bi bi-eye"></i>
           </button>`;
         },
         onCellClicked: (event: any) => {
@@ -257,18 +258,26 @@ export class ApprovedAdvancePaymentComponent {
             EMIStartDate: singleApprovedData?.updated_on,
             installmentAmount: singleApprovedData?.emi,
             remainingBalance: singleApprovedData?.remaining_balance,
-            advanceAmount: singleApprovedData?.advance_amount
+            advanceAmount: singleApprovedData?.advance_amount,
+            firstInstallmentDate: singleApprovedData?.deducted_on, 
           } 
         this.displayApprovedData.patchValue(this.approvedData);  
       }
     })
   }
   
-calculatePaidAmount(): number {
-  const total = +this.displayApprovedData.get('amount')?.value || 0;
-  const remaining = +this.displayApprovedData.get('remainingBalance')?.value || 0;
-  return total - remaining;
-}
+  calculatePaidAmount(): number {
+    const total = +this.displayApprovedData.get('amount')?.value || 0;
+    const remaining = +this.displayApprovedData.get('remainingBalance')?.value || 0;
+    return total - remaining;
+  }
+
+  calculatePaidPercentage(): number {
+    const advance = +this.displayApprovedData.get('advanceAmount')?.value || 0;
+    const remaining = +this.displayApprovedData.get('remainingBalance')?.value || 0;
+    if (advance === 0) return 0;
+    return Math.round(((advance - remaining) / advance) * 100);
+  }
 
   statusButtonRenderer(params: any) {
     const status = params.value;
@@ -311,5 +320,11 @@ calculatePaidAmount(): number {
   // update function
   updateStatus(data: any) {
     alert('update');
+  }
+
+   exportExcel() {
+    if (this.gridApiActive) {
+      this.gridApiActive.exportDataAsCsv();
+    }
   }
 }

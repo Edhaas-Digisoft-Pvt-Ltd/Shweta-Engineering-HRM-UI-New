@@ -31,7 +31,7 @@ import { AdvancePaymentComponent } from './advance-payment/advance-payment.compo
 import { PayrollListComponent } from './payroll/payroll-list/payroll-list.component';
 import { PayrollActionBtnComponent } from './payroll/payroll-list/payroll-action-btn/payroll-action-btn.component';
 import { PayrollSummariesComponent } from './payroll/payroll-list/payroll-summaries/payroll-summaries.component';
-import { AdvanceSalaryBtnComponent } from './payroll/payroll-list/payroll-summaries/advance-salary-btn/advance-salary-btn.component';
+import { PayrollSummariesBtnComponent } from './payroll/payroll-list/payroll-summaries/Payroll-summaries-btn/Payroll-summaries-btn.component';
 import { PayrollProcessComponent } from './payroll/payroll-process/payroll-process.component';
 import { SalaryRevisionComponent } from './payroll/salary-revision/salary-revision.component';
 import { HttpClientModule } from '@angular/common/http';
@@ -44,7 +44,7 @@ import { LeaveSetupComponent } from './compnay-setup/leave-setup/leave-setup.com
 import { CompanyDashboardComponent } from './compnay-setup/company-list/company-dashboard/company-dashboard.component';
 import { EditLeaveRequestComponent } from './leave/leave-request/edit-leave-request/edit-leave-request.component';
 
-import { ApprovedSalaryReportComponent } from './advance-payment/approved-salary-report/approved-salary-report.component';
+import { AdvanceSalaryReportComponent } from './advance-payment/advance-salary-report/advance-salary-report.component';
 import { EmployeeComponent } from './employee/employee.component';
 import { EmployeeDashboardComponent } from './employee/employee-dashboard/employee-dashboard.component';
 import { CreateEmployeeComponent } from './employee/create-employee/create-employee.component';
@@ -52,6 +52,10 @@ import { CreateEmployeeComponent } from './employee/create-employee/create-emplo
 import { BonusAndIncentiveComponent } from './compnay-setup/bonus-and-incentive/bonus-and-incentive.component';
 import { ManageBonusAndIncentiveComponent } from './compnay-setup/bonus-and-incentive/manage-bonus-and-incentive/manage-bonus-and-incentive.component';
 import { BonuseAndInsentiveReportsComponent } from './compnay-setup/bonus-and-incentive/bonuse-and-insentive-reports/bonuse-and-insentive-reports.component';
+import { PayrollApprovedComponent } from './payroll/payroll-list/payroll-approved/payroll-approved.component';
+import { PayrollRejectedComponent } from './payroll/payroll-list/payroll-rejected/payroll-rejected.component';
+import { PayrollProcessRejectedComponent } from './payroll/payroll-process/payroll-process-rejected/payroll-process-rejected.component';
+import { PayrollProcessApprovedComponent } from './payroll/payroll-process/payroll-process-approved/payroll-process-approved.component';
 
 
 // FullCalendarModule.registerPlugins([dayGridPlugin]);
@@ -81,7 +85,7 @@ import { BonuseAndInsentiveReportsComponent } from './compnay-setup/bonus-and-in
     PayrollListComponent,
     PayrollActionBtnComponent,
     PayrollSummariesComponent,
-    AdvanceSalaryBtnComponent,
+    PayrollSummariesBtnComponent,
     PayrollProcessComponent,
     SalaryRevisionComponent,
     CompanyListComponent,
@@ -93,15 +97,16 @@ import { BonuseAndInsentiveReportsComponent } from './compnay-setup/bonus-and-in
     Demo2Component,
     ComMangeAndPoliciesComponent,
     LeaveSetupComponent,
-
-    ApprovedSalaryReportComponent,
-
-
-     CompanyDashboardComponent,
-     EditLeaveRequestComponent,
-     BonusAndIncentiveComponent,
-     ManageBonusAndIncentiveComponent,
-     BonuseAndInsentiveReportsComponent,
+    AdvanceSalaryReportComponent,
+    CompanyDashboardComponent,
+    EditLeaveRequestComponent,
+    BonusAndIncentiveComponent,
+    ManageBonusAndIncentiveComponent,
+    BonuseAndInsentiveReportsComponent,
+    PayrollApprovedComponent,
+    PayrollRejectedComponent,
+    PayrollProcessRejectedComponent,
+    PayrollProcessApprovedComponent,
 
   ],
   imports: [

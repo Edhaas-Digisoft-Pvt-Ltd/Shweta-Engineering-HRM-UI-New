@@ -17,10 +17,13 @@ export class AttendanceComponent {
   activeTab: string = 'tab1';
   searchInputValue: string = '';
   gridApiActive: any;
+  role: string = '';
 
   constructor(private toastr: ToastrService, private service: HrmserviceService) { }
 
   ngOnInit() {
+    this.role = this.service.getRole();
+    
     this.loadTodayDataFromStorage();
     this.fetchAttendance();
   }
@@ -34,7 +37,7 @@ export class AttendanceComponent {
   };
 
   columnDefs: ColDef[] = [
-    { headerName: 'Employee Id', field: 'employe_id' },
+    { headerName: 'Employee Code', field: 'employee_code', editable:true },
     { headerName: 'Date', field: 'attendance_date' },
     { headerName: 'CheckIn', field: 'check_in' },
     { headerName: 'CheckOut', field: 'check_out' },
@@ -92,7 +95,7 @@ export class AttendanceComponent {
   fetchAttendance(): void {
     this.service.post('fetch/attendance', {}).subscribe((res: any) => {
       if (res.status === 'success') {
-        this.rowData = res.data
+        this.rowData = res.data.reverse()
       } else {
         console.log(res.error);
       }
@@ -102,14 +105,13 @@ export class AttendanceComponent {
   downloadTemplate(): void {
     const userConfirmed = confirm("Do you want to download the daily attendance template?");
     if (userConfirmed) {
-      const headers = ['employe_id', 'attendance_date', 'check_in', 'check_out', 'shift_id', 'status'];
+      const headers = ['employee_code', 'attendance_date', 'check_in', 'check_out', 'shift_id'];
       const exampleRow = [
-        '1',
-        '1-06-2025',
+        'SEE20250501',
+        'mm-dd-yyyy',
         '7:00',
         '19:00',
         '1',
-        'P'
       ];
 
       const worksheet: XLSX.WorkSheet = XLSX.utils.aoa_to_sheet([headers, exampleRow]);

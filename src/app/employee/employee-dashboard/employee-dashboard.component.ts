@@ -4,20 +4,20 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { ChartData, ChartOptions } from 'chart.js';
 import { ToastrService } from 'ngx-toastr';
 import { HrmserviceService } from 'src/app/hrmservice.service';
-
+declare var bootstrap: any;
 @Component({
   selector: 'app-employee-dashboard',
   templateUrl: './employee-dashboard.component.html',
   styleUrls: ['./employee-dashboard.component.css']
 })
 export class EmployeeDashboardComponent {
- @ViewChild('advanceSalaryModal') advanceSalaryModalRef!: ElementRef;
+  @ViewChild('advanceSalaryModal') advanceSalaryModalRef!: ElementRef;
   @ViewChild('leaveRequestModal') leaveRequestModalRef!: ElementRef;
 
   editForm!: FormGroup;
-  leaveForm!: FormGroup; // apply leave
-  leaveTypes: string[] = ['Casual', 'Sick', 'Earned', 'Maternity', 'Paternity'];
-  advanceSalaryForm!: FormGroup;  // apply advance salary
+  leaveForm!: FormGroup;
+
+  advanceSalaryForm!: FormGroup;
   tenures: string[] = ['3 Month', '6 Month'];
   installmentAmount: number = 0;
   years: number[] = [];
@@ -26,7 +26,7 @@ export class EmployeeDashboardComponent {
   canDownload: boolean = false;
   userName: string = "John Doe";
   billAmount: number = 0;
-  EmployeeID!: number;
+  // EmployeeID!: number;
   currentDateTime: Date = new Date();
   searchValue: any = "";
   Companydata: any;
@@ -35,8 +35,11 @@ export class EmployeeDashboardComponent {
   isSubmitted: any = false;
   isLeaveSubmitted: any = false;
   isAdvanceSalary: any = false;
-  employee_code: any;
+  employee_id!: number;
+  company_id: any;
   Employee_Data: any;
+  role: string = '';
+  leaveTypes: any;
 
   constructor(private route: ActivatedRoute, private fb: FormBuilder, private router: Router, private toastr: ToastrService, private service: HrmserviceService,) {
     // Generate last 20 years dynamically
@@ -51,9 +54,10 @@ export class EmployeeDashboardComponent {
   }
 
   ngOnInit(): void {
+    this.role = this.service.getRole();
 
     this.route.queryParams.subscribe(params => {
-      this.employee_code = params['id'];
+      this.employee_id = params['id'];
       console.log('Received employee code:', params['id']);
     });
 
@@ -66,24 +70,32 @@ export class EmployeeDashboardComponent {
     });
 
     this.leaveForm = this.fb.group({
-      leaveType: ['', Validators.required],
+      leave_id: [null, Validators.required],
       noOfDays: [1, [Validators.required, Validators.min(1)]],
-      fromDate: ['', Validators.required],
-      toDate: ['', Validators.required],
-      reason: ['', [Validators.required, Validators.pattern(/^[A-Za-z ]+$/), this.NoWhitespaceValidator]]
+      start_date: ['', Validators.required],
+      end_date: ['', Validators.required],
+      leave_reason: ['', [Validators.required, Validators.pattern(/^[A-Za-z ]+$/), this.NoWhitespaceValidator]]
     });
 
     this.advanceSalaryForm = this.fb.group({
-      tenure: ['', Validators.required],
-      amount: [0, [Validators.required, Validators.min(1)]],
-      reason: ['', [Validators.required, Validators.pattern(/^[A-Za-z ]+$/), this.NoWhitespaceValidator]]
+      tenure: [null, Validators.required],
+      advance_amount: [0, [Validators.required, Validators.min(1)]],
+      remarks: ['', [Validators.required, Validators.pattern(/^[A-Za-z ]+$/), this.NoWhitespaceValidator]]
     });
 
     this.advanceSalaryForm.valueChanges.subscribe(() => this.calculateInstallment());
-    this.fetchEmployee(this.employee_code);
-
+    this.fetchEmployee(this.employee_id);
   }
 
+  closeAllModals(): void {
+    const modals = document.querySelectorAll('.modal.show');
+    modals.forEach((modalElement: any) => {
+      const modalInstance = bootstrap.Modal.getInstance(modalElement);
+      if (modalInstance) {
+        modalInstance.hide();
+      }
+    });
+  }
 
   leaveStatus = {
     accept: 1,
@@ -122,9 +134,17 @@ export class EmployeeDashboardComponent {
   }
 
   fetchEmployee(id: any) {
-    // alert(id);
     this.service.post(`single/employee`, { "employe_id": id }).subscribe((res: any) => {
       this.Employee_Data = res.data;
+      this.company_id = res.data.employee.company_id;
+
+      this.getLeaveTypes()
+    });
+  }
+
+  getLeaveTypes() {
+    this.service.post(`fetch/companyleave`, { "company_id": this.company_id }).subscribe((res: any) => {
+      this.leaveTypes = res.data;
     });
   }
 
@@ -136,12 +156,13 @@ export class EmployeeDashboardComponent {
 
   // for installment calculation : 
   calculateInstallment() {
-    const amount = this.advanceSalaryForm.get('amount')?.value;
+    const amount = this.advanceSalaryForm.get('advance_amount')?.value;
     const tenureString = this.advanceSalaryForm.get('tenure')?.value;
     const months = parseInt(tenureString?.split(' ')[0] || '1', 10);
 
     if (amount > 0 && months > 0) {
-      this.installmentAmount = +(amount / months).toFixed(2);
+      // this.installmentAmount = +(amount / months).toFixed(2);
+      this.installmentAmount = Math.round(amount / months);
     } else {
       this.installmentAmount = 0;
     }
@@ -187,7 +208,6 @@ export class EmployeeDashboardComponent {
   };
 
   updateData() {
-
     this.editForm.patchValue({
       email: this.Employee_Data.employee.emp_email,
       contact: this.Employee_Data.employee.emp_contact,
@@ -199,7 +219,7 @@ export class EmployeeDashboardComponent {
   editEmployee() {
     this.isSubmitted = true;
     let current_data = {
-      "employe_id": this.Employee_Data.employe_id,
+      "employe_id": this.Employee_Data.employee.employe_id,
       "emp_email": this.editForm.value.email,
       "emp_contact": this.editForm.value.contact,
       "status": this.editForm.value.status,
@@ -234,21 +254,63 @@ export class EmployeeDashboardComponent {
   //apply leave 
   addLeaveRequest() {
     this.isLeaveSubmitted = true;
-    if (this.leaveForm.valid) {
-      const leaveData = this.leaveForm.value;
-      console.log('Leave Request Submitted:', leaveData);
-      this.toastr.success('Leave Added !!!');
-      this.router.navigate(['/authPanal/EmployeeInDetail']);
-      this.leaveForm.reset();
 
-      //  API here
-    }
-    else {
-      // alert("Check Again !!!")
-      const leaveData = this.leaveForm.value;
-      // this.leaveForm.markAllAsTouched();
-      this.toastr.error('Invalid Credentials !');
-      // console.log('Leave Request Submitted:', leaveData);
+    if (this.leaveForm.valid) {
+      const leaveData = {
+        employe_id: this.employee_id,
+        company_id: this.company_id,
+        leave_id: this.leaveForm.value.leave_id,
+        start_date: this.leaveForm.value.start_date,
+        end_date: this.leaveForm.value.end_date,
+        leave_reason: this.leaveForm.value.leave_reason,
+      };
+
+      console.log('Submitting leave request with data:', leaveData);
+
+      this.service.post("apply/leave", leaveData).subscribe({
+        next: (res: any) => {
+          if (res.status === 'success') {
+            this.toastr.success('Leave applied successfully!');
+            this.router.navigate(['/authPanal/EmployeeInDetail'], {
+              queryParams: { id: this.employee_id }
+            });
+
+            this.leaveForm.reset({
+              leave_id: null,
+              noOfDays: 1,
+              start_date: '',
+              end_date: '',
+              leave_reason: ''
+            });
+            this.leaveForm.markAsUntouched();
+            this.leaveForm.markAsPristine();
+            this.isLeaveSubmitted = false;
+
+            this.closeAllModals();
+          } else {
+            this.toastr.error(res.data);
+            this.leaveForm.reset({
+              leave_id: null,
+              noOfDays: 1,
+              start_date: '',
+              end_date: '',
+              leave_reason: ''
+            });
+            this.leaveForm.markAsUntouched();
+            this.leaveForm.markAsPristine();
+            this.isLeaveSubmitted = false;
+
+            this.closeAllModals();
+          }
+        },
+        error: (err: any) => {
+          this.toastr.error(err.error?.data || 'Server error');
+          this.closeAllModals();
+        }
+      });
+    } else {
+      this.toastr.error('Invalid Cedentials!');
+      this.leaveForm.markAllAsTouched();
     }
   }
 
@@ -258,19 +320,37 @@ export class EmployeeDashboardComponent {
     if (this.advanceSalaryForm.valid) {
       const formData = {
         ...this.advanceSalaryForm.value,
-        installmentAmount: this.installmentAmount
+        emi: this.installmentAmount,
+        employee_id: this.employee_id,
+        tenure: (this.advanceSalaryForm.value.tenure).match(/\d+/)[0],
       };
-      console.log('Advance Salary Request Submitted:', formData);
-      this.toastr.success(' Request Added !!!');
-      this.router.navigate(['/authPanal/EmployeeInDetail']);
-      this.advanceSalaryForm.reset();
-      //  API here
+      this.service.post("apply/advancesaraly", formData).subscribe({
+        next: (res: any) => {
+          if (res.status === 'success') {
+            this.toastr.success('Advance salary applied successfully !');
+            this.router.navigate(['/authPanal/EmployeeInDetail'], {
+              queryParams: { id: this.employee_id }
+            });
+            this.advanceSalaryForm.reset();
+            this.closeAllModals();
+          } else {
+            this.toastr.error(res.data);
+            this.advanceSalaryForm.reset();
+            this.closeAllModals();
+          }
+        },
+        error: (err: any) => {
+          this.toastr.error(err.error?.data);
+          this.advanceSalaryForm.reset();
+          this.closeAllModals();
+        }
+      });
+    }else {
+      this.toastr.error('Invalid Credentials!');
+      this.leaveForm.markAllAsTouched();
     }
-    else {
-      // this.advanceSalaryForm.markAllAsTouched();
-      this.toastr.error(' Invalid credentials !');
-    }
-
   }
+
+
 
 }

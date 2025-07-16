@@ -4,11 +4,11 @@ import { ColDef } from 'ag-grid-community';
 import { HrmserviceService } from 'src/app/hrmservice.service';
 
 @Component({
-  selector: 'app-approved-salary-report',
-  templateUrl: './approved-salary-report.component.html',
-  styleUrls: ['./approved-salary-report.component.css']
+  selector: 'app-advance-salary-report',
+  templateUrl: './advance-salary-report.component.html',
+  styleUrls: ['./advance-salary-report.component.css']
 })
-export class ApprovedSalaryReportComponent {
+export class AdvanceSalaryReportComponent {
   searchValue: string = '';
   selectedYear = new Date().getFullYear();
   selectedMonth = new Date().getMonth() + 1;
@@ -60,32 +60,33 @@ export class ApprovedSalaryReportComponent {
   }
 
   searchEmployeeAdvanceSalary() {
-  const code = this.searchValue?.trim();
-  if (!code) {
-    this.rowData = []; 
-    return;
-  }
-
-  const payload = {
-    employee_code: code,
-    year: this.selectedYear,
-    month: this.selectedMonth,
-  };
-
-  this.service.post('emp/advancesaraly/report', payload).subscribe(
-    (res: any) => {
-      if (res.status === 'success' && res.data.length > 0) {
-        this.rowData = res.data;
-      } else {
-        this.rowData = []; 
-      }
-    },
-    (error) => {
-      console.error('Error fetching salary report:', error);
-      this.rowData = [];
+    this.rowData = [];
+    const code = this.searchValue?.trim();
+    if (!code) {
+      this.rowData = []; 
+      return;
     }
-  );
-}
+
+    const payload = {
+      employee_code: code,
+      year: this.selectedYear,
+      month: this.selectedMonth,
+    };
+
+    this.service.post('emp/advancesaraly/report', payload).subscribe(
+      (res: any) => {
+        if (res.status === 'success' && res.data.length > 0) {
+          this.rowData = res.data;
+        } else {
+          this.rowData = []; 
+        }
+      },
+      (error) => {
+        console.error('Error fetching salary report:', error);
+        this.rowData = [];
+      }
+    );
+  }
 
 
   // getemployees () {
@@ -119,7 +120,7 @@ export class ApprovedSalaryReportComponent {
 
     // Common styles
     button.style.padding = '6px 12px';
-    button.style.borderRadius = '18px';
+    button.style.borderRadius = '20px';
     button.style.cursor = 'default';
     button.style.height = '30px'; // ✅ Match AG Grid row height
     button.style.lineHeight = '20px';
@@ -127,7 +128,7 @@ export class ApprovedSalaryReportComponent {
     button.style.display = 'flex';
     button.style.alignItems = 'center';
     button.style.justifyContent = 'center';
-    button.style.width = '100%';
+    button.style.width = '97%';
     button.style.marginTop = '6px';
 
     // Conditional styling
@@ -135,17 +136,25 @@ export class ApprovedSalaryReportComponent {
       button.style.backgroundColor = '#FFF291'; // light red
       button.style.color = '#721c24'; // dark red text
       button.style.border = '1px solid #f5c6cb';
+      button.style.borderRadius = '20px';
     } else if (status === 'Approved') {
       button.style.backgroundColor = '#B2FFE1B0'; // light green
       button.style.color = 'black';
       button.style.border = '1px solid #B2FFE1B0';
+      button.style.borderRadius = '20px';
+    } else if (status === 'Rejected') {
+      button.style.backgroundColor = '#FFAFAF'; // light green
+      button.style.color = 'black';
+      button.style.border = '1px solid #FFAFAF';
+      button.style.borderRadius = '20px';
     }
+
     return button;
   }
 
   initializeColumns() {
     this.columnDefs = [
-     { headerName: 'ID', field: 'employee_code', sortable: true, filter: true, maxWidth: 150 },
+     { headerName: 'Emp Code', field: 'employee_code', sortable: true, filter: true, maxWidth: 150 },
       { headerName: 'Employee Name', field: 'emp_name', sortable: true, filter: true, maxWidth:180 },
       { headerName: 'Apply Date', field: 'apply_date', sortable: true, filter: true, maxWidth:150 },
       { headerName: 'Adv. Amount', field: 'advance_amount', sortable: true, filter: true, maxWidth:150 },
@@ -160,7 +169,7 @@ export class ApprovedSalaryReportComponent {
       maxWidth:120,
       cellStyle: { border: '1px solid #ddd' },
       cellRenderer: (params: any) => {
-        return `<button type="button" class="btn btn-outline-dark mb-1" data-bs-toggle="modal" data-bs-target="#salaryReport">
+        return `<button type="button" class="btn btn-sm mb-1" data-bs-toggle="modal" data-bs-target="#salaryReport" style="background-color:#C8E3FF">
           <i class="bi bi-eye "></i>
         </button>`;
       },

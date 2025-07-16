@@ -1,6 +1,6 @@
 import { Component, ViewChild } from '@angular/core';
 import { AgGridAngular } from 'ag-grid-angular';
-import { GridApi, ColumnApi, GridReadyEvent, ColDef } from 'ag-grid-community';
+import { GridApi, ColumnApi, GridReadyEvent, ColDef, GridOptions } from 'ag-grid-community';
 import { AttendanceActionComponent } from '../attendance-action/attendance-action.component';
 import * as XLSX from 'xlsx';
 import { HrmserviceService } from 'src/app/hrmservice.service';
@@ -55,27 +55,28 @@ export class AttendanceSummaryComponent {
     const daysInMonth = new Date(this.selectedYear, this.selectedMonth + 1, 0).getDate();
 
     this.columnDefs = [
-      { headerName: 'ID', field: 'id', pinned: 'left', width: 70 },
+      { headerName: 'Employee Code', field: 'id', pinned: 'left', width: 150 },
       { headerName: 'Employee Name', field: 'name', pinned: 'left', width: 200 },
     ];
 
     for (let i = 1; i <= daysInMonth; i++) {
       const date = new Date(Date.UTC(this.selectedYear, this.selectedMonth, i));
       const dayName = date.toLocaleDateString('en-US', { weekday: 'short' });
-      const header = `${this.months[this.selectedMonth].name} ${i} ${dayName}`;
+      const header = `${i}\n${dayName}`;
       const isSunday = dayName === 'Sun';
       const fieldKey = this.formatDateKey(date);
 
       this.columnDefs.push({
-        headerName: header,
+        headerValueGetter: () => header,
         field: fieldKey,
         cellRenderer: (params: any) => this.dotAndImageRenderer(params, isSunday),
-
+        minWidth: 50,
+        maxWidth: 80,
       });
     }
   }
 
-  gridOptions = {
+  gridOptions: GridOptions = {
     pagination: false,
     paginationPageSize: 10,
   };
@@ -84,6 +85,10 @@ export class AttendanceSummaryComponent {
     return new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()))
       .toISOString()
       .split('T')[0];
+  }
+
+  get selectedMonthYear(): string {
+    return `${this.months[this.selectedMonth].name} ${this.selectedYear}`;
   }
 
   fetchDailySummary() {
@@ -168,14 +173,14 @@ export class AttendanceSummaryComponent {
     const employeeMap: { [key: string]: any } = {};
 
     data.forEach((item) => {
-      const key = item.employe_id;
+      const key = item.employee_code;
       const date = new Date(item.attendance_date);
       const field = this.formatDateKey(date); 
       const status = (item.status || '').toUpperCase();
 
       if (!employeeMap[key]) {
         employeeMap[key] = {
-          id: item.employe_id,
+          id: item.employee_code,
           name: item.emp_name,
           _dates: new Set<string>() 
         };

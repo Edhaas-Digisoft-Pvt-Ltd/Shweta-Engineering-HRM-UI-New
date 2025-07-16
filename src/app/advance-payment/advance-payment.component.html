@@ -3,8 +3,6 @@
     <div class="col-12 d-flex">
       <h2 class="fw-bold"> <i class="bi bi-currency-rupee me-2"></i> Advance Salary</h2>
     </div>
-
-
   </div>
   <div class="tabs-container m-2">
     <ul class="nav nav-tabs">
@@ -15,134 +13,45 @@
         <a class="nav-link fw-bold" [ngClass]="{'active': activeTab === 'tab2'}">Approved Salary Request</a>
       </li>
       <li class="nav-item" (click)="selectTab('tab3')">
-        <a class="nav-link fw-bold" [ngClass]="{'active': activeTab === 'tab3'}">Approved Salary Report</a>
+        <a class="nav-link fw-bold" [ngClass]="{'active': activeTab === 'tab3'}">Advance Salary Report</a>
       </li>
     </ul>
-        <div class="tab-content mt-3">
-            <div *ngIf="activeTab === 'tab1'">
-                <div class="row gap-2 mb-4 align-items-center justify-content-end">
-                    <div class="col col-lg-5 d-flex align-items-end justify-content-end search-box text-start">
-
-
-                        <div class="w-50 text-start select-company ">
-                            <label class="fw-bold">Select Company </label>
-                            <br>
-                            <select class="form-select" [(ngModel)]="selectedValue">
-                                <option *ngFor="let item of optionsArray" [value]="item">{{ item }}</option>
-                            </select>
-                        </div>
+    <div class="tab-content mt-3">
+      <div *ngIf="activeTab === 'tab1'">
+        <div class="row gx-3  align-items-center  p-2 rounded-2">
+            <div class="col-12  mt-2">
+                <div class="row justify-content-end">
+                    <div class="col-3">
+                        <label for="">Select Company</label>
+                        <select class="form-select" (change)="onCompanyChange($event)">
+                          <option *ngFor="let item of CompanyNames" [value]="item.company_id">{{ item.company_name }}</option>
+                        </select>
                     </div>
 
-                    <div class="col col-lg-4 d-flex justify-content-around attendanceButtons text-start">
-                      <!-- Month and Year Dropdowns -->
-                      <div>
-                        <label>Select Year</label><br />
-
-                        <div class="d-flex align-items-center">
-
-                          <div class="me-2">
-                            <select class="form-control selectdata2" [(ngModel)]="selectedYear" (change)="onYearMonthChange()">
-                                <option *ngFor="let year of financialYears">{{ year }}</option>
-                              </select>
-                          </div>
-                          <div>
-                            <span><i class="bi bi-circle-fill" style="font-size: 8px;color: #578FCA;"></i></span>
-                          </div>
-                        </div>
-
-
-                      </div>
-
-                      <!-- select month -->
-                      <div>
-                        <label>Select Month</label><br />
-
-                        <div class="d-flex align-items-center">
-                          <div>
-                            <span><i class="bi bi-circle-fill" style="font-size: 8px;color: #578FCA;"></i></span>
-                          </div>
-                          <div class="ms-2">
-                            <select class="form-control selectdata3" [(ngModel)]="selectedMonth" (change)="onYearMonthChange()">
-                              <option *ngFor="let month of months">{{ month }}</option>
-                            </select>
-                          </div>
-
-                        </div>
-
-
-                      </div>
-
+                    <div class="col-2 dotted-line">
+                        <label for="">Select Year</label>
+                        <select class="form-select" [(ngModel)]="selectedYear" (change)="onYearMonthChange()">
+                          <option *ngFor="let year of financialYears">{{ year }}</option>
+                        </select>
+                    </div>
+                    <!-- <div class="col vector">
+                        <span class="mt-4"></span>
+                    </div> -->
+                    <div class="col-2">
+                        <label for="">Select Month</label>
+                        <select class="form-select" [(ngModel)]="selectedMonth" (change)="onYearMonthChange()">
+                          <option *ngFor="let month of months" [value]="month.id">{{ month.value }}</option>
+                        </select>
                     </div>
 
-                  </div>
-
-                  <div class="row gap-4 row-wrap my-3 ">
-                    <div class="container  ">
-
-                      <div class="row g-3">
-                        <div class="col-12">
-
-                          <!-- Day View Grid -->
-                          <ag-grid-angular
-                          class="ag-theme-alpine"
-                          style="width: 100%; height: 500px;"
-                          [rowData]="rowData"
-                          [columnDefs]="columnDefs"
-                          [domLayout]="'autoHeight'">
-                        </ag-grid-angular>
-                          <!-- Month View Grid -->
-                          <!-- <ag-grid-angular *ngIf="viewMode === 'Month'" class="ag-theme-alpine" [rowData]="monthlyRowData"
-                            [columnDefs]="monthlyColumnDefs" rowSelection="multiple" style="width: 100%; height: 60vh;">
-                          </ag-grid-angular> -->
-
-                        </div>
-                      </div>
+                    <div class="col-auto d-flex align-items-end">
+                      <button class="btn btn-primary exportExcelBtn me-2" (click)="exportExcel()">
+                        <i class="bi bi-file-earmark-excel"></i>
+                      </button>
                     </div>
-                  </div>
+
+                </div>
             </div>
-          </div>
-
-          <div class="col col-lg-4 d-flex justify-content-around attendanceButtons text-start">
-            <!-- Month and Year Dropdowns -->
-            <div>
-              <label>Select Year</label><br />
-
-              <div class="d-flex align-items-center">
-
-                <div class="me-2">
-                  <select class="form-control selectdata2" [(ngModel)]="selectedYear" (change)="onYearMonthChange()">
-                    <option *ngFor="let year of financialYears">{{ year }}</option>
-                  </select>
-                </div>
-                <div>
-                  <span><i class="bi bi-circle-fill" style="font-size: 8px;color: #578FCA;"></i></span>
-                </div>
-              </div>
-
-
-            </div>
-
-            <!-- select month -->
-            <div>
-              <label>Select Month</label><br />
-
-              <div class="d-flex align-items-center">
-                <div>
-                  <span><i class="bi bi-circle-fill" style="font-size: 8px;color: #578FCA;"></i></span>
-                </div>
-                <div class="ms-2">
-                  <select class="form-control selectdata3" [(ngModel)]="selectedMonth" (change)="onYearMonthChange()">
-                    <option *ngFor="let month of months" [value]="month.id">{{ month.value }}</option>
-                  </select>
-                </div>
-
-              </div>
-
-
-            </div>
-
-          </div>
-
         </div>
 
         <div class="row gap-4 row-wrap my-3 ">
@@ -151,49 +60,34 @@
             <div class="row g-3">
               <div class="col-12">
 
-                <!-- Day View Grid -->
-                <ag-grid-angular 
-                  class="ag-theme-alpine" 
-                  style="width: 100%; height: 60vh;" 
-                  [rowData]="rowData"
-                  [columnDefs]="columnDefs" 
-                  [defaultColDef]="defaultColDef" 
-                  [gridOptions]="gridOptions" [pagination]="true"
-                  (gridReady)="onGridReady($event)">
+                <ag-grid-angular class="ag-theme-alpine" style="width: 100%; height: 60vh;" [rowData]="rowData"
+                  [columnDefs]="columnDefs" [gridOptions]="gridOptions" [pagination]="true" [defaultColDef]="defaultColDef" (gridReady)="onGridReady($event)">
                 </ag-grid-angular>
-
-
-                <!-- Month View Grid -->
-                <!-- <ag-grid-angular *ngIf="viewMode === 'Month'" class="ag-theme-alpine" [rowData]="rowData"
-                            [columnDefs]="monthlyColumnDefs" rowSelection="multiple" style="width: 100%; height: 60vh;">
-                          </ag-grid-angular> -->
-
 
               </div>
             </div>
           </div>
-
-        </div>
-      </div>
-
-      <div *ngIf="activeTab === 'tab2'">
-        <div class="container ">
-          <app-approved-advance-payment></app-approved-advance-payment>
-        </div>
-      </div>
-
-      <div *ngIf="activeTab === 'tab3'">
-        <div class="container ">
-          <app-approved-salary-report></app-approved-salary-report>
         </div>
       </div>
     </div>
+
+
+  </div>
+</div>
+
+<div *ngIf="activeTab === 'tab2'">
+  <div class="container ">
+    <app-approved-advance-payment></app-approved-advance-payment>
+  </div>
+</div>
+
+<div *ngIf="activeTab === 'tab3'">
+  <div class="container ">
+    <app-advance-salary-report></app-advance-salary-report>
   </div>
 </div>
 
 
-
-<!-- Modal - advance request info -->
 <div class="modal fade" id="advanceRequestModal" tabindex="-1" aria-labelledby="advanceRequestModalLabel"
   aria-hidden="true">
   <div class="modal-dialog modal-xl modal-dialog-centered">
@@ -235,21 +129,21 @@
             </div>
             <div class="col-md-2">
               <strong>Status</strong>
-              <!-- <input
+              <input
               type="text"
               id="status"
               class="form-control "
               formControlName="status"
               [ngClass]="{
-                  'custom-bg-warning': EditAdvancePayment?.status === 'pending',
-                  'custom-bg-success': EditAdvancePayment?.status === 'Approved',
-                  'custom-bg-danger': EditAdvancePayment?.status === 'Rejected'
+                  'custom-bg-warning': EditAdvancePaymentData?.status === 'pending',
+                  'custom-bg-success': EditAdvancePaymentData?.status === 'Approved',
+                  'custom-bg-danger': EditAdvancePaymentData?.status === 'Rejected'
               }"
-              [value]="EditAdvancePayment?.status"
-            /> -->
-              <div class="px-3 py-2 rounded text-center fw-bold" style="background-color: #fef3c7; color: #7c6000;">
+              [value]="EditAdvancePaymentData?.status"
+            />
+              <!-- <div class="px-3 py-2 rounded text-center fw-bold" style="background-color: #fef3c7; color: #7c6000;">
                 Pending
-              </div>
+              </div> -->
             </div>
             <div class="col-md-2">
               <strong>Tenure</strong>
@@ -275,10 +169,10 @@
       <div class="modal-footer">
         <button type="button" class="btn approveBtn" (click)="updateStatus('Approved')"
           [disabled]="EditAdvancePaymentData?.status === 'Approved' || EditAdvancePaymentData?.status === 'Rejected'">Approve
-          Leave</button>
+          Request</button>
         <button type="button" class="btn declineBtn" (click)="updateStatus('Rejected')"
           [disabled]="EditAdvancePaymentData?.status === 'Approved' || EditAdvancePaymentData?.status === 'Rejected'">Decline
-          Leave</button>
+          Request</button>
         <button type="button" class="btn btn-outline-dark fw-semobild " data-bs-dismiss="modal">Cancel</button>
       </div>
     </div>

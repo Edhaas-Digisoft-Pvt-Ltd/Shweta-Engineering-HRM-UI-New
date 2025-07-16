@@ -1,53 +1,48 @@
-<div class="row gap-2 mb-0 align-items-center justify-content-end">
-  <div class="col col-lg-5 d-flex align-items-end search-box text-start">
-    <input class="py-1 mx-2 form-control me-2" type="text" #searchBox placeholder="Search here"
-      [(ngModel)]="searchValue" value="" (ngModelChange)="onFilterBoxChange()" />
-    <!-- <div class="">
-    </div> -->
-    <div>
-      <label>Select Year</label><br />
-      <select class="form-control selectdata" style="width: 150px;"  [(ngModel)]="selectedYear" (change)="onMonthYearChange()">
-        <option *ngFor="let year of years" [value]="year">{{ year }}</option>
-      </select>
-    </div>
+<div class="row gx-3 align-items-center rounded-2">
+  <div class="col-12">
+    <div class="row justify-content-end">
+      
+      <div class="col-3">
+        <label>Search</label>
+        <input class="form-control" type="text" #searchBox placeholder="Search here"
+          [(ngModel)]="searchValue" (ngModelChange)="onFilterBoxChange()" />
+      </div>
 
-    <!-- <div class="text-start">
-        <label for="">Select Year</label><br />
-        <select class="form-control" [(ngModel)]="selectedYear" (change)="onYearMonthChange()">
-          <option *ngFor="let year of financialYears" [value]="year">{{ year }}</option>
+      <div class="col-2 dotted-line">
+        <label>Select Year</label>
+        <select class="form-select" [(ngModel)]="selectedYear" (change)="onMonthYearChange()">
+          <option *ngFor="let year of years" [value]="year">{{ year }}</option>
         </select>
-      </div> -->
-  </div>
-<span class="devider p-0"></span>
-  <div class="col col-lg-4 d-flex gap-2 attendanceButtons text-start align-items-end">
+      </div>
 
-    <!-- select month dropdown -->
-    <div >
-      <label>Select Month</label><br />
-      <div class="d-flex align-items-center w-100">
-        <select class="form-control selectdata3" style="width: 150px;"
-          [(ngModel)]="selectedMonth" (change)="onMonthYearChange()">
+      <div class="col-2">
+        <label>Select Month</label>
+        <select class="form-select" [(ngModel)]="selectedMonth" (change)="onMonthYearChange()">
           <option *ngFor="let month of months" [ngValue]="month.value">{{ month.name }}</option>
         </select>
       </div>
-    </div>
 
-    <div class="flex-grow-1">
-      <button class="btn btn-primary exportExcelBtn w-100" (click)="exportToExcel()">
-        Export To Excel
-      </button>
+      <div class="col-auto d-flex align-items-end">
+        <button class="btn btn-primary exportExcelBtn me-2" (click)="exportToExcel()">
+          <i class="bi bi-file-earmark-excel"></i>
+        </button>
+      </div>
+
     </div>
   </div>
-
 </div>
 
-<div class="row gap-4 row-wrap my-3 ">
+
+<div class="row gap-4 row-wrap">
   <div class="container  ">
+
+    <h5 class="fw-bold text-center">
+     {{ selectedMonthYear }}
+    </h5>
 
     <div class="row g-3">
       <div class="col-12">
 
-        <!-- Day View Grid -->
         <ag-grid-angular class="ag-theme-alpine" id="specualGrid"
           [defaultColDef]="{ resizable: true, sortable: true, width: 100 }" [rowData]="rowData"
           [gridOptions]="gridOptions" [pagination]="true"

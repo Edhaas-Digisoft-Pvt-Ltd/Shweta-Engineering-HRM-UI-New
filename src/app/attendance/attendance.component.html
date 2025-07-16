@@ -17,13 +17,10 @@
         <div class="tabs-container">
             <ul class="nav nav-tabs">
                 <li class="nav-item" (click)="selectTab('tab1')">
-                    <a class="nav-link fw-bold" [ngClass]="{'active': activeTab === 'tab1'}">List
-
-                    </a>
-
+                    <a class="nav-link fw-bold" [ngClass]="{'active': activeTab === 'tab1'}">List</a>
                 </li>
                 <li class="nav-item" (click)="selectTab('tab2')">
-                    <a class="nav-link fw-bold" [ngClass]="{'active': activeTab === 'tab2'}">Daily Summary</a>
+                    <a class="nav-link fw-bold" [ngClass]="{'active': activeTab === 'tab2'}">Monthly Summary</a>
                 </li>
                 <li class="nav-item" (click)="selectTab('tab3')">
                     <a class="nav-link fw-bold" [ngClass]="{'active': activeTab === 'tab3'}">Consolidate Summary</a>
@@ -34,66 +31,33 @@
                 <div *ngIf="activeTab === 'tab1'">
                     <div class="company-setup">
                         <div class="container-fluid ">
-                            <div class="row gap-0 gx-2 my-4 align-items-center justify-content-between">
-                                <div class="col col-lg-3 text-end  search-box">
+                         <div class="d-flex flex-wrap justify-content-end align-items-center gap-3 my-3 mt-5">
+                            <!-- Search Box -->
+                            <div>
+                                <input class="form-control" type="text" #searchBox
+                                    placeholder="Enter Name"
+                                    [(ngModel)]="searchInputValue"
+                                    (ngModelChange)="onFilterBoxChange()"
+                                    style="min-width: 180px;" />
+                            </div>
 
+                            <!-- Filter Buttons -->
+                            <div class="d-flex flex-wrap gap-2">
+                                <button class="btn btn-light border-secondary rounded-3" (click)="filterByStatus('P')">Present</button>
+                                <button class="btn btn-light border-secondary rounded-3" (click)="filterByStatus('W')">Weekoff</button>
+                                <button class="btn btn-light border-secondary rounded-3" (click)="filterByStatus('A')">Absent</button>
+                                <button class="btn btn-light border-secondary rounded-3" (click)="clearStatusFilter()">Clear Filter</button>
+                            </div>
 
-                                    <!-- <input class="form-control me-3" type="search" placeholder="Search"
-                                            aria-label="Search"> -->
+                            <!-- Accountant-only Buttons -->
+                            <ng-container *ngIf="role === 'accountant'">
+                                <button class="btn btn-primary text-white rounded-3 ExcelBtn" (click)="downloadTemplate()">Download Template</button>
 
-                                    <input class="py-1 mx-2 form-control me-2" type="text" #searchBox
-                                        placeholder="Enter Name" [(ngModel)]="searchInputValue"
-                                        (ngModelChange)="onFilterBoxChange()" />
-
-                                    <!-- <button class="btn btn-outline-primary" type="submit">
-                                            <i class="bi bi-search"></i>
-                                        </button> -->
-
+                                <div>
+                                <input type="file" #fileInput style="display: none" (change)="onFileChange($event)" accept=".xlsx, .xls" />
+                                <button class="btn btn-primary text-white rounded-3 ExcelBtn" (click)="fileInput.click()">Import Excel</button>
                                 </div>
-                                <div class="col col-lg-5   attendanceButtons">
-
-                                    <button class="btn btn-light border-secondary" style="border-radius: 10px;"
-                                        (click)="filterByStatus('P')">Present</button>
-                                    <button class="btn btn-light border-secondary" style="border-radius: 10px;"
-                                        (click)="filterByStatus('W')">Weekoff</button>
-                                    <!-- <button class="btn btn-light border-secondary" style="border-radius: 10px;" (click)="filterByStatus('Holiday')">Holiday</button>
-                                    <button class="btn btn-light border-secondary" style="border-radius: 10px;" (click)="filterByStatus('OverTime')">OverTime</button> -->
-                                    <button class="btn btn-light border-secondary" style="border-radius: 10px;"
-                                        (click)="filterByStatus('A')">Absent</button>
-                                    <!-- <button class="btn btn-light border-secondary" style="border-radius: 10px;"
-                                    >CurrentMonth</button> -->
-                                    <button class="btn btn-light border-secondary ms-2"
-                                        (click)="clearStatusFilter()">Clear
-                                        Filter</button>
-
-                                </div>
-                                <div class="col col-lg-4 text-center d-flex justify-content-center gap-3">
-                                    <!-- Download Template -->
-                                    <div class="dropdown">
-                                        <button class="btn ExcelBtn text-white dropdown-toggle" type="button"
-                                            data-bs-toggle="dropdown">
-                                            Download Template
-                                        </button>
-                                        <ul class="dropdown-menu">
-                                            <!-- <li><a class="dropdown-item" (click)="downloadTemplate()"> Daliy Attendance
-                                                    </a></li> -->
-                                            <li><a class="dropdown-item" (click)="downloadTemplate()"> Monthly Attendance
-                                            </a></li>
-                                            <!-- <li><a class="dropdown-item" (click)="MonthlyAttendanceTemplate()"> Monthly Attendance
-                                            </a></li> -->
-                                        </ul>
-                                    </div>
-
-                                    <!-- Import Excel -->
-                                    <div>
-                                        <input type="file" #fileInput style="display: none"
-                                            (change)="onFileChange($event)" accept=".xlsx, .xls" />
-                                        <button class="btn ExcelBtn text-white" (click)="fileInput.click()">Import
-                                            Excel</button>
-                                    </div>
-
-
-                                </div>
+                            </ng-container>
 
                             </div>
                             <div class="row gap-4 row-wrap my-3 ">

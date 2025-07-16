@@ -20,7 +20,7 @@ export class DashboardComponent {
   selectedYear: string = '';
   selectedCompany: string = ''; 
   CompanyNames: any = [] ;
-  selectedCompanyId: any = 2;
+  selectedCompanyId: any = 1;
 
   leaveCards = [
     {

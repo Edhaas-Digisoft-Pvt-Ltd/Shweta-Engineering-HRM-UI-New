@@ -5,11 +5,8 @@ import { Router } from '@angular/router';
 @Component({
   selector: 'app-employee-action',
   template: `
-    <div class="d-flex align-items-center  mt-1">
-     <button class="btn btn-sm " >
-        <i class="bi bi-printer"></i>
-      </button>
-      <button class="btn btn-sm  me-2" (click)="viewEmployee()" style="background-color:#C8E3FF"
+    <div class="d-flex align-items-center">
+      <button class="btn btn-sm me-2" (click)="viewEmployee()" style="background-color:#C8E3FF"
       >
         <i class="bi bi-eye"></i>
       </button>
@@ -40,7 +37,7 @@ export class EmployeeActionComponent implements ICellRendererAngularComp {
   }
 
   viewEmployee() {
-    this.router.navigate(['/authPanal/EmployeeDashboard'],{
+    this.router.navigate(['/authPanal/EmployeeInDetail'],{
     queryParams: { id: this.employeID }
   });
     console.log(this.employeID);

@@ -1,65 +1,103 @@
-<div class="company-setup mt-3 ">
-    <div class="container-fluid ">
-        <div class="row gx-3  align-items-center  p-2 rounded-2">
-            <div class="col-6 d-flex flex-column">
-                <!-- <img src="assets/img/Animation - 1743094888648.gif" alt=""> -->
-
-                <h2> <i class="bi bi-currency-rupee me-2"></i> Payroll Process</h2>
-                <p class="ms-5"><span>Payroll</span> / <span style="color: #3674B5;">Payroll Process</span></p>
-            </div>
-            <div class="col-12  mt-2">
-                <div class="row justify-content-end">
-                    <!-- <div class="col-2">
-                        <label for="">Search Employee</label>
-                        <input class="form-control" type="text" name="" id=""
-                            placeholder="Search by employee Name, ID,....">
-                    </div> -->
-                    <div class="col-3">
-                        <label for="">Select Company</label>
-                        <select class="form-select" aria-label="Default select example">
-                            <option selected>--select company--</option>
-                            <option  *ngFor="let Company of companies" value="1">{{Company.name}}</option>
-                        </select>
-                    </div>
-
-                    <div class="col-2">
-                        <label for="">Select year</label>
-                        <select class="form-select" aria-label="Default select example">
-                            <option selected>--select year--</option>
-                            <option value="1">2023</option>
-                            <option value="2">2024</option>
-                            <option value="3">2025</option>
-                        </select>
-                    </div>
-                    <div class="col vector">
-                        <span class="mt-4"></span>
-                    </div>
-                    <div class="col-2">
-                        <label for="">Select Month</label>
-                        <select class="form-select" aria-label="Default select example">
-                            <option selected>--Select Month--</option>
-                            <option value="1">April</option>
-                            <option value="2">May</option>
-                            <option value="3">June</option>
-                        </select>
-                    </div>
-
-
-                </div>
-
-
-                <!-- <input type="text" name="" class="form-control" placeholder="Search Employee" id=""> -->
-            </div>
-        </div>
-
-        <div class="row">
-            <div class="col-12 mt-4">
-                <ag-grid-angular style="width: 100%; height: 60vh;" class="ag-theme-alpine" [rowData]="rowData"
-                    [columnDefs]="columnDefs" [gridOptions]="gridOptions" [pagination]="true"
-                    (selectionChanged)="onSelectionChanged($event)"rowSelection="multiple" [rowMultiSelectWithClick]="true" [defaultColDef]="defaultColDef">
-                </ag-grid-angular>
-            </div>
-        </div>
-        <div class="my-3 text-center"><button class="btn comBtn text-white">Process Payroll </button></div>
+<div class="main-content">
+  <div class="row gx-3 align-items-center p-2 rounded-2 mt-3">
+    <div class="col-12 d-flex">
+      <h2 class="fw-bold"> <i class="bi bi-currency-rupee me-2"></i>Payroll Manage</h2>
     </div>
+  </div>
+
+  <div class="tabs-container m-2">
+    <ul class="nav nav-tabs">
+      <li class="nav-item" (click)="selectTab('tab1')">
+        <a class="nav-link fw-bold" [ngClass]="{ 'active': activeTab === 'tab1' }">Process Payroll</a>
+      </li>
+      <li class="nav-item" (click)="selectTab('tab2')">
+        <a class="nav-link fw-bold" [ngClass]="{ 'active': activeTab === 'tab2' }">Payroll Rejected</a>
+      </li>
+      <li class="nav-item" (click)="selectTab('tab3')">
+        <a class="nav-link fw-bold" [ngClass]="{ 'active': activeTab === 'tab3' }">Payroll Approved</a>
+      </li>
+    </ul>
+
+    <div class="tab-content mt-3">
+      <div *ngIf="activeTab === 'tab1'">
+        <div class="row gx-3 align-items-center p-2 rounded-2">
+          <div class="col-12 mt-2">
+            <div class="row justify-content-end">
+              <div class="col-3">
+                <label>Select Company</label>
+                <select class="form-select" (change)="onCompanyChange($event)">
+                  <option *ngFor="let item of CompanyNames" [value]="item.company_id">
+                    {{ item.company_name }}
+                  </option>
+                </select>
+              </div>
+              <div class="col-2">
+                <label>Year</label>
+                <input class="form-control" [value]="selectedYear" readonly />
+              </div>
+              <div class="col-2">
+                <label>Month</label>
+                <input class="form-control" [value]="getMonthName(selectedMonth)" readonly />
+              </div>
+              <div class="col-auto d-flex align-items-end">
+                <button class="btn btn-primary me-2" (click)="exportExcel()">
+                  <i class="bi bi-file-earmark-excel"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Grid when isProcess is false -->
+<div *ngIf="!isProcess" class="row mt-3">
+  <div class="col-12">
+    <ag-grid-angular style="width: 100%; height: 60vh;" class="ag-theme-alpine"
+      [rowData]="rowData"
+      [columnDefs]="columnDefs"
+      [gridOptions]="gridOptions"
+      [pagination]="true"
+      (gridReady)="onGridReady($event)"
+      rowSelection="multiple"
+      [rowMultiSelectWithClick]="true"
+      [defaultColDef]="defaultColDef">
+    </ag-grid-angular>
+  </div>
+  <div class="text-center mt-3">
+    <button class="btn comBtn text-white" (click)="generatePayroll()">Generate</button>
+  </div>
+</div>
+
+<!-- Grid when isProcess is true -->
+<div *ngIf="isProcess" class="row mt-3">
+  <div class="col-12">
+    <ag-grid-angular style="width: 100%; height: 60vh;" class="ag-theme-alpine"
+      [rowData]="tempRowData"
+      [columnDefs]="tempColumnDefs"
+      [gridOptions]="gridOptions"
+      [pagination]="true"
+      (gridReady)="onTempGridReady($event)"
+      (selectionChanged)="onSelectionChanged($event)"
+      rowSelection="multiple"
+      [rowMultiSelectWithClick]="true"
+      [defaultColDef]="defaultColDef">
+    </ag-grid-angular>
+  </div>
+  <div class="text-center mt-3">
+    <button class="btn comBtn text-white" (click)="processPayroll()">Process Payroll</button>
+  </div>
+</div>
+
+      </div>
+
+<input type="file" #fileInput style="display: none" (change)="onFileChange($event)" accept=".xlsx, .xls" />
+
+
+      <div *ngIf="activeTab === 'tab2'">
+        <app-payroll-process-rejected></app-payroll-process-rejected>
+      </div>
+      <div *ngIf="activeTab === 'tab3'">
+        <app-payroll-process-approved></app-payroll-process-approved>
+      </div>
+    </div>
+  </div>
 </div>
