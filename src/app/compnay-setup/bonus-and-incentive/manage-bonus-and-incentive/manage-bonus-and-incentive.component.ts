@@ -1,60 +1,178 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { FormGroup, FormBuilder, Validators } from '@angular/forms';
 import { ColDef } from 'ag-grid-community';
-
+import { ManageBonusIncentiveBtnComponent } from './manage-bonus-incentive-btn/manage-bonus-incentive-btn.component';
 @Component({
   selector: 'app-manage-bonus-and-incentive',
   templateUrl: './manage-bonus-and-incentive.component.html',
   styleUrls: ['./manage-bonus-and-incentive.component.css'],
 })
-export class ManageBonusAndIncentiveComponent {
+export class ManageBonusAndIncentiveComponent implements OnInit {
   // columnDefs: ColDef[] = [];
+  addForm : any;
+  editForm  : any;
+  gridApi: any;
+  selectedRow: any;
+  constructor(private fb: FormBuilder) {
+     this.addForm = this.fb.group({
+      companyId: [
+        '',
+        [
+          Validators.required
+        ],
+      ],
+      employeeName: [
+        '',
+        [
+          Validators.required
+        ],
+      ],
+      date: [
+        '',
+        [
+          Validators.required
+        ],
+      ],
+      bonusAmt: [
+        '',
+        [
+          Validators.required
+        ],
+      ],
+      incentiveAmt: [
+        '',
+        [
+          Validators.required
+        ],
+      ],
+    });
+    this.editForm = this.fb.group({
+      companyId: [
+        '',
+        [
+          Validators.required
+        ],
+      ],
+      employeeName: [
+        '',
+        [
+          Validators.required
+        ],
+      ],
+      date: [
+        '',
+        [
+          Validators.required
+        ],
+      ],
+      bonusAmt: [
+        '',
+        [
+          Validators.required
+        ],
+      ],
+      incentiveAmt: [
+        '',
+        [
+          Validators.required
+        ],
+      ],
+    });
+  }
+  ngOnInit(): void {
 
+  }
   columnDefs: ColDef[] = [
-    { headerName: 'ID', field: 'id', sortable: true, filter: true },
-     {
+    {
       headerName: 'Employee Name',
-      field: 'name',
+      field: 'employeeName',
       sortable: true,
       filter: true,
     },
-    { headerName: 'Date', field: 'date', sortable: true, filter: true },
+    {
+      headerName: 'Date',
+      field: 'date',
+      sortable: true,
+      filter: true,
+      maxWidth: 150,
+    },
+    {
+      headerName: 'Bonus Amount',
+      field: 'bonusAmt',
+      sortable: true,
+      filter: true,
+      maxWidth: 200,
+    },
+    {
+      headerName: 'incentive Amount',
+      field: 'incentiveAmt',
+      sortable: true,
+      filter: true,
+      maxWidth: 200,
+    },
+
     {
       headerName: 'Status',
       field: 'status',
       sortable: true,
       filter: true,
       cellRenderer: this.statusButtonRenderer,
+      maxWidth: 150,
+    },
+    {
+      headerName: 'Created On',
+      field: 'createdOn',
+      sortable: true,
+      filter: true,
+      maxWidth: 200,
     },
     {
       headerName: 'Actions',
-      cellStyle: { border: '1px solid #ddd' },
-
-      cellRenderer: (params: any) => {
-        return `<button type="button" class="btn btn-outline-dark" data-bs-toggle="modal" data-bs-target="#advanceRequestModal">
-  <i class="bi bi-pencil"></i>
-</button>`;
+      cellRenderer: ManageBonusIncentiveBtnComponent,
+      cellRendererParams: {
+        onEdit: this.onEdit.bind(this),
+        onDelete: this.onDelete.bind(this),
       },
     },
   ];
-  rowData = [
-    {
-      id: 'EMP001',
-      date: '2025-05-01',
-      name: 'John Doe',
-      company: 'Company A',
-      department: 'Finance',
-      role: 'Accountant',
-      amount: 50000,
-      tenure: '6 months',
-      status: 'Approved',
-    },
+  // rowData = [
+  //   {
+  //     name: 'John Doe',
+  //     date: '2025-05-01',
+  //     bonusAmt: '123456',
+  //     incentiveAmt: '123456',
+  //     status: 'Approved',
+  //     createdOn: '2025-05-01',
+  //   },
+  // ];
+  rowData: any[] = [];
+  //   gridApiActive: any;
+  //  onGridReady(params: { api: any }) {
+  //     this.gridApiActive = params.api;
+  //   }
 
-  ];
-  gridApiActive: any;
- onGridReady(params: { api: any }) {
-    this.gridApiActive = params.api;
+   onGridReady(params: any) {
+    this.gridApi = params.api;
   }
+
+  frameworkComponents = {
+    // buttonCellRenderer: CreateModuleBtnComponent,
+  };
+
+
+  defaultColDef: ColDef = {
+    sortable: false,
+
+    flex: 1,
+    resizable: true,
+  };
+  gridOptions = {
+    rowHeight: 45,
+    rowClass: 'custom-row-class',
+    pagination: true,
+    paginationPageSize: 10,
+    paginationPageSizeSelector: [10, 50, 100],
+  };
   statusButtonRenderer(params: any) {
     const status = params.value;
     const button = document.createElement('button');
@@ -97,5 +215,82 @@ export class ManageBonusAndIncentiveComponent {
 
   updateStatus(data: any) {
     alert('update');
+  }
+
+  comapnyName = [
+    {
+      name: 'Hrishikesh',
+      value: 'hrishikesh',
+    },
+    {
+      name: 'Onkar',
+      value: 'onkar',
+    },
+    {
+      name: 'Sonal',
+      value: 'sonal',
+    },
+  ];
+  employeeName = [
+    {
+      name: 'Hrishikesh',
+      value: 'hrishikesh',
+    },
+    {
+      name: 'Onkar',
+      value: 'onkar',
+    },
+    {
+      name: 'Sonal',
+      value: 'sonal',
+    },
+  ];
+
+   addData() {
+    if (this.addForm.invalid) {
+      alert('Please fill all details to proceed!');
+      return;
+    }
+    this.rowData.push(this.addForm.value);
+    this.gridApi.setRowData(this.rowData);
+    this.addForm.reset();
+    const modal = (window as any).bootstrap.Modal.getInstance(
+      document.getElementById('BonusAndIncentiveModal')
+    );
+    modal.hide();
+  }
+
+  onEdit(row: any) {
+    this.selectedRow = row;
+    this.editForm.patchValue(row);
+    const modal = new (window as any).bootstrap.Modal(
+      document.getElementById('editModal')
+    );
+    modal.show();
+  }
+
+  onDelete(row: any) {
+    this.rowData = this.rowData.filter((d) => d.id !== row.id);
+    this.gridApi.setRowData(this.rowData);
+  }
+
+  updateData() {
+    if (this.editForm.invalid) {
+      alert('Please fill all details to proceed!');
+      return;
+    }
+    const index = this.rowData.findIndex((d) => d.id === this.selectedRow.id);
+    if (index !== -1) {
+      this.rowData[index] = {
+        ...this.selectedRow,
+        ...this.editForm.getRawValue(),
+      };
+      this.gridApi.setRowData(this.rowData);
+    }
+
+    const modal = (window as any).bootstrap.Modal.getInstance(
+      document.getElementById('editModal')
+    );
+    modal.hide();
   }
 }

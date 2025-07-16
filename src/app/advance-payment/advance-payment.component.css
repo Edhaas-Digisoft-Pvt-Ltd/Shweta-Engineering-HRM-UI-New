@@ -73,8 +73,8 @@ label{
 
   .modal-header .btn-close {
     color: white;
-    filter: invert(1); 
-    background-color: transparent; 
+    filter: invert(1);
+    background-color: transparent;
   }
   a.nav-link.fw-bold.active::after {
     position: absolute;
@@ -131,7 +131,7 @@ label{
     .main-content{
         padding:15px 0px;
     }
-    
+
     .bg-component{
         width: 70% !important;
         margin-left: 59px;
@@ -141,7 +141,7 @@ label{
     .main-content{
         padding:15px 0px;
     }
-    
+
     .bg-component{
         width: 70% ;
         margin-left: 0px

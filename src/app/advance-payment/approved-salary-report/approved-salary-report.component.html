@@ -22,8 +22,7 @@
         <div>
             <label>Select Month</label><br />
             <div class="d-flex align-items-center w-100">
-                <select class="form-control selectdata3" style="width: 150px;" [(ngModel)]="selectedMonth"
-                   >
+                <select class="form-control selectdata3" style="width: 150px;" [(ngModel)]="selectedMonth">
                     <option *ngFor="let month of months" [ngValue]="month.id">{{ month.value }}</option>
                 </select>
             </div>

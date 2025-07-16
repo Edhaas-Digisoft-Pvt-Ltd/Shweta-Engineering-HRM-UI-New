@@ -36,11 +36,11 @@
     (gridReady)="onGridReady($event)">
   </ag-grid-angular>
 </div> -->
-<div class="container mt-4">
+<!-- <div class="container mt-4">
   <full-calendar [options]="calendarOptions" (click)="handleDateClick($event)"></full-calendar>
 </div>
 
-<!-- Bootstrap Modal -->
+
 <div class="modal fade" id="eventModal" tabindex="-1" aria-labelledby="eventModalLabel" aria-hidden="true">
   <div class="modal-dialog">
     <div class="modal-content">
@@ -63,6 +63,127 @@
       <div class="modal-footer">
         <button type="button" class="btn btn-primary" (click)="addEvent()">Submit</button>
       </div>
+    </div>
+  </div>
+</div> -->
+<div class="col-12 d-flex justify-content-end">
+  <button class="btn createEmployee" data-bs-toggle="modal" data-bs-target="#BonusAndIncentiveModal"
+    style="background-color: #3674b5; color: white;">
+    Add Bounus And Incentive</button>
+</div>
+<div class="modal fade" id="BonusAndIncentiveModal" tabindex="-1" aria-labelledby="BonusAndIncentiveModalLabel"
+  aria-hidden="true">
+  <div class="modal-dialog modal-xl modal-dialog-centered">
+    <div class="modal-content ">
+      <!-- Header -->
+      <div class="modal-header text-white">
+        <h5 class="modal-title" id="advanceSalaryModalLabel">Add Bonus And Incentive</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body p-4">
+        <form action="" [formGroup]="addForm" (ngSubmit)="addData()">
+          <div class="row m-0 p-0">
+            <div class="col">
+              <label for="">Select Company ID</label>
+              <select name="" id="" class="form-control" formControlName="companyId">
+                <option value="">--select company--</option>
+                <option *ngFor="let company of comapnyName" [value]="company.value">{{company.name}}
+                </option>
+              </select>
+            </div>
+            <div class="col">
+              <label for="">Select Employee ID</label>
+              <select name="" id="" class="form-control" formControlName="employeeName">
+                <option value="">--select company--</option>
+                <option *ngFor="let employee of employeeName " [value]="employee.value">
+                  {{employee.name}}</option>
+              </select>
+            </div>
+          </div>
+          <div class="row m-0 p-0 mt-3 ">
+            <div class="col">
+              <label for="">Date</label>
+              <input type="date" class="form-control" formControlName="date">
+            </div>
+            <div class="col">
+              <label for="">Bonus Amount(₹)</label>
+              <input type="text" class="form-control" formControlName="bonusAmt">
+            </div>
+            <div class="col">
+              <label for="">Incentive Amount(₹)</label>
+              <input type="text" class="form-control" formControlName="incentiveAmt">
+            </div>
+          </div>
+          <div class="modal-footer mt-3">
+            <button class="btn" type="submit" style="background-color: #3674b5; color: white;">Add</button>
+          </div>
+        </form>
+      </div>
+
+    </div>
+  </div>
+</div>
+<!-- <div class="container mt-4">
+  <h4>Add New Entry</h4>
+  <form [formGroup]="addForm" (ngSubmit)="addData()" class="row g-2 mb-3">
+    <div class="col-md-2">
+      <input formControlName="id" class="form-control" type="number" placeholder="ID" />
+    </div>
+    <div class="col-md-4">
+      <input formControlName="name" class="form-control" type="text" placeholder="Name" />
+    </div>
+    <div class="col-md-4">
+      <input formControlName="email" class="form-control" type="email" placeholder="Email" />
+    </div>
+    <div class="col-md-2">
+      <button class="btn btn-success w-100" [disabled]="addForm.invalid">Add</button>
+    </div>
+  </form> -->
+
+<ag-grid-angular class="ag-theme-alpine" style="width: 100%; height: 400px;" [rowData]="rowData"
+  [columnDefs]="columnDefs" (gridReady)="onGridReady($event)"></ag-grid-angular>
+
+<!-- Modal for Edit -->
+<div class="modal fade" id="editModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <form action="" [formGroup]="editForm" (ngSubmit)="updateData()">
+        <div class="row m-0 p-0">
+          <div class="col">
+            <label for="">Select Company ID</label>
+            <select name="" id="" class="form-control" formControlName="companyId">
+              <option value="">--select company--</option>
+              <option *ngFor="let company of comapnyName" [value]="company.value">{{company.name}}
+              </option>
+            </select>
+          </div>
+          <div class="col">
+            <label for="">Select Employee ID</label>
+            <select name="" id="" class="form-control" formControlName="employeeName">
+              <option value="">--select company--</option>
+              <option *ngFor="let employee of employeeName " [value]="employee.value">{{employee.name}}
+              </option>
+            </select>
+          </div>
+        </div>
+        <div class="row m-0 p-0 mt-3 ">
+          <div class="col">
+            <label for="">Date</label>
+            <input type="date" class="form-control" formControlName="date">
+          </div>
+          <div class="col">
+            <label for="">Bonus Amount(₹)</label>
+            <input type="text" class="form-control" formControlName="bonusAmt">
+          </div>
+          <div class="col">
+            <label for="">Incentive Amount(₹)</label>
+            <input type="text" class="form-control" formControlName="incentiveAmt">
+          </div>
+        </div>
+        <div class="modal-footer mt-3">
+          <button class="btn" type="submit" style="background-color: #3674b5; color: white;">Add</button>
+        </div>
+      </form>
     </div>
   </div>
 </div>

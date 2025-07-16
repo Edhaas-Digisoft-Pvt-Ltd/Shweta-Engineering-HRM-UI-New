@@ -64,9 +64,32 @@
     background-color: #06113C;
 }
 
+.navbarList {
+    max-height: 500px;
+    overflow: auto;
+    margin-bottom: 10px;
+    /* padding: 0.5rem 0.5rem; */
+    /* box-shadow: rgba(0, 0, 0, 0.16) 0px 1px 4px; */
+    /* background-color: #24588f; */
+    border-radius: 10px;
+    scrollbar-color: #3674b5 #1c5694;
+  scrollbar-width: thin;
+}
+
 .navbar-nav {
     width: 100%;
     margin-top: 0;
+
+}
+.login-Details i{
+    font-size:1.5rem;
+}
+.logOutbtn {
+    outline: 1px solid rgb(255, 255, 255);
+    /* width: 100%; */
+}
+.logOutbtn:hover{
+    background-color: #003b7a;
 }
 
 

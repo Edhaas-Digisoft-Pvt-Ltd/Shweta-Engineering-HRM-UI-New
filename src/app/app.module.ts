@@ -52,6 +52,7 @@ import { CreateEmployeeComponent } from './employee/create-employee/create-emplo
 import { BonusAndIncentiveComponent } from './compnay-setup/bonus-and-incentive/bonus-and-incentive.component';
 import { ManageBonusAndIncentiveComponent } from './compnay-setup/bonus-and-incentive/manage-bonus-and-incentive/manage-bonus-and-incentive.component';
 import { BonuseAndInsentiveReportsComponent } from './compnay-setup/bonus-and-incentive/bonuse-and-insentive-reports/bonuse-and-insentive-reports.component';
+import { ManageBonusIncentiveBtnComponent } from './compnay-setup/bonus-and-incentive/manage-bonus-and-incentive/manage-bonus-incentive-btn/manage-bonus-incentive-btn.component';
 
 
 // FullCalendarModule.registerPlugins([dayGridPlugin]);
@@ -102,6 +103,7 @@ import { BonuseAndInsentiveReportsComponent } from './compnay-setup/bonus-and-in
      BonusAndIncentiveComponent,
      ManageBonusAndIncentiveComponent,
      BonuseAndInsentiveReportsComponent,
+     ManageBonusIncentiveBtnComponent,
 
   ],
   imports: [

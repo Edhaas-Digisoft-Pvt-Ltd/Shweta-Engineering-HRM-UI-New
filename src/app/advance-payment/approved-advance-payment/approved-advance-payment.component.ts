@@ -74,8 +74,8 @@ export class ApprovedAdvancePaymentComponent {
   }
 
   getAllApprovedRequest() {
-    this.service.post('all/approvedrequest', { 
-      // company_id: this.selectedCompanyId, 
+    this.service.post('all/approvedrequest', {
+      // company_id: this.selectedCompanyId,
       // year: this.selectedYear,
       // month: this.selectedMonth
     }).subscribe((res: any) => {
@@ -94,7 +94,7 @@ export class ApprovedAdvancePaymentComponent {
             tenure : item.tenure,
             adv_pay_id: item.adv_pay_id
           }));
-        } 
+        }
       } catch (error) {
         console.log(error);
       }
@@ -183,7 +183,7 @@ export class ApprovedAdvancePaymentComponent {
         field: 'emp_name',
         sortable: true,
         filter: true,
-        maxWidth:180
+        
       },
       { headerName: 'Apply Date', field: 'apply_date', sortable: true, filter: true, maxWidth:140 },
       {
@@ -207,22 +207,22 @@ export class ApprovedAdvancePaymentComponent {
         filter: true,
         maxWidth:100
       },
-      {
-        headerName: 'Updated On',
-        field: 'updated_on',
-        sortable: true,
-        filter: true,
-        maxWidth:140
-      },
-        {
-        headerName: 'Deducted On',
-        field: 'deducted_on',
-        sortable: true,
-        filter: true,
-        maxWidth:150
-      },
-      { headerName: 'Status', field: 'status', cellRenderer: this.statusButtonRenderer, sortable: true, filter: true,  maxWidth:140},
-      { headerName: 'Tenure', field: 'tenure', sortable: true, filter: true,  maxWidth:110},
+      // {
+      //   headerName: 'Updated On',
+      //   field: 'updated_on',
+      //   sortable: true,
+      //   filter: true,
+      //   maxWidth:140
+      // },
+      //   {
+      //   headerName: 'Deducted On',
+      //   field: 'deducted_on',
+      //   sortable: true,
+      //   filter: true,
+      //   maxWidth:150
+      // },
+      // { headerName: 'Status', field: 'status', cellRenderer: this.statusButtonRenderer, sortable: true, filter: true,  maxWidth:140},
+      // { headerName: 'Tenure', field: 'tenure', sortable: true, filter: true,  maxWidth:110},
     ];
       this.columnDefs.push({
         headerName: 'Actions',
@@ -235,7 +235,7 @@ export class ApprovedAdvancePaymentComponent {
         },
         onCellClicked: (event: any) => {
           this.getSingleApprovedData(event.data.adv_pay_id);
-        },  
+        },
       });
   }
 
@@ -258,12 +258,12 @@ export class ApprovedAdvancePaymentComponent {
             installmentAmount: singleApprovedData?.emi,
             remainingBalance: singleApprovedData?.remaining_balance,
             advanceAmount: singleApprovedData?.advance_amount
-          } 
-        this.displayApprovedData.patchValue(this.approvedData);  
+          }
+        this.displayApprovedData.patchValue(this.approvedData);
       }
     })
   }
-  
+
 calculatePaidAmount(): number {
   const total = +this.displayApprovedData.get('amount')?.value || 0;
   const remaining = +this.displayApprovedData.get('remainingBalance')?.value || 0;

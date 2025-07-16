@@ -23,14 +23,14 @@ export class LoginComponent {
     private service: HrmserviceService
   ) {
     this.loginForm = new FormGroup({
-      email: new FormControl('smp@gmail.com', [
+      email: new FormControl('sm1982@gmail.com', [
         Validators.required,
         Validators.email,
         Validators.pattern(
           /^[a-zA-Z0-9._%+-]+@[a-zA-Z]+\.[a-zA-Z]{2,}(?:\.[a-zA-Z]{2,})?$/
         ),
       ]), // Email validation
-      password: new FormControl('7057063094', [
+      password: new FormControl('942336936', [
         Validators.required,
         Validators.minLength(6),
         Validators.pattern(this.NoWhitespaceRegExp),
@@ -69,7 +69,7 @@ export class LoginComponent {
         this.toastr.success('Login successful !!!');
         this.logindata = res.data
         sessionStorage.setItem('roleName', this.logindata.employe_role)
-        sessionStorage.setItem('empName', this.logindata.employe_id)
+        sessionStorage.setItem('empName', this.logindata.employe_name)
         const role = this.loginForm.value.role;
         sessionStorage.setItem("AUTH", res.token); // Session storage for Auth
         this.service.setRole(role); // Session storage for role

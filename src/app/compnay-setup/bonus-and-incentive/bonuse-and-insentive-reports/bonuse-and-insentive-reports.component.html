@@ -1,1 +1,110 @@
-<p>bonuse-and-insentive-reports works!</p>
+<div class="row gap-2 mb-0 align-items-center justify-content-end">
+    <div class="col col-lg-4 d-flex align-items-end search-box text-start">
+        <input class="py-1 mx-2 form-control me-2" type="text" #searchBox placeholder="Search Employee code"
+            [(ngModel)]="searchValue" value=""/>
+
+          <!-- <div class="w-50 text-start">
+            <label class="fw-bold">Select Employee </label>
+            <br>
+            <select class="form-select">
+              <option *ngFor="let item of employees" [value]="item.employee_id">{{ item.employee_name }}</option>
+            </select>
+          </div> -->
+        <div>
+            <label>Select Year</label><br />
+            <select class="form-control selectdata" style="width: 150px;" [(ngModel)]="selectedYear">
+                <option *ngFor="let year of years" [value]="year">{{ year }}</option>
+            </select>
+        </div>
+    </div>
+    <span class="devider p-0"></span>
+    <div class="col col-lg-4 d-flex gap-2 attendanceButtons text-start align-items-end">
+        <div>
+            <label>Select Month</label><br />
+            <div class="d-flex align-items-center w-100">
+                <select class="form-control selectdata3" style="width: 150px;" [(ngModel)]="selectedMonth"
+                   >
+                    <option *ngFor="let month of months" [ngValue]="month.id">{{ month.value }}</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="flex-grow-1">
+            <button class="btn btn-primary exportExcelBtn w-75  float-end" (click)="searchEmployeeAdvanceSalary()">
+                Search
+            </button>
+        </div>
+    </div>
+</div>
+
+<div class="row gap-4 row-wrap my-3 ">
+  <div class="container  ">
+    <div class="row g-3">
+      <div class="col-12">
+        <ag-grid-angular class="ag-theme-alpine" style="width: 100%; height: 300px;" [rowData]="rowData"
+          [columnDefs]="columnDefs" [defaultColDef]="defaultColDef">
+        </ag-grid-angular>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="modal fade" id="salaryReport" tabindex="-1" aria-labelledby="advanceSalaryModalLabel"
+  aria-hidden="true">
+  <div class="modal-dialog modal-xl modal-dialog-centered">
+    <div class="modal-content">
+
+      <div class="modal-header  text-white">
+        <h5 class="modal-title" id="advanceSalaryModalLabel">Salary Report</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+
+      <form [formGroup]="displayApprovedData">
+      <div class="modal-body p-4">
+
+        <div class="row mb-3">
+          <div class="col-md-2"><strong>ID</strong><input class="form-control" formControlName="id" value="id"></div>
+          <div class="col-md-3"><strong>Employee Name</strong><input class="form-control" formControlName="employeeName"></div>
+          <div class="col-md-2"><strong>Company</strong><input class="form-control" formControlName="company"></div>
+          <div class="col-md-3"><strong>Department</strong><input class="form-control" formControlName="department"></div>
+          <div class="col-md-2"><strong>Role</strong><input class="form-control" formControlName="role"></div>
+        </div>
+
+        <div class="row mb-3">
+          <div class="col-md-2"><strong>Request Date</strong><input class="form-control" formControlName="requestData"></div>
+          <div class="col-md-2"><strong>Tenure</strong><input class="form-control" formControlName="tenure"></div>
+          <div class="col-md-2"><strong>Amount (in ₹)</strong><input class="form-control" formControlName="amount"></div>
+          <div class="col-md-2"><strong>status</strong><input class="form-control" formControlName="status"></div>
+        </div>
+
+        <div class="mb-3">
+          <label class="fw-bold">Loan Amount</label>
+          <div class="d-flex justify-content-between">
+            <span class="fw-bold text-dark">₹ {{ displayApprovedData.get('advanceAmount')?.value || '0' }}</span>
+            <span class="text-muted small">
+              Remaining<br>₹ {{ displayApprovedData.get('remainingBalance')?.value || '0' }}
+            </span>
+          </div>
+          <div class="progress mt-2" style="height: 12px;">
+            <div class="progress-bar bg-success" role="progressbar" style="width: 50%;" aria-valuenow="50"
+              aria-valuemin="0" aria-valuemax="100">
+              <span class="visually-hidden">Paid</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="row mb-3">
+          <div class="col-md-3"><strong>First Installment Date</strong><input class="form-control" formControlName="firstInstallmentDate">
+          </div>
+          <div class="col-md-3"><strong>Installment End Date</strong><input class="form-control" formControlName="installmentEndDate"></div>
+          <div class="col-md-3"><strong>Last Installment Paid</strong><input class="form-control" formControlName="lastInstallmentDate">
+          </div>
+          <div class="col-md-3"><strong>Next Installment Due Date</strong><input class="form-control" formControlName="installmentDueDate">
+          </div>
+        </div>
+      </div>
+      </form>
+    </div>
+  </div>
+</div>

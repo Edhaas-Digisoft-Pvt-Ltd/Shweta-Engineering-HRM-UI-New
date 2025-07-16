@@ -61,15 +61,15 @@
       <div class="col-12">
 
         <!-- Day View Grid -->
-        <ag-grid-angular class="ag-theme-alpine" style="width: 100%; height: 300px;" [rowData]="rowData" [gridOptions]="gridOptions" [pagination]="true"
+        <ag-grid-angular class="ag-theme-alpine" style="width: 100%; height: 60vh;" [rowData]="rowData" [gridOptions]="gridOptions" [pagination]="true"
           [columnDefs]="columnDefs" [defaultColDef]="defaultColDef">
         </ag-grid-angular>
 
 
         <!-- Month View Grid -->
-        <ag-grid-angular *ngIf="viewMode === 'Month'" class="ag-theme-alpine" [rowData]="monthlyRowData"
+        <!-- <ag-grid-angular *ngIf="viewMode === 'Month'" class="ag-theme-alpine" [rowData]="monthlyRowData"
           [columnDefs]="monthlyColumnDefs" rowSelection="multiple" style="width: 100%; height: 60vh;">
-        </ag-grid-angular>
+        </ag-grid-angular> -->
 
 
       </div>
@@ -142,13 +142,6 @@
 
       </div>
       </form>
-
-      <!-- modal footer -->
-      <!-- <div class="modal-footer">
-        <button type="button" class="btn approveBtn" (click)="updateStatus('Approved')">Approve Leave</button>
-        <button type="button" class="btn declineBtn" (click)="updateStatus('Rejected')">Decline Leave</button>
-        <button type="button" class="btn btn-outline-dark fw-semobild " data-bs-dismiss="modal">Cancel</button>
-      </div> -->
     </div>
   </div>
 </div>
