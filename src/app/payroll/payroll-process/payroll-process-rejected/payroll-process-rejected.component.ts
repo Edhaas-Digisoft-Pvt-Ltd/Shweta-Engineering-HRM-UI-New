@@ -114,18 +114,18 @@ export class PayrollProcessRejectedComponent {
       try {
         if (res.status === 'success') {
           this.rowData = res.data.map((item: any) => ({
-            employeeName: item.emp_name,
-            department: item.department_name,
+            employee_code: item.employee_code,
+            emp_name: item.emp_name,
+            department: item.department_name, 
             role: item.role_name,
             presentDays: item.present_days,
             absentDays: item.absent_days,
             hours: item.total_hours,
             overTime: item.total_overtime,
             employe_id: item.employe_id,
-            employee_code: item.employee_code,
-            bonus_incentive: item.bonus,
-            advance_salary: item.advance_salary,
-            net_salary: item.net_salary
+            bonus_incentive_amount: item.bonus_incentive_amount ? `₹${item.bonus_incentive_amount}` : '-',
+            advance_salary: item.advance_salary ? `₹${item.advance_salary}` : '-',
+            net_salary: item.net_salary ? `₹${item.net_salary}` : '-',
           }));
         }
       } catch (error) {
@@ -168,8 +168,8 @@ export class PayrollProcessRejectedComponent {
         headerCheckboxSelection: true,
       },
       {
-        headerName: 'Emp Name',
-        field: 'employeeName',
+        headerName: 'Emp Code',
+        field: 'employee_code',
         sortable: true,
         filter: true,
         minWidth: 150,
@@ -182,7 +182,7 @@ export class PayrollProcessRejectedComponent {
         minWidth: 140,
       },
       {
-        headerName: 'PD',
+        headerName: 'P',
         field: 'presentDays',
         sortable: true,
         filter: true,
@@ -196,6 +196,13 @@ export class PayrollProcessRejectedComponent {
         minWidth: 80,
       },
       {
+        headerName: 'OT(hrs)',
+        field: 'overTime',
+        sortable: true,
+        filter: true,
+        minWidth: 100,
+      },
+      {
         headerName: 'hours',
         field: 'hours',
         sortable: true,
@@ -203,16 +210,8 @@ export class PayrollProcessRejectedComponent {
         minWidth: 100,
       },
       {
-        headerName: 'OT',
-        field: 'overTime',
-        sortable: true,
-        filter: true,
-        minWidth: 100,
-      },
-
-      {
-        headerName: 'Bonus & Incentive',
-        field: 'bonus_incentive',
+        headerName: 'B & I',
+        field: 'bonus_incentive_amount',
         sortable: true,
         filter: true,
         minWidth: 120,

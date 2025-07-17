@@ -91,14 +91,17 @@ export class PayrollApprovedComponent {
         try {
           if (res.status === 'success' && res.data && res.data.length > 0) {
             this.rowData = res.data.map((item: any) => ({
-              employee_code: item.employee_code,
-              employeeName: item.emp_name,
-              grossAmount: item.gross_salary,
-              overTime: item.total_overtime,
-              netAmount: item.net_salary,
-              deduction: item.deduction,
-              employe_id: item.employe_id,
-              payroll_status: item.payroll_status
+            employee_code: item.employee_code,
+            department: item.department_name,
+            role: item.role_name,
+            presentDays: item.present_days,
+            absentDays: item.absent_days,
+            hours: item.total_hours,
+            overTime: item.total_overtime + ' hrs',
+            employe_id: item.employe_id,
+            bonus_incentive_amount: item.bonus_incentive_amount ? `₹ ${item.bonus_incentive_amount}` : '-',
+            advance_salary: item.advance_salary ? `₹ ${item.advance_salary}` : '-',
+            net_salary: item.net_salary  ? `₹ ${item.net_salary}` : '-',
             }));
           } else {
             this.rowData = [];
@@ -116,50 +119,69 @@ export class PayrollApprovedComponent {
   }
 
   columnDefs: ColDef[] = [
-    {
-      headerName: 'Employee Code',
-      field: 'employee_code',
-      sortable: true,
-      filter: true,
-    },
-    {
-      headerName: 'Employee Name',
-      field: 'employeeName',
-      sortable: true,
-      filter: true,
-    },
-
-    {
-      headerName: 'Gross Amount',
-      field: 'grossAmount',
-      sortable: true,
-      filter: true,
-    },
-    {
-      headerName: 'Over Time',
-      field: 'overTime',
-      sortable: true,
-      filter: true,
-    },
-    {
-      headerName: 'Deductions',
-      field: 'deduction',
-      sortable: true,
-      filter: true,
-    },
-    {
-      headerName: 'Net Amount',
-      field: 'netAmount',
-      sortable: true,
-      filter: true,
-    },
-    {
-      headerName: 'Status',
-      field: 'payroll_status',
-      sortable: true,
-      filter: true,
-      cellRenderer: this.statusButtonRenderer,
-    },
+     {
+        headerName: 'Emp Code',
+        field: 'employee_code',
+        sortable: true,
+        filter: true,
+        minWidth: 150,
+      },
+      {
+        headerName: 'Department',
+        field: 'department',
+        sortable: true,
+        filter: true,
+        minWidth: 140,
+      },
+      {
+        headerName: 'P',
+        field: 'presentDays',
+        sortable: true,
+        filter: true,
+        maxWidth: 70,
+      },
+      {
+        headerName: 'A',
+        field: 'absentDays',
+        sortable: true,
+        filter: true,
+        maxWidth: 70,
+      },
+       {
+        headerName: 'OT(hrs)',
+        field: 'overTime',
+        sortable: true,
+        filter: true,
+        minWidth: 100,
+      },
+      {
+        headerName: 'hours',
+        field: 'hours',
+        sortable: true,
+        filter: true,
+        minWidth: 100,
+      },
+      {
+        headerName: 'B & I',
+        field: 'bonus_incentive_amount',
+        sortable: true,
+        filter: true,
+        minWidth: 120,
+      },
+      {
+        headerName: 'Adv Salary',
+        field: 'advance_salary',
+        sortable: true,
+        filter: true,
+        minWidth: 140,
+      },
+      {
+        headerName: 'Net Salary',
+        field: 'net_salary',
+        sortable: true,
+        filter: true,
+        minWidth: 140,
+      },
   ];
 
   statusButtonRenderer(params: any) {

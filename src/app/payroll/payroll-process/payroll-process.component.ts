@@ -60,7 +60,6 @@ export class PayrollProcessComponent {
     this.selectedYear = new Date().getFullYear();
     this.selectedMonth = new Date().getMonth() + 1;
     this.getCompanyNames();
-    this.getPayrollProcess();
     this.initializeColumns();
     this.initializeColumnsforProcess();
     this.getTempPayroll();
@@ -109,7 +108,7 @@ export class PayrollProcessComponent {
     }).subscribe((res: any) => {
       if (res.status === 'success') {
         this.rowData = res.data.map((item: any) => ({
-          employeeName: item.emp_name,
+          employee_code: item.employee_code,
           department: item.department_name,
           role: item.role_name,
           presentDays: item.present_days,
@@ -134,26 +133,28 @@ export class PayrollProcessComponent {
         if (res.status === 'success' && res.data && res.data.length > 0) {
           this.isProcess = true;
           this.tempRowData = res.data.map((item: any) => ({
-            emp_name: item.emp_name,
+            employee_code: item.employee_code,
             department_name: item.department_name,
             present_days: item.present_days,
             absent_days: item.absent_days,
             total_hours: item.total_hours,
             total_overtime: item.total_overtime ?? '-',
             employe_id: item.employe_id,
-            bonus_incentive_amount: item.bonus_incentive_amount ?? '-',
-            advance_salary: item.advance_salary ?? '-',
-            net_salary: item.net_salary,
+            bonus_incentive_amount: item.bonus_incentive_amount ? `₹ ${item.bonus_incentive_amount}` : '-',
+            advance_salary: item.advance_salary ? `₹ ${item.advance_salary}` : '-',
+            net_salary: item.net_salary ? `₹ ${item.net_salary}` : '-',
           }));
         }
         else {
           this.isProcess = false;
           this.tempRowData = [];
+          this.getPayrollProcess();
         }
       },
       error: () => {
         this.isProcess = false;
         this.tempRowData = [];
+        this.getPayrollProcess();
       }
     });
   }
@@ -214,7 +215,7 @@ export class PayrollProcessComponent {
     this.service.post('craete/payroll', payload).subscribe((res: any) => {
       if(res.status == 'success'){
         this.toastr.success('Payroll processed successfully.');
-        this.getPayrollProcess();
+        this.getTempPayroll();
       }else {
         this.toastr.error('Something went wrong');
       }
@@ -224,23 +225,23 @@ export class PayrollProcessComponent {
 
   initializeColumns() {
     this.columnDefs = [
-      { headerName: 'Emp Name', field: 'employeeName', sortable: true, filter: true },
+      { headerName: 'Emp Code', field: 'employee_code', sortable: true, filter: true },
       { headerName: 'Department', field: 'department', sortable: true, filter: true },
       { headerName: 'Role', field: 'role', sortable: true, filter: true },
       { headerName: 'Present Days', field: 'presentDays', sortable: true, filter: true },
-      { headerName: 'Absent', field: 'absentDays', sortable: true, filter: true },
-      { headerName: 'hours', field: 'hours', sortable: true, filter: true },
-      { headerName: 'OT', field: 'overTime', sortable: true, filter: true },
+      { headerName: 'Absent', field: 'absentDays', sortable: true, filter: true, },
+      { headerName: 'hours', field: 'hours', sortable: true, filter: true, },
+      { headerName: 'OT(hrs)', field: 'overTime', sortable: true, filter: true, },
     ];
   }
 
   initializeColumnsforProcess() {
     this.tempColumnDefs = [
-      { headerName: 'Emp Name', field: 'emp_name', sortable: true, filter: true },
-      { headerName: 'Department', field: 'department_name', sortable: true, filter: true },
+      { headerName: 'Emp Code', field: 'employee_code', sortable: true, filter: true, minWidth: 160 },
+      { headerName: 'Department', field: 'department_name', sortable: true, filter: true, minWidth: 140 },
       { headerName: 'P', field: 'present_days', sortable: true, filter: true },
       { headerName: 'A', field: 'absent_days', sortable: true, filter: true },
-      { headerName: 'OT', field: 'total_overtime', sortable: true, filter: true },
+      { headerName: 'OT(hrs)', field: 'total_overtime', sortable: true, filter: true },
       { headerName: 'Hrs', field: 'total_hours', sortable: true, filter: true },
       { headerName: 'B&I', field: 'bonus_incentive_amount', sortable: true, filter: true },
       { headerName: 'Adv Salary', field: 'advance_salary', sortable: true, filter: true },
@@ -300,10 +301,10 @@ export class PayrollProcessComponent {
     const formData = new FormData();
     formData.append('upload_file', file);
 
-    this.service.post('import-attendance', formData).subscribe((res: any) => {
+    this.service.post('import/attendance', formData).subscribe((res: any) => {
       if (res.status === 'success') {
         this.toastr.success(res.data);
-        this.getPayrollProcess();
+        this.getTempPayroll();
       } else {
         console.log(res.error);
       }

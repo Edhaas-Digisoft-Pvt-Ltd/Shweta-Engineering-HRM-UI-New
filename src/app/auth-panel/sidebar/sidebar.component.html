@@ -143,7 +143,7 @@
                                             Leave Config
                                         </a>
                                     </li>
-                                    <li [routerLink]="['BonusAndIncentive']" class="nav-item" *ngIf="role === 'accountant'">
+                                    <li [routerLink]="['BonusAndIncentive']" class="nav-item" *ngIf="role === 'admin' || role === 'accountant'">
                                         <a type="button" routerLinkActive="active-link"
                                             (click)="closeAccordion()" class="d-flex align-items-center">
                                             Bonus And Incentive

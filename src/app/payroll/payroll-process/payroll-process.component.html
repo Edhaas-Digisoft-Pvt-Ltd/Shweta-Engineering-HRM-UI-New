@@ -31,14 +31,21 @@
                   </option>
                 </select>
               </div>
+
               <div class="col-2">
                 <label>Year</label>
                 <input class="form-control" [value]="selectedYear" readonly />
               </div>
+
               <div class="col-2">
                 <label>Month</label>
                 <input class="form-control" [value]="getMonthName(selectedMonth)" readonly />
               </div>
+
+              <div *ngIf="!isProcess" class="col-1 d-flex align-items-end">
+                <button class="btn comBtn text-white" (click)="generatePayroll()">Generate</button>
+              </div>
+
               <div class="col-auto d-flex align-items-end">
                 <button class="btn exportExcelBtn me-2" (click)="exportExcel()">
                   <i class="bi bi-file-earmark-excel"></i>
@@ -49,47 +56,33 @@
         </div>
 
         <!-- Grid when isProcess is false -->
-<div *ngIf="!isProcess" class="row mt-3">
-  <div class="col-12">
-    <ag-grid-angular style="width: 100%; height: 60vh;" class="ag-theme-alpine"
-      [rowData]="rowData"
-      [columnDefs]="columnDefs"
-      [gridOptions]="gridOptions"
-      [pagination]="true"
-      (gridReady)="onGridReady($event)"
-      rowSelection="multiple"
-      [rowMultiSelectWithClick]="true"
-      [defaultColDef]="defaultColDef">
-    </ag-grid-angular>
-  </div>
-  <div class="text-center mt-3">
-    <button class="btn comBtn text-white" (click)="generatePayroll()">Generate</button>
-  </div>
-</div>
+        <div *ngIf="!isProcess" class="row mt-3">
+          <div class="col-12">
+            <ag-grid-angular style="width: 100%; height: 60vh;" class="ag-theme-alpine" [rowData]="rowData"
+              [columnDefs]="columnDefs" [gridOptions]="gridOptions" [pagination]="true"
+              (gridReady)="onGridReady($event)" rowSelection="multiple" [rowMultiSelectWithClick]="true"
+              [defaultColDef]="defaultColDef">
+            </ag-grid-angular>
+          </div>
+        </div>
 
-<!-- Grid when isProcess is true -->
-<div *ngIf="isProcess" class="row mt-3">
-  <div class="col-12">
-    <ag-grid-angular style="width: 100%; height: 60vh;" class="ag-theme-alpine"
-      [rowData]="tempRowData"
-      [columnDefs]="tempColumnDefs"
-      [gridOptions]="gridOptions"
-      [pagination]="true"
-      (gridReady)="onTempGridReady($event)"
-      (selectionChanged)="onSelectionChanged($event)"
-      rowSelection="multiple"
-      [rowMultiSelectWithClick]="true"
-      [defaultColDef]="defaultColDef">
-    </ag-grid-angular>
-  </div>
-  <div class="text-center mt-3">
-    <button class="btn comBtn text-white" (click)="processPayroll()">Process Payroll</button>
-  </div>
-</div>
+        <!-- Grid when isProcess is true -->
+        <div *ngIf="isProcess" class="row mt-3">
+          <div class="col-12">
+            <ag-grid-angular style="width: 100%; height: 60vh;" class="ag-theme-alpine" [rowData]="tempRowData"
+              [columnDefs]="tempColumnDefs" [gridOptions]="gridOptions" [pagination]="true"
+              (gridReady)="onTempGridReady($event)" (selectionChanged)="onSelectionChanged($event)"
+              rowSelection="multiple" [rowMultiSelectWithClick]="true" [defaultColDef]="defaultColDef">
+            </ag-grid-angular>
+          </div>
+          <div class="text-center mt-3">
+            <button class="btn btn-success text-white" (click)="processPayroll()">Process Payroll</button>
+          </div>
+        </div>
 
       </div>
 
-<input type="file" #fileInput style="display: none" (change)="onFileChange($event)" accept=".xlsx, .xls" />
+      <input type="file" #fileInput style="display: none" (change)="onFileChange($event)" accept=".xlsx, .xls" />
 
 
       <div *ngIf="activeTab === 'tab2'">

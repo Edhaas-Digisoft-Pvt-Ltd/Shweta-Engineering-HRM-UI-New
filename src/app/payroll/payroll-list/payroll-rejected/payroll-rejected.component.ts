@@ -92,12 +92,16 @@ export class PayrollRejectedComponent {
           if (res.status === 'success' && res.data && res.data.length > 0) {
             this.rowData = res.data.map((item: any) => ({
               employee_code: item.employee_code,
-              employeeName: item.emp_name,
+              department: item.department_name,
+              role: item.role_name,
+              presentDays: item.present_days,
+              absentDays: item.absent_days,
+              hours: item.total_hours,
               overTime: item.total_overtime,
-              bonus_Incentive: item.bonus_incentive_amount,
-              advance_salary: item.advance_salary,
-              netAmount: item.net_salary,
               employe_id: item.employe_id,
+              bonus_incentive_amount: item.bonus_incentive_amount ? `₹${item.bonus_incentive_amount}` : '-',
+              advance_salary: item.advance_salary ? `₹${item.advance_salary}` : '-',
+              net_salary: item.net_salary ? `₹${item.net_salary}` : '-',
             }));
           } else {
             this.rowData = [];
@@ -115,42 +119,69 @@ export class PayrollRejectedComponent {
   }
 
   columnDefs: ColDef[] = [
-    {
-      headerName: 'Employee Code',
-      field: 'employee_code',
-      sortable: true,
-      filter: true,
-    },
-    {
-      headerName: 'Employee Name',
-      field: 'employeeName',
-      sortable: true,
-      filter: true,
-    },
-    {
-      headerName: 'Over Time',
-      field: 'overTime',
-      sortable: true,
-      filter: true,
-    },
-    {
-      headerName: 'Bonus & incentive',
-      field: 'bonus_Incentive',
-      sortable: true,
-      filter: true,
-    },
-    {
-      headerName: 'Adv Salary',
-      field: 'advance_salary',
-      sortable: true,
-      filter: true,
-    },
-    {
-      headerName: 'Net Amount',
-      field: 'netAmount',
-      sortable: true,
-      filter: true,
-    },
+      {
+        headerName: 'Emp Code',
+        field: 'employee_code',
+        sortable: true,
+        filter: true,
+        minWidth: 150,
+      },
+      {
+        headerName: 'Department',
+        field: 'department',
+        sortable: true,
+        filter: true,
+        minWidth: 140,
+      },
+      {
+        headerName: 'P',
+        field: 'presentDays',
+        sortable: true,
+        filter: true,
+        minWidth: 80,
+      },
+      {
+        headerName: 'A',
+        field: 'absentDays',
+        sortable: true,
+        filter: true,
+        minWidth: 80,
+      },
+      {
+        headerName: 'OT(hrs)',
+        field: 'overTime',
+        sortable: true,
+        filter: true,
+        minWidth: 100,
+      },
+      {
+        headerName: 'hours',
+        field: 'hours',
+        sortable: true,
+        filter: true,
+        minWidth: 100,
+      },
+      {
+        headerName: 'Bonus & Incentive',
+        field: 'bonus_incentive_amount',
+        sortable: true,
+        filter: true,
+        minWidth: 120,
+      },
+      {
+        headerName: 'Adv Salary',
+        field: 'advance_salary',
+        sortable: true,
+        filter: true,
+        minWidth: 140,
+      },
+      {
+        headerName: 'Net Salary',
+        field: 'net_salary',
+        sortable: true,
+        filter: true,
+        minWidth: 140,
+      },
   ];
 
   statusButtonRenderer(params: any) {

@@ -56,6 +56,7 @@ import { PayrollApprovedComponent } from './payroll/payroll-list/payroll-approve
 import { PayrollRejectedComponent } from './payroll/payroll-list/payroll-rejected/payroll-rejected.component';
 import { PayrollProcessRejectedComponent } from './payroll/payroll-process/payroll-process-rejected/payroll-process-rejected.component';
 import { PayrollProcessApprovedComponent } from './payroll/payroll-process/payroll-process-approved/payroll-process-approved.component';
+import { EditBonusAndIncentiveComponent } from './compnay-setup/bonus-and-incentive/manage-bonus-and-incentive/edit-bonus-and-incentive/edit-bonus-and-incentive.component';
 
 
 // FullCalendarModule.registerPlugins([dayGridPlugin]);
@@ -101,6 +102,7 @@ import { PayrollProcessApprovedComponent } from './payroll/payroll-process/payro
     CompanyDashboardComponent,
     EditLeaveRequestComponent,
     BonusAndIncentiveComponent,
+    EditBonusAndIncentiveComponent,
     ManageBonusAndIncentiveComponent,
     BonuseAndInsentiveReportsComponent,
     PayrollApprovedComponent,
