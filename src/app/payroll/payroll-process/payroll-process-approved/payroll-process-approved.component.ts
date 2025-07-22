@@ -3,6 +3,8 @@ import { ColDef, GridApi } from 'ag-grid-community';
 import { Router } from '@angular/router';
 import { HrmserviceService } from 'src/app/hrmservice.service';
 import { ToastrService } from 'ngx-toastr';
+import { IRowNode } from 'ag-grid-community';
+
 @Component({
   selector: 'app-payroll-process-approved',
   templateUrl: './payroll-process-approved.component.html',
@@ -22,6 +24,8 @@ export class PayrollProcessApprovedComponent {
   columnDefs: ColDef[] = [];
   selectedEmployee: any = null;
   selectedEmployeesForModal: any[] = [];
+  consolidatedSummary: { [monthYear: string]: any[] } = {};
+  isLoading: boolean = false;
 
   today: string = new Date().toISOString().split('T')[0];
   constructor(private router: Router, private service: HrmserviceService, private toastr: ToastrService) { }
@@ -60,7 +64,7 @@ export class PayrollProcessApprovedComponent {
     this.getCompanyNames();
     this.getApprovedPayroll();
     this.initializeColumns();
-
+    this.getAttendanceDetails();
     // this.rowData = [
     //   {
     //     employeeName: 'Amit Sharma',
@@ -89,8 +93,6 @@ export class PayrollProcessApprovedComponent {
     //     employe_id: 102,
     //   }
     // ];
-
-
   }
 
   getMonthName(monthId: number): string {
@@ -124,6 +126,7 @@ export class PayrollProcessApprovedComponent {
   }
 
   getApprovedPayroll() {
+    this.isLoading = true;
     this.rowData = [];
     this.service.post('fetch/approved/payroll', {
       company_id: this.selectedCompanyId,
@@ -135,6 +138,7 @@ export class PayrollProcessApprovedComponent {
         if (res.status === 'success') {
           this.rowData = res.data.map((item: any) => ({
             employee_code: item.employee_code,
+            emp_name: item.emp_name,
             department: item.department_name,
             role: item.role_name,
             presentDays: item.present_days,
@@ -142,19 +146,28 @@ export class PayrollProcessApprovedComponent {
             hours: item.total_hours,
             overTime: item.total_overtime + ' hrs',
             employe_id: item.employe_id,
-            bonus_incentive_amount: item.bonus_incentive_amount ? `₹ ${item.bonus_incentive_amount}` : '-',
-            advance_salary: item.advance_salary ? `₹ ${item.advance_salary}` : '-',
-            net_salary: item.net_salary  ? `₹ ${item.net_salary}` : '-',
+            bonus_incentive_amount: item.bonus_incentive_amount ? `₹ ${item.bonus_incentive_amount}` : 'NA',
+            advance_salary: item.advance_salary ? `₹ ${item.advance_salary}` : 'NA',
+            net_salary: item.net_salary ? `₹ ${item.net_salary}` : 'NA',
           }));
         }
+        this.isLoading = false;
       } catch (error) {
         console.log(error);
+        this.isLoading = false;
       }
     })
+    this.isLoading = false;
   }
 
   initializeColumns() {
     this.columnDefs = [
+      {
+        headerName: '',
+        maxWidth: 50,
+        checkboxSelection: true,
+        headerCheckboxSelection: true,
+      },
       {
         headerName: 'Emp Code',
         field: 'employee_code',
@@ -189,7 +202,7 @@ export class PayrollProcessApprovedComponent {
         filter: true,
         maxWidth: 70,
       },
-       {
+      {
         headerName: 'OT(hrs)',
         field: 'overTime',
         sortable: true,
@@ -251,12 +264,73 @@ export class PayrollProcessApprovedComponent {
     console.log('Selected rows:', this.selectedRowData);
   }
 
-
-
-  exportExcel() {
-    console.log('called')
-    if (this.gridApiActive) {
-      this.gridApiActive.exportDataAsCsv();
-    }
+  getAttendanceDetails() {
+    this.service.post('fetch/ConsolidatedSummary', {}).subscribe((res: any) => {
+      if (res.status === 'success') {
+        this.consolidatedSummary = res;
+      }
+    });
   }
+
+  exportSelectedRowsToCSV() {
+    const selectedNodes: IRowNode<any>[] = this.gridApiActive.getSelectedNodes();
+    const selectedData = selectedNodes.map((node: IRowNode<any>) => node.data);
+
+    if (selectedData.length === 0) {
+      this.toastr.warning('Please select at least one row to export.');
+      return;
+    }
+
+    const monthYear = `${this.selectedYear}-${this.selectedMonth.toString().padStart(2, '0')}`;
+    const consolidatedData = this.consolidatedSummary[monthYear] || [];
+
+    const mergedData = selectedData.map((row: any) => {
+      const attendance = consolidatedData.find((att: any) => att.employee_code === row.employee_code);
+
+      return {
+        'Employee Code': row.employee_code,
+        'Employee Name': row.emp_name || attendance?.emp_name,
+        'Department': row.department,
+        'Present Days': row.presentDays,
+        'Absent Days': row.absentDays,
+        'WFH/2': attendance?.work_from_home_half_day || '0',
+        'Half Day': attendance?.half_day || '0',
+        'Late': attendance?.late || '0',
+        'Total OT': row.overTime,
+        'Total Hrs': row.hours,
+        'Bonus&Incentive': row.bonus_incentive_amount,
+        'Net Salary': row.net_salary,
+      };
+    });
+
+    this.downloadAsCSV(mergedData, `Payroll_  ${monthYear}.csv`);
+  }
+
+downloadAsCSV(data: any[], filename: string) {
+  if (!data || !data.length) return;
+
+  const separator = ',';
+  const keys = Object.keys(data[0]);
+
+  const csvContent = [
+    keys.join(separator),
+    ...data.map(row =>
+      keys.map(k => `"${(row[k] ?? '').toString().replace(/"/g, '""')}"`).join(separator)
+    )
+  ].join('\n');
+
+  const BOM = '\uFEFF';
+  const blob = new Blob([BOM + csvContent], { type: 'text/csv;charset=utf-8;' });
+
+  const link = document.createElement('a');
+  const url = URL.createObjectURL(blob);
+  link.setAttribute('href', url);
+  link.setAttribute('download', filename);
+  link.style.visibility = 'hidden';
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+}
+
+
 }

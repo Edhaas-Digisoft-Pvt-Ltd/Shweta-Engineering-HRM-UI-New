@@ -31,6 +31,7 @@ export class ManageBonusAndIncentiveComponent {
   defaultDate = '';
   isEditSubmitted = false;
   role: string = '';
+  isLoading: boolean = false;
 
   constructor(private fb: FormBuilder, private service: HrmserviceService, private toastr: ToastrService) {}
   
@@ -273,6 +274,7 @@ export class ManageBonusAndIncentiveComponent {
   }
 
   getBonusAndIncentives() {
+    this.isLoading = true;
     this.service.post('fetch/bonusincentive', { }).subscribe((res: any) => {
       try {
         if (res.status === 'success') {
@@ -289,6 +291,7 @@ export class ManageBonusAndIncentiveComponent {
         console.log(error);
       }
     })
+    this.isLoading = false;
   }
 
   fetchBonusIncentive(data: any, formGroup: FormGroup) {

@@ -1,1 +1,65 @@
-<p>bonuse-and-insentive-reports works!</p>
+<div class="right-panel">
+  <div class="loader-overlay" *ngIf="isLoading">
+    <app-loader></app-loader>
+  </div>
+  <div class="main-content" [class.loading]="isLoading">
+
+    <div class="row gx-3  align-items-center rounded-2">
+      <div class="col-12">
+        <div class="row justify-content-end">
+          <div class="col-3">
+            <label class="fw-bold">Search Emp Code</label>
+            <input class="form-control" type="text" #searchBox placeholder="Search Employee Code"
+              [(ngModel)]="searchValue" (change)="searchEmployeeBonusIncentive()" />
+          </div>
+
+          <div class="col-2 dotted-line">
+            <label for="">Select Year</label>
+            <select class="form-select" [(ngModel)]="selectedYear" (change)="onYearMonthChange()">
+              <option *ngFor="let year of years" [value]="year">{{ year }}</option>
+            </select>
+          </div>
+
+          <div class="col-2">
+            <label for="">Select Month</label>
+            <select class="form-select" [(ngModel)]="selectedMonth" (change)="onYearMonthChange()">
+              <option *ngFor="let month of months" [value]="month.id">{{ month.value }}</option>
+            </select>
+          </div>
+
+          <div class="col-auto d-flex align-items-end me-2">
+            <button class="btn btn-primary searchBtn" (click)="searchEmployeeBonusIncentive()">Search</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row gap-4 row-wrap my-3 ">
+      <div class="container  ">
+        <div class="row g-3">
+          <div class="col-12">
+            <ag-grid-angular class="ag-theme-alpine" style="width: 100%; height: 300px;" [rowData]="rowData"
+              [columnDefs]="columnDefs" [defaultColDef]="defaultColDef" (gridReady)="onGridReady($event)">
+            </ag-grid-angular>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="modal fade" id="salaryReport" tabindex="-1" aria-labelledby="advanceSalaryModalLabel"
+      aria-hidden="true">
+      <div class="modal-dialog modal-xl modal-dialog-centered">
+        <div class="modal-content">
+
+          <div class="modal-header  text-white">
+            <h5 class="modal-title" id="advanceSalaryModalLabel">Salary Report</h5>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>

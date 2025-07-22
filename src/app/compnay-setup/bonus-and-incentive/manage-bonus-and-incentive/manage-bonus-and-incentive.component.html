@@ -1,29 +1,36 @@
-<div class="container-fluid">
-    <div class="row m-0 p-0">
-        <div class="col-12 d-flex justify-content-end">
-            <div class="row">
-                <div class="col text-end p-0">
-                    <!-- Button trigger modal -->
-                    <button *ngIf="role === 'accountant'" type="button" class="btn text-white  add_company  mb-3"
-                        style="background-color: #3674B5;" data-bs-toggle="modal" data-bs-target="#bonusIncentiveModal">
-                        <i class="bi bi-plus-lg me-2"></i> Add Bonus And Incentive
-                    </button>
+<div class="right-panel">
+    <div class="loader-overlay" *ngIf="isLoading">
+        <app-loader></app-loader>
+    </div>
+    <div class="main-content" [class.loading]="isLoading">
 
-                    <!-- Modal -->
-                    <div class="modal fade modal-lg text-left" id="bonusIncentiveModal" tabindex="-1"
-                        aria-labelledby="exampleModalLabel">
-                        <div class="modal-dialog modal-xl  modal-dialog-centered">
-                            <div class="modal-content">
-                                <div class="modal-header">
-                                    <h5 class="modal-title" id="exampleModalLabel">Add Bonus and Incentive</h5>
-                                    <button type="button text-white" class="btn-close" data-bs-dismiss="modal"
-                                        aria-label="Close"></button>
-                                </div>
-                                <div class="modal-body text-left">
-                                    <form [formGroup]="bonusAndIncentive" (ngSubmit)="addBonusAndIncentive()">
-                                        <div class="row">
+        <div class="container-fluid">
+            <div class="row m-0 p-0">
+                <div class="col-12 d-flex justify-content-end">
+                    <div class="row">
+                        <div class="col text-end p-0">
+                            <!-- Button trigger modal -->
+                            <button *ngIf="role === 'accountant'" type="button"
+                                class="btn text-white  add_company  mb-3" style="background-color: #3674B5;"
+                                data-bs-toggle="modal" data-bs-target="#bonusIncentiveModal">
+                                <i class="bi bi-plus-lg me-2"></i> Add Bonus And Incentive
+                            </button>
 
-                                            <!-- <div class="col-lg-6">
+                            <!-- Modal -->
+                            <div class="modal fade modal-lg text-left" id="bonusIncentiveModal" tabindex="-1"
+                                aria-labelledby="exampleModalLabel">
+                                <div class="modal-dialog modal-xl  modal-dialog-centered">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title" id="exampleModalLabel">Add Bonus and Incentive</h5>
+                                            <button type="button text-white" class="btn-close" data-bs-dismiss="modal"
+                                                aria-label="Close"></button>
+                                        </div>
+                                        <div class="modal-body text-left">
+                                            <form [formGroup]="bonusAndIncentive" (ngSubmit)="addBonusAndIncentive()">
+                                                <div class="row">
+
+                                                    <!-- <div class="col-lg-6">
                                                 <label class="fw-bold">Select Company <span
                                                         class="text-danger">*</span></label>
                                                 <br>
@@ -36,16 +43,17 @@
                                                 </select>
                                             </div> -->
 
-                                            <div class="col-md-6 mb-3">
-                                                <label> Employee id<span class="text-danger">*</span></label>
-                                                <div>
-                                                    <input type="text" class="form-control"
-                                                        formControlName="employee_id" placeholder="Enter Employee Id"
-                                                        [ngClass]="{'is-invalid': isSubmitted && bonusAndIncentive.get('employee_id')?.invalid}">
-                                                </div>
-                                            </div>
+                                                    <div class="col-md-6 mb-3">
+                                                        <label> Employee id<span class="text-danger">*</span></label>
+                                                        <div>
+                                                            <input type="text" class="form-control"
+                                                                formControlName="employee_id"
+                                                                placeholder="Enter Employee Id"
+                                                                [ngClass]="{'is-invalid': isSubmitted && bonusAndIncentive.get('employee_id')?.invalid}">
+                                                        </div>
+                                                    </div>
 
-                                            <!-- <div class="col-lg-6">
+                                                    <!-- <div class="col-lg-6">
                                                 <label class="fw-bold">Year <span
                                                         class="text-danger">*</span></label>
                                                 <br>
@@ -68,210 +76,217 @@
                                                     </option>
                                                 </select>
                                             </div> -->
-                                            <div class="col-lg-6">
-                                                <label>Date<span class="text-danger">*</span></label>
-                                                <input id="bonusDate" formControlName="bonus_incentive_date"
-                                                    class="form-control" 
-                                                    [ngClass]="{'is-invalid': isSubmitted && bonusAndIncentive.get('bonus_incentive_date')?.invalid}"
-                                                    >
-                                            </div>
+                                                    <div class="col-lg-6">
+                                                        <label>Date<span class="text-danger">*</span></label>
+                                                        <input id="bonusDate" formControlName="bonus_incentive_date"
+                                                            class="form-control"
+                                                            [ngClass]="{'is-invalid': isSubmitted && bonusAndIncentive.get('bonus_incentive_date')?.invalid}">
+                                                    </div>
 
-                                            <div class="col-md-6 mb-3">
-                                                <label for="companyName">Bonus<span class="text-danger">*</span></label>
-                                                <div class="position-relative">
-                                                    <input type="text" id="companyName" class="form-control"
-                                                        formControlName="bonus_amount" placeholder="Enter Bonus"
-                                                        [ngClass]="{'is-invalid': isSubmitted && bonusAndIncentive.get('bonus_amount')?.invalid}">
-                                                    <div class="invalid-feedback"
-                                                        *ngIf="isSubmitted && bonusAndIncentive.get('bonus_amount')?.errors?.['pattern']">
-                                                        Only Numbers are Allowed
+                                                    <div class="col-md-6 mb-3">
+                                                        <label for="companyName">Bonus<span
+                                                                class="text-danger">*</span></label>
+                                                        <div class="position-relative">
+                                                            <input type="text" id="companyName" class="form-control"
+                                                                formControlName="bonus_amount" placeholder="Enter Bonus"
+                                                                [ngClass]="{'is-invalid': isSubmitted && bonusAndIncentive.get('bonus_amount')?.invalid}">
+                                                            <div class="invalid-feedback"
+                                                                *ngIf="isSubmitted && bonusAndIncentive.get('bonus_amount')?.errors?.['pattern']">
+                                                                Only Numbers are Allowed
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="col-md-6 mb-3">
+                                                        <label for="companyName">Incentive<span
+                                                                class="text-danger">*</span></label>
+                                                        <div class="position-relative">
+                                                            <input type="text" id="companyName" class="form-control"
+                                                                formControlName="incentive_amount"
+                                                                placeholder="Enter Incentive"
+                                                                [ngClass]="{'is-invalid': isSubmitted && bonusAndIncentive.get('incentive_amount')?.invalid}">
+                                                            <small class="text-danger"
+                                                                *ngIf="isSubmitted && bonusAndIncentive.get('incentive_amount')?.invalid && bonusAndIncentive.get('incentive_amount')?.value">
+                                                                Only Numbers are Allowed
+                                                            </small>
+                                                        </div>
+                                                    </div>
+
+
+                                                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                                                        <button type="submit"
+                                                            class="btn btn-primary mt-3 ml-auto btn-end submit-btn BtnColor">Submit</button>
                                                     </div>
                                                 </div>
-                                            </div>
 
-                                            <div class="col-md-6 mb-3">
-                                                <label for="companyName">Incentive<span
-                                                        class="text-danger">*</span></label>
-                                                <div class="position-relative">
-                                                    <input type="text" id="companyName" class="form-control"
-                                                        formControlName="incentive_amount" placeholder="Enter Incentive"
-                                                        [ngClass]="{'is-invalid': isSubmitted && bonusAndIncentive.get('incentive_amount')?.invalid}">
-                                                    <small class="text-danger"
-                                                        *ngIf="isSubmitted && bonusAndIncentive.get('incentive_amount')?.invalid && bonusAndIncentive.get('incentive_amount')?.value">
-                                                        Only Numbers are Allowed
-                                                    </small>
-                                                </div>
-                                            </div>
+                                            </form>
 
 
-                                            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-                                                <button type="submit"
-                                                    class="btn btn-primary mt-3 ml-auto btn-end submit-btn BtnColor">Submit</button>
-                                            </div>
+
                                         </div>
 
-                                    </form>
-
-
-
-                                </div>
-
-                            </div>
-                        </div>
-                    </div>
-
-
-
-                    <!-- edit approve/reject modal -->
-                    <div class="modal fade modal-lg text-left" id="requestBonusIncentiveModal" tabindex="-1"
-                        aria-labelledby="exampleModalLabel">
-                        <div class="modal-dialog modal-xl  modal-dialog-centered">
-                            <div class="modal-content">
-                                <div class="modal-header">
-                                    <h5 class="modal-title" id="exampleModalLabel">Request Bonus and Incentive</h5>
-                                    <button type="button text-white" class="btn-close" data-bs-dismiss="modal"
-                                        aria-label="Close"></button>
-                                </div>
-                                <div class="modal-body text-left">
-                                    <form [formGroup]="updateStatusBonusAndIncentive">
-                                        <div class="row">
-
-                                            <div class="col-md-5 mb-3">
-                                                <label> Employee id<span class="text-danger">*</span></label>
-                                                <div>
-                                                    <input type="text" class="form-control"
-                                                        formControlName="employee_id">
-                                                </div>
-                                            </div>
-
-                                            <div class="col-md-7 mb-3">
-                                                <label> Employee Name<span class="text-danger">*</span></label>
-                                                <div>
-                                                    <input type="text" class="form-control"
-                                                        formControlName="employee_name">
-                                                </div>
-                                            </div>
-
-                                            <div class="col-lg-4">
-                                                <label>Date<span class="text-danger">*</span></label>
-                                                <input type="date" formControlName="bonus_incentive_date"
-                                                    class="form-control">
-                                            </div>
-
-                                            <div class="col-md-4 mb-3">
-                                                <label for="companyName">Bonus<span class="text-danger">*</span></label>
-                                                <div class="position-relative">
-                                                    <input type="text" id="companyName" class="form-control"
-                                                        formControlName="bonus_amount">
-                                                </div>
-                                            </div>
-
-                                            <div class="col-md-4 mb-3">
-                                                <label for="companyName">Incentive<span
-                                                        class="text-danger">*</span></label>
-                                                <div class="position-relative">
-                                                    <input type="text" id="companyName" class="form-control"
-                                                        formControlName="incentive_amount">
-                                                </div>
-                                            </div>
-
-
-                                            <div class="modal-footer">
-                                                <button type="button" class="btn approveBtn"
-                                                    (click)="updateStatus('Approved')"
-                                                    [disabled]="editBonusAndIncentiveData?.status === 'Approved' || editBonusAndIncentiveData?.status === 'Rejected'">Approve
-                                                    </button>
-                                                <button type="button" class="btn declineBtn"
-                                                    (click)="updateStatus('Rejected')"
-                                                    [disabled]="editBonusAndIncentiveData?.status === 'Approved' || editBonusAndIncentiveData?.status === 'Rejected'">Decline
-                                                    </button>
-                                                <button type="button" class="btn btn-outline-dark fw-semobild "
-                                                    data-bs-dismiss="modal">Cancel</button>
-                                            </div>
-                                        </div>
-                                    </form>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                    </div>
 
-                    <!-- edit modal -->
-                    <div class="modal fade modal-lg text-left" id="editBonusIncentiveModal" tabindex="-1"
-                        aria-labelledby="exampleModalLabel">
-                        <div class="modal-dialog modal-xl  modal-dialog-centered">
-                            <div class="modal-content">
-                                <div class="modal-header">
-                                    <h5 class="modal-title" id="exampleModalLabel">Edit Bonus and Incentive</h5>
-                                    <button type="button text-white" class="btn-close" data-bs-dismiss="modal"
-                                        aria-label="Close"></button>
-                                </div>
-                                <div class="modal-body text-left">
-                                    <form [formGroup]="editBonusAndIncentive" (ngSubmit)="updateBonusIncentive()">
-                                        <div class="row">
 
-                                            <div class="col-md-5 mb-3">
-                                                <label> Employee id<span class="text-danger">*</span></label>
-                                                <div>
-                                                    <input type="text" class="form-control"
-                                                        formControlName="employee_id">
-                                                </div>
-                                            </div>
 
-                                            <div class="col-md-7 mb-3">
-                                                <label> Employee Name<span class="text-danger">*</span></label>
-                                                <div>
-                                                    <input type="text" class="form-control"
-                                                        formControlName="employee_name">
-                                                </div>
-                                            </div>
-
-                                            <div class="col-lg-4">
-                                                <label>Date<span class="text-danger">*</span></label>
-                                                <input id="bonusDate" formControlName="bonus_incentive_date"
-                                                    class="form-control" 
-                                                    [ngClass]="{'is-invalid': isEditSubmitted && editBonusAndIncentive.get('bonus_incentive_date')?.invalid}"
-                                                >
-                                            </div>
-
-                                            <div class="col-md-4 mb-3">
-                                                <label for="companyName">Bonus<span class="text-danger">*</span></label>
-                                                <div class="position-relative">
-                                                    <input type="text" id="companyName" class="form-control"
-                                                        formControlName="bonus_amount"
-                                                        [ngClass]="{'is-invalid': isEditSubmitted && editBonusAndIncentive.get('bonus_amount')?.invalid}">
-                                                </div>
-                                            </div>
-
-                                            <div class="col-md-4 mb-3">
-                                                <label for="companyName">Incentive<span
-                                                        class="text-danger">*</span></label>
-                                                <div class="position-relative">
-                                                    <input type="text" id="companyName" class="form-control"
-                                                        formControlName="incentive_amount"
-                                                        [ngClass]="{'is-invalid': isEditSubmitted && editBonusAndIncentive.get('incentive_amount')?.invalid}">
-                                                </div>
-                                            </div>
-
-                                            <div class="modal-footer">
-                                                <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-                                                    <button type="submit"
-                                                        [disabled]="editBonusAndIncentiveData?.status === 'Approved' || editBonusAndIncentiveData?.status === 'Rejected'"
-                                                        class="btn btn-primary mt-3 ml-auto btn-end submit-btn BtnColor">Update</button>
-                                                </div>
-                                            </div>
+                            <!-- edit approve/reject modal -->
+                            <div class="modal fade modal-lg text-left" id="requestBonusIncentiveModal" tabindex="-1"
+                                aria-labelledby="exampleModalLabel">
+                                <div class="modal-dialog modal-xl  modal-dialog-centered">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title" id="exampleModalLabel">Request Bonus and Incentive
+                                            </h5>
+                                            <button type="button text-white" class="btn-close" data-bs-dismiss="modal"
+                                                aria-label="Close"></button>
                                         </div>
-                                    </form>
+                                        <div class="modal-body text-left">
+                                            <form [formGroup]="updateStatusBonusAndIncentive">
+                                                <div class="row">
+
+                                                    <div class="col-md-5 mb-3">
+                                                        <label> Employee id<span class="text-danger">*</span></label>
+                                                        <div>
+                                                            <input type="text" class="form-control"
+                                                                formControlName="employee_id">
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="col-md-7 mb-3">
+                                                        <label> Employee Name<span class="text-danger">*</span></label>
+                                                        <div>
+                                                            <input type="text" class="form-control"
+                                                                formControlName="employee_name">
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="col-lg-4">
+                                                        <label>Date<span class="text-danger">*</span></label>
+                                                        <input type="date" formControlName="bonus_incentive_date"
+                                                            class="form-control">
+                                                    </div>
+
+                                                    <div class="col-md-4 mb-3">
+                                                        <label for="companyName">Bonus<span
+                                                                class="text-danger">*</span></label>
+                                                        <div class="position-relative">
+                                                            <input type="text" id="companyName" class="form-control"
+                                                                formControlName="bonus_amount">
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="col-md-4 mb-3">
+                                                        <label for="companyName">Incentive<span
+                                                                class="text-danger">*</span></label>
+                                                        <div class="position-relative">
+                                                            <input type="text" id="companyName" class="form-control"
+                                                                formControlName="incentive_amount">
+                                                        </div>
+                                                    </div>
+
+
+                                                    <div class="modal-footer">
+                                                        <button type="button" class="btn approveBtn"
+                                                            (click)="updateStatus('Approved')"
+                                                            [disabled]="editBonusAndIncentiveData?.status === 'Approved' || editBonusAndIncentiveData?.status === 'Rejected'">Approve
+                                                        </button>
+                                                        <button type="button" class="btn declineBtn"
+                                                            (click)="updateStatus('Rejected')"
+                                                            [disabled]="editBonusAndIncentiveData?.status === 'Approved' || editBonusAndIncentiveData?.status === 'Rejected'">Decline
+                                                        </button>
+                                                        <button type="button" class="btn btn-outline-dark fw-semobild "
+                                                            data-bs-dismiss="modal">Cancel</button>
+                                                    </div>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- edit modal -->
+                            <div class="modal fade modal-lg text-left" id="editBonusIncentiveModal" tabindex="-1"
+                                aria-labelledby="exampleModalLabel">
+                                <div class="modal-dialog modal-xl  modal-dialog-centered">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title" id="exampleModalLabel">Edit Bonus and Incentive</h5>
+                                            <button type="button text-white" class="btn-close" data-bs-dismiss="modal"
+                                                aria-label="Close"></button>
+                                        </div>
+                                        <div class="modal-body text-left">
+                                            <form [formGroup]="editBonusAndIncentive"
+                                                (ngSubmit)="updateBonusIncentive()">
+                                                <div class="row">
+
+                                                    <div class="col-md-5 mb-3">
+                                                        <label> Employee id<span class="text-danger">*</span></label>
+                                                        <div>
+                                                            <input type="text" class="form-control"
+                                                                formControlName="employee_id">
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="col-md-7 mb-3">
+                                                        <label> Employee Name<span class="text-danger">*</span></label>
+                                                        <div>
+                                                            <input type="text" class="form-control"
+                                                                formControlName="employee_name">
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="col-lg-4">
+                                                        <label>Date<span class="text-danger">*</span></label>
+                                                        <input id="bonusDate" formControlName="bonus_incentive_date"
+                                                            class="form-control"
+                                                            [ngClass]="{'is-invalid': isEditSubmitted && editBonusAndIncentive.get('bonus_incentive_date')?.invalid}">
+                                                    </div>
+
+                                                    <div class="col-md-4 mb-3">
+                                                        <label for="companyName">Bonus<span
+                                                                class="text-danger">*</span></label>
+                                                        <div class="position-relative">
+                                                            <input type="text" id="companyName" class="form-control"
+                                                                formControlName="bonus_amount"
+                                                                [ngClass]="{'is-invalid': isEditSubmitted && editBonusAndIncentive.get('bonus_amount')?.invalid}">
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="col-md-4 mb-3">
+                                                        <label for="companyName">Incentive<span
+                                                                class="text-danger">*</span></label>
+                                                        <div class="position-relative">
+                                                            <input type="text" id="companyName" class="form-control"
+                                                                formControlName="incentive_amount"
+                                                                [ngClass]="{'is-invalid': isEditSubmitted && editBonusAndIncentive.get('incentive_amount')?.invalid}">
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="modal-footer">
+                                                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                                                            <button type="submit"
+                                                                [disabled]="editBonusAndIncentiveData?.status === 'Approved' || editBonusAndIncentiveData?.status === 'Rejected'"
+                                                                class="btn btn-primary mt-3 ml-auto btn-end submit-btn BtnColor">Update</button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
+                <div class="col-12 mt-3">
+                    <ag-grid-angular class="ag-theme-alpine" style="width: 100%; height: 60vh;" [rowData]="rowData"
+                        [columnDefs]="columnDefs" [defaultColDef]="defaultColDef" (gridReady)="onGridReady($event)">
+                    </ag-grid-angular>
+                </div>
             </div>
         </div>
-        <div class="col-12 mt-3">
-            <ag-grid-angular class="ag-theme-alpine" style="width: 100%; height: 60vh;" [rowData]="rowData"
-                [columnDefs]="columnDefs" [defaultColDef]="defaultColDef" (gridReady)="onGridReady($event)">
-            </ag-grid-angular>
-        </div>
+
     </div>
 </div>

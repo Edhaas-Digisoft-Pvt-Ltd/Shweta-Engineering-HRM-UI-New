@@ -6,8 +6,7 @@
 
                 <h2> <i class="bi bi-currency-rupee me-2"></i> Payroll</h2>
                 <p><span (click)="backtoPayroll()" style="cursor: pointer;"><i class="bi bi-arrow-left-circle"></i>
-Back</span> / <span
-                        style="color: #3674B5;">Payroll
+                        Back</span> / <span style="color: #3674B5;">Payroll
                         Summaries for {{employeeDetails.employee_code}}</span></p>
             </div>
 
@@ -375,11 +374,11 @@ Back</span> / <span
                     <div class="col-2">
                         <div class="payrollSummaryDetails">
                             <label for="">Month</label>
-                            <input class="form-control readOnlyInput" [value]="getMonthName(selectedMonth)" />
+                            <input class="form-control readOnlyInput tex" [value]="getMonthName(selectedMonth)" />
                         </div>
                     </div>
                 </form>
-                <div class="mt-2">
+                <div class="mt-4">
                     <ag-grid-angular class="ag-theme-alpine" style="width: 100%; height: 30vh;"
                         [rowData]="attendanceDetails" [columnDefs]="columnDefs2" [defaultColDef]="defaultColDef">
                     </ag-grid-angular>
@@ -387,6 +386,20 @@ Back</span> / <span
                         [rowData]="attandanceDetails" [columnDefs]="columnDefs2" (gridReady)="onGridReady($event)"
                         (selectionChanged)="onSelectionChanged($event)"> [defaultColDef]="defaultColDef">
                     </ag-grid-angular> -->
+                </div>
+
+                <div class="list mt-2">
+                    <ul>
+                        <li><span class="dot"></span> P - Present</li>
+                        <li><span class="dot"></span> A - Absent</li>
+                        <li><span class="dot"></span> W - Weekend</li>
+                        <li><span class="dot"></span> W/od - Weekend</li>
+                        <li><span class="dot"></span> H - Holiday</li>
+                        <li><span class="dot"></span> WFH/2 - Work From Home Half Day</li>
+                        <li><span class="dot"></span> HD - Half Day</li>
+                        <li><span class="dot"></span> LT - Late</li>
+                    </ul>
+
                 </div>
 
             </div>
@@ -414,7 +427,8 @@ Back</span> / <span
                             <select class="form-select" [(ngModel)]="selectedRejectedReason" name="rejectReason"
                                 [ngClass]="{ 'is-invalid': showReasonError }">
                                 <option value="" disabled selected>-- Choose reason --</option>
-                                <option *ngFor="let item of rejectreasons" [value]="item.rejection_id">{{ item.rejection_reason }}</option>
+                                <option *ngFor="let item of rejectreasons" [value]="item.rejection_id">{{
+                                    item.rejection_reason }}</option>
                             </select>
                         </div>
                     </div>

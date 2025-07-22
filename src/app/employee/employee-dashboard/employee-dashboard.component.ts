@@ -40,6 +40,7 @@ export class EmployeeDashboardComponent {
   Employee_Data: any;
   role: string = '';
   leaveTypes: any;
+  isLoading: boolean = false;
 
   constructor(private route: ActivatedRoute, private fb: FormBuilder, private router: Router, private toastr: ToastrService, private service: HrmserviceService,) {
     // Generate last 20 years dynamically
@@ -54,6 +55,7 @@ export class EmployeeDashboardComponent {
   }
 
   ngOnInit(): void {
+    this.isLoading = true;
     this.role = this.service.getRole();
 
     this.route.queryParams.subscribe(params => {
@@ -85,6 +87,8 @@ export class EmployeeDashboardComponent {
 
     this.advanceSalaryForm.valueChanges.subscribe(() => this.calculateInstallment());
     this.fetchEmployee(this.employee_id);
+
+    this.isLoading = false;
   }
 
   closeAllModals(): void {

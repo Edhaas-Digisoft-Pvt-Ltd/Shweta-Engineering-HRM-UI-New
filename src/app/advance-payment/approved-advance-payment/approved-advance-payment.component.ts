@@ -13,18 +13,19 @@ export class ApprovedAdvancePaymentComponent {
   today: string = new Date().toISOString().split('T')[0];
   title: String = 'Company Demo';
   activeTab: string = 'tab1';
-  gridApiActive!: GridApi;;
+  gridApiActive!: GridApi;
   role: string = '';
   columnDefs: ColDef[] = [];
   rowData: any = [];
-  CompanyNames: any = [] ;
-  selectedCompanyId : any = 1 ;
+  CompanyNames: any = [];
+  selectedCompanyId: any = 1;
   selectedYear: any;
   selectedMonth: any;
   displayApprovedData!: FormGroup;
   approvedData!: any;
+  isLoading: boolean = false;
 
-  constructor(private fb: FormBuilder, private service: HrmserviceService) {}
+  constructor(private fb: FormBuilder, private service: HrmserviceService) { }
 
   ngOnInit() {
     const currentDate = new Date();
@@ -50,8 +51,8 @@ export class ApprovedAdvancePaymentComponent {
       installmentEndDate: [{ value: '', disabled: true }],
       lastInstallmentDate: [{ value: '', disabled: true }],
       installmentDueDate: [{ value: '', disabled: true }],
-      remainingBalance: [{value: '', disabled: true}],
-      advanceAmount: [{value: '', disabled: true}]
+      remainingBalance: [{ value: '', disabled: true }],
+      advanceAmount: [{ value: '', disabled: true }]
     })
   }
 
@@ -74,32 +75,34 @@ export class ApprovedAdvancePaymentComponent {
   }
 
   getAllApprovedRequest() {
+    this.isLoading = true;
     this.rowData = [];
-    this.service.post('all/approvedrequest', { 
+    this.service.post('all/approvedrequest', {
       // company_id: this.selectedCompanyId, 
       // year: this.selectedYear,
       // month: this.selectedMonth
     }).subscribe((res: any) => {
       try {
         if (res.status === 'success') {
-          this.rowData = res.data.map((item:any)=>({
-            emp_id:item.employee_code,
-            emp_name:item.emp_name,
-            apply_date:item.apply_date,
-            advance_amount:item.advance_amount,
-            remaining_balance:item.remaining_balance,
+          this.rowData = res.data.map((item: any) => ({
+            emp_id: item.employee_code,
+            emp_name: item.emp_name,
+            apply_date: item.apply_date,
+            advance_amount: item.advance_amount,
+            remaining_balance: item.remaining_balance,
             emi: item.emi,
-            updated_on:item.updated_on,
-            deducted_on:item.deducted_on,
+            updated_on: item.updated_on,
+            deducted_on: item.deducted_on,
             status: item.status,
-            tenure : item.tenure,
+            tenure: item.tenure,
             adv_pay_id: item.adv_pay_id
           }));
-        } 
+        }
       } catch (error) {
         console.log(error);
       }
     })
+    this.isLoading = false;
   }
 
   selectTab(tab: string) {
@@ -184,29 +187,29 @@ export class ApprovedAdvancePaymentComponent {
         field: 'emp_name',
         sortable: true,
         filter: true,
-        maxWidth:200
+        maxWidth: 200
       },
-      { headerName: 'Apply Date', field: 'apply_date', sortable: true, filter: true, maxWidth:150 },
+      { headerName: 'Apply Date', field: 'apply_date', sortable: true, filter: true, maxWidth: 150 },
       {
         headerName: 'Adv. Amount',
         field: 'advance_amount',
         sortable: true,
         filter: true,
-        maxWidth:150
+        maxWidth: 150
       },
       {
         headerName: 'Remaining Amount',
         field: 'remaining_balance',
         sortable: true,
         filter: true,
-        maxWidth:190
+        maxWidth: 190
       },
       {
         headerName: 'EMI',
         field: 'emi',
         sortable: true,
         filter: true,
-        maxWidth:120
+        maxWidth: 120
       },
       // {
       //   headerName: 'Updated On',
@@ -223,49 +226,49 @@ export class ApprovedAdvancePaymentComponent {
       //   maxWidth:150
       // },
       // { headerName: 'Status', field: 'status', cellRenderer: this.statusButtonRenderer, sortable: true, filter: true,  maxWidth:140},
-      { headerName: 'Tenure', field: 'tenure', sortable: true, filter: true,  maxWidth:110},
+      { headerName: 'Tenure', field: 'tenure', sortable: true, filter: true, maxWidth: 110 },
     ];
-      this.columnDefs.push({
-        headerName: 'Actions',
-        maxWidth:120,
-        cellStyle: { border: '1px solid #ddd' },
-        cellRenderer: (params: any) => {
-          return `<button type="button" class="btn btn-sm mb-1" data-bs-toggle="modal" data-bs-target="#advanceSalaryModalinfo" style="background-color:#C8E3FF">
+    this.columnDefs.push({
+      headerName: 'Actions',
+      maxWidth: 120,
+      cellStyle: { border: '1px solid #ddd' },
+      cellRenderer: (params: any) => {
+        return `<button type="button" class="btn btn-sm mb-1" data-bs-toggle="modal" data-bs-target="#advanceSalaryModalinfo" style="background-color:#C8E3FF">
           <i class="bi bi-eye"></i>
           </button>`;
-        },
-        onCellClicked: (event: any) => {
-          this.getSingleApprovedData(event.data.adv_pay_id);
-        },  
-      });
+      },
+      onCellClicked: (event: any) => {
+        this.getSingleApprovedData(event.data.adv_pay_id);
+      },
+    });
   }
 
-  getSingleApprovedData(data:any) {
-     this.service.post('single/report/advancesaraly',{adv_pay_id: data}).subscribe((res: any) => {
-      if(res.status === 'success'){
+  getSingleApprovedData(data: any) {
+    this.service.post('single/report/advancesaraly', { adv_pay_id: data }).subscribe((res: any) => {
+      if (res.status === 'success') {
         const singleApprovedData = res.data[0];
-          this.approvedData = {
-            id: singleApprovedData?.employee_code,
-            employeeName: singleApprovedData?.emp_name,
-            company: singleApprovedData?.company_name,
-            department: singleApprovedData?.department_name,
-            role: singleApprovedData?.designation_name,
-            requestDate: singleApprovedData?.apply_date,
-            status: singleApprovedData?.status,
-            tenure: singleApprovedData?.tenure,
-            amount: singleApprovedData?.advance_amount,
-            reason: singleApprovedData?.remarks,
-            EMIStartDate: singleApprovedData?.updated_on,
-            installmentAmount: singleApprovedData?.emi,
-            remainingBalance: singleApprovedData?.remaining_balance,
-            advanceAmount: singleApprovedData?.advance_amount,
-            firstInstallmentDate: singleApprovedData?.deducted_on, 
-          } 
-        this.displayApprovedData.patchValue(this.approvedData);  
+        this.approvedData = {
+          id: singleApprovedData?.employee_code,
+          employeeName: singleApprovedData?.emp_name,
+          company: singleApprovedData?.company_name,
+          department: singleApprovedData?.department_name,
+          role: singleApprovedData?.designation_name,
+          requestDate: singleApprovedData?.apply_date,
+          status: singleApprovedData?.status,
+          tenure: singleApprovedData?.tenure,
+          amount: singleApprovedData?.advance_amount,
+          reason: singleApprovedData?.remarks,
+          EMIStartDate: singleApprovedData?.updated_on,
+          installmentAmount: singleApprovedData?.emi,
+          remainingBalance: singleApprovedData?.remaining_balance,
+          advanceAmount: singleApprovedData?.advance_amount,
+          firstInstallmentDate: singleApprovedData?.deducted_on,
+        }
+        this.displayApprovedData.patchValue(this.approvedData);
       }
     })
   }
-  
+
   calculatePaidAmount(): number {
     const total = +this.displayApprovedData.get('amount')?.value || 0;
     const remaining = +this.displayApprovedData.get('remainingBalance')?.value || 0;
@@ -322,7 +325,7 @@ export class ApprovedAdvancePaymentComponent {
     alert('update');
   }
 
-   exportExcel() {
+  exportExcel() {
     if (this.gridApiActive) {
       this.gridApiActive.exportDataAsCsv();
     }

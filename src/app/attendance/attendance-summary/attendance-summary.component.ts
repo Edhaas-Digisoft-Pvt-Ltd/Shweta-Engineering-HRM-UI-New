@@ -37,6 +37,7 @@ export class AttendanceSummaryComponent {
 
   columnDefs: any[] = [];
   rowData: any[] = [];
+  isLoading: boolean = false;
 
   constructor(private service: HrmserviceService) {}
 
@@ -46,7 +47,7 @@ export class AttendanceSummaryComponent {
   }
 
   onMonthYearChange() {
-    this.selectedMonth = Number(this.selectedMonth); 
+    this.selectedMonth = Number(this.selectedMonth);
     this.loadData();
     this.fetchDailySummary();
   }
@@ -92,6 +93,7 @@ export class AttendanceSummaryComponent {
   }
 
   fetchDailySummary() {
+    this.isLoading = true;
     const payload = {
       month: this.selectedMonth + 1,
       year: this.selectedYear
@@ -105,6 +107,7 @@ export class AttendanceSummaryComponent {
         console.log(res.error);
       }
     });
+    this.isLoading = false;
   }
 
   dotAndImageRenderer(params: any, isSunday: boolean) {
@@ -175,14 +178,14 @@ export class AttendanceSummaryComponent {
     data.forEach((item) => {
       const key = item.employee_code;
       const date = new Date(item.attendance_date);
-      const field = this.formatDateKey(date); 
+      const field = this.formatDateKey(date);
       const status = (item.status || '').toUpperCase();
 
       if (!employeeMap[key]) {
         employeeMap[key] = {
           id: item.employee_code,
           name: item.emp_name,
-          _dates: new Set<string>() 
+          _dates: new Set<string>()
         };
       }
 

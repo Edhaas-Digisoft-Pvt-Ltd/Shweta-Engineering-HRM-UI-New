@@ -1,14 +1,20 @@
-<div class="company-setup mt-3 ">
-    <div class="container-fluid ">
-        <div class="row gx-3  align-items-center p-2 " style="border-radius: 10px;">
-            <div class=" col-md-8 d-flex">
-                <!-- <img src="assets/img/Animation - 1743094888648.gif" alt=""> -->
+<div class="right-panel">
+    <div class="loader-overlay" *ngIf="isLoading">
+        <app-loader></app-loader>
+    </div>
+    <div class="main-content" [class.loading]="isLoading">
 
-                <h2><i class="bi bi-person-fill"></i> Employee </h2>
-            </div>
-            <div class="col-md-4 text-end p-0">
+        <div class="company-setup mt-3 ">
+            <div class="container-fluid ">
+                <div class="row gx-3  align-items-center p-2 " style="border-radius: 10px;">
+                    <div class=" col-md-8 d-flex">
+                        <!-- <img src="assets/img/Animation - 1743094888648.gif" alt=""> -->
 
-                <!-- <div class="container-fluid ">
+                        <h2><i class="bi bi-person-fill"></i> Employee </h2>
+                    </div>
+                    <div class="col-md-4 text-end p-0">
+
+                        <!-- <div class="container-fluid ">
                     <div class="">
                         <input class="py-1 px-3 form-control" type="text" #searchBox placeholder="Search Here"
                             [(ngModel)]="searchValue" (ngModelChange)="onFilterBoxChange()"
@@ -16,514 +22,533 @@
                     </div>
                 </div> -->
 
-                <!-- <input type="text" name="" class="form-control" placeholder="Search Employee" id=""> -->
-            </div>
-        </div>
-
-        <div class="row">
-            <div class="col senarioWrapper">
-                <div class="col border p-4" style="border-radius: 10px;">
-
-                    <div class="d-flex flex-column">
-                        <div class="row align-items-center border-bottom border-primary border-2 mb-4 ">
-                            <div class="col-3 ">
-                                <img src="assets/img/user_img.png" class="profile-img img-fluid rounded-circle " alt="">
-                            </div>
-                            <div class="col-9 ">
-                                <h4>{{Employee_Data.employee.emp_name}}</h4>
-                                <div class="d-flex gap-3">
-                                    <div class="">
-                                        <p class="pb-2 userInfo ">{{this.Employee_Data.department}}</p>
-                                    </div>
-                                    <div class="">
-                                        <p class="pb-2 userInfo">{{this.Employee_Data.designation}}</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="row justify-content-between my-3">
-                            <div class="col-lg-7">
-                                <div class="d-flex">
-                                    <div class=""><i class="bi bi-envelope-fill me-2 text-primary"></i></div>
-                                    <div class="">
-                                        <p class="mb-0 employeeData">Email</p>
-                                        <p class="employeeDetail text-lowercase fw-bold">
-                                            {{Employee_Data.employee.emp_email}}</p>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-lg-5">
-                                <div class="d-flex">
-                                    <div class="">
-                                        <i class="bi bi-telephone-fill me-2 text-primary "></i>
-                                    </div>
-                                    <div class="">
-                                        <p class="mb-0 employeeData">Contact</p>
-                                        <p class="fw-bold employeeDetail">
-                                            {{Employee_Data.employee.emp_contact}}</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="row mt-3">
-                            <div class="col-md-4">
-                                <div class="d-flex">
-                                    <div class=""><i class="bi bi-envelope-fill me-2 text-primary"></i></div>
-                                    <div class="">
-                                        <p class="mb-0 employeeData">Age</p>
-                                        <p class="fw-bold employeeDetail">
-                                            30</p>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-4">
-                                <div class="d-flex">
-                                    <div class="">
-                                        <i class="bi bi-bell me-2 text-primary "></i>
-                                    </div>
-                                    <div class="">
-                                        <p class="mb-0 employeeData">Status</p>
-                                        <p class="fw-bold employeeDetail">
-                                            {{Employee_Data.employee.status}}</p>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="col-md-4">
-                                <div class="d-flex">
-                                    <div class="">
-                                        <i class="bi bi-geo-alt-fill me-2 text-primary "></i>
-                                    </div>
-                                    <div class="">
-                                        <p class="mb-0 employeeData ">Address</p>
-                                        <p class="fw-bold employeeDetail">
-                                            {{Employee_Data.employee.emp_address}}</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="row mt-4">
-                            <!-- <div class="btn w-100 dashboard-btn">
-                                Edit
-                            </div> -->
-                            <button *ngIf="role === 'admin'" type="button" class="btn dashboard-btn w-100" data-bs-toggle="modal"
-                                data-bs-target="#editProfileModal" (click)="updateData()">
-                                Edit
-                            </button>
-                        </div>
+                        <!-- <input type="text" name="" class="form-control" placeholder="Search Employee" id=""> -->
                     </div>
                 </div>
-                <div class=" col  border p-4  " style="border-radius: 10px;">
 
-                    <div class="row gx-0">
-                        <div class="col  border-bottom border-primary border-2  mb-2">
-                            <h5 class="pb-2"> <i class="bi bi-calendar-week me-2 text-primary"></i> Leaves Details</h5>
+                <div class="row">
+                    <div class="col senarioWrapper">
+                        <div class="col border p-4" style="border-radius: 10px;">
+
+                            <div class="d-flex flex-column">
+                                <div class="row align-items-center border-bottom border-primary border-2 mb-4 ">
+                                    <div class="col-3 ">
+                                        <img src="assets/img/user_img.png" class="profile-img img-fluid rounded-circle "
+                                            alt="">
+                                    </div>
+                                    <div class="col-9 ">
+                                        <h4>{{Employee_Data.employee.emp_name}}</h4>
+                                        <div class="d-flex gap-3">
+                                            <div class="">
+                                                <p class="pb-2 userInfo ">{{this.Employee_Data.department}}</p>
+                                            </div>
+                                            <div class="">
+                                                <p class="pb-2 userInfo">{{this.Employee_Data.designation}}</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row justify-content-between my-3">
+                                    <div class="col-lg-7">
+                                        <div class="d-flex">
+                                            <div class=""><i class="bi bi-envelope-fill me-2 text-primary"></i></div>
+                                            <div class="">
+                                                <p class="mb-0 employeeData">Email</p>
+                                                <p class="employeeDetail text-lowercase fw-bold">
+                                                    {{Employee_Data.employee.emp_email}}</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-5">
+                                        <div class="d-flex">
+                                            <div class="">
+                                                <i class="bi bi-telephone-fill me-2 text-primary "></i>
+                                            </div>
+                                            <div class="">
+                                                <p class="mb-0 employeeData">Contact</p>
+                                                <p class="fw-bold employeeDetail">
+                                                    {{Employee_Data.employee.emp_contact}}</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row mt-3">
+                                    <div class="col-md-4">
+                                        <div class="d-flex">
+                                            <div class=""><i class="bi bi-envelope-fill me-2 text-primary"></i></div>
+                                            <div class="">
+                                                <p class="mb-0 employeeData">Age</p>
+                                                <p class="fw-bold employeeDetail">
+                                                    30</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="d-flex">
+                                            <div class="">
+                                                <i class="bi bi-bell me-2 text-primary "></i>
+                                            </div>
+                                            <div class="">
+                                                <p class="mb-0 employeeData">Status</p>
+                                                <p class="fw-bold employeeDetail">
+                                                    {{Employee_Data.employee.status}}</p>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-4">
+                                        <div class="d-flex">
+                                            <div class="">
+                                                <i class="bi bi-geo-alt-fill me-2 text-primary "></i>
+                                            </div>
+                                            <div class="">
+                                                <p class="mb-0 employeeData ">Address</p>
+                                                <p class="fw-bold employeeDetail">
+                                                    {{Employee_Data.employee.emp_address}}</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row mt-4">
+                                    <!-- <div class="btn w-100 dashboard-btn">
+                                Edit
+                            </div> -->
+                                    <button *ngIf="role === 'admin'" type="button" class="btn dashboard-btn w-100"
+                                        data-bs-toggle="modal" data-bs-target="#editProfileModal"
+                                        (click)="updateData()">
+                                        Edit
+                                    </button>
+                                </div>
+                            </div>
                         </div>
-                    </div>
-                    <!-- leave details -->
-                    <div class="row mt-3  ">
-                        <div class="col leaveWrapper">
-                            <div class=" border-right-dashed pe-2">
-                                <div class="d-flex justify-content-center ">
-                                    <div class=""><i class="bi bi-clock me-2"></i></div>
-                                    <div class="">
-                                        <h6 class="mb-1">Total</h6>
+                        <div class=" col  border p-4  " style="border-radius: 10px;">
 
-                                    </div>
+                            <div class="row gx-0">
+                                <div class="col  border-bottom border-primary border-2  mb-2">
+                                    <h5 class="pb-2"> <i class="bi bi-calendar-week me-2 text-primary"></i> Leaves
+                                        Details</h5>
                                 </div>
-                                <h2 class="mb-0 text-center">16</h2>
                             </div>
-                            <div class=" border-right-dashed pe-2">
-                                <div class="d-flex justify-content-center">
-                                    <div class=""><i class="bi bi-clock me-2"></i></div>
-                                    <div class="">
-                                        <h6 class="mb-1">Taken</h6>
+                            <!-- leave details -->
+                            <div class="row mt-3  ">
+                                <div class="col leaveWrapper">
+                                    <div class=" border-right-dashed pe-2">
+                                        <div class="d-flex justify-content-center ">
+                                            <div class=""><i class="bi bi-clock me-2"></i></div>
+                                            <div class="">
+                                                <h6 class="mb-1">Total</h6>
+
+                                            </div>
+                                        </div>
+                                        <h2 class="mb-0 text-center">16</h2>
+                                    </div>
+                                    <div class=" border-right-dashed pe-2">
+                                        <div class="d-flex justify-content-center">
+                                            <div class=""><i class="bi bi-clock me-2"></i></div>
+                                            <div class="">
+                                                <h6 class="mb-1">Taken</h6>
+                                            </div>
+                                        </div>
+                                        <h2 class="mb-0 text-center">10</h2>
+
+                                    </div>
+
+                                    <div class=" border-right-dashed pe-2 gx-2 gap-2">
+                                        <div class="d-flex justify-content-center">
+                                            <div class=""><i class="bi bi-clock me-2"></i></div>
+                                            <div class="">
+                                                <h6 class="mb-1">Available</h6>
+
+                                            </div>
+                                        </div>
+                                        <h2 class="mb-0 text-center">16</h2>
+
+                                    </div>
+                                    <div class="  gx-2 rounded-1 gap-2">
+                                        <div class="d-flex justify-content-center">
+                                            <div class=""><i class="bi bi-clock me-2"></i></div>
+                                            <div class="">
+                                                <h6 class="mb-1">Request</h6>
+                                            </div>
+                                        </div>
+                                        <h2 class="mb-0 text-center">10</h2>
+
                                     </div>
                                 </div>
-                                <h2 class="mb-0 text-center">10</h2>
-
                             </div>
 
-                            <div class=" border-right-dashed pe-2 gx-2 gap-2">
-                                <div class="d-flex justify-content-center">
-                                    <div class=""><i class="bi bi-clock me-2"></i></div>
-                                    <div class="">
-                                        <h6 class="mb-1">Available</h6>
+                            <!-- leave request status -->
+                            <div class="row ">
+                                <div class="card p-0 shadow-sm rounded-4 overflow-hidden mt-2">
+                                    <div class=" text-white px-4 py-2 " style="background-color: #578FCA;">
+                                        <h5 class="mb-0">Leave Request Status</h5>
+                                    </div>
 
+                                    <div class="d-flex justify-content-around py-2 text-center">
+                                        <!-- Accept -->
+                                        <div>
+                                            <div class="fw-bold text-success">Accept</div>
+                                            <div class="fs-3">{{ leaveStatus.accept }}</div>
+                                        </div>
+
+                                        <!-- Pending -->
+                                        <div>
+                                            <div class="fw-bold" style="color: #806000;">Pending</div>
+                                            <div class="fs-3">{{ leaveStatus.pending }}</div>
+                                        </div>
+
+                                        <!-- Reject -->
+                                        <div>
+                                            <div class="fw-bold text-danger" style="color: #70002a;">Reject</div>
+                                            <div class="fs-3">{{ leaveStatus.reject }}</div>
+                                        </div>
                                     </div>
                                 </div>
-                                <h2 class="mb-0 text-center">16</h2>
+
 
                             </div>
-                            <div class="  gx-2 rounded-1 gap-2">
-                                <div class="d-flex justify-content-center">
-                                    <div class=""><i class="bi bi-clock me-2"></i></div>
-                                    <div class="">
-                                        <h6 class="mb-1">Request</h6>
-                                    </div>
-                                </div>
-                                <h2 class="mb-0 text-center">10</h2>
+                            <div class="row">
+                                <div class="col-lg-12  gx-2 mt-4 rounded-1 gap-2">
+                                    <div class="" *ngIf="role === 'employee'">
 
+                                        <button type="button" class="btn dashboard-btn w-100" data-bs-toggle="modal"
+                                            data-bs-target="#applyLeaveModal">
+                                            Apply For Leave
+                                        </button>
+                                    </div>
+
+                                </div>
                             </div>
                         </div>
-                    </div>
+                        <div class=" col p-0">
+                            <div class="border p-4 " style="border-radius: 10px;">
 
-                    <!-- leave request status -->
-                    <div class="row ">
-                        <div class="card p-0 shadow-sm rounded-4 overflow-hidden mt-2">
-                            <div class=" text-white px-4 py-2 " style="background-color: #578FCA;">
-                                <h5 class="mb-0">Leave Request Status</h5>
+                                <h5 class="border-bottom border-2 border-primary pb-3"><span><i
+                                            class="bi bi-file-earmark-text me-3 text-primary "></i></span>Payslip</h5>
+                                <div class=" mx-auto ">
+                                    <form class="w-100">
+                                        <div class="row  justify-content-between flex-row mt-4">
+
+                                            <!-- Select Year -->
+                                            <div class="col-6"> <label for="yearSelect" class="form-label">Select
+                                                    Year</label>
+                                                <select id="yearSelect" class="form-select" [(ngModel)]="selectedYear"
+                                                    (change)="checkSelection()">
+                                                    <option selected> Year</option>
+                                                    <option *ngFor="let year of years" [value]="year">{{ year }}
+                                                    </option>
+                                                </select>
+                                            </div>
+
+                                            <!-- month dropdown -->
+                                            <div class="col-6">
+                                                <label for="monthSelect" class="form-label">Select Month</label>
+                                                <select id="monthSelect" class="form-select me-2"
+                                                    [(ngModel)]="selectedMonth" (change)="checkSelection()">
+                                                    <option selected> Month</option>
+                                                    <option *ngFor="let month of months" [value]="month.value">{{
+                                                        month.name }}
+                                                    </option>
+                                                </select>
+                                            </div>
+
+                                        </div>
+                                        <button
+                                            class="btn dashboard-btn w-100 mt-5 text-center btn-center">Download</button>
+                                    </form>
+                                </div>
                             </div>
 
-                            <div class="d-flex justify-content-around py-2 text-center">
-                                <!-- Accept -->
-                                <div>
-                                    <div class="fw-bold text-success">Accept</div>
-                                    <div class="fs-3">{{ leaveStatus.accept }}</div>
-                                </div>
-
-                                <!-- Pending -->
-                                <div>
-                                    <div class="fw-bold" style="color: #806000;">Pending</div>
-                                    <div class="fs-3">{{ leaveStatus.pending }}</div>
-                                </div>
-
-                                <!-- Reject -->
-                                <div>
-                                    <div class="fw-bold text-danger" style="color: #70002a;">Reject</div>
-                                    <div class="fs-3">{{ leaveStatus.reject }}</div>
-                                </div>
-                            </div>
-                        </div>
-
-
-                    </div>
-                    <div class="row">
-                        <div class="col-lg-12  gx-2 mt-4 rounded-1 gap-2">
-                            <div class="" *ngIf="role === 'employee'">
-
-                                <button type="button" class="btn dashboard-btn w-100" data-bs-toggle="modal"
-                                    data-bs-target="#applyLeaveModal">
-                                    Apply For Leave
+                            <div class="col d-flex align-items-center border px-4 mt-4"
+                                style="border-radius: 10px; height: 122px;" *ngIf="role === 'employee'">
+                                <button class="btn dashboard-btn w-100" data-bs-toggle="modal"
+                                    data-bs-target="#advanceSalaryModal">
+                                    Apply for Advance Salary
                                 </button>
                             </div>
 
                         </div>
                     </div>
                 </div>
-                <div class=" col p-0">
-                    <div class="border p-4 " style="border-radius: 10px;">
 
-                        <h5 class="border-bottom border-2 border-primary pb-3"><span><i
-                                    class="bi bi-file-earmark-text me-3 text-primary "></i></span>Payslip</h5>
-                        <div class=" mx-auto ">
-                            <form class="w-100">
-                                <div class="row  justify-content-between flex-row mt-4">
 
-                                    <!-- Select Year -->
-                                    <div class="col-6"> <label for="yearSelect" class="form-label">Select Year</label>
-                                        <select id="yearSelect" class="form-select" [(ngModel)]="selectedYear"
-                                            (change)="checkSelection()">
-                                            <option selected> Year</option>
-                                            <option *ngFor="let year of years" [value]="year">{{ year }}</option>
-                                        </select>
-                                    </div>
+                <div class="row">
+                    <div class="col attendaceWrapper">
+                        <div class=" attendenceCard p-3 border text-center" style="border-radius: 10px;">
 
-                                    <!-- month dropdown -->
-                                    <div class="col-6">
-                                        <label for="monthSelect" class="form-label">Select Month</label>
-                                        <select id="monthSelect" class="form-select me-2" [(ngModel)]="selectedMonth"
-                                            (change)="checkSelection()">
-                                            <option selected> Month</option>
-                                            <option *ngFor="let month of months" [value]="month.value">{{ month.name }}
-                                            </option>
-                                        </select>
-                                    </div>
+                            <h6> <i class="bi bi-clock me-2 " style="color:#3674B5"></i> Total Hours Today</h6>
+                            <h5 class="pb-0 text-center">5.5/6</h5>
+                        </div>
+                        <div class=" attendenceCard p-3 border text-center" style="border-radius: 10px;">
+                            <h6> <i class="bi bi-clock me-2" style="color:#3674B5"></i> Total Hours Week</h6>
+                            <h5 class="pb-0 text-center">10/40</h5>
+                        </div>
+                        <div class=" attendenceCard p-3 border text-center" style="border-radius: 10px;">
+                            <h6> <i class="bi bi-clock me-2" style="color:#3674B5"></i> Total Hours Month</h6>
+                            <h5 class="pb-0 text-center">75/98</h5>
+                        </div>
+                        <div class=" attendenceCard p-3 border text-center" style="border-radius: 10px;">
+                            <h6> <i class="bi bi-clock me-2" style="color:#3674B5"></i> Total Overtime</h6>
+                            <h5 class="pb-0 text-center">16(Hours)</h5>
+                        </div>
+                    </div>
+                </div>
 
+
+                <div class="row my-2 gap-2 row-gap-3 ">
+                    <div class="col attendanceAdvanceSalaryWrapper">
+                        <div class=" p-3  border " style="border-radius: 10px;">
+
+
+                            <div class="row gx-0">
+                                <div class="col-12  border-bottom border-primary-light mb-2">
+                                    <h5 class="pb-2"> <i class="bi bi-calendar-check me-2 text-primary "></i> Attendance
+                                    </h5>
                                 </div>
-                                <button class="btn dashboard-btn w-100 mt-5 text-center btn-center">Download</button>
-                            </form>
-                        </div>
-                    </div>
+                                <div class="d-flex ">
+                                    <div class="col col-md-7 ">
+                                        <div class="chart-container p-0">
+                                            <h6 class="text-center"> {{ currentDateTime | date:
+                                                'HH:mm' }} , {{ currentDateTime | date: 'dd-MM-yyyy' }} </h6>
 
-                    <div class="col d-flex align-items-center border px-4 mt-4"
-                        style="border-radius: 10px; height: 122px;"
-                        *ngIf="role === 'employee'">
-                        <button class="btn dashboard-btn w-100" data-bs-toggle="modal"
-                            data-bs-target="#advanceSalaryModal">
-                            Apply for Advance Salary
-                        </button>
-                    </div>
-
-                </div>
-            </div>
-        </div>
-
-
-        <div class="row">
-            <div class="col attendaceWrapper">
-                <div class=" attendenceCard p-3 border text-center" style="border-radius: 10px;">
-
-                    <h6> <i class="bi bi-clock me-2 " style="color:#3674B5"></i> Total Hours Today</h6>
-                    <h5 class="pb-0 text-center">5.5/6</h5>
-                </div>
-                <div class=" attendenceCard p-3 border text-center" style="border-radius: 10px;">
-                    <h6> <i class="bi bi-clock me-2" style="color:#3674B5"></i> Total Hours Week</h6>
-                    <h5 class="pb-0 text-center">10/40</h5>
-                </div>
-                <div class=" attendenceCard p-3 border text-center" style="border-radius: 10px;">
-                    <h6> <i class="bi bi-clock me-2" style="color:#3674B5"></i> Total Hours Month</h6>
-                    <h5 class="pb-0 text-center">75/98</h5>
-                </div>
-                <div class=" attendenceCard p-3 border text-center" style="border-radius: 10px;">
-                    <h6> <i class="bi bi-clock me-2" style="color:#3674B5"></i> Total Overtime</h6>
-                    <h5 class="pb-0 text-center">16(Hours)</h5>
-                </div>
-            </div>
-        </div>
-
-
-        <div class="row my-2 gap-2 row-gap-3 ">
-            <div class="col attendanceAdvanceSalaryWrapper">
-                <div class=" p-3  border " style="border-radius: 10px;">
-
-
-                    <div class="row gx-0">
-                        <div class="col-12  border-bottom border-primary-light mb-2">
-                            <h5 class="pb-2"> <i class="bi bi-calendar-check me-2 text-primary "></i> Attendance </h5>
-                        </div>
-                        <div class="d-flex ">
-                            <div class="col col-md-7 ">
-                                <div class="chart-container p-0">
-                                    <h6 class="text-center"> {{ currentDateTime | date:
-                                        'HH:mm' }} , {{ currentDateTime | date: 'dd-MM-yyyy' }} </h6>
-
-                                    <!-- attendance chart  -->
-                                    <div class="chart">
-                                        <div style="position: relative; width: 200px; margin: auto;">
-                                            <canvas baseChart [data]="doughnutChartData" [type]="'doughnut'"
-                                                [options]="doughnutChartOptions">
-                                            </canvas>
-                                            <!-- Centered Text -->
-                                            <div
-                                                style="position:absolute;top:36%;left:51%;transform:translate(-50%,-50%);font-size:20px;font-weight:bold;text-align:center">
-                                                <div>Total Attendance</div>
-                                                <div>500</div>
+                                            <!-- attendance chart  -->
+                                            <div class="chart">
+                                                <div style="position: relative; width: 200px; margin: auto;">
+                                                    <canvas baseChart [data]="doughnutChartData" [type]="'doughnut'"
+                                                        [options]="doughnutChartOptions">
+                                                    </canvas>
+                                                    <!-- Centered Text -->
+                                                    <div
+                                                        style="position:absolute;top:36%;left:51%;transform:translate(-50%,-50%);font-size:20px;font-weight:bold;text-align:center">
+                                                        <div>Total Attendance</div>
+                                                        <div>500</div>
+                                                    </div>
+                                                </div>
                                             </div>
+
                                         </div>
                                     </div>
+                                    <div class="col col-md-5 mt-3 d-flex flex-column justify-content-between w-50">
+                                        <div class="text-center"><i class="bi bi-box-arrow-in-right text-primary"></i>
+                                            Punch In
+                                            At
+                                            <br>
+                                            <span style="font-size: 18px; font-weight: bold;">
+                                                10 AM
+                                            </span>
+                                        </div>
+                                        <div class="text-center"><i class="bi bi-box-arrow-in-left  text-primary"></i>
+                                            Punch Out
+                                            At
+                                            <br><span style="font-size: 18px; font-weight: bold;">
+                                                Not Yet
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
 
-                                </div>
-                            </div>
-                            <div class="col col-md-5 mt-3 d-flex flex-column justify-content-between w-50">
-                                <div class="text-center"><i class="bi bi-box-arrow-in-right text-primary"></i> Punch In
-                                    At
-                                    <br>
-                                    <span style="font-size: 18px; font-weight: bold;">
-                                        10 AM
-                                    </span>
-                                </div>
-                                <div class="text-center"><i class="bi bi-box-arrow-in-left  text-primary"></i> Punch Out
-                                    At
-                                    <br><span style="font-size: 18px; font-weight: bold;">
-                                        Not Yet
-                                    </span>
-                                </div>
+
                             </div>
                         </div>
-
-
-                    </div>
-                </div>
-                <div class=" p-3 border advanceSalaryTracking" style="border-radius: 10px;">
-                    <!-- Performnce chart -->
-                    <!-- <div class="chart-container">
+                        <div class=" p-3 border advanceSalaryTracking" style="border-radius: 10px;">
+                            <!-- Performnce chart -->
+                            <!-- <div class="chart-container">
                     <canvas baseChart [data]="chartData" [options]="chartOptions">
                     </canvas>
                 </div> -->
-                    <div class="card rounded-4 border-0">
-                        <div class="d-flex justify-content-between align-items-center mb-2">
-                            <h5 class="fw-bold">
-                                ₹ <span class="ms-2">Advance Salary Tracking</span>
-                            </h5>
-                            <select class="form-select w-auto" [(ngModel)]="selectedYear">
-                                <option *ngFor="let year of years" [value]="year">{{ year }}</option>
-                            </select>
-                        </div>
+                            <div class="card rounded-4 border-0">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <h5 class="fw-bold">
+                                        ₹ <span class="ms-2">Advance Salary Tracking</span>
+                                    </h5>
+                                    <select class="form-select w-auto" [(ngModel)]="selectedYear">
+                                        <option *ngFor="let year of years" [value]="year">{{ year }}</option>
+                                    </select>
+                                </div>
 
-                        <!-- Progress Bar -->
-                        <div class="progress mb-2" style="height: 8px;">
-                            <div class="progress-bar bg-success"
-                                [style.width.%]="(salaryTracking.paidAmount / salaryTracking.totalAmount) * 100"></div>
-                        </div>
-                        <div class="d-flex justify-content-between small mb-4 px-1">
-                            <div style="color:gray">
-                                <span class="text-success"> ● </span> Paid<br />
-                                <h5 class="text-dark">₹ {{ salaryTracking.paidAmount }}</h5>
-                            </div>
-                            <div class="text-muted text-end">
-                                ● Remaining<br />
-                                <h5 class="text-dark">₹ {{ salaryTracking.totalAmount - salaryTracking.paidAmount }}
-                                </h5>
-                            </div>
-                        </div>
+                                <!-- Progress Bar -->
+                                <div class="progress mb-2" style="height: 8px;">
+                                    <div class="progress-bar bg-success"
+                                        [style.width.%]="(salaryTracking.paidAmount / salaryTracking.totalAmount) * 100">
+                                    </div>
+                                </div>
+                                <div class="d-flex justify-content-between small mb-4 px-1">
+                                    <div style="color:gray">
+                                        <span class="text-success"> ● </span> Paid<br />
+                                        <h5 class="text-dark">₹ {{ salaryTracking.paidAmount }}</h5>
+                                    </div>
+                                    <div class="text-muted text-end">
+                                        ● Remaining<br />
+                                        <h5 class="text-dark">₹ {{ salaryTracking.totalAmount -
+                                            salaryTracking.paidAmount }}
+                                        </h5>
+                                    </div>
+                                </div>
 
-                        <!-- Info Grid -->
-                        <div class="row g-3 row-gap-2">
-                            <div class="col-md-2">
-                                <label>Total Amount <span class="rupee-text">(in ₹)</span> </label>
-                                <input class="form-control" readonly [value]="salaryTracking.totalAmount" />
+                                <!-- Info Grid -->
+                                <div class="row g-3 row-gap-2">
+                                    <div class="col-md-2">
+                                        <label>Total Amount <span class="rupee-text">(in ₹)</span> </label>
+                                        <input class="form-control" readonly [value]="salaryTracking.totalAmount" />
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label>Installment Amount <span class="rupee-text">(in ₹)</span> </label>
+                                        <input class="form-control" readonly
+                                            [value]="salaryTracking.installmentAmount" />
+                                    </div>
+                                    <div class="col-md-2">
+                                        <label>Tenure</label> <br>
+                                        <input class="form-control" readonly [value]="salaryTracking.tenure" />
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label>First Installment Paid Date</label>
+                                        <input class="form-control" readonly
+                                            [value]="salaryTracking.firstInstallmentDate" />
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label>Next Installment Due Date</label>
+                                        <input class="form-control" readonly
+                                            [value]="salaryTracking.nextInstallmentDueDate" />
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label>Last Installment Paid Date</label>
+                                        <input class="form-control" readonly
+                                            [value]="salaryTracking.lastInstallmentPaidDate" />
+                                    </div>
+                                    <div class="col-md-3 ">
+                                        <label>Installment End Date</label>
+                                        <input class="form-control" readonly
+                                            [value]="salaryTracking.installmentEndDate" />
+                                    </div>
+                                </div>
                             </div>
-                            <div class="col-md-4">
-                                <label>Installment Amount <span class="rupee-text">(in ₹)</span> </label>
-                                <input class="form-control" readonly [value]="salaryTracking.installmentAmount" />
-                            </div>
-                            <div class="col-md-2">
-                                <label>Tenure</label> <br>
-                                <input class="form-control" readonly [value]="salaryTracking.tenure" />
-                            </div>
-                            <div class="col-md-4">
-                                <label>First Installment Paid Date</label>
-                                <input class="form-control" readonly [value]="salaryTracking.firstInstallmentDate" />
-                            </div>
-                            <div class="col-md-4">
-                                <label>Next Installment Due Date</label>
-                                <input class="form-control" readonly [value]="salaryTracking.nextInstallmentDueDate" />
-                            </div>
-                            <div class="col-md-4">
-                                <label>Last Installment Paid Date</label>
-                                <input class="form-control" readonly [value]="salaryTracking.lastInstallmentPaidDate" />
-                            </div>
-                            <div class="col-md-3 ">
-                                <label>Installment End Date</label>
-                                <input class="form-control" readonly [value]="salaryTracking.installmentEndDate" />
-                            </div>
+
+
                         </div>
                     </div>
-
-
                 </div>
             </div>
         </div>
-    </div>
-</div>
 
-<!-- edit-profile.component.html -->
-<div class="modal fade" id="editProfileModal" tabindex="-1" aria-labelledby="editProfileModalLabel">
-    <div class="modal-dialog modal-xl modal-dialog-centered">
-        <div class="modal-content">
+        <!-- edit-profile.component.html -->
+        <div class="modal fade" id="editProfileModal" tabindex="-1" aria-labelledby="editProfileModalLabel">
+            <div class="modal-dialog modal-xl modal-dialog-centered">
+                <div class="modal-content">
 
-            <div class="modal-header text-white ">
-                <h5 class="modal-title" id="editProfileModalLabel">Edit Employee</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
-                    aria-label="Close"></button>
-            </div>
+                    <div class="modal-header text-white ">
+                        <h5 class="modal-title" id="editProfileModalLabel">Edit Employee</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                            aria-label="Close"></button>
+                    </div>
 
-            <form *ngIf="editForm" [formGroup]="editForm" (ngSubmit)="editEmployee()">
-                <div class="modal-body ">
-                    <div class="row g-3 pt-3 pb-5">
+                    <form *ngIf="editForm" [formGroup]="editForm" (ngSubmit)="editEmployee()">
+                        <div class="modal-body ">
+                            <div class="row g-3 pt-3 pb-5">
 
-                        <!-- Email -->
-                        <div class="col-md-4">
-                            <label class="form-label">Email</label>
-                            <input type="email" class="form-control" placeholder="Enter Email" formControlName="email"
-                                [class.is-invalid]="isSubmitted && editForm.get('email')?.invalid" />
+                                <!-- Email -->
+                                <div class="col-md-4">
+                                    <label class="form-label">Email</label>
+                                    <input type="email" class="form-control" placeholder="Enter Email"
+                                        formControlName="email"
+                                        [class.is-invalid]="isSubmitted && editForm.get('email')?.invalid" />
 
-                            <!-- <div *ngIf="isSubmitted && editForm.get('email')?.hasError('required')" class="text-danger">
+                                    <!-- <div *ngIf="isSubmitted && editForm.get('email')?.hasError('required')" class="text-danger">
                         Email is required.
                       </div> -->
-                            <div *ngIf="isSubmitted && editForm.get('email')?.hasError('email')" class="text-danger">
-                                Please enter a valid email address.
-                            </div>
-                        </div>
+                                    <div *ngIf="isSubmitted && editForm.get('email')?.hasError('email')"
+                                        class="text-danger">
+                                        Please enter a valid email address.
+                                    </div>
+                                </div>
 
-                        <!-- Contact -->
-                        <div class="col-md-3">
-                            <label class="form-label">Contact</label>
-                            <input type="text" class="form-control" formControlName="contact"
-                                placeholder="Enter Contact"
-                                [class.is-invalid]="isSubmitted && editForm.get('contact')?.invalid" />
+                                <!-- Contact -->
+                                <div class="col-md-3">
+                                    <label class="form-label">Contact</label>
+                                    <input type="text" class="form-control" formControlName="contact"
+                                        placeholder="Enter Contact"
+                                        [class.is-invalid]="isSubmitted && editForm.get('contact')?.invalid" />
 
-                            <div *ngIf="isSubmitted && editForm.get('contact')?.errors?.['pattern']"
-                                class="text-danger">
-                                Contact must contain only numbers.
-                            </div>
-                        </div>
+                                    <div *ngIf="isSubmitted && editForm.get('contact')?.errors?.['pattern']"
+                                        class="text-danger">
+                                        Contact must contain only numbers.
+                                    </div>
+                                </div>
 
-                        <!-- Status -->
-                        <div class="col-md-2">
-                            <label class="form-label">Status</label>
-                            <select class="form-select" formControlName="status"
-                                [class.is-invalid]="isSubmitted && editForm.get('status')?.invalid">
-                                <option value="">-- Select Status --</option>
-                                <option value="Active">Active</option>
-                                <option value="Inactive">Inactive</option>
-                            </select>
+                                <!-- Status -->
+                                <div class="col-md-2">
+                                    <label class="form-label">Status</label>
+                                    <select class="form-select" formControlName="status"
+                                        [class.is-invalid]="isSubmitted && editForm.get('status')?.invalid">
+                                        <option value="">-- Select Status --</option>
+                                        <option value="Active">Active</option>
+                                        <option value="Inactive">Inactive</option>
+                                    </select>
 
-                            <!-- <div *ngIf="isSubmitted && editForm.get('status')?.hasError('required')"
+                                    <!-- <div *ngIf="isSubmitted && editForm.get('status')?.hasError('required')"
                                 class="text-danger">
                                 Status is required.
                             </div> -->
-                        </div>
+                                </div>
 
-                        <!-- Address -->
-                        <div class="col-md-3">
-                            <label class="form-label">Address</label>
-                            <input type="text" class="form-control" formControlName="address"
-                                placeholder="Enter Address"
-                                [class.is-invalid]="isSubmitted && editForm.get('address')?.invalid" />
+                                <!-- Address -->
+                                <div class="col-md-3">
+                                    <label class="form-label">Address</label>
+                                    <input type="text" class="form-control" formControlName="address"
+                                        placeholder="Enter Address"
+                                        [class.is-invalid]="isSubmitted && editForm.get('address')?.invalid" />
 
-                            <div *ngIf="isSubmitted && editForm.get('address')?.hasError('pattern')"
-                                class="text-danger">
-                                Enter Address in correct format.
+                                    <div *ngIf="isSubmitted && editForm.get('address')?.hasError('pattern')"
+                                        class="text-danger">
+                                        Enter Address in correct format.
+                                    </div>
+                                </div>
+
                             </div>
                         </div>
 
-                    </div>
-                </div>
-
-                <div class="modal-footer">
-                    <button type="submit" class="btn BtnColor">Update</button>
-                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
-                </div>
-            </form>
-
-        </div>
-    </div>
-</div>
-
-
-<!-- Apply For Leave Modal -->
-<div class="modal fade" id="applyLeaveModal" tabindex="-1">
-    <div class="modal-dialog modal-lg modal-dialog-centered">
-        <div class="modal-content rounded-4">
-            <div class="modal-header text-white rounded-top-4">
-                <h5 class="modal-title" id="applyLeaveLabel">Apply For Leave</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
-                    aria-label="Close"></button>
-            </div>
-
-            <form *ngIf="leaveForm" [formGroup]="leaveForm" (ngSubmit)="addLeaveRequest()">
-                <div class="modal-body">
-                    <div class="row mb-3">
-
-                        <!-- Leave Type -->
-                        <div class="col-md-4">
-                            <label class="form-label">Leave Name</label>
-                            <select class="form-select" formControlName="leave_id" 
-                             [ngClass]="{'input-error': isLeaveSubmitted && leaveForm.get('leave_id')?.invalid,
-                                'is-invalid': isLeaveSubmitted && leaveForm.get('leave_id')?.invalid }">
-                                <option [value]="null" disabled selected>-- Select Leave Type --</option>
-                                <option *ngFor="let leave of leaveTypes" [value]="leave.leave_id">{{ leave.leave_name }}</option>
-                            </select>
-                           
+                        <div class="modal-footer">
+                            <button type="submit" class="btn BtnColor">Update</button>
+                            <button type="button" class="btn btn-outline-secondary"
+                                data-bs-dismiss="modal">Cancel</button>
                         </div>
+                    </form>
 
-                        <!-- No Of Leaves -->
-                        <!-- <div class="col-md-2">
+                </div>
+            </div>
+        </div>
+
+
+        <!-- Apply For Leave Modal -->
+        <div class="modal fade" id="applyLeaveModal" tabindex="-1">
+            <div class="modal-dialog modal-lg modal-dialog-centered">
+                <div class="modal-content rounded-4">
+                    <div class="modal-header text-white rounded-top-4">
+                        <h5 class="modal-title" id="applyLeaveLabel">Apply For Leave</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                            aria-label="Close"></button>
+                    </div>
+
+                    <form *ngIf="leaveForm" [formGroup]="leaveForm" (ngSubmit)="addLeaveRequest()">
+                        <div class="modal-body">
+                            <div class="row mb-3">
+
+                                <!-- Leave Type -->
+                                <div class="col-md-4">
+                                    <label class="form-label">Leave Name</label>
+                                    <select class="form-select" formControlName="leave_id" [ngClass]="{'input-error': isLeaveSubmitted && leaveForm.get('leave_id')?.invalid,
+                                'is-invalid': isLeaveSubmitted && leaveForm.get('leave_id')?.invalid }">
+                                        <option [value]="null" disabled selected>-- Select Leave Type --</option>
+                                        <option *ngFor="let leave of leaveTypes" [value]="leave.leave_id">{{
+                                            leave.leave_name }}</option>
+                                    </select>
+
+                                </div>
+
+                                <!-- No Of Leaves -->
+                                <!-- <div class="col-md-2">
                             <label class="form-label">No Of Leaves</label>
                             <input type="number" class="form-control" formControlName="noOfDays" [ngClass]="{
                                'is-invalid': isLeaveSubmitted && leaveForm.get('noOfDays')?.invalid
@@ -534,120 +559,115 @@
                             </small>
                         </div> -->
 
-                        <!-- From Date -->
-                        <div class="col-md-4">
-                            <label class="form-label">From Date</label>
-                            <input type="date" class="form-control" formControlName="start_date" 
-                            [ngClass]="{'input-error': isLeaveSubmitted && leaveForm.get('start_date')?.invalid,
-                                'is-invalid': isLeaveSubmitted && leaveForm.get('start_date')?.invalid }"/>
-                           
-                        </div>
+                                <!-- From Date -->
+                                <div class="col-md-4">
+                                    <label class="form-label">From Date</label>
+                                    <input type="date" class="form-control" formControlName="start_date" [ngClass]="{'input-error': isLeaveSubmitted && leaveForm.get('start_date')?.invalid,
+                                'is-invalid': isLeaveSubmitted && leaveForm.get('start_date')?.invalid }" />
 
-                        <!-- To Date -->
-                        <div class="col-md-4">
-                            <label class="form-label">To Date</label>
-                            <input type="date" class="form-control" formControlName="end_date" 
-                            [ngClass]="{'input-error': isLeaveSubmitted && leaveForm.get('end_date')?.invalid,
+                                </div>
+
+                                <!-- To Date -->
+                                <div class="col-md-4">
+                                    <label class="form-label">To Date</label>
+                                    <input type="date" class="form-control" formControlName="end_date" [ngClass]="{'input-error': isLeaveSubmitted && leaveForm.get('end_date')?.invalid,
                                 'is-invalid': isLeaveSubmitted && leaveForm.get('end_date')?.invalid }" />
-                           
-                        </div>
-                    </div>
 
-                    <!-- Reason -->
-                    <div class="mb-3">
-                        <label class="form-label">Reason</label>
-                        <textarea class="form-control" rows="3" formControlName="leave_reason"
-                            placeholder="Enter your reason here"
-                            [ngClass]="{'input-error': isLeaveSubmitted && leaveForm.get('leave_reason')?.invalid,
+                                </div>
+                            </div>
+
+                            <!-- Reason -->
+                            <div class="mb-3">
+                                <label class="form-label">Reason</label>
+                                <textarea class="form-control" rows="3" formControlName="leave_reason"
+                                    placeholder="Enter your reason here" [ngClass]="{'input-error': isLeaveSubmitted && leaveForm.get('leave_reason')?.invalid,
                                 'is-invalid': isLeaveSubmitted && leaveForm.get('leave_reason')?.invalid }"></textarea>
-                        <small class="text-danger"
-                            *ngIf="leaveForm.get('leave_reason')?.value && leaveForm.get('leave_reason')?.hasError('pattern')">
-                            No special characters are allowed.
-                        </small>
-                    </div>
-                </div>
-
-                <div class="modal-footer d-flex justify-content-end">
-                    <button type="submit" class="btn btn-primary me-2 dashboard-btn">Apply</button>
-                     <!-- <button [disabled]="leaveForm.invalid || isLeaveSubmitted">Submit</button> -->
-                    <button type="button" class="btn btn-outline-dark" data-bs-dismiss="modal">Cancel</button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
-
-<!-- Apply For Advance Salary Modal -->
-<div class="modal fade" id="advanceSalaryModal" tabindex="-1">
-    <div class="modal-dialog modal-lg modal-dialog-centered">
-        <div class="modal-content rounded-4">
-            <div class="modal-header  text-white rounded-top-4">
-                <h5 class="modal-title" id="advanceSalaryLabel">Apply For Advance Salary</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
-                    aria-label="Close"></button>
-            </div>
-
-            <form *ngIf="advanceSalaryForm" [formGroup]="advanceSalaryForm" (ngSubmit)="addAdvanceSalary()">
-                <div class="modal-body">
-
-                    <div class="row mb-3">
-
-                        <div class="col-md-3">
-                            <label class="form-label">Tenure</label>
-                            <select class="form-select" formControlName="tenure"
-                             [ngClass]="{'input-error': isAdvanceSalary && advanceSalaryForm.get('tenure')?.invalid,
-                                'is-invalid': isAdvanceSalary && advanceSalaryForm.get('tenure')?.invalid }"
-                            >
-                                <option [value]="null" disabled selected>-- Select Tenure --</option>
-                                <option *ngFor="let option of tenures" [value]="option">{{ option }}</option>
-                            </select>
-                            <!-- <div *ngIf="advanceSalaryForm.get('tenure')?.invalid && advanceSalaryForm.get('tenure')?.touched"
-                                class="text-danger">
-                                This is required field.
-                            </div> -->
-                        </div>
-
-                        <div class="col-md-3">
-                            <label class="form-label">Amount (in ₹)</label>
-                            <input type="number" class="form-control" formControlName="advance_amount"
-                                (input)="calculateInstallment()"
-                                [ngClass]="{'input-error': isAdvanceSalary && advanceSalaryForm.get('advance_amount')?.invalid,
-                                'is-invalid': isAdvanceSalary && advanceSalaryForm.get('advance_amount')?.invalid }"
-                                 />
-                            <!-- <div *ngIf="advanceSalaryForm.get('amount')?.invalid && advanceSalaryForm.get('amount')?.touched"
-                                class="text-danger">
-                                This is required field.
-                            </div> -->
-                        </div>
-
-                        <div class="col-md-6">
-                            <label class="form-label">Reason</label>
-                            <textarea rows="3" class="form-control" formControlName="remarks"
-                                placeholder="Enter your reason here"
-                                [ngClass]="{'input-error': isAdvanceSalary && advanceSalaryForm.get('remarks')?.invalid,
-                                'is-invalid': isAdvanceSalary && advanceSalaryForm.get('remarks')?.invalid }"
-                                ></textarea>
-                            <div *ngIf="advanceSalaryForm.get('reason')?.invalid && advanceSalaryForm.get('reason')?.value && isAdvanceSalary"
-                                class="text-danger">
-                                NO special character are allowed.
+                                <small class="text-danger"
+                                    *ngIf="leaveForm.get('leave_reason')?.value && leaveForm.get('leave_reason')?.hasError('pattern')">
+                                    No special characters are allowed.
+                                </small>
                             </div>
                         </div>
 
-                    </div>
-
-                    <div class="mb-3">
-                        <label class="form-label">Installment Amount (in ₹)</label>
-                        <input type="text" class="form-control readonlyInput" [value]="installmentAmount">
-                    </div>
-
+                        <div class="modal-footer d-flex justify-content-end">
+                            <button type="submit" class="btn btn-primary me-2 dashboard-btn">Apply</button>
+                            <!-- <button [disabled]="leaveForm.invalid || isLeaveSubmitted">Submit</button> -->
+                            <button type="button" class="btn btn-outline-dark" data-bs-dismiss="modal">Cancel</button>
+                        </div>
+                    </form>
                 </div>
-
-                <div class="modal-footer d-flex justify-content-end">
-                    <button type="submit" class="btn btn-primary dashboard-btn">Apply</button>
-                    <button type="button" class="btn btn-outline-dark" data-bs-dismiss="modal">Cancel</button>
-                </div>
-            </form>
-
+            </div>
         </div>
+
+        <!-- Apply For Advance Salary Modal -->
+        <div class="modal fade" id="advanceSalaryModal" tabindex="-1">
+            <div class="modal-dialog modal-lg modal-dialog-centered">
+                <div class="modal-content rounded-4">
+                    <div class="modal-header  text-white rounded-top-4">
+                        <h5 class="modal-title" id="advanceSalaryLabel">Apply For Advance Salary</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                            aria-label="Close"></button>
+                    </div>
+
+                    <form *ngIf="advanceSalaryForm" [formGroup]="advanceSalaryForm" (ngSubmit)="addAdvanceSalary()">
+                        <div class="modal-body">
+
+                            <div class="row mb-3">
+
+                                <div class="col-md-3">
+                                    <label class="form-label">Tenure</label>
+                                    <select class="form-select" formControlName="tenure" [ngClass]="{'input-error': isAdvanceSalary && advanceSalaryForm.get('tenure')?.invalid,
+                                'is-invalid': isAdvanceSalary && advanceSalaryForm.get('tenure')?.invalid }">
+                                        <option [value]="null" disabled selected>-- Select Tenure --</option>
+                                        <option *ngFor="let option of tenures" [value]="option">{{ option }}</option>
+                                    </select>
+                                    <!-- <div *ngIf="advanceSalaryForm.get('tenure')?.invalid && advanceSalaryForm.get('tenure')?.touched"
+                                class="text-danger">
+                                This is required field.
+                            </div> -->
+                                </div>
+
+                                <div class="col-md-3">
+                                    <label class="form-label">Amount (in ₹)</label>
+                                    <input type="number" class="form-control" formControlName="advance_amount"
+                                        (input)="calculateInstallment()" [ngClass]="{'input-error': isAdvanceSalary && advanceSalaryForm.get('advance_amount')?.invalid,
+                                'is-invalid': isAdvanceSalary && advanceSalaryForm.get('advance_amount')?.invalid }" />
+                                    <!-- <div *ngIf="advanceSalaryForm.get('amount')?.invalid && advanceSalaryForm.get('amount')?.touched"
+                                class="text-danger">
+                                This is required field.
+                            </div> -->
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label class="form-label">Reason</label>
+                                    <textarea rows="3" class="form-control" formControlName="remarks"
+                                        placeholder="Enter your reason here"
+                                        [ngClass]="{'input-error': isAdvanceSalary && advanceSalaryForm.get('remarks')?.invalid,
+                                'is-invalid': isAdvanceSalary && advanceSalaryForm.get('remarks')?.invalid }"></textarea>
+                                    <div *ngIf="advanceSalaryForm.get('reason')?.invalid && advanceSalaryForm.get('reason')?.value && isAdvanceSalary"
+                                        class="text-danger">
+                                        NO special character are allowed.
+                                    </div>
+                                </div>
+
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Installment Amount (in ₹)</label>
+                                <input type="text" class="form-control readonlyInput" [value]="installmentAmount">
+                            </div>
+
+                        </div>
+
+                        <div class="modal-footer d-flex justify-content-end">
+                            <button type="submit" class="btn btn-primary dashboard-btn">Apply</button>
+                            <button type="button" class="btn btn-outline-dark" data-bs-dismiss="modal">Cancel</button>
+                        </div>
+                    </form>
+
+                </div>
+            </div>
+        </div>
+
     </div>
 </div>

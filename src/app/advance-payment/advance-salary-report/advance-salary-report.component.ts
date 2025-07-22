@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { ColDef } from 'ag-grid-community';
 import { HrmserviceService } from 'src/app/hrmservice.service';
+import { ToastrService } from 'ngx-toastr';
 
 @Component({
   selector: 'app-advance-salary-report',
@@ -17,11 +18,13 @@ export class AdvanceSalaryReportComponent {
   rowData: any[] = [];
   columnDefs: ColDef[] = [];
   selectedEmployee: any;
-  employees: any  = [];
+  employees: any = [];
   EditAdvancePaymentData!: any;
+  isLoading: boolean = false;
+  gridApi: any;
 
   years = [2023, 2024, 2025];
-   months = [
+  months = [
     { id: 1, value: 'January' },
     { id: 2, value: 'February' },
     { id: 3, value: 'March' },
@@ -36,34 +39,38 @@ export class AdvanceSalaryReportComponent {
     { id: 12, value: 'December' }
   ];
 
-  constructor(private fb: FormBuilder, private service: HrmserviceService) {}
+  constructor(private fb: FormBuilder, private service: HrmserviceService, private toastr: ToastrService) { }
 
   ngOnInit() {
     this.initializeColumns()
     const currentDate = new Date();
-    this.today = currentDate.toISOString().split('T')[0]; 
-      this.displayApprovedData = this.fb.group({
-          id: [{ value: '', disabled: true }],
-          employeeName: [{ value: '', disabled: true }],
-          company: [{ value: '', disabled: true }],
-          department: [{ value: '', disabled: true }],
-          role: [{ value: '', disabled: true }],
-          requestData: [{ value: '', disabled: true }],
-          status: [{ value: '', disabled: true }],
-          tenure: [{ value: '', disabled: true }],
-          amount: [{ value: '', disabled: true }],
-          reason: [{ value: '', disabled: true }],
-          EMIStartDate: [{ value: '', disabled: true }],
-          installmentAmount: [{ value: '', disabled: true }],
-        })
-    this.searchEmployeeAdvanceSalary()
+    this.today = currentDate.toISOString().split('T')[0];
+    this.displayApprovedData = this.fb.group({
+      id: [{ value: '', disabled: true }],
+      employeeName: [{ value: '', disabled: true }],
+      company: [{ value: '', disabled: true }],
+      department: [{ value: '', disabled: true }],
+      role: [{ value: '', disabled: true }],
+      requestData: [{ value: '', disabled: true }],
+      status: [{ value: '', disabled: true }],
+      tenure: [{ value: '', disabled: true }],
+      amount: [{ value: '', disabled: true }],
+      reason: [{ value: '', disabled: true }],
+      EMIStartDate: [{ value: '', disabled: true }],
+      installmentAmount: [{ value: '', disabled: true }],
+    })
+  }
+
+  onYearMonthChange() {
+    this.searchEmployeeAdvanceSalary();
   }
 
   searchEmployeeAdvanceSalary() {
     this.rowData = [];
     const code = this.searchValue?.trim();
     if (!code) {
-      this.rowData = []; 
+      this.rowData = [];
+      this.toastr.error('Please Enter Employee Code');
       return;
     }
 
@@ -78,7 +85,7 @@ export class AdvanceSalaryReportComponent {
         if (res.status === 'success' && res.data.length > 0) {
           this.rowData = res.data;
         } else {
-          this.rowData = []; 
+          this.rowData = [];
         }
       },
       (error) => {
@@ -88,6 +95,9 @@ export class AdvanceSalaryReportComponent {
     );
   }
 
+  onGridReady(params: any) {
+    this.gridApi = params.api;
+  }
 
   // getemployees () {
   //    this.service.post('all/employee', {}).subscribe((res: any) => {
@@ -154,19 +164,20 @@ export class AdvanceSalaryReportComponent {
 
   initializeColumns() {
     this.columnDefs = [
-     { headerName: 'Emp Code', field: 'employee_code', sortable: true, filter: true, maxWidth: 150 },
-      { headerName: 'Employee Name', field: 'emp_name', sortable: true, filter: true, maxWidth:180 },
-      { headerName: 'Apply Date', field: 'apply_date', sortable: true, filter: true, maxWidth:150 },
-      { headerName: 'Adv. Amount', field: 'advance_amount', sortable: true, filter: true, maxWidth:150 },
-      { headerName: 'Remaining Amount', field: 'remaining_balance', sortable: true, filter: true, maxWidth:190 },
-      { headerName: 'EMI', field: 'emi', sortable: true, filter: true, maxWidth:100 },
-      { headerName: 'Status', field: 'status', sortable: true, filter: true, maxWidth:150,
+      { headerName: 'Emp Code', field: 'employee_code', sortable: true, filter: true, maxWidth: 150 },
+      { headerName: 'Employee Name', field: 'emp_name', sortable: true, filter: true, maxWidth: 180 },
+      { headerName: 'Apply Date', field: 'apply_date', sortable: true, filter: true, maxWidth: 150 },
+      { headerName: 'Adv. Amount', field: 'advance_amount', sortable: true, filter: true, maxWidth: 150 },
+      { headerName: 'Remaining Amount', field: 'remaining_balance', sortable: true, filter: true, maxWidth: 190 },
+      { headerName: 'EMI', field: 'emi', sortable: true, filter: true, maxWidth: 100 },
+      {
+        headerName: 'Status', field: 'status', sortable: true, filter: true, maxWidth: 150,
         cellRenderer: this.statusButtonRenderer,
       },
-    ];  
+    ];
     this.columnDefs.push({
       headerName: 'Actions',
-      maxWidth:120,
+      maxWidth: 120,
       cellStyle: { border: '1px solid #ddd' },
       cellRenderer: (params: any) => {
         return `<button type="button" class="btn btn-sm mb-1" data-bs-toggle="modal" data-bs-target="#salaryReport" style="background-color:#C8E3FF">
@@ -175,30 +186,30 @@ export class AdvanceSalaryReportComponent {
       },
       onCellClicked: (event: any) => {
         this.getSingleAdvanceSalary(event.data.adv_pay_id);
-      },  
+      },
     });
   }
 
-  
-  getSingleAdvanceSalary(data:any) {
-     this.service.post('single/advancesaraly',{adv_pay_id: data}).subscribe((res: any) => {
-      if(res.status === 'success'){
+
+  getSingleAdvanceSalary(data: any) {
+    this.service.post('single/advancesaraly', { adv_pay_id: data }).subscribe((res: any) => {
+      if (res.status === 'success') {
         const singleAdvanceSalary = res.data[0];
-          this.EditAdvancePaymentData = {
-            id: singleAdvanceSalary?.employee_code,
-            employeeName: singleAdvanceSalary?.emp_name,
-            company: singleAdvanceSalary?.company_name,
-            department: singleAdvanceSalary?.department_name,
-            role: singleAdvanceSalary?.designation_name,
-            requestData: singleAdvanceSalary?.apply_date,
-            status: singleAdvanceSalary?.status,
-            tenure: singleAdvanceSalary?.tenure,
-            amount: singleAdvanceSalary?.advance_amount,
-            reason: singleAdvanceSalary?.remarks,
-            EMIStartDate: singleAdvanceSalary?.updated_on,
-            installmentAmount:singleAdvanceSalary?.emi,
-          } 
-        this.displayApprovedData.patchValue(this.EditAdvancePaymentData);  
+        this.EditAdvancePaymentData = {
+          id: singleAdvanceSalary?.employee_code,
+          employeeName: singleAdvanceSalary?.emp_name,
+          company: singleAdvanceSalary?.company_name,
+          department: singleAdvanceSalary?.department_name,
+          role: singleAdvanceSalary?.designation_name,
+          requestData: singleAdvanceSalary?.apply_date,
+          status: singleAdvanceSalary?.status,
+          tenure: singleAdvanceSalary?.tenure,
+          amount: singleAdvanceSalary?.advance_amount,
+          reason: singleAdvanceSalary?.remarks,
+          EMIStartDate: singleAdvanceSalary?.updated_on,
+          installmentAmount: singleAdvanceSalary?.emi,
+        }
+        this.displayApprovedData.patchValue(this.EditAdvancePaymentData);
       }
     })
   }

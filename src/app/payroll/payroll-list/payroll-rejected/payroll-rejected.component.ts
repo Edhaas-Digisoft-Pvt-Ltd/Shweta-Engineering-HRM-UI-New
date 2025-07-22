@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { ColDef } from 'ag-grid-community';
+import { ColDef, GridApi } from 'ag-grid-community';
 import { Router } from '@angular/router';
 import { HrmserviceService } from 'src/app/hrmservice.service';
 import { ToastrService } from 'ngx-toastr';
@@ -18,6 +18,8 @@ export class PayrollRejectedComponent {
   rowData: any = [];
   selectedRowData: any[] = [];
   activeTab: string = 'tab1';
+  gridApiActive!: GridApi;
+  isLoading: boolean = false;
 
   constructor(private router: Router, private service: HrmserviceService, private toastr: ToastrService) { }
 
@@ -48,7 +50,6 @@ export class PayrollRejectedComponent {
     this.activeTab = tab;
   }
 
-
   ngOnInit() {
     this.selectedYear = new Date().getFullYear();
     this.selectedMonth = new Date().getMonth() + 1;
@@ -56,6 +57,10 @@ export class PayrollRejectedComponent {
     this.today = currentDate.toISOString().split('T')[0];
     this.getCompanyNames();
     this.ApproveRejectPayrollList();
+  }
+
+  onGridReady(params: { api: any }) {
+    this.gridApiActive = params.api;
   }
 
 
@@ -82,6 +87,7 @@ export class PayrollRejectedComponent {
   }
 
   ApproveRejectPayrollList() {
+    this.isLoading = true;
     this.service.post('fetch/rejected/payroll', {
       company_id: this.selectedCompanyId,
       year: this.selectedYear,
@@ -99,9 +105,9 @@ export class PayrollRejectedComponent {
               hours: item.total_hours,
               overTime: item.total_overtime,
               employe_id: item.employe_id,
-              bonus_incentive_amount: item.bonus_incentive_amount ? `₹${item.bonus_incentive_amount}` : '-',
-              advance_salary: item.advance_salary ? `₹${item.advance_salary}` : '-',
-              net_salary: item.net_salary ? `₹${item.net_salary}` : '-',
+              bonus_incentive_amount: item.bonus_incentive_amount ? `₹${item.bonus_incentive_amount}` : 'NA',
+              advance_salary: item.advance_salary ? `₹${item.advance_salary}` : 'NA',
+              net_salary: item.net_salary ? `₹${item.net_salary}` : 'NA',
             }));
           } else {
             this.rowData = [];
@@ -116,6 +122,7 @@ export class PayrollRejectedComponent {
         this.rowData = [];
       }
     );
+    this.isLoading = false;
   }
 
   columnDefs: ColDef[] = [
@@ -233,6 +240,10 @@ export class PayrollRejectedComponent {
   };
 
 
-
+  exportExcel() {
+    if (this.gridApiActive) {
+      this.gridApiActive.exportDataAsCsv();
+    }
+  }
 
 }

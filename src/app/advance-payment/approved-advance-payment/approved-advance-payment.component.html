@@ -1,138 +1,145 @@
-<div class="row gx-3  align-items-center rounded-2">
-    <div class="col-12">
-        <div class="row justify-content-end">
-            <div class="col-3">
-                <label for="">Select Company</label>
-                <select class="form-select" (change)="onCompanyChange($event)">
-                  <option *ngFor="let item of CompanyNames" [value]="item.company_id">{{ item.company_name }}</option>
-                </select>
-            </div>
+<div class="right-panel">
+  <div class="loader-overlay" *ngIf="isLoading">
+    <app-loader></app-loader>
+  </div>
+  <div class="main-content" [class.loading]="isLoading">
 
-            <div class="col-2 dotted-line">
-                <label for="">Select Year</label>
-                <select class="form-select" [(ngModel)]="selectedYear" (change)="onYearMonthChange()">
-                  <option *ngFor="let year of financialYears">{{ year }}</option>
-                </select>
-            </div>
-            <!-- <div class="col vector">
+    <div class="row gx-3  align-items-center rounded-2">
+      <div class="col-12">
+        <div class="row justify-content-end">
+          <div class="col-3">
+            <label for="">Select Company</label>
+            <select class="form-select" (change)="onCompanyChange($event)">
+              <option *ngFor="let item of CompanyNames" [value]="item.company_id">{{ item.company_name }}</option>
+            </select>
+          </div>
+
+          <div class="col-2 dotted-line">
+            <label for="">Select Year</label>
+            <select class="form-select" [(ngModel)]="selectedYear" (change)="onYearMonthChange()">
+              <option *ngFor="let year of financialYears">{{ year }}</option>
+            </select>
+          </div>
+          <!-- <div class="col vector">
                 <span class="mt-4"></span>
             </div> -->
-            <div class="col-2">
-                <label for="">Select Month</label>
-                <select class="form-select" [(ngModel)]="selectedMonth" (change)="onYearMonthChange()">
-                  <option *ngFor="let month of months" [value]="month.id">{{ month.value }}</option>
-                </select>
-            </div>
+          <div class="col-2">
+            <label for="">Select Month</label>
+            <select class="form-select" [(ngModel)]="selectedMonth" (change)="onYearMonthChange()">
+              <option *ngFor="let month of months" [value]="month.id">{{ month.value }}</option>
+            </select>
+          </div>
 
-            <div class="col-auto d-flex align-items-end">
-              <button class="btn btn-primary exportExcelBtn me-2" (click)="exportExcel()">
-                <i class="bi bi-file-earmark-excel"></i>
-              </button>
-            </div>
+          <div class="col-auto d-flex align-items-end">
+            <button class="btn btn-primary exportExcelBtn me-2" (click)="exportExcel()">
+              <i class="bi bi-file-earmark-text-fill"></i>
+            </button>
+          </div>
 
         </div>
-    </div>
-</div>
-
-<div class="row gap-4 row-wrap my-3 ">
-  <div class="container  ">
-
-    <div class="row g-3">
-      <div class="col-12">
-        <ag-grid-angular class="ag-theme-alpine" style="width: 100%; height: 60vh;" [rowData]="rowData"
-          [gridOptions]="gridOptions" [pagination]="true" [columnDefs]="columnDefs" [defaultColDef]="defaultColDef" (gridReady)="onGridReady($event)">
-        </ag-grid-angular>
       </div>
     </div>
-  </div>
 
-</div>
+    <div class="row gap-4 row-wrap my-3 ">
+      <div class="container  ">
 
-<!-- modal for advance salary request info -->
-<!-- Modal -->
-<div class="modal fade" id="advanceSalaryModalinfo" tabindex="-1" aria-labelledby="advanceSalaryModalLabel"
-  aria-hidden="true">
-  <div class="modal-dialog modal-xl modal-dialog-centered">
-    <div class="modal-content">
-
-      <!-- Header -->
-      <div class="modal-header  text-white">
-        <h5 class="modal-title" id="advanceSalaryModalLabel">Approved Salary Request Info</h5>
-        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        <div class="row g-3">
+          <div class="col-12">
+            <ag-grid-angular class="ag-theme-alpine" style="width: 100%; height: 60vh;" [rowData]="rowData"
+              [gridOptions]="gridOptions" [pagination]="true" [columnDefs]="columnDefs" [defaultColDef]="defaultColDef"
+              (gridReady)="onGridReady($event)">
+            </ag-grid-angular>
+          </div>
+        </div>
       </div>
 
-      <!-- Body -->
-      <form [formGroup]="displayApprovedData">
-        <div class="modal-body p-4">
+    </div>
 
-          <!-- Row 1 -->
-          <div class="row mb-3">
-            <div class="col-md-2"><strong>ID</strong><input class="form-control" formControlName="id"></div>
-            <div class="col-md-3"><strong>Employee Name</strong><input class="form-control"
-                formControlName="employeeName"></div>
-            <div class="col-md-2"><strong>Company</strong><input class="form-control" formControlName="company"></div>
-            <div class="col-md-3"><strong>Department</strong><input class="form-control" formControlName="department">
-            </div>
-            <div class="col-md-2"><strong>Role</strong><input class="form-control" formControlName="role"></div>
+    <!-- modal for advance salary request info -->
+    <!-- Modal -->
+    <div class="modal fade" id="advanceSalaryModalinfo" tabindex="-1" aria-labelledby="advanceSalaryModalLabel"
+      aria-hidden="true">
+      <div class="modal-dialog modal-xl modal-dialog-centered">
+        <div class="modal-content">
+
+          <!-- Header -->
+          <div class="modal-header  text-white">
+            <h5 class="modal-title" id="advanceSalaryModalLabel">Approved Salary Request Info</h5>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
 
-          <!-- Row 2 -->
-          <div class="row mb-3">
-            <div class="col-md-2"><strong>Request Date</strong><input class="form-control"
-                formControlName="requestDate"></div>
-            <div class="col-md-2"><strong>Tenure</strong><input class="form-control" formControlName="tenure"></div>
-            <div class="col-md-2"><strong>Amount (in ₹)</strong><input class="form-control" formControlName="amount">
-            </div>
-          </div>
+          <!-- Body -->
+          <form [formGroup]="displayApprovedData">
+            <div class="modal-body p-4">
 
-          <!-- Loan Amount Progress Bar -->
-          <div class="mb-3">
-            <label class="fw-bold">Loan Amount</label>
-            <div class="d-flex justify-content-between">
-              <span class="fw-bold text-dark">₹ {{ displayApprovedData.get('advanceAmount')?.value || '0' }}</span>
-              <span class="text-muted small">
-                Remaining<br>₹ {{ displayApprovedData.get('remainingBalance')?.value || '0' }}
-              </span>
-            </div>
-            <div class="progress mt-2" style="height: 12px;">
-              <div
-                class="progress-bar bg-success"
-                role="progressbar"
-                [style.width.%]="calculatePaidPercentage()"
-                [attr.aria-valuenow]="calculatePaidPercentage()"
-                aria-valuemin="0"
-                aria-valuemax="100"
-              >
-                <span class="visually-hidden">Paid</span>
+              <!-- Row 1 -->
+              <div class="row mb-3">
+                <div class="col-md-2"><strong>ID</strong><input class="form-control" formControlName="id"></div>
+                <div class="col-md-3"><strong>Employee Name</strong><input class="form-control"
+                    formControlName="employeeName"></div>
+                <div class="col-md-2"><strong>Company</strong><input class="form-control" formControlName="company">
+                </div>
+                <div class="col-md-3"><strong>Department</strong><input class="form-control"
+                    formControlName="department">
+                </div>
+                <div class="col-md-2"><strong>Role</strong><input class="form-control" formControlName="role"></div>
               </div>
-            </div>
-            <div class="small text-success mt-1">● Paid ₹ {{ calculatePaidAmount() }}</div>
-          </div>
 
-          <!-- Row 3 -->
-          <div class="row mb-3">
-            <div class="col-md-3"><strong>First Installment Date</strong><input class="form-control"
-                formControlName="firstInstallmentDate">
-            </div>
-            <div class="col-md-3"><strong>Installment End Date</strong><input class="form-control"
-                formControlName="installmentEndDate"></div>
-            <div class="col-md-3"><strong>Last Installment Paid</strong><input class="form-control"
-                formControlName="lastInstallmentDate">
-            </div>
-            <div class="col-md-3"><strong>Next Installment Due Date</strong><input class="form-control"
-                formControlName="installmentDueDate">
-            </div>
-          </div>
+              <!-- Row 2 -->
+              <div class="row mb-3">
+                <div class="col-md-2"><strong>Request Date</strong><input class="form-control"
+                    formControlName="requestDate"></div>
+                <div class="col-md-2"><strong>Tenure</strong><input class="form-control" formControlName="tenure"></div>
+                <div class="col-md-2"><strong>Amount (in ₹)</strong><input class="form-control"
+                    formControlName="amount">
+                </div>
+              </div>
 
-        </div>
-      </form>
+              <!-- Loan Amount Progress Bar -->
+              <div class="mb-3">
+                <label class="fw-bold">Loan Amount</label>
+                <div class="d-flex justify-content-between">
+                  <span class="fw-bold text-dark">₹ {{ displayApprovedData.get('advanceAmount')?.value || '0' }}</span>
+                  <span class="text-muted small">
+                    Remaining<br>₹ {{ displayApprovedData.get('remainingBalance')?.value || '0' }}
+                  </span>
+                </div>
+                <div class="progress mt-2" style="height: 12px;">
+                  <div class="progress-bar bg-success" role="progressbar" [style.width.%]="calculatePaidPercentage()"
+                    [attr.aria-valuenow]="calculatePaidPercentage()" aria-valuemin="0" aria-valuemax="100">
+                    <span class="visually-hidden">Paid</span>
+                  </div>
+                </div>
+                <div class="small text-success mt-1">● Paid ₹ {{ calculatePaidAmount() }}</div>
+              </div>
 
-      <!-- modal footer -->
-      <!-- <div class="modal-footer">
+              <!-- Row 3 -->
+              <div class="row mb-3">
+                <div class="col-md-3"><strong>First Installment Date</strong><input class="form-control"
+                    formControlName="firstInstallmentDate">
+                </div>
+                <div class="col-md-3"><strong>Installment End Date</strong><input class="form-control"
+                    formControlName="installmentEndDate"></div>
+                <div class="col-md-3"><strong>Last Installment Paid</strong><input class="form-control"
+                    formControlName="lastInstallmentDate">
+                </div>
+                <div class="col-md-3"><strong>Next Installment Due Date</strong><input class="form-control"
+                    formControlName="installmentDueDate">
+                </div>
+              </div>
+
+            </div>
+          </form>
+
+          <!-- modal footer -->
+          <!-- <div class="modal-footer">
         <button type="button" class="btn approveBtn" (click)="updateStatus('Approved')">Approve Leave</button>
         <button type="button" class="btn declineBtn" (click)="updateStatus('Rejected')">Decline Leave</button>
         <button type="button" class="btn btn-outline-dark fw-semobild " data-bs-dismiss="modal">Cancel</button>
       </div> -->
+        </div>
+      </div>
     </div>
+
   </div>
 </div>

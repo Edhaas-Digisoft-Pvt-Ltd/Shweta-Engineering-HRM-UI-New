@@ -24,6 +24,7 @@ export class PayrollListComponent {
   codeInput: string = '';
   gridApi: any;
   gridColumnApi: any;
+  isLoading: boolean = false;
 
   today: string = new Date().toISOString().split('T')[0];
   constructor(private router: Router, private service: HrmserviceService, private toastr: ToastrService) { }
@@ -92,6 +93,7 @@ export class PayrollListComponent {
   }
 
   getpayrollList() {
+    this.isLoading = true;
     this.rowData = [];
     this.service.post('get/payroll_list', {
       company_id: this.selectedCompanyId,
@@ -103,10 +105,10 @@ export class PayrollListComponent {
           this.rowData = res.data.map((item: any) => ({
             employee_code: item.employee_code,
             employeeName: item.emp_name,
-            grossAmount: item.gross_salary ? `₹ ${item.gross_salary}` : '-',
+            grossAmount: item.gross_salary ? `₹ ${item.gross_salary}` : 'NA',
             overTime: item.total_overtime,
-            netAmount: item.net_salary ? `₹ ${item.net_salary}` : '-',
-            deduction: item.deduction ? `₹ ${item.deduction}` : '-',
+            netAmount: item.net_salary ? `₹ ${item.net_salary}` : 'NA',
+            deduction: item.deduction ? `₹ ${item.deduction}` : 'NA',
             employe_id: item.employe_id,
             temp_payroll_id: item.temp_payroll_id
           }));
@@ -118,6 +120,7 @@ export class PayrollListComponent {
         this.rowData = [];
       }
     });
+    this.isLoading = false;
   }
 
 
@@ -299,6 +302,15 @@ export class PayrollListComponent {
     });
   }
 
+  exportExcel() {
+    if (this.gridApi) {
+      this.gridApi.exportDataAsCsv({
+      columnKeys: ['employee_code', 'employeeName', 'grossAmount', 'overTime', 'deduction', 'netAmount'],
+      fileName: 'payrollList.csv',
+    });
+    }
+    
+  }
 }
 
 

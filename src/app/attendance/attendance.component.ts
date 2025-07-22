@@ -18,12 +18,13 @@ export class AttendanceComponent {
   searchInputValue: string = '';
   gridApiActive: any;
   role: string = '';
+  isLoading: boolean = false;
 
   constructor(private toastr: ToastrService, private service: HrmserviceService) { }
 
   ngOnInit() {
     this.role = this.service.getRole();
-    
+
     this.loadTodayDataFromStorage();
     this.fetchAttendance();
   }
@@ -37,7 +38,7 @@ export class AttendanceComponent {
   };
 
   columnDefs: ColDef[] = [
-    { headerName: 'Employee Code', field: 'employee_code', editable:true },
+    { headerName: 'Employee Code', field: 'employee_code', editable: true },
     { headerName: 'Date', field: 'attendance_date' },
     { headerName: 'CheckIn', field: 'check_in' },
     { headerName: 'CheckOut', field: 'check_out' },
@@ -93,6 +94,7 @@ export class AttendanceComponent {
   }
 
   fetchAttendance(): void {
+    this.isLoading = true;
     this.service.post('fetch/attendance', {}).subscribe((res: any) => {
       if (res.status === 'success') {
         this.rowData = res.data.reverse()
@@ -100,6 +102,7 @@ export class AttendanceComponent {
         console.log(res.error);
       }
     });
+    this.isLoading = false;
   }
 
   downloadTemplate(): void {
@@ -123,8 +126,8 @@ export class AttendanceComponent {
       this.toastr.success('Download successfully !');
     }
   }
- 
- 
+
+
   // Monthly attendance template download
   MonthlyAttendanceTemplate(): void {
     const userConfirmed = confirm("Do you want to download the monthly attendance template?");
@@ -182,7 +185,7 @@ export class AttendanceComponent {
       this.gridApiActive.setQuickFilter(this.searchInputValue);
     }
   }
- 
+
   emptyInput(): void {
     this.searchInputValue = '';
     this.onFilterBoxChange();

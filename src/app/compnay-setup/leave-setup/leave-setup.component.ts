@@ -34,8 +34,9 @@ export class LeaveSetupComponent {
   columnDefs: ColDef[] = [];
   gridApiActive: any;
   singleleave: any;
-  companyId:any;
-  leaveId:any
+  companyId: any;
+  leaveId: any;
+  isLoading: boolean = false;
 
   public defaultColDef: ColDef = {
     editable: true,
@@ -160,6 +161,7 @@ export class LeaveSetupComponent {
   }
 
   getAllLeaves() {
+    this.isLoading = true;
     this.rowData = [];
     this.service.post("fetch/companyleave", { company_id: this.selectedCompanyId }).subscribe((res: any) => {
       if (res.status === 'success') {
@@ -171,11 +173,14 @@ export class LeaveSetupComponent {
           leave_id: item.leave_id
         }));
       }
+      this.isLoading = false;
     },
       (error) => {
         console.error('Error fetching leave request:', error);
+        this.isLoading = false;
       }
     );
+    this.isLoading = false;
   }
 
   selectTab(tab: string) {

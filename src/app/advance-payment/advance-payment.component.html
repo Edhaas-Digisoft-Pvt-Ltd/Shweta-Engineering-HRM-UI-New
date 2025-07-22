@@ -1,180 +1,184 @@
-<div class="main-content">
-  <div class="row gx-3  align-items-center p-2 rounded-2 mt-3">
-    <div class="col-12 d-flex">
-      <h2 class="fw-bold"> <i class="bi bi-currency-rupee me-2"></i> Advance Salary</h2>
-    </div>
+<div class="right-panel">
+  <div class="loader-overlay" *ngIf="isLoading">
+    <app-loader></app-loader>
   </div>
-  <div class="tabs-container m-2">
-    <ul class="nav nav-tabs">
-      <li class="nav-item" (click)="selectTab('tab1')">
-        <a class="nav-link fw-bold" [ngClass]="{'active': activeTab === 'tab1'}">Advance Salary Request</a>
-      </li>
-      <li class="nav-item" (click)="selectTab('tab2')">
-        <a class="nav-link fw-bold" [ngClass]="{'active': activeTab === 'tab2'}">Approved Salary Request</a>
-      </li>
-      <li class="nav-item" (click)="selectTab('tab3')">
-        <a class="nav-link fw-bold" [ngClass]="{'active': activeTab === 'tab3'}">Advance Salary Report</a>
-      </li>
-    </ul>
-    <div class="tab-content mt-3">
-      <div *ngIf="activeTab === 'tab1'">
-        <div class="row gx-3  align-items-center  p-2 rounded-2">
-            <div class="col-12  mt-2">
-                <div class="row justify-content-end">
-                    <div class="col-3">
-                        <label for="">Select Company</label>
-                        <select class="form-select" (change)="onCompanyChange($event)">
-                          <option *ngFor="let item of CompanyNames" [value]="item.company_id">{{ item.company_name }}</option>
-                        </select>
-                    </div>
+  <div class="main-content" [class.loading]="isLoading">
 
-                    <div class="col-2 dotted-line">
-                        <label for="">Select Year</label>
-                        <select class="form-select" [(ngModel)]="selectedYear" (change)="onYearMonthChange()">
-                          <option *ngFor="let year of financialYears">{{ year }}</option>
-                        </select>
-                    </div>
-                    <!-- <div class="col vector">
+    <div class="main-content">
+      <div class="row gx-3  align-items-center p-2 rounded-2 mt-3">
+        <div class="col-12 d-flex">
+          <h2 class="fw-bold"> <i class="bi bi-currency-rupee me-2"></i> Advance Salary</h2>
+        </div>
+      </div>
+      <div class="tabs-container m-2">
+        <ul class="nav nav-tabs">
+          <li class="nav-item" (click)="selectTab('tab1')">
+            <a class="nav-link fw-bold" [ngClass]="{'active': activeTab === 'tab1'}">Advance Salary Request</a>
+          </li>
+          <li class="nav-item" (click)="selectTab('tab2')">
+            <a class="nav-link fw-bold" [ngClass]="{'active': activeTab === 'tab2'}">Approved Salary Request</a>
+          </li>
+          <li class="nav-item" (click)="selectTab('tab3')">
+            <a class="nav-link fw-bold" [ngClass]="{'active': activeTab === 'tab3'}">Advance Salary Report</a>
+          </li>
+        </ul>
+        <div class="tab-content mt-3">
+          <div *ngIf="activeTab === 'tab1'">
+            <div class="row gx-3  align-items-center  p-2 rounded-2">
+              <div class="col-12  mt-2">
+                <div class="row justify-content-end">
+                  <div class="col-3">
+                    <label for="">Select Company</label>
+                    <select class="form-select" (change)="onCompanyChange($event)">
+                      <option *ngFor="let item of CompanyNames" [value]="item.company_id">{{ item.company_name }}
+                      </option>
+                    </select>
+                  </div>
+
+                  <div class="col-2 dotted-line">
+                    <label for="">Select Year</label>
+                    <select class="form-select" [(ngModel)]="selectedYear" (change)="onYearMonthChange()">
+                      <option *ngFor="let year of financialYears">{{ year }}</option>
+                    </select>
+                  </div>
+                  <!-- <div class="col vector">
                         <span class="mt-4"></span>
                     </div> -->
-                    <div class="col-2">
-                        <label for="">Select Month</label>
-                        <select class="form-select" [(ngModel)]="selectedMonth" (change)="onYearMonthChange()">
-                          <option *ngFor="let month of months" [value]="month.id">{{ month.value }}</option>
-                        </select>
-                    </div>
+                  <div class="col-2">
+                    <label for="">Select Month</label>
+                    <select class="form-select" [(ngModel)]="selectedMonth" (change)="onYearMonthChange()">
+                      <option *ngFor="let month of months" [value]="month.id">{{ month.value }}</option>
+                    </select>
+                  </div>
 
-                    <div class="col-auto d-flex align-items-end">
-                      <button class="btn btn-primary exportExcelBtn me-2" (click)="exportExcel()">
-                        <i class="bi bi-file-earmark-excel"></i>
-                      </button>
-                    </div>
+                  <div class="col-auto d-flex align-items-end">
+                    <button class="btn btn-primary exportExcelBtn me-2" (click)="exportExcel()">
+                      <i class="bi bi-file-earmark-text-fill"></i>
+                    </button>
+                  </div>
 
                 </div>
+              </div>
             </div>
-        </div>
 
-        <div class="row gap-4 row-wrap my-3 ">
-          <div class="container  ">
+            <div class="row gap-4 row-wrap my-3 ">
+              <div class="container  ">
 
-            <div class="row g-3">
-              <div class="col-12">
+                <div class="row g-3">
+                  <div class="col-12">
 
-                <ag-grid-angular class="ag-theme-alpine" style="width: 100%; height: 60vh;" [rowData]="rowData"
-                  [columnDefs]="columnDefs" [gridOptions]="gridOptions" [pagination]="true" [defaultColDef]="defaultColDef" (gridReady)="onGridReady($event)">
-                </ag-grid-angular>
+                    <ag-grid-angular class="ag-theme-alpine" style="width: 100%; height: 60vh;" [rowData]="rowData"
+                      [columnDefs]="columnDefs" [gridOptions]="gridOptions" [pagination]="true"
+                      [defaultColDef]="defaultColDef" (gridReady)="onGridReady($event)">
+                    </ag-grid-angular>
 
+                  </div>
+                </div>
               </div>
             </div>
           </div>
         </div>
+
+
+      </div>
+    </div>
+
+    <div *ngIf="activeTab === 'tab2'">
+      <div class="container ">
+        <app-approved-advance-payment></app-approved-advance-payment>
+      </div>
+    </div>
+
+    <div *ngIf="activeTab === 'tab3'">
+      <div class="container ">
+        <app-advance-salary-report></app-advance-salary-report>
       </div>
     </div>
 
 
-  </div>
-</div>
-
-<div *ngIf="activeTab === 'tab2'">
-  <div class="container ">
-    <app-approved-advance-payment></app-approved-advance-payment>
-  </div>
-</div>
-
-<div *ngIf="activeTab === 'tab3'">
-  <div class="container ">
-    <app-advance-salary-report></app-advance-salary-report>
-  </div>
-</div>
-
-
-<div class="modal fade" id="advanceRequestModal" tabindex="-1" aria-labelledby="advanceRequestModalLabel"
-  aria-hidden="true">
-  <div class="modal-dialog modal-xl modal-dialog-centered">
-    <div class="modal-content ">
-      <!-- Header -->
-      <div class="modal-header text-white">
-        <h5 class="modal-title" id="advanceSalaryModalLabel">Advance Salary Request Info</h5>
-        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <form [formGroup]="EditAdvancePayment">
-        <div class="modal-body p-4">
-          <div class="row mb-3">
-            <div class="col-md-2">
-              <strong>ID</strong>
-              <input class="form-control" formControlName="id" value="#0001" />
-            </div>
-            <div class="col-md-3">
-              <strong>Employee Name</strong>
-              <input class="form-control" formControlName="employeeName" />
-            </div>
-            <div class="col-md-3">
-              <strong>Company</strong>
-              <input class="form-control" formControlName="company" />
-            </div>
-            <div class="col-md-2">
-              <strong>Department</strong>
-              <input class="form-control" formControlName="department" />
-            </div>
-            <div class="col-md-2">
-              <strong>Role</strong>
-              <input class="form-control" formControlName="role" />
-            </div>
+    <div class="modal fade" id="advanceRequestModal" tabindex="-1" aria-labelledby="advanceRequestModalLabel"
+      aria-hidden="true">
+      <div class="modal-dialog modal-xl modal-dialog-centered">
+        <div class="modal-content ">
+          <!-- Header -->
+          <div class="modal-header text-white">
+            <h5 class="modal-title" id="advanceSalaryModalLabel">Advance Salary Request Info</h5>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
+          <form [formGroup]="EditAdvancePayment">
+            <div class="modal-body p-4">
+              <div class="row mb-3">
+                <div class="col-md-2">
+                  <strong>ID</strong>
+                  <input class="form-control" formControlName="id" value="#0001" />
+                </div>
+                <div class="col-md-3">
+                  <strong>Employee Name</strong>
+                  <input class="form-control" formControlName="employeeName" />
+                </div>
+                <div class="col-md-3">
+                  <strong>Company</strong>
+                  <input class="form-control" formControlName="company" />
+                </div>
+                <div class="col-md-2">
+                  <strong>Department</strong>
+                  <input class="form-control" formControlName="department" />
+                </div>
+                <div class="col-md-2">
+                  <strong>Role</strong>
+                  <input class="form-control" formControlName="role" />
+                </div>
+              </div>
 
-          <div class="row mb-3">
-            <div class="col-md-2">
-              <strong>Request Date</strong>
-              <input class="form-control" formControlName="requestData" />
-            </div>
-            <div class="col-md-2">
-              <strong>Status</strong>
-              <input
-              type="text"
-              id="status"
-              class="form-control "
-              formControlName="status"
-              [ngClass]="{
+              <div class="row mb-3">
+                <div class="col-md-2">
+                  <strong>Request Date</strong>
+                  <input class="form-control" formControlName="requestData" />
+                </div>
+                <div class="col-md-2">
+                  <strong>Status</strong>
+                  <input type="text" id="status" class="form-control " formControlName="status" [ngClass]="{
                   'custom-bg-warning': EditAdvancePaymentData?.status === 'pending',
                   'custom-bg-success': EditAdvancePaymentData?.status === 'Approved',
                   'custom-bg-danger': EditAdvancePaymentData?.status === 'Rejected'
-              }"
-              [value]="EditAdvancePaymentData?.status"
-            />
-              <!-- <div class="px-3 py-2 rounded text-center fw-bold" style="background-color: #fef3c7; color: #7c6000;">
+              }" [value]="EditAdvancePaymentData?.status" />
+                  <!-- <div class="px-3 py-2 rounded text-center fw-bold" style="background-color: #fef3c7; color: #7c6000;">
                 Pending
               </div> -->
-            </div>
-            <div class="col-md-2">
-              <strong>Tenure</strong>
-              <input class="form-control" formControlName="tenure" />
-            </div>
-            <div class="col-md-2"><strong>Amount (in ₹)</strong><input class="form-control" value="10,000"
-                formControlName="amount" /></div>
-            <div class="col-md-4">
-              <strong>Reason <small class="text-muted">(In Case of Rejection)</small></strong>
-              <textarea class="form-control" formControlName="reason" rows="3" readonly></textarea>
-            </div>
-          </div>
+                </div>
+                <div class="col-md-2">
+                  <strong>Tenure</strong>
+                  <input class="form-control" formControlName="tenure" />
+                </div>
+                <div class="col-md-2"><strong>Amount (in ₹)</strong><input class="form-control" value="10,000"
+                    formControlName="amount" /></div>
+                <div class="col-md-4">
+                  <strong>Reason <small class="text-muted">(In Case of Rejection)</small></strong>
+                  <textarea class="form-control" formControlName="reason" rows="3" readonly></textarea>
+                </div>
+              </div>
 
-          <div class="row mb-2">
-            <div class="col-md-3"><strong>EMI Start Date</strong><input class="form-control"
-                formControlName="EMIStartDate" readonly /></div>
-            <div class="col-md-3"><strong>Installment Amount (in ₹)</strong><input class="form-control bg-light"
-                formControlName="installmentAmount" readonly /></div>
+              <div class="row mb-2">
+                <div class="col-md-3"><strong>EMI Start Date</strong><input class="form-control"
+                    formControlName="EMIStartDate" readonly /></div>
+                <div class="col-md-3"><strong>Installment Amount (in ₹)</strong><input class="form-control bg-light"
+                    formControlName="installmentAmount" readonly /></div>
+              </div>
+            </div>
+          </form>
+
+          <div class="modal-footer">
+            <button type="button" class="btn approveBtn" (click)="updateStatus('Approved')"
+              [disabled]="EditAdvancePaymentData?.status === 'Approved' || EditAdvancePaymentData?.status === 'Rejected'">Approve
+              Request</button>
+            <button type="button" class="btn declineBtn" (click)="updateStatus('Rejected')"
+              [disabled]="EditAdvancePaymentData?.status === 'Approved' || EditAdvancePaymentData?.status === 'Rejected'">Decline
+              Request</button>
+            <button type="button" class="btn btn-outline-dark fw-semobild " data-bs-dismiss="modal">Cancel</button>
           </div>
         </div>
-      </form>
-
-      <div class="modal-footer">
-        <button type="button" class="btn approveBtn" (click)="updateStatus('Approved')"
-          [disabled]="EditAdvancePaymentData?.status === 'Approved' || EditAdvancePaymentData?.status === 'Rejected'">Approve
-          Request</button>
-        <button type="button" class="btn declineBtn" (click)="updateStatus('Rejected')"
-          [disabled]="EditAdvancePaymentData?.status === 'Approved' || EditAdvancePaymentData?.status === 'Rejected'">Decline
-          Request</button>
-        <button type="button" class="btn btn-outline-dark fw-semobild " data-bs-dismiss="modal">Cancel</button>
       </div>
     </div>
+
   </div>
 </div>

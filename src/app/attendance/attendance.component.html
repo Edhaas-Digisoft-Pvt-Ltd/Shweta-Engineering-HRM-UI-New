@@ -1,98 +1,113 @@
-<div class="container-fluid mt-4">
-    <div class="row gx-3  ">
-        <div class="col-md-6  ">
-            <h2 class="fw-bold">
-                <span><i class="bi bi-alarm me-2"></i></span>
-                Attedances
-            </h2>
-        </div>
-        <div class="col-md-6  text-end">
-            <h5 class="mb-0">{{getTodayDayName()}}</h5>
-            <h3>{{getFormattedTodayDate()}}</h3>
-        </div>
+<div class="right-panel">
+    <div class="loader-overlay" *ngIf="isLoading">
+        <app-loader></app-loader>
     </div>
+    <div class="main-content" [class.loading]="isLoading">
+        <div class="container-fluid mt-4">
+            <div class="row gx-3  ">
+                <div class="col-md-6  ">
+                    <h2 class="fw-bold">
+                        <span><i class="bi bi-alarm me-2"></i></span>
+                        Attedances
+                    </h2>
+                </div>
+                <div class="col-md-6  text-end">
+                    <h5 class="mb-0">{{getTodayDayName()}}</h5>
+                    <h3>{{getFormattedTodayDate()}}</h3>
+                </div>
+            </div>
 
-    <div class="row">
+            <div class="row">
 
-        <div class="tabs-container">
-            <ul class="nav nav-tabs">
-                <li class="nav-item" (click)="selectTab('tab1')">
-                    <a class="nav-link fw-bold" [ngClass]="{'active': activeTab === 'tab1'}">List</a>
-                </li>
-                <li class="nav-item" (click)="selectTab('tab2')">
-                    <a class="nav-link fw-bold" [ngClass]="{'active': activeTab === 'tab2'}">Monthly Summary</a>
-                </li>
-                <li class="nav-item" (click)="selectTab('tab3')">
-                    <a class="nav-link fw-bold" [ngClass]="{'active': activeTab === 'tab3'}">Consolidate Summary</a>
-                </li>
-            </ul>
+                <div class="tabs-container">
+                    <ul class="nav nav-tabs">
+                        <li class="nav-item" (click)="selectTab('tab1')">
+                            <a class="nav-link fw-bold" [ngClass]="{'active': activeTab === 'tab1'}">List</a>
+                        </li>
+                        <li class="nav-item" (click)="selectTab('tab2')">
+                            <a class="nav-link fw-bold" [ngClass]="{'active': activeTab === 'tab2'}">Monthly Summary</a>
+                        </li>
+                        <li class="nav-item" (click)="selectTab('tab3')">
+                            <a class="nav-link fw-bold" [ngClass]="{'active': activeTab === 'tab3'}">Consolidate
+                                Summary</a>
+                        </li>
+                    </ul>
 
-            <div class="tab-content mt-3">
-                <div *ngIf="activeTab === 'tab1'">
-                    <div class="company-setup">
-                        <div class="container-fluid ">
-                         <div class="d-flex flex-wrap justify-content-end align-items-center gap-3 my-3 mt-5">
-                            <!-- Search Box -->
-                            <div>
-                                <input class="form-control" type="text" #searchBox
-                                    placeholder="Enter Name"
-                                    [(ngModel)]="searchInputValue"
-                                    (ngModelChange)="onFilterBoxChange()"
-                                    style="min-width: 180px;" />
-                            </div>
-
-                            <!-- Filter Buttons -->
-                            <div class="d-flex flex-wrap gap-2">
-                                <button class="btn btn-light border-secondary rounded-3" (click)="filterByStatus('P')">Present</button>
-                                <button class="btn btn-light border-secondary rounded-3" (click)="filterByStatus('W')">Weekoff</button>
-                                <button class="btn btn-light border-secondary rounded-3" (click)="filterByStatus('A')">Absent</button>
-                                <button class="btn btn-light border-secondary rounded-3" (click)="clearStatusFilter()">Clear Filter</button>
-                            </div>
-
-                            <!-- Accountant-only Buttons -->
-                            <ng-container *ngIf="role === 'accountant'">
-                                <button class="btn btn-primary text-white rounded-3 ExcelBtn" (click)="downloadTemplate()">Download Template</button>
-
-                                <div>
-                                <input type="file" #fileInput style="display: none" (change)="onFileChange($event)" accept=".xlsx, .xls" />
-                                <button class="btn btn-primary text-white rounded-3 ExcelBtn" (click)="fileInput.click()">Import Excel</button>
-                                </div>
-                            </ng-container>
-
-                            </div>
-                            <div class="row gap-4 row-wrap my-3 ">
-                                <div class="container  ">
-
-                                    <div class="row g-3">
-                                        <div class="col-12">
-                                            <ag-grid-angular *ngIf="rowData.length > 0" #agGrid class="ag-theme-alpine"
-                                                style="width: 100%; height: 60vh" [rowData]="rowData"
-                                                [columnDefs]="columnDefs" [defaultColDef]="defaultColDef"
-                                                [gridOptions]="gridOptions" [pagination]="true"
-                                                [rowSelection]="'multiple'" (gridReady)="onGridReady($event)">
-                                            </ag-grid-angular>
+                    <div class="tab-content mt-3">
+                        <div *ngIf="activeTab === 'tab1'">
+                            <div class="company-setup">
+                                <div class="container-fluid ">
+                                    <div
+                                        class="d-flex flex-wrap justify-content-end align-items-center gap-3 my-3 mt-5">
+                                        <!-- Search Box -->
+                                        <div>
+                                            <input class="form-control" type="text" #searchBox placeholder="Enter Name"
+                                                [(ngModel)]="searchInputValue" (ngModelChange)="onFilterBoxChange()"
+                                                style="min-width: 180px;" />
                                         </div>
+
+                                        <!-- Filter Buttons -->
+                                        <div class="d-flex flex-wrap gap-2">
+                                            <button class="btn btn-light border-secondary rounded-3"
+                                                (click)="filterByStatus('P')">Present</button>
+                                            <button class="btn btn-light border-secondary rounded-3"
+                                                (click)="filterByStatus('W')">Weekoff</button>
+                                            <button class="btn btn-light border-secondary rounded-3"
+                                                (click)="filterByStatus('A')">Absent</button>
+                                            <button class="btn btn-light border-secondary rounded-3"
+                                                (click)="clearStatusFilter()">Clear Filter</button>
+                                        </div>
+
+                                        <!-- Accountant-only Buttons -->
+                                        <ng-container *ngIf="role === 'accountant'">
+                                            <button class="btn btn-primary text-white rounded-3 ExcelBtn"
+                                                (click)="downloadTemplate()">Download Template</button>
+
+                                            <div>
+                                                <input type="file" #fileInput style="display: none"
+                                                    (change)="onFileChange($event)" accept=".xlsx, .xls" />
+                                                <button class="btn btn-primary text-white rounded-3 ExcelBtn"
+                                                    (click)="fileInput.click()">Import Excel</button>
+                                            </div>
+                                        </ng-container>
+
+                                    </div>
+                                    <div class="row gap-4 row-wrap my-3 ">
+                                        <div class="container  ">
+
+                                            <div class="row g-3">
+                                                <div class="col-12">
+                                                    <ag-grid-angular *ngIf="rowData.length > 0" #agGrid
+                                                        class="ag-theme-alpine" style="width: 100%; height: 60vh"
+                                                        [rowData]="rowData" [columnDefs]="columnDefs"
+                                                        [defaultColDef]="defaultColDef" [gridOptions]="gridOptions"
+                                                        [pagination]="true" [rowSelection]="'multiple'"
+                                                        (gridReady)="onGridReady($event)">
+                                                    </ag-grid-angular>
+                                                </div>
+                                            </div>
+                                        </div>
+
                                     </div>
                                 </div>
-
                             </div>
                         </div>
-                    </div>
-                </div>
-                <div *ngIf="activeTab === 'tab2'">
+                        <div *ngIf="activeTab === 'tab2'">
 
-                    <div class="container mt-4">
+                            <div class="container mt-4">
 
-                        <!-- attendance summary -->
-                        <app-attendance-summary></app-attendance-summary>
-                    </div>
-                </div>
-                <div *ngIf="activeTab === 'tab3'">
+                                <!-- attendance summary -->
+                                <app-attendance-summary></app-attendance-summary>
+                            </div>
+                        </div>
+                        <div *ngIf="activeTab === 'tab3'">
 
-                    <div class="container mt-4">
+                            <div class="container mt-4">
 
-                        <!-- attendance summary -->
-                        <app-consolidate-attendance-summary></app-consolidate-attendance-summary>
+                                <!-- attendance summary -->
+                                <app-consolidate-attendance-summary></app-consolidate-attendance-summary>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>

@@ -22,6 +22,7 @@ export class PayrollProcessRejectedComponent {
   activeTab: string = 'tab1';
   columnDefs: ColDef[] = [];
   selectedEmployeesForModal: any[] = [];
+  isLoading: boolean = false;
 
   today: string = new Date().toISOString().split('T')[0];
   constructor(private router: Router, private service: HrmserviceService, private toastr: ToastrService) { }
@@ -104,6 +105,7 @@ export class PayrollProcessRejectedComponent {
   }
 
   getRejectedPayroll() {
+    this.isLoading = true;
     this.rowData = [];
     this.service.post('fetch/rejected/payroll', {
       company_id: this.selectedCompanyId,
@@ -123,15 +125,18 @@ export class PayrollProcessRejectedComponent {
             hours: item.total_hours,
             overTime: item.total_overtime,
             employe_id: item.employe_id,
-            bonus_incentive_amount: item.bonus_incentive_amount ? `₹${item.bonus_incentive_amount}` : '-',
-            advance_salary: item.advance_salary ? `₹${item.advance_salary}` : '-',
-            net_salary: item.net_salary ? `₹${item.net_salary}` : '-',
+            bonus_incentive_amount: item.bonus_incentive_amount ? `₹${item.bonus_incentive_amount}` : 'NA',
+            advance_salary: item.advance_salary ? `₹${item.advance_salary}` : 'NA',
+            net_salary: item.net_salary ? `₹${item.net_salary}` : 'NA',
           }));
         }
+        this.isLoading = false;
       } catch (error) {
-        console.log(error);
+        console.log('hi',error);
+        this.isLoading = false;
       }
     })
+      this.isLoading = false;
   }
 
   processAction() {
@@ -282,6 +287,13 @@ export class PayrollProcessRejectedComponent {
     });
 
     this.fileInput.nativeElement.value = '';
+  }
+
+  exportExcel() {
+      this.gridApiActive.exportDataAsCsv({
+        columnKeys: ['employee_code', 'department', 'presentDays', 'absentDays', 'overTime', 'hours', 'bonus_incentive_amount', 'advance_salary', 'net_salary'],
+        fileName: 'payrollRejected.csv',
+      });
   }
 
 }

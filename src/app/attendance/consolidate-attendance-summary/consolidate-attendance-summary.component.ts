@@ -23,6 +23,7 @@ export class ConsolidateAttendanceSummaryComponent {
   rowData: any[] = [];
   selectedYear = new Date().getFullYear();
   selectedMonth = new Date().getMonth();
+  isLoading: boolean = false;
 
   constructor(private service: HrmserviceService) { }
 
@@ -129,6 +130,7 @@ export class ConsolidateAttendanceSummaryComponent {
   }
 
   fetchConsolidateSummary() {
+    this.isLoading = true;
     this.service.post('fetch/ConsolidatedSummary', {}).subscribe((res: any) => {
       if (res.status === 'success') {
         const result = res.data;
@@ -172,6 +174,7 @@ export class ConsolidateAttendanceSummaryComponent {
         console.error(res.error);
       }
     });
+    this.isLoading = false;
   }
 
   // search code

@@ -25,6 +25,7 @@ export class LeaveRequestComponent {
   empLeaveId : any;
   leaveBalance : any = {};
   previousLeaves: any;
+  isLoading: boolean = false;
 
   // @ViewChild('leaveModal') leaveModalRef!: ElementRef;
 
@@ -130,6 +131,7 @@ export class LeaveRequestComponent {
   }
 
   getLeaveRequests(){
+    this.isLoading = true;
      this.rowData = [];
      this.service.post('leave/request', { company_id: this.selectedCompanyId }).subscribe(
       (res: any) => {
@@ -151,6 +153,7 @@ export class LeaveRequestComponent {
         console.error(error);
       }
     );
+    this.isLoading = false;
   }
 
   statusButtonRenderer(params: any) {

@@ -26,6 +26,7 @@ export class PayrollProcessComponent {
   columnDefs: ColDef[] = [];
   tempColumnDefs: ColDef[] = [];
   selectedEmployee: any = null;
+  isLoading: boolean = false;
 
   today: string = new Date().toISOString().split('T')[0];
   constructor(private router: Router, private service: HrmserviceService, private toastr: ToastrService) { }
@@ -100,6 +101,7 @@ export class PayrollProcessComponent {
   }
 
   getPayrollProcess() {
+    this.isLoading = true;
     this.rowData = [];
     this.service.post('fetch/payroll', {
       company_id: this.selectedCompanyId,
@@ -118,10 +120,12 @@ export class PayrollProcessComponent {
           employe_id: item.employe_id,
         }));
       }
+      this.isLoading = false;
     });
   }
 
   getTempPayroll() {
+    this.isLoading = true;
     const payload = {
       company_id: this.selectedCompanyId,
       year: this.selectedYear,
@@ -138,11 +142,11 @@ export class PayrollProcessComponent {
             present_days: item.present_days,
             absent_days: item.absent_days,
             total_hours: item.total_hours,
-            total_overtime: item.total_overtime ?? '-',
+            total_overtime: item.total_overtime ?? 'NA',
             employe_id: item.employe_id,
-            bonus_incentive_amount: item.bonus_incentive_amount ? `₹ ${item.bonus_incentive_amount}` : '-',
-            advance_salary: item.advance_salary ? `₹ ${item.advance_salary}` : '-',
-            net_salary: item.net_salary ? `₹ ${item.net_salary}` : '-',
+            bonus_incentive_amount: item.bonus_incentive_amount ? `₹ ${item.bonus_incentive_amount}` : 'NA',
+            advance_salary: item.advance_salary ? `₹ ${item.advance_salary}` : 'NA',
+            net_salary: item.net_salary ? `₹ ${item.net_salary}` : 'NA',
           }));
         }
         else {
@@ -157,6 +161,7 @@ export class PayrollProcessComponent {
         this.getPayrollProcess();
       }
     });
+    this.isLoading = false;
   }
 
   generatePayroll() {
@@ -211,12 +216,12 @@ export class PayrollProcessComponent {
       year: this.selectedYear,
       month: this.selectedMonth
     }));
-     const payload = { payrolls };
+    const payload = { payrolls };
     this.service.post('craete/payroll', payload).subscribe((res: any) => {
-      if(res.status == 'success'){
+      if (res.status == 'success') {
         this.toastr.success('Payroll processed successfully.');
         this.getTempPayroll();
-      }else {
+      } else {
         this.toastr.error('Something went wrong');
       }
     })
@@ -257,7 +262,7 @@ export class PayrollProcessComponent {
         },
         onCellClicked: (params: any) => {
           this.selectedEmployee = params.data;
-          this.fileInput.nativeElement.click(); 
+          this.fileInput.nativeElement.click();
         }
       }
     ];
@@ -289,8 +294,14 @@ export class PayrollProcessComponent {
   }
 
   exportExcel() {
-    if (this.gridApiActive) {
-      this.gridApiActive.exportDataAsCsv();
+    const gridApiToUse = this.isProcess ? this.gridApiTemp : this.gridApiActive;
+
+    if (gridApiToUse) {
+      gridApiToUse.exportDataAsCsv({
+        fileName: this.isProcess ? 'Processed_Payroll.csv' : 'generate_payroll.csv'
+      });
+    } else {
+      this.toastr.warning('Grid not ready.');
     }
   }
 

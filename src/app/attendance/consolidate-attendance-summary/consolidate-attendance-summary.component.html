@@ -1,66 +1,88 @@
-<div class="row gap-2 mb-4  justify-content-end ">
-  <div class="col col-lg-5 d-flex align-items-end search-box text-start">
-    <div class="">
-      <!-- <input class="py-1 mx-2 form-control me-2" type="text" #searchBox placeholder="Search here"
-          [(ngModel)]="searchValue" value="" (ngModelChange)="onFilterBoxChange()" /> -->
-    </div>
-    <div>
-      <label>Select Year</label><br />
-      <select class="form-control selectdata" [(ngModel)]="selectedYear" (change)="onMonthYearChange()">
-        <option *ngFor="let year of years" [value]="year">{{ year }}</option>
-      </select>
-    </div>
+<div class="right-panel">
+  <div class="loader-overlay" *ngIf="isLoading">
+    <app-loader></app-loader>
+  </div>
+  <div class="main-content" [class.loading]="isLoading">
 
-    <!-- <div class="text-start">
+    <div class="row gap-2 mb-4  justify-content-end ">
+      <div class="col col-lg-5 d-flex align-items-end search-box text-start">
+        <div class="">
+          <!-- <input class="py-1 mx-2 form-control me-2" type="text" #searchBox placeholder="Search here"
+          [(ngModel)]="searchValue" value="" (ngModelChange)="onFilterBoxChange()" /> -->
+        </div>
+        <div>
+          <label>Select Year</label><br />
+          <select class="form-control selectdata" [(ngModel)]="selectedYear" (change)="onMonthYearChange()">
+            <option *ngFor="let year of years" [value]="year">{{ year }}</option>
+          </select>
+        </div>
+
+        <!-- <div class="text-start">
           <label for="">Select Year</label><br />
           <select class="form-control" [(ngModel)]="selectedYear" (change)="onYearMonthChange()">
             <option *ngFor="let year of financialYears" [value]="year">{{ year }}</option>
           </select>
         </div> -->
-  </div>
-
-  <div class="col col-lg-4 d-flex gap-2 attendanceButtons text-start align-items-end">
-    <div >
-      <label>Select Month</label><br />
-      <div class="d-flex align-items-center w-100">
-        <select class="form-control selectdata3" style="width: 150px;"
-          [(ngModel)]="selectedMonth" (change)="onMonthYearChange()">
-          <option *ngFor="let month of months" [ngValue]="month.value">{{ month.name }}</option>
-        </select>
       </div>
+
+      <div class="col col-lg-4 d-flex gap-2 attendanceButtons text-start align-items-end">
+        <div>
+          <label>Select Month</label><br />
+          <div class="d-flex align-items-center w-100">
+            <select class="form-control selectdata3" style="width: 150px;" [(ngModel)]="selectedMonth"
+              (change)="onMonthYearChange()">
+              <option *ngFor="let month of months" [ngValue]="month.value">{{ month.name }}</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="col-auto d-flex align-items-end">
+          <button class="btn btn-primary exportExcelBtn me-2" (click)="exportToExcel()">
+            <i class="bi bi-file-earmark-text-fill"></i>
+          </button>
+        </div>
+      </div>
+
+
     </div>
 
-    <div>
-      <button class="btn btn-primary exportExcelBtn w-100 me-2" (click)="exportToExcel()">
-        <i class="bi bi-file-earmark-excel"></i>
-      </button>
-    </div>
-  </div>      
+    <div class="row gap-4 row-wrap my-3 ">
+      <div class="container  ">
 
+        <div class="row g-3">
+          <div class="col-12">
 
-</div>
-
-<div class="row gap-4 row-wrap my-3 ">
-  <div class="container  ">
-
-    <div class="row g-3">
-      <div class="col-12">
-
-        <!-- Day View Grid -->
-        <!-- <ag-grid-angular *ngIf="viewMode === 'Day'" class="ag-theme-alpine" [rowData]="rowData"
+            <!-- Day View Grid -->
+            <!-- <ag-grid-angular *ngIf="viewMode === 'Day'" class="ag-theme-alpine" [rowData]="rowData"
             [columnDefs]="columnDefs" (gridReady)="onGridReady($event)" rowSelection="multiple"
             style="width: 100%; height: 400px;">
           </ag-grid-angular> -->
-        <!--  -->
+            <!--  -->
 
-        <!-- Month View Grid -->
-        <ag-grid-angular style="width: 100%; height: 600px;" class="ag-theme-alpine" id="specualGrid2"
-          [gridOptions]="gridOptions" [pagination]="true"
-          [columnDefs]="columnDefs" [defaultColDef]="defaultColDef" [rowData]="rowData" [domLayout]="'autoHeight'"
-          (gridReady)="onGridReady($event)">
-        </ag-grid-angular>
+            <!-- Month View Grid -->
+            <ag-grid-angular style="width: 100%; height: 600px;" class="ag-theme-alpine" id="specualGrid2"
+              [gridOptions]="gridOptions" [pagination]="true" [columnDefs]="columnDefs" [defaultColDef]="defaultColDef"
+              [rowData]="rowData" [domLayout]="'autoHeight'" (gridReady)="onGridReady($event)">
+            </ag-grid-angular>
+          </div>
+        </div>
       </div>
-    </div>
-  </div>
 
+       <div class="list mt-2">
+          <ul>
+            <li><span class="dot"></span> P - Present</li>
+            <li><span class="dot"></span> A - Absent</li>
+            <li><span class="dot"></span> W - Weekend</li>
+            <li><span class="dot"></span> W/od - Weekend</li>
+            <li><span class="dot"></span> H - Holiday</li>
+            <li><span class="dot"></span> WFH/2 - Work From Home Half Day</li>
+            <li><span class="dot"></span> HD - Half Day</li>
+            <li><span class="dot"></span> LT - Late</li>
+          </ul>
+
+        </div>
+
+    </div>
+
+  </div>
 </div>
