@@ -114,12 +114,22 @@ export class PayrollListComponent {
           }));
         } else {
           this.rowData = [];
+          this.toastr.warning('Data Not Found');
         }
       } catch (error) {
         console.log(error);
         this.rowData = [];
       }
-    });
+    },
+      (error) => {
+        this.isLoading = false;
+        this.rowData = [];
+        if (error.status === 404) {
+          this.toastr.warning('Data Not Found');
+        } else {
+          console.error(error);
+        }
+      });
     this.isLoading = false;
   }
 
@@ -228,8 +238,8 @@ export class PayrollListComponent {
     }
 
     const temp_payroll_ids = this.selectedRowData.map((emp: any) => ({
-      temp_payroll_id : emp.temp_payroll_id
-     
+      temp_payroll_id: emp.temp_payroll_id
+
     }));
     const payload = { temp_payroll_ids };
     console.log('payloadArray', payload)
@@ -305,11 +315,11 @@ export class PayrollListComponent {
   exportExcel() {
     if (this.gridApi) {
       this.gridApi.exportDataAsCsv({
-      columnKeys: ['employee_code', 'employeeName', 'grossAmount', 'overTime', 'deduction', 'netAmount'],
-      fileName: 'payrollList.csv',
-    });
+        columnKeys: ['employee_code', 'employeeName', 'grossAmount', 'overTime', 'deduction', 'netAmount'],
+        fileName: 'payrollList.csv',
+      });
     }
-    
+
   }
 }
 

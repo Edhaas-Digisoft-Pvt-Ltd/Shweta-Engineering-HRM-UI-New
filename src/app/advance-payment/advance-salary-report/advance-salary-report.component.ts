@@ -86,11 +86,16 @@ export class AdvanceSalaryReportComponent {
           this.rowData = res.data;
         } else {
           this.rowData = [];
+          this.toastr.warning('Data Not Found');
         }
       },
       (error) => {
-        console.error('Error fetching salary report:', error);
         this.rowData = [];
+      if (error.status === 404) {
+        this.toastr.warning('Data Not Found');
+      } else {
+        this.toastr.error(error);
+      }
       }
     );
   }

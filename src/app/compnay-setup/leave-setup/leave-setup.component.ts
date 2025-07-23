@@ -176,8 +176,12 @@ export class LeaveSetupComponent {
       this.isLoading = false;
     },
       (error) => {
-        console.error('Error fetching leave request:', error);
         this.isLoading = false;
+        if (error.status === 400) {
+          this.toastr.warning('Data Not Found');
+        } else {
+          console.error(error);
+        }
       }
     );
     this.isLoading = false;

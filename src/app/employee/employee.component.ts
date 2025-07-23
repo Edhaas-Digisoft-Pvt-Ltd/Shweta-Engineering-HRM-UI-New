@@ -184,6 +184,7 @@ export class EmployeeComponent {
         }));
       } else {
         this.rowData = [];
+        this.toastr.warning('Data Not Found')
       }
     }, (error) => {
       this.rowData = [];

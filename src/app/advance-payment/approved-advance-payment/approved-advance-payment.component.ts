@@ -3,6 +3,7 @@ import { FormBuilder, FormGroup } from '@angular/forms';
 import { ColDef, GridApi } from 'ag-grid-community';
 import { EmployeeActionComponent } from 'src/app/employee/employee-action/employee-action.component';
 import { HrmserviceService } from 'src/app/hrmservice.service';
+import { ToastrService } from 'ngx-toastr';
 
 @Component({
   selector: 'app-approved-advance-payment',
@@ -25,7 +26,7 @@ export class ApprovedAdvancePaymentComponent {
   approvedData!: any;
   isLoading: boolean = false;
 
-  constructor(private fb: FormBuilder, private service: HrmserviceService) { }
+  constructor(private fb: FormBuilder, private service: HrmserviceService, private toastr: ToastrService) { }
 
   ngOnInit() {
     const currentDate = new Date();
@@ -62,6 +63,10 @@ export class ApprovedAdvancePaymentComponent {
     this.getAllApprovedRequest();
   }
 
+  onYearMonthChange() {
+    this.getAllApprovedRequest();
+  }
+
   getCompanyNames() {
     this.service.post('fetch/company', {}).subscribe((res: any) => {
       if (res.status == "success") {
@@ -77,10 +82,10 @@ export class ApprovedAdvancePaymentComponent {
   getAllApprovedRequest() {
     this.isLoading = true;
     this.rowData = [];
-    this.service.post('all/approvedrequest', {
-      // company_id: this.selectedCompanyId, 
-      // year: this.selectedYear,
-      // month: this.selectedMonth
+    this.service.post('all/companyapprovedrequest', {
+      company_id: this.selectedCompanyId, 
+      year: this.selectedYear,
+      month: this.selectedMonth
     }).subscribe((res: any) => {
       try {
         if (res.status === 'success') {
@@ -97,9 +102,18 @@ export class ApprovedAdvancePaymentComponent {
             tenure: item.tenure,
             adv_pay_id: item.adv_pay_id
           }));
+        }else {
+          this.toastr.warning('Data Not Found');
         }
       } catch (error) {
         console.log(error);
+      }
+    },(error) => {
+      this.isLoading = false;
+      if (error.status === 400) {
+        this.toastr.warning('Data Not Found');
+      } else {
+        console.error( error);
       }
     })
     this.isLoading = false;
@@ -168,10 +182,6 @@ export class ApprovedAdvancePaymentComponent {
   emptyInput() {
     this.searchValue = '';
     window.location.reload();
-  }
-  onYearMonthChange() {
-    // alert("month change")
-    console.log('Month Change');
   }
 
   public defaultColDef: ColDef = {

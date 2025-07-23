@@ -87,7 +87,6 @@ export class AdvancePaymentComponent {
 
   onCompanyChange(event: Event): void {
     this.selectedCompanyId = (event.target as HTMLSelectElement).value;
-    console.log('Selected Company ID:', this.selectedCompanyId);
     this.getAllAdvSalary();
   }
 
@@ -99,9 +98,8 @@ export class AdvancePaymentComponent {
       year: this.selectedYear,
       month: this.selectedMonth,
     }).subscribe((res: any) => {
-      console.log(res)
       try {
-        if (res.status === 'success') {
+        if (res.status === 'success' && res.data.length > 0) {
           this.rowData = res.data.map((item: any) => ({
             employee_code: item.employee_code,
             apply_date: item.apply_date,
@@ -111,12 +109,23 @@ export class AdvancePaymentComponent {
             advance_amount: item.advance_amount,
             tenure: item.tenure,
             status: item.status,
+            adv_pay_id: item.adv_pay_id
           }));
+        } else {
+          this.toastr.warning('Data Not Found');
         }
       } catch (error) {
         console.log(error);
       }
-    })
+    },
+      (error) => {
+        this.isLoading = false;
+        if (error.status === 404) {
+          this.toastr.warning('Data Not Found');
+        } else {
+          console.error(error);
+        }
+      })
     this.isLoading = false;
   }
 
@@ -251,13 +260,18 @@ export class AdvancePaymentComponent {
         },
         onCellClicked: (event: any) => {
           this.getSingleAdvanceSalary(event.data.adv_pay_id);
+          console.log(event);
+
         },
       });
     }
   }
 
   getSingleAdvanceSalary(data: any) {
+    this.isLoading = true;
     this.advPayId = data;
+    console.log(this.advPayId);
+
     this.service.post('single/advancesaraly', { adv_pay_id: data }).subscribe((res: any) => {
       if (res.status === 'success') {
         const singleAdvanceSalary = res.data[0];
@@ -278,6 +292,7 @@ export class AdvancePaymentComponent {
         this.EditAdvancePayment.patchValue(this.EditAdvancePaymentData);
       }
     })
+    this.isLoading = false;
   }
 
   statusButtonRenderer(params: any) {

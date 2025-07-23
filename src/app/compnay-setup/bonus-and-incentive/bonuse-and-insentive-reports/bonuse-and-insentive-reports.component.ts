@@ -62,8 +62,8 @@ export class BonuseAndInsentiveReportsComponent {
       month: this.selectedMonth,
     };
 
-    this.service.post('emp/bonus-incentive/report', payload).subscribe(
-      (res: any) => {
+    this.service.post('report/bonusincentive', payload).subscribe(
+      (res: any) => {   
         if (res.status === 'success' && res.data.length > 0) {
           this.rowData = res.data;
         } else {
@@ -71,8 +71,12 @@ export class BonuseAndInsentiveReportsComponent {
         }
       },
       (error) => {
-        console.error('Error fetching salary report:', error);
         this.rowData = [];
+        if (error.status === 404) {
+          this.toastr.warning('Data Not Found');
+        } else {
+          console.error(error);
+        }
       }
     );
   }

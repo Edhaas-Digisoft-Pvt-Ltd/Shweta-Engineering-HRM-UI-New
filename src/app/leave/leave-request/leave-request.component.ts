@@ -19,11 +19,11 @@ export class LeaveRequestComponent {
 
   params: any;
   leaveRequestForm!: FormGroup;
-  selectedCompanyId : any = 1;
-  rowData : any = [];
+  selectedCompanyId: any = 1;
+  rowData: any = [];
   leaveRequestData!: any;
-  empLeaveId : any;
-  leaveBalance : any = {};
+  empLeaveId: any;
+  leaveBalance: any = {};
   previousLeaves: any;
   isLoading: boolean = false;
 
@@ -43,8 +43,8 @@ export class LeaveRequestComponent {
   //   }
   // };
 
-  CompanyNames: any = [] ;
-  selectedValue: any = 1 ; // Default selected
+  CompanyNames: any = [];
+  selectedValue: any = 1; // Default selected
 
   constructor(private route: ActivatedRoute, private router: Router, private fb: FormBuilder, private service: HrmserviceService, private toastr: ToastrService) { }
 
@@ -77,24 +77,24 @@ export class LeaveRequestComponent {
   };
 
   columnDefs: ColDef[] = [
-    { headerName: 'Employee Code', field: 'employee_code', sortable: true, filter: true},
-    { headerName: 'Employee Name', field: 'emp_name', sortable: true, filter: true},
-    { headerName: 'Department', field: 'department_name',sortable: true, filter: true},
+    { headerName: 'Employee Code', field: 'employee_code', sortable: true, filter: true },
+    { headerName: 'Employee Name', field: 'emp_name', sortable: true, filter: true },
+    { headerName: 'Department', field: 'department_name', sortable: true, filter: true },
     {
       headerName: 'Actions',
       cellStyle: { border: '1px solid #ddd' },
       cellRenderer: EditLeaveRequestComponent,
       cellRendererParams: {
-        editCallback: (leaveId: any) => this.getSingleLeaveRequest(leaveId), 
+        editCallback: (leaveId: any) => this.getSingleLeaveRequest(leaveId),
       }
     }
   ];
 
   getSingleLeaveRequest(params: any) {
     this.empLeaveId = params;
-     this.service.post(`single/leave/request`,{ "tbl_emp_leave_id": this.empLeaveId}).subscribe((res: any) => {
-       if (res.status === 'success') {
-        const singleleaveRequestData = res.current_leave; 
+    this.service.post(`single/leave/request`, { "tbl_emp_leave_id": this.empLeaveId }).subscribe((res: any) => {
+      if (res.status === 'success') {
+        const singleleaveRequestData = res.current_leave;
         this.leaveRequestData = {
           employeeName: singleleaveRequestData?.emp_name,
           startDate: singleleaveRequestData?.start_date,
@@ -105,13 +105,13 @@ export class LeaveRequestComponent {
           department: singleleaveRequestData?.department_name,
           leavereason: singleleaveRequestData?.leave_reason,
         };
-        this.leaveRequestForm.patchValue(this.leaveRequestData);  
-        this.leaveBalance = res.leavebalnce[0];   
+        this.leaveRequestForm.patchValue(this.leaveRequestData);
+        this.leaveBalance = res.leavebalnce[0];
         this.previousLeaves = res.previous_leaves;
-       }
+      }
     });
   }
- 
+
   onCompanyChange(event: Event): void {
     this.selectedCompanyId = (event.target as HTMLSelectElement).value;
     console.log('Selected Company ID:', this.selectedCompanyId);
@@ -130,27 +130,33 @@ export class LeaveRequestComponent {
     );
   }
 
-  getLeaveRequests(){
+  getLeaveRequests() {
     this.isLoading = true;
-     this.rowData = [];
-     this.service.post('leave/request', { company_id: this.selectedCompanyId }).subscribe(
+    this.rowData = [];
+    this.service.post('leave/request', { company_id: this.selectedCompanyId }).subscribe(
       (res: any) => {
         if (res.status === 'success') {
-          this.rowData = res.data.map((item:any)=>({
-            employee_code:item.employee_code,
-            emp_name:item.emp_name,
-            company_name:item.company_name,
-            department_name:item.department_name,
-            start_date:item.start_date,
-            end_date:item.end_date,
-            apply_leave_count : item.apply_leave_count,
-            leave_status:item.leave_status,
+          this.rowData = res.data.map((item: any) => ({
+            employee_code: item.employee_code,
+            emp_name: item.emp_name,
+            company_name: item.company_name,
+            department_name: item.department_name,
+            start_date: item.start_date,
+            end_date: item.end_date,
+            apply_leave_count: item.apply_leave_count,
+            leave_status: item.leave_status,
             tbl_emp_leave_id: item.tbl_emp_leave_id,
-        }));
-        } 
+          }));
+        } else {
+          this.toastr.warning('Data Not Found')
+        }
       },
-       (error) => {
-        console.error(error);
+      (error) => {
+        if (error.status === 400) {
+          this.toastr.warning('Data Not Found');
+        } else {
+          console.error(error);
+        }
       }
     );
     this.isLoading = false;
@@ -209,7 +215,7 @@ export class LeaveRequestComponent {
     this.searchInputValue = '';
     window.location.reload();
   }
-  
+
   gridOptions = {
     pagination: false,
     paginationPageSize: 10,
@@ -221,24 +227,24 @@ export class LeaveRequestComponent {
   }
 
   updateStatus(data: any) {
-    if(confirm("Do you want to update Status?") == true){
+    if (confirm("Do you want to update Status?") == true) {
       const payload = {
-        tbl_emp_leave_id : this.empLeaveId,
-        leave_status : data
+        tbl_emp_leave_id: this.empLeaveId,
+        leave_status: data
       }
-      this.service.post(`update/leave/request`,payload).subscribe((res: any) => {
-        if(res.status === 'success'){
-        this.toastr.success("Updated Successfully");
+      this.service.post(`update/leave/request`, payload).subscribe((res: any) => {
+        if (res.status === 'success') {
+          this.toastr.success("Updated Successfully");
           this.getLeaveRequests()
           const modalElement = document.getElementById('leaveRequestModal');
-            if (modalElement) {
-              const modalInstance = bootstrap.Modal.getInstance(modalElement);
-              if (modalInstance) {
-                modalInstance.hide();
-              }
+          if (modalElement) {
+            const modalInstance = bootstrap.Modal.getInstance(modalElement);
+            if (modalInstance) {
+              modalInstance.hide();
             }
+          }
         }
-      },(error) => {
+      }, (error) => {
         console.error('Error fetching leave request:', error);
       });
     }
@@ -264,7 +270,7 @@ export class LeaveRequestComponent {
     }
   }
 
-  
+
 }
 
 

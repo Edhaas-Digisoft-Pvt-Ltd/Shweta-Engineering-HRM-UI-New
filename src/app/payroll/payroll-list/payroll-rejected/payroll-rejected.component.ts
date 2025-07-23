@@ -111,15 +111,21 @@ export class PayrollRejectedComponent {
             }));
           } else {
             this.rowData = [];
+            this.toastr.warning('Data Not Found');
           }
         } catch (error) {
-          console.error('Error mapping payroll data:', error);
+          console.error( error);
           this.rowData = []; 
         }
       },
       (error) => {
-        console.error('Error fetching payroll list:', error);
+        this.isLoading = false;
         this.rowData = [];
+        if (error.status === 404) {
+          this.toastr.warning('Data Not Found');
+        } else {
+          console.error(error);
+        }
       }
     );
     this.isLoading = false;
