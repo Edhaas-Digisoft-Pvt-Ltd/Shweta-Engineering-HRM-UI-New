@@ -27,8 +27,8 @@ export class EmployeeActionComponent implements ICellRendererAngularComp {
   agInit(params: any): void {
     this.params = params;
     this.employeID = params.data.employee_id; // or the correct property name
-    console.log("employee_action :",this.params.data);
-    console.log(this.employeID);
+    // console.log("employee_action :",this.params.data);
+    // console.log(this.employeID);
   }
   
 

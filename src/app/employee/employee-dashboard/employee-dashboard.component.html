@@ -537,7 +537,7 @@
 
                                 <!-- Leave Type -->
                                 <div class="col-md-4">
-                                    <label class="form-label">Leave Name</label>
+                                    <label class="form-label">Leave Name<span class="text-danger">*</span></label>
                                     <select class="form-select" formControlName="leave_id" [ngClass]="{'input-error': isLeaveSubmitted && leaveForm.get('leave_id')?.invalid,
                                 'is-invalid': isLeaveSubmitted && leaveForm.get('leave_id')?.invalid }">
                                         <option [value]="null" disabled selected>-- Select Leave Type --</option>
@@ -561,7 +561,7 @@
 
                                 <!-- From Date -->
                                 <div class="col-md-4">
-                                    <label class="form-label">From Date</label>
+                                    <label class="form-label">From Date<span class="text-danger">*</span></label>
                                     <input type="date" class="form-control" formControlName="start_date" [ngClass]="{'input-error': isLeaveSubmitted && leaveForm.get('start_date')?.invalid,
                                 'is-invalid': isLeaveSubmitted && leaveForm.get('start_date')?.invalid }" />
 
@@ -569,7 +569,7 @@
 
                                 <!-- To Date -->
                                 <div class="col-md-4">
-                                    <label class="form-label">To Date</label>
+                                    <label class="form-label">To Date<span class="text-danger">*</span></label>
                                     <input type="date" class="form-control" formControlName="end_date" [ngClass]="{'input-error': isLeaveSubmitted && leaveForm.get('end_date')?.invalid,
                                 'is-invalid': isLeaveSubmitted && leaveForm.get('end_date')?.invalid }" />
 
@@ -578,7 +578,7 @@
 
                             <!-- Reason -->
                             <div class="mb-3">
-                                <label class="form-label">Reason</label>
+                                <label class="form-label">Reason<span class="text-danger">*</span></label>
                                 <textarea class="form-control" rows="3" formControlName="leave_reason"
                                     placeholder="Enter your reason here" [ngClass]="{'input-error': isLeaveSubmitted && leaveForm.get('leave_reason')?.invalid,
                                 'is-invalid': isLeaveSubmitted && leaveForm.get('leave_reason')?.invalid }"></textarea>
@@ -615,7 +615,7 @@
                             <div class="row mb-3">
 
                                 <div class="col-md-3">
-                                    <label class="form-label">Tenure</label>
+                                    <label class="form-label">Tenure<span class="text-danger">*</span></label>
                                     <select class="form-select" formControlName="tenure" [ngClass]="{'input-error': isAdvanceSalary && advanceSalaryForm.get('tenure')?.invalid,
                                 'is-invalid': isAdvanceSalary && advanceSalaryForm.get('tenure')?.invalid }">
                                         <option [value]="null" disabled selected>-- Select Tenure --</option>
@@ -628,7 +628,7 @@
                                 </div>
 
                                 <div class="col-md-3">
-                                    <label class="form-label">Amount (in ₹)</label>
+                                    <label class="form-label">Amount (in ₹)<span class="text-danger">*</span></label>
                                     <input type="number" class="form-control" formControlName="advance_amount"
                                         (input)="calculateInstallment()" [ngClass]="{'input-error': isAdvanceSalary && advanceSalaryForm.get('advance_amount')?.invalid,
                                 'is-invalid': isAdvanceSalary && advanceSalaryForm.get('advance_amount')?.invalid }" />
@@ -639,7 +639,7 @@
                                 </div>
 
                                 <div class="col-md-6">
-                                    <label class="form-label">Reason</label>
+                                    <label class="form-label">Reason<span class="text-danger">*</span></label>
                                     <textarea rows="3" class="form-control" formControlName="remarks"
                                         placeholder="Enter your reason here"
                                         [ngClass]="{'input-error': isAdvanceSalary && advanceSalaryForm.get('remarks')?.invalid,
@@ -654,7 +654,7 @@
 
                             <div class="mb-3">
                                 <label class="form-label">Installment Amount (in ₹)</label>
-                                <input type="text" class="form-control readonlyInput" [value]="installmentAmount">
+                                <input type="text" disabled class="form-control readonlyInput" [value]="installmentAmount">
                             </div>
 
                         </div>

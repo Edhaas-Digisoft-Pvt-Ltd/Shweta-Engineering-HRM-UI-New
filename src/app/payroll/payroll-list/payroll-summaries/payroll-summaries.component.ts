@@ -165,34 +165,38 @@ export class PayrollSummariesComponent {
           {
             Compound: 'Provident Fund (PF)',
             deduction: 'Fixed %',
-            amount: 'Rs. 1000'
+            amount: '₹. 0'
           },
 
           {
             Compound: 'Professional Tax (PT)',
             deduction: 'Tax Deduction',
-            amount: `Rs. ${this.calculationData.total_tax_deduction ?? 0}`
+            amount: `₹. ${this.calculationData.total_tax_deduction ?? 0}`
           },
 
           {
             Compound: 'ESIC',
             deduction: 'Fixed %',
-            amount: 'Rs. 0'
+            amount: '₹. 0'
           },
           {
             Compound: 'Advance Salary',
             deduction: 'Advance Deduction',
-            amount: `Rs. ${this.calculationData.advance_amount ?? 0}`
+            amount: `₹. ${this.calculationData.advance_amount ?? 0}`
           },
           {
             Compound: 'Other',
             deduction: 'lorem',
-            amount: 'Rs. 0',
+            amount: '₹. 0',
           },
         ];
 
       }
     })
+  }
+
+  formatted(value: number): string {
+    return value.toLocaleString('en-IN');
   }
 
   calculateProgress(): number {

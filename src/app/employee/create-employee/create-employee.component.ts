@@ -119,7 +119,7 @@ export class CreateEmployeeComponent {
     this.multiStepForm.get('ctc')?.valueChanges.subscribe((value) => {
       this.ctc = value;
       // this.calculateAmount();
-    });
+    }); 
     this.getCompanyNames();
 
   }
@@ -182,6 +182,8 @@ export class CreateEmployeeComponent {
       this.statutoryInfo = this.statutoryInfo.filter(item => item !== label);
       this.selectedStatutoryOptions = this.selectedStatutoryOptions.filter(item => item.label !== label);
     }
+    
+    this.calculateSalaryAmount();
   }
 
   getCompanyNames() {
@@ -387,8 +389,6 @@ export class CreateEmployeeComponent {
       console.log(this.multiStepForm.value);
     }
   }
-
-
 
   calculateSalaryAmount() {
     const monthlyAmount = this.ctc / 12;

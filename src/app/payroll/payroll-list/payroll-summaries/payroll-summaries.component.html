@@ -215,27 +215,27 @@
                                     <tr>
                                         <td data-label="Compound">CTC</td>
                                         <td data-label="Calculation">-</td>
-                                        <td data-label="Amount (in ₹)">{{ calculationData?.CTC }}</td>
+                                        <td data-label="Amount (in ₹)">₹ {{ formatted(calculationData?.CTC) }}</td>
                                     </tr>
                                     <tr>
                                         <td data-label="Compound">Gross Salary</td>
-                                        <td data-label="Calculation">Basic_Salary+Bonus+Incentive+OT</td>
-                                        <td data-label="Amount (in ₹)">{{calculationData?.gross_salary}}</td>
+                                        <td data-label="Calculation">Monthly Salary+Bonus+Incentive+OT</td>
+                                        <td data-label="Amount (in ₹)">₹ {{ formatted(calculationData?.gross_salary)}}</td>
                                     </tr>
                                     <tr>
                                         <td data-label="Compound">Over Time Salary</td>
-                                        <td data-label="Calculation">hrs * 200</td>
-                                        <td data-label="Amount (in ₹)">{{calculationData?.total_overtime}}</td>
+                                        <td data-label="Calculation">Over Time Hours * 200</td>
+                                        <td data-label="Amount (in ₹)">₹ {{ formatted(calculationData?.total_overtime)}}</td>
                                     </tr>
-                                    <tr>
+                                    <!-- <tr>
                                         <td data-label="Compound">Present Day Hrs Salary</td>
                                         <td data-label="Calculation">-</td>
                                         <td data-label="Amount (in ₹)">-</td>
-                                    </tr>
+                                    </tr> -->
                                     <tr>
-                                        <td data-label="Compound">total Salary</td>
+                                        <td data-label="Compound">Total Monthly Salary</td>
                                         <td data-label="Calculation">-</td>
-                                        <td data-label="Amount (in ₹)">{{ calculationData?.basic_salary}}</td>
+                                        <td data-label="Amount (in ₹)">₹ {{ formatted(calculationData?.basic_salary)}}</td>
                                     </tr>
                                     <tr>
                                         <!-- <th  scope="row">1</th> -->
@@ -245,9 +245,9 @@
                                         <!-- <td>Otto</td> -->
                                     </tr>
                                     <tr class="deduction" *ngFor="let deductions of deduct">
-                                        <td data-label="Compound">{{deductions.Compound}}</td>
-                                        <td data-label="Calculation">{{deductions.deduction}}</td>
-                                        <td data-label="Amount (in ₹)">{{deductions.amount}}</td>
+                                        <td data-label="Compound">{{formatted(deductions.Compound)}}</td>
+                                        <td data-label="Calculation">{{formatted(deductions.deduction)}}</td>
+                                        <td data-label="Amount (in ₹)">{{formatted(deductions.amount)}}</td>
                                     </tr>
                                     <tr>
                                         <!-- <th  scope="row">1</th> -->
@@ -257,14 +257,14 @@
                                         <!-- <td>Otto</td> -->
                                     </tr>
                                     <tr class="insentive">
-                                        <td data-label="Compound">Incentive</td>
+                                        <td data-label="Compound">Bonus & Incentive</td>
                                         <td data-label="Calculation">-</td>
-                                        <td data-label="Amount (in ₹)">{{calculationData?.bonus_incentive_amount}}</td>
+                                        <td data-label="Amount (in ₹)">₹ {{formatted(calculationData?.bonus_incentive_amount)}}</td>
                                     </tr>
                                     <tr class="total">
-                                        <td data-label="Compound">Total</td>
+                                        <td data-label="Compound">Total Final Salary</td>
                                         <td></td>
-                                        <td data-label="Amount (in ₹)">Rs.39446.00</td>
+                                        <td data-label="Amount (in ₹)">Rs.0</td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -278,10 +278,10 @@
                         <button class="btn comBtn w-100  text-white"><i
                                 class="bi bi-file-earmark-text me-2"></i>Download Payslip</button>
                     </div>
-                    <div>
+                    <!-- <div>
                         <button class="btn preVieBtn w-100 "><i class="bi bi-file-earmark-text me-2"></i>Email
                             Payslip</button>
-                    </div>
+                    </div> -->
                 </div>
             </div>
         </div>

@@ -69,7 +69,7 @@
 
                             <!-- Company -->
                             <div class="col-md-3 text-start select-company">
-                                <label class="fw-bold" disabled selected>Select Company</label>
+                                <label class="fw-bold" disabled selected>Select Company<span class="text-danger">*</span></label>
                                 <select class="form-select" formControlName="companyid" [ngClass]="{
                                 'input-error': isSubmitted && LeaveRule.get('companyid')?.invalid,
                                 'is-invalid': isSubmitted && LeaveRule.get('companyid')?.invalid
@@ -86,7 +86,7 @@
 
                             <!-- Leave Type -->
                             <div class="col-md-3">
-                                <label for="leavetype">Leave Type</label>
+                                <label for="leavetype">Leave Type<span class="text-danger">*</span></label>
                                 <select id="leavetype" class="form-select" formControlName="leavetype" [ngClass]="{
           'input-error': isSubmitted && LeaveRule.get('leavetype')?.invalid,
           'is-invalid': isSubmitted && LeaveRule.get('leavetype')?.invalid
@@ -103,7 +103,7 @@
 
                             <!-- Leave Name -->
                             <div class="col-md-3">
-                                <label for="leavename">Leave Name</label>
+                                <label for="leavename">Leave Name<span class="text-danger">*</span></label>
                                 <input type="text" class="form-control" id="leavename" formControlName="leavename"
                                     placeholder="Please Enter Leave Name" [ngClass]="{
           'input-error': isSubmitted && LeaveRule.get('leavename')?.invalid,
@@ -117,7 +117,7 @@
 
                             <!-- No. Of Leaves -->
                             <div class="col-md-3">
-                                <label for="leavenumber">No. of leaves</label>
+                                <label for="leavenumber">No. of leaves<span class="text-danger">*</span></label>
                                 <input type="number" class="form-control" id="leavenumber" formControlName="leavenumber"
                                     placeholder="Please Enter Leave number" [ngClass]="{
           'input-error': isSubmitted && LeaveRule.get('leavenumber')?.invalid,
