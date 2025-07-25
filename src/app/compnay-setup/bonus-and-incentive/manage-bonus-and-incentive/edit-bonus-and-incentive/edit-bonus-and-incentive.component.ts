@@ -68,7 +68,6 @@ export class EditBonusAndIncentiveComponent implements ICellRendererAngularComp 
   agInit(params: any): void {
     this.params = params;
     this.role = this.service.getRole();
-    console.log(this.role);
     if(this.role == "accountant"){
       this.showIconAccountant = true
     }

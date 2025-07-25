@@ -20,7 +20,7 @@ export class AdvancePaymentComponent {
   activeTab: string = 'tab1';
   gridApiActive!: GridApi;
   CompanyNames: any = [];
-  selectedCompanyId: any = 1;
+  selectedCompanyId: any;
   selectedYear: any;
   selectedMonth: any;
   rowData: any = [];
@@ -32,6 +32,8 @@ export class AdvancePaymentComponent {
   isLoading: boolean = false;
 
   ngOnInit() {
+    this.selectedCompanyId = this.service.selectedCompanyId();
+
     this.getCompanyNames();
     this.selectedYear = new Date().getFullYear();
     this.selectedMonth = new Date().getMonth() + 1;

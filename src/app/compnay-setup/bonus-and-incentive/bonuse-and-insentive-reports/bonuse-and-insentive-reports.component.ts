@@ -59,7 +59,6 @@ export class BonuseAndInsentiveReportsComponent {
     const payload = {
       employee_code: code,
       year: this.selectedYear,
-      month: this.selectedMonth,
     };
 
     this.service.post('report/bonusincentive', payload).subscribe(

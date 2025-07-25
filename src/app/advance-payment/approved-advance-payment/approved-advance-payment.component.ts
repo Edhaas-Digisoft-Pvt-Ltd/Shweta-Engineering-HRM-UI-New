@@ -29,6 +29,8 @@ export class ApprovedAdvancePaymentComponent {
   constructor(private fb: FormBuilder, private service: HrmserviceService, private toastr: ToastrService) { }
 
   ngOnInit() {
+    this.selectedCompanyId = this.service.selectedCompanyId();
+    
     const currentDate = new Date();
     this.selectedYear = new Date().getFullYear();
     this.selectedMonth = new Date().getMonth() + 1;

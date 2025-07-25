@@ -22,6 +22,60 @@ export class AdvanceSalaryReportComponent {
   EditAdvancePaymentData!: any;
   isLoading: boolean = false;
   gridApi: any;
+  selectedCompanyId: any = 1;
+  CompanyNames: any = [];
+
+  data = [
+      {
+        "adv_pay_id": 23,
+        "employee_id": 14,
+        "advance_amount": 2000,
+        "tenure": 3,
+        "emi": 667,
+        "emi_status": null,
+        "remaining_balance": 2000,
+        "status": "Approved",
+        "remarks": "test",
+        "apply_date": "2025-07-16",
+        "updated_on": "2025-07-16",
+        "employee_code": "SEE2025051314",
+        "emp_name": "Ms Ankita Patel",
+        "department_name": "Accounts",
+        "designation_name": "Sr.Accountant"
+      },
+      {
+        "adv_pay_id": 14,
+        "employee_id": 14,
+        "advance_amount": 10000,
+        "tenure": 3,
+        "emi": 3333,
+        "emi_status": null,
+        "remaining_balance": 0,
+        "status": "Completed",
+        "remarks": "test",
+        "apply_date": "2025-02-16",
+        "updated_on": "2025-07-16",
+        "employee_code": "SEE2025051314",
+        "emp_name": "Ms Ankita Patel",
+        "department_name": "Accounts",
+        "designation_name": "Sr.Accountant"
+      },
+  ]
+selectedAdvpayid: number | null = null;
+tabledata: { [key: number]: { date: string; EMI: string; status: string }[] } = {
+  23: [
+    { date: '2025-10-07', EMI: '666', status: 'Pending' },
+    { date: '2025-09-07', EMI: '666', status: 'Pending' },
+    { date: '2025-08-07', EMI: '666', status: 'Pending' },
+  ],
+  14: [
+    { date: '2025-05-07', EMI: '3333', status: 'Paid' },
+    { date: '2025-04-07', EMI: '3333', status: 'Paid' },
+    { date: '2025-03-07', EMI: '3333', status: 'Paid' },
+  ]
+};
+
+
 
   years = [2023, 2024, 2025];
   months = [
@@ -42,6 +96,7 @@ export class AdvanceSalaryReportComponent {
   constructor(private fb: FormBuilder, private service: HrmserviceService, private toastr: ToastrService) { }
 
   ngOnInit() {
+    this.getCompanyNames();
     this.initializeColumns()
     const currentDate = new Date();
     this.today = currentDate.toISOString().split('T')[0];
@@ -66,38 +121,39 @@ export class AdvanceSalaryReportComponent {
   }
 
   searchEmployeeAdvanceSalary() {
-    this.rowData = [];
-    const code = this.searchValue?.trim();
-    if (!code) {
-      this.rowData = [];
-      this.toastr.error('Please Enter Employee Code');
-      return;
-    }
+    this.rowData = this.data
+    // this.rowData = [];
+    // const code = this.searchValue?.trim();
+    // if (!code) {
+    //   this.rowData = [];
+    //   this.toastr.error('Please Enter Employee Code');
+    //   return;
+    // }
 
-    const payload = {
-      employee_code: code,
-      year: this.selectedYear,
-      month: this.selectedMonth,
-    };
+    // const payload = {
+    //   employee_code: code,
+    //   year: this.selectedYear,
+    //   month: this.selectedMonth,
+    // };
 
-    this.service.post('emp/advancesaraly/report', payload).subscribe(
-      (res: any) => {
-        if (res.status === 'success' && res.data.length > 0) {
-          this.rowData = res.data;
-        } else {
-          this.rowData = [];
-          this.toastr.warning('Data Not Found');
-        }
-      },
-      (error) => {
-        this.rowData = [];
-      if (error.status === 404) {
-        this.toastr.warning('Data Not Found');
-      } else {
-        this.toastr.error(error);
-      }
-      }
-    );
+    // this.service.post('emp/advancesaraly/report', payload).subscribe(
+    //   (res: any) => {
+    //     if (res.status === 'success' && res.data.length > 0) {
+    //       this.rowData = res.data;
+    //     } else {
+    //       this.rowData = [];
+    //       this.toastr.warning('Data Not Found');
+    //     }
+    //   },
+    //   (error) => {
+    //     this.rowData = [];
+    //   if (error.status === 404) {
+    //     this.toastr.warning('Data Not Found');
+    //   } else {
+    //     this.toastr.error(error);
+    //   }
+    //   }
+    // );
   }
 
   onGridReady(params: any) {
@@ -195,8 +251,24 @@ export class AdvanceSalaryReportComponent {
     });
   }
 
+  getCompanyNames() {
+    this.service.post('fetch/company', {}).subscribe((res: any) => {
+      if (res.status == "success") {
+        this.CompanyNames = res.data
+      }
+    },
+      (error) => {
+        console.error('Error fetching companies:', error);
+      }
+    );
+  }
+
+  onCompanyChange(event: Event): void {
+    this.selectedCompanyId = (event.target as HTMLSelectElement).value;
+  }
 
   getSingleAdvanceSalary(data: any) {
+    this.selectedAdvpayid = data
     this.service.post('single/advancesaraly', { adv_pay_id: data }).subscribe((res: any) => {
       if (res.status === 'success') {
         const singleAdvanceSalary = res.data[0];

@@ -24,7 +24,7 @@
                         <div class=" text-start select-company ">
                             <label class="fw-bold">Select Company </label>
                             <br>
-                            <select class="form-select" (change)="onCompanyChange($event)">
+                            <select class="form-select" [(ngModel)]="selectedCompanyId" (change)="onCompanyChange($event)">
                                 <!-- <option value="" selected>Select Company</option> -->
                                 <option *ngFor="let item of CompanyNames" [value]="item.company_id">
                                     {{ item.company_name }}

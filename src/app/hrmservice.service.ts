@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import {
   HttpClient,
@@ -124,4 +124,13 @@ export class HrmserviceService {
   clearRole(): void {
     sessionStorage.removeItem(this.roleKey);
   }
+
+  //signal =========================================================================================
+    private _selectedCompanyId = signal<number>(1); //storing company id 
+  
+    setCompanyId(id: number) {
+      this._selectedCompanyId.set(id);   //temp store company id
+    }
+  
+    selectedCompanyId = this._selectedCompanyId.asReadonly(); //display company id
 }

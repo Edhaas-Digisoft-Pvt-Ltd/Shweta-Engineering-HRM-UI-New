@@ -1,6 +1,8 @@
 import { Component } from '@angular/core';
 import { FormGroup, FormBuilder, Validators } from '@angular/forms';
 import { ColDef } from 'ag-grid-community';
+import * as XLSX from 'xlsx';
+import { saveAs } from 'file-saver';
 import { ToastrService } from 'ngx-toastr';
 import { HrmserviceService } from 'src/app/hrmservice.service';
 import { EditBonusAndIncentiveComponent } from './edit-bonus-and-incentive/edit-bonus-and-incentive.component';
@@ -16,25 +18,25 @@ export class ManageBonusAndIncentiveComponent {
   employees: any = [];
   selectedYear: any;
   selectedMonth: any;
-  bonusAndIncentive! : FormGroup;
-  updateStatusBonusAndIncentive! : FormGroup;
-  editBonusAndIncentive! : FormGroup;
+  bonusAndIncentive!: FormGroup;
+  updateStatusBonusAndIncentive!: FormGroup;
+  editBonusAndIncentive!: FormGroup;
   isSubmitted = false;
   rowData: any = [];
   editBonusAndIncentiveData: any;
   tbiId: any;
   loggedInUser: any;
-  minDate = ''; 
-  maxDate = ''; 
-  blockStart = ''; 
-  blockEnd = ''; 
+  minDate = '';
+  maxDate = '';
+  blockStart = '';
+  blockEnd = '';
   defaultDate = '';
   isEditSubmitted = false;
   role: string = '';
   isLoading: boolean = false;
 
-  constructor(private fb: FormBuilder, private service: HrmserviceService, private toastr: ToastrService) {}
-  
+  constructor(private fb: FormBuilder, private service: HrmserviceService, private toastr: ToastrService) { }
+
   financialYears = [2022, 2023, 2024, 2025];
   months = [
     { id: 1, value: 'January' },
@@ -63,7 +65,7 @@ export class ManageBonusAndIncentiveComponent {
 
   ngOnInit() {
     this.role = this.service.getRole();
-    
+
     this.selectedYear = new Date().getFullYear();
     this.selectedMonth = new Date().getMonth() + 1;
     this.getCompanyNames();
@@ -71,7 +73,7 @@ export class ManageBonusAndIncentiveComponent {
     this.loggedInUser = sessionStorage.getItem('employeeName')
 
     this.bonusAndIncentive = this.fb.group({
-      employee_id: ['', [Validators.required]],
+      employee_code: ['', [Validators.required]],
       bonus_incentive_date: ['', [Validators.required]],
       bonus_amount: ['', [Validators.required, Validators.pattern(/^\d+$/)]],
       incentive_amount: ['', [Validators.required, Validators.pattern(/^\d+$/)]],
@@ -87,8 +89,8 @@ export class ManageBonusAndIncentiveComponent {
     });
 
     this.editBonusAndIncentive = this.fb.group({
-      employee_id: [{ value: '', disabled: true}, Validators.required],
-      employee_name: [{ value: '', disabled: true}, Validators.required],
+      employee_id: [{ value: '', disabled: true }, Validators.required],
+      employee_name: [{ value: '', disabled: true }, Validators.required],
       bonus_incentive_date: [{ value: '' }, Validators.required],
       bonus_amount: [{ value: '' }, Validators.required],
       incentive_amount: [{ value: '' }, Validators.required],
@@ -126,15 +128,15 @@ export class ManageBonusAndIncentiveComponent {
 
     const disableDates = day <= 10
       ? [
-          (d: Date) => {
-            return d.getFullYear() === year &&
-              d.getMonth() === month &&
-              d.getDate() > 10;
-          },
-        ]
+        (d: Date) => {
+          return d.getFullYear() === year &&
+            d.getMonth() === month &&
+            d.getDate() > 10;
+        },
+      ]
       : [
-          (d: Date) => d.getFullYear() === year && d.getMonth() === month
-        ];
+        (d: Date) => d.getFullYear() === year && d.getMonth() === month
+      ];
 
     flatpickr("#bonusDate", {
       dateFormat: "Y-m-d",
@@ -148,10 +150,11 @@ export class ManageBonusAndIncentiveComponent {
   }
 
   columnDefs: ColDef[] = [
-    { headerName: 'Employee Code', field: 'employee_code', sortable: true, filter: true, minWidth:200 },
-    { headerName: 'Employee Name', field: 'emp_name', sortable: true, filter: true, minWidth:250 },
-    { headerName: 'Date', field: 'bonus_incentive_date', sortable: true, filter: true, minWidth:240 },
-    { headerName: 'Status', field: 'status',  sortable: true, filter: true, minWidth:250,
+    { headerName: 'Employee Code', field: 'employee_code', sortable: true, filter: true, minWidth: 200 },
+    { headerName: 'Employee Name', field: 'emp_name', sortable: true, filter: true, minWidth: 250 },
+    { headerName: 'Date', field: 'bonus_incentive_date', sortable: true, filter: true, minWidth: 240 },
+    {
+      headerName: 'Status', field: 'status', sortable: true, filter: true, minWidth: 250,
       cellRenderer: this.statusButtonRenderer,
     },
 
@@ -167,7 +170,7 @@ export class ManageBonusAndIncentiveComponent {
       // onCellClicked: (event: any) => {
       //   this.getSingleBonusIncentive(event.data);
       // },  
-      cellRenderer: EditBonusAndIncentiveComponent,
+      cellRenderer: EditBonusAndIncentiveComponent, 
       cellRendererParams: {
         userRole: this.role, // <-- assuming this.userRole contains 'accountant' or 'admin'
         editCallback: (data: string) => this.getSingleBonusIncentiveforEdit(data),
@@ -175,6 +178,11 @@ export class ManageBonusAndIncentiveComponent {
       },
     },
   ];
+
+  gridOptions = {
+    pagination: false,
+    paginationPageSize: 10,
+  };
 
   gridApiActive: any;
   onGridReady(params: { api: any }) {
@@ -240,15 +248,15 @@ export class ManageBonusAndIncentiveComponent {
 
   setMaxDate() {
     const today = new Date();
-    const lastDayPrevMonth = new Date(today.getFullYear(), today.getMonth(), 0); 
-    this.maxDate = lastDayPrevMonth.toISOString().split('T')[0]; 
+    const lastDayPrevMonth = new Date(today.getFullYear(), today.getMonth(), 0);
+    this.maxDate = lastDayPrevMonth.toISOString().split('T')[0];
   }
-  
+
   addBonusAndIncentive() {
     this.isSubmitted = true;
     if (this.bonusAndIncentive.valid) {
       const current_data: any = {
-        employee_id: this.bonusAndIncentive.value.employee_id,
+        employee_code: this.bonusAndIncentive.value.employee_code,
         bonus_incentive_date: this.bonusAndIncentive.value.bonus_incentive_date,
         bonus_amount: this.bonusAndIncentive.value.bonus_amount,
         incentive_amount: this.bonusAndIncentive.value.incentive_amount,
@@ -257,10 +265,11 @@ export class ManageBonusAndIncentiveComponent {
       this.service.post("insert/bonusincentive", current_data).subscribe({
         next: (res) => {
           this.toastr.success('Form Submitted Successfully!');
-          this.bonusAndIncentive.reset(); 
+          this.bonusAndIncentive.reset();
           this.bonusAndIncentive.markAllAsTouched();
           this.isSubmitted = false;
           this.closeAllModals();
+          this.getBonusAndIncentives();
         },
         error: (err) => {
           console.error(err);
@@ -275,18 +284,18 @@ export class ManageBonusAndIncentiveComponent {
 
   getBonusAndIncentives() {
     this.isLoading = true;
-    this.service.post('fetch/bonusincentive', { }).subscribe((res: any) => {
+    this.service.post('fetch/bonusincentive', {}).subscribe((res: any) => {
       try {
         if (res.status === 'success') {
-          this.rowData = res.Data.map((item:any)=>({
-            employee_code:item.employee_code,
-            emp_name:item.emp_name,
-            bonus_incentive_date:item.bonus_incentive_date,
-            status:item.status,
-            tbi_id:item.tbi_id,
-            role:sessionStorage.getItem('roleName')
+          this.rowData = res.Data.map((item: any) => ({
+            employee_code: item.employee_code,
+            emp_name: item.emp_name,
+            bonus_incentive_date: item.bonus_incentive_date,
+            status: item.status,
+            tbi_id: item.tbi_id,
+            role: sessionStorage.getItem('roleName')
           }));
-        } 
+        }
       } catch (error) {
         console.log(error);
       }
@@ -322,19 +331,19 @@ export class ManageBonusAndIncentiveComponent {
   }
 
   updateStatus(data: any) {
-    if(confirm("Do you want to update Status?") == true){
+    if (confirm("Do you want to update Status?") == true) {
       const payload = {
-        tbi_id : this.tbiId.tbi_id,
-        status : data,
-        approved_by : this.loggedInUser
+        tbi_id: this.tbiId.tbi_id,
+        status: data,
+        approved_by: this.loggedInUser
       }
-      this.service.post(`action/bonusincentive`,payload).subscribe((res: any) => {
-        if(res.status === 'success'){
+      this.service.post(`action/bonusincentive`, payload).subscribe((res: any) => {
+        if (res.status === 'success') {
           this.toastr.success("Bonus and Incentive status updated successfully");
           this.getBonusAndIncentives();
           this.closeAllModals();
         }
-      },(error) => {
+      }, (error) => {
         console.error('Error:', error);
       });
     }
@@ -365,6 +374,54 @@ export class ManageBonusAndIncentiveComponent {
     } else {
       this.editBonusAndIncentive.markAllAsTouched();
       this.toastr.error('Invalid Credentials!');
+    }
+  }
+
+  downloadTemplate(): void {
+    const userConfirmed = confirm("Do you want to download the bonus & incentive template?");
+    if (userConfirmed) {
+      const headers = ['employee_code', 'bonus_amount', 'incentive_amount', 'bonus_incentive_date'];
+      const exampleRow = [
+        'SEE20250501',
+        '2000',
+        '0',
+        'mm-dd-yyyy',
+      ];
+
+      const worksheet: XLSX.WorkSheet = XLSX.utils.aoa_to_sheet([headers, exampleRow]);
+      const workbook: XLSX.WorkBook = { Sheets: { 'Template': worksheet }, SheetNames: ['Template'] };
+      const excelBuffer: any = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+      const blob: Blob = new Blob([excelBuffer], { type: 'application/octet-stream' });
+      saveAs(blob, 'BonusIncentive_Template.xlsx');
+
+      this.toastr.success('Download successfully !');
+    }
+  }
+
+  selectedFile: File | null = null;
+
+  onFileChange(event: any) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    this.selectedFile = file;
+
+    const formData = new FormData();
+    formData.append('upload_file', file);
+
+    this.service.post('import/bonusincentive', formData).subscribe((res: any) => {
+      if (res.status === 'success') {
+        this.toastr.success(res.data);
+        this.getBonusAndIncentives();
+      } else {
+        console.log(res.error);
+      }
+    });
+  }
+
+  exportExcel() {
+    if (this.gridApiActive) {
+      this.gridApiActive.exportDataAsCsv();
     }
   }
 

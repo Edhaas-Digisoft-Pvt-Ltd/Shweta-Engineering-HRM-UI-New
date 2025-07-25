@@ -11,7 +11,7 @@ import { ToastrService } from 'ngx-toastr';
 })
 export class PayrollRejectedComponent {
   CompanyNames: any = [];
-  selectedCompanyId: any = 1;
+  selectedCompanyId: any;
   selectedYear: any;
   selectedMonth: any;
   today: string = new Date().toISOString().split('T')[0];
@@ -51,6 +51,8 @@ export class PayrollRejectedComponent {
   }
 
   ngOnInit() {
+    this.selectedCompanyId = this.service.selectedCompanyId();
+
     this.selectedYear = new Date().getFullYear();
     this.selectedMonth = new Date().getMonth() + 1;
     const currentDate = new Date();

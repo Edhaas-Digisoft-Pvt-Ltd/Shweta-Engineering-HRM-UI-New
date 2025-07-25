@@ -19,7 +19,7 @@ export class LeaveRequestComponent {
 
   params: any;
   leaveRequestForm!: FormGroup;
-  selectedCompanyId: any = 1;
+  selectedCompanyId: any;
   rowData: any = [];
   leaveRequestData!: any;
   empLeaveId: any;
@@ -50,6 +50,8 @@ export class LeaveRequestComponent {
 
   // leave request form : 
   ngOnInit(): void {
+    this.selectedCompanyId = this.service.selectedCompanyId();
+    
     this.leaveRequestForm = this.fb.group({
       employeeName: [{ value: '', disabled: true }, Validators.required],
       startDate: [{ value: '', disabled: true }, Validators.required],
@@ -114,7 +116,6 @@ export class LeaveRequestComponent {
 
   onCompanyChange(event: Event): void {
     this.selectedCompanyId = (event.target as HTMLSelectElement).value;
-    console.log('Selected Company ID:', this.selectedCompanyId);
     this.getLeaveRequests();
   }
 

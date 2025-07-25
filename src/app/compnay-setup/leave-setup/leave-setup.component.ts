@@ -29,7 +29,7 @@ export class LeaveSetupComponent {
   isSubmitted = false;
   isEditSubmitted = false;
   CompanyNames: any = [];
-  selectedCompanyId: any = 1;
+  selectedCompanyId: any;
   rowData: any = [];
   columnDefs: ColDef[] = [];
   gridApiActive: any;
@@ -151,6 +151,8 @@ export class LeaveSetupComponent {
 
 
   ngOnInit() {
+    this.selectedCompanyId = this.service.selectedCompanyId();
+
     const currentDate = new Date();
     this.today = currentDate.toISOString().split('T')[0]; // Format YYYY-MM-DD
     this.getCompanyData();

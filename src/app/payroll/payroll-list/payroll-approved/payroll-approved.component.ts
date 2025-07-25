@@ -12,7 +12,7 @@ import { IRowNode } from 'ag-grid-community';
 })
 export class PayrollApprovedComponent {
   CompanyNames: any = [];
-  selectedCompanyId: any = 1;
+  selectedCompanyId: any;
   selectedYear: any;
   selectedMonth: any;
   today: string = new Date().toISOString().split('T')[0];
@@ -54,6 +54,8 @@ export class PayrollApprovedComponent {
 
 
   ngOnInit() {
+    this.selectedCompanyId = this.service.selectedCompanyId();
+
     this.selectedYear = new Date().getFullYear();
     this.selectedMonth = new Date().getMonth() + 1;
     const currentDate = new Date();

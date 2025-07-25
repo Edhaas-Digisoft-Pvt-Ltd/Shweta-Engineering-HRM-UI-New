@@ -128,7 +128,7 @@
 
                             <div class="row gx-0">
                                 <div class="col  border-bottom border-primary border-2  mb-2">
-                                    <h5 class="pb-2"> <i class="bi bi-calendar-week me-2 text-primary"></i> Leaves
+                                    <h5 class="pb-2"> <i class="bi bi-calendar-week me-2 text-primary"></i> Leave
                                         Details</h5>
                                 </div>
                             </div>
@@ -235,9 +235,8 @@
                                             <!-- Select Year -->
                                             <div class="col-6"> <label for="yearSelect" class="form-label">Select
                                                     Year</label>
-                                                <select id="yearSelect" class="form-select" [(ngModel)]="selectedYear"
+                                                <select id="yearSelect" class="form-select" name="selectedYear" [(ngModel)]="selectedYear"
                                                     (change)="checkSelection()">
-                                                    <option selected> Year</option>
                                                     <option *ngFor="let year of years" [value]="year">{{ year }}
                                                     </option>
                                                 </select>
@@ -246,9 +245,8 @@
                                             <!-- month dropdown -->
                                             <div class="col-6">
                                                 <label for="monthSelect" class="form-label">Select Month</label>
-                                                <select id="monthSelect" class="form-select me-2"
+                                                <select id="monthSelect" class="form-select me-2" name="selectedMonth"
                                                     [(ngModel)]="selectedMonth" (change)="checkSelection()">
-                                                    <option selected> Month</option>
                                                     <option *ngFor="let month of months" [value]="month.value">{{
                                                         month.name }}
                                                     </option>
@@ -629,13 +627,18 @@
 
                                 <div class="col-md-3">
                                     <label class="form-label">Amount (in ₹)<span class="text-danger">*</span></label>
-                                    <input type="number" class="form-control" formControlName="advance_amount"
+                                    <input type="text" class="form-control" formControlName="advance_amount"
                                         (input)="calculateInstallment()" [ngClass]="{'input-error': isAdvanceSalary && advanceSalaryForm.get('advance_amount')?.invalid,
-                                'is-invalid': isAdvanceSalary && advanceSalaryForm.get('advance_amount')?.invalid }" />
-                                    <!-- <div *ngIf="advanceSalaryForm.get('amount')?.invalid && advanceSalaryForm.get('amount')?.touched"
-                                class="text-danger">
-                                This is required field.
-                            </div> -->
+                                        'is-invalid': isAdvanceSalary && advanceSalaryForm.get('advance_amount')?.invalid }"
+                                        placeholder="Enter Amount"/>
+                                    <div *ngIf="isAdvanceSalary && advanceSalaryForm.get('advance_amount')?.errors?.['leadingZero']"
+                                        class="text-danger">
+                                        Amount should not start with 0.
+                                    </div>
+                                    <div *ngIf="isAdvanceSalary && advanceSalaryForm.get('advance_amount')?.errors?.['min']"
+                                        class="text-danger">
+                                        Amount must be greater than 0.
+                                    </div>
                                 </div>
 
                                 <div class="col-md-6">
@@ -654,7 +657,8 @@
 
                             <div class="mb-3">
                                 <label class="form-label">Installment Amount (in ₹)</label>
-                                <input type="text" disabled class="form-control readonlyInput" [value]="installmentAmount">
+                                <input type="text" disabled class="form-control readonlyInput"
+                                    [value]="installmentAmount">
                             </div>
 
                         </div>

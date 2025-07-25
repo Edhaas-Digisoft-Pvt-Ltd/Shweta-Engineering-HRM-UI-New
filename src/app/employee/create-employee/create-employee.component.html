@@ -201,7 +201,8 @@
                                 <div class="col-lg-4">
                                     <label class="fw-bold">Select Company </label>
                                     <br>
-                                    <select class="form-select" formControlName="company" (click)="onCompanyChange($event)"
+                                    <select class="form-select" formControlName="company"
+                                        (click)="onCompanyChange($event)"
                                         [ngClass]="{'input-error': nextCheck && multiStepForm.get('company')?.invalid}">
                                         <option value="" selected disabled>Select Company</option>
                                         <option *ngFor="let item of CompanyNames" [value]="item.company_id">
@@ -210,46 +211,58 @@
                                     </select>
                                 </div>
                                 <div class="col-lg-4">
-                                    <label>Department <span class="text-danger">*</span></label>
-                                    <select id="roleSelect" formControlName="department" class="form-select"
-                                        [ngClass]="{'input-error': nextCheck && multiStepForm.get('department')?.invalid}">
-                                        <option value="" selected disabled>Select Department</option>
-
-                                        <option *ngFor="let dept of departmentNames" [value]="dept.department_id">
-                                            {{ dept.department_name }}
-                                        </option>
-
-                                    </select>
-                                </div>
-
-                                <div class="col-lg-4">
-                                    <label>Designation <span class="text-danger">*</span></label>
-                                    <select id="roleSelect" formControlName="designation" class="form-select"
-                                        [ngClass]="{'input-error': nextCheck && multiStepForm.get('designation')?.invalid}">
-                                        <option value="" selected disabled>Select Designation</option>
-                                        <option *ngFor="let desig of designationNames" [value]="desig.designation_id">
-                                            {{ desig.designation_name }}
+                                    <label class="fw-bold">Select Role <span class="text-danger">*</span></label>
+                                    <br>
+                                    <select class="form-select" formControlName="role"
+                                        [ngClass]="{'input-error': nextCheck && multiStepForm.get('role')?.invalid}">
+                                        <option value="" selected disabled>Select Role</option>
+                                        <option *ngFor="let item of roles" [value]="item.role_id">
+                                            {{ item.role_name }}
                                         </option>
                                     </select>
                                 </div>
-                            </div>
-
-                            <div class="row my-3">
                                 <div class="col-lg-4">
                                     <label>Date Of Joinning</label>
                                     <input type="date" formControlName="join_date" class="form-control"
                                         [ngClass]="{'input-error': nextCheck && multiStepForm.get('join_date')?.invalid}">
                                 </div>
-                                <div class="col-lg-4">
-                                    <label>Working Pattern</label>
-                                    <select id="roleSelect" formControlName="work_pattern" class="form-select"
-                                        [ngClass]="{'input-error': nextCheck && multiStepForm.get('work_pattern')?.invalid}">
-                                        <option value="" selected>Select Work Pattern</option>
-                                        <option value="5">5 Days Week</option>
-                                        <option value="6">6 Days Week</option>
-                                        <option value="7">7 Days Week</option>
-                                    </select>
-                                </div>
+
+
+                                    <div class="col-lg-4 my-3">
+                                        <label>Department <span class="text-danger">*</span></label>
+                                        <select id="roleSelect" formControlName="department" class="form-select"
+                                            [ngClass]="{'input-error': nextCheck && multiStepForm.get('department')?.invalid}">
+                                            <option value="" selected disabled>Select Department</option>
+
+                                            <option *ngFor="let dept of departmentNames" [value]="dept.department_id">
+                                                {{ dept.department_name }}
+                                            </option>
+
+                                        </select>
+                                    </div>
+
+                                    <div class="col-lg-4 my-3">
+                                        <label>Designation <span class="text-danger">*</span></label>
+                                        <select id="roleSelect" formControlName="designation" class="form-select"
+                                            [ngClass]="{'input-error': nextCheck && multiStepForm.get('designation')?.invalid}">
+                                            <option value="" selected disabled>Select Designation</option>
+                                            <option *ngFor="let desig of designationNames"
+                                                [value]="desig.designation_id">
+                                                {{ desig.designation_name }}
+                                            </option>
+                                        </select>
+                                    </div>
+
+                                    <div class="col-lg-4 my-3">
+                                        <label>Working Pattern</label>
+                                        <select id="roleSelect" formControlName="work_pattern" class="form-select"
+                                            [ngClass]="{'input-error': nextCheck && multiStepForm.get('work_pattern')?.invalid}">
+                                            <option value="" selected>Select Work Pattern</option>
+                                            <option value="5">5 Days Week</option>
+                                            <option value="6">6 Days Week</option>
+                                            <option value="7">7 Days Week</option>
+                                        </select>
+                                    </div>
                             </div>
                         </div>
 
@@ -382,7 +395,8 @@
                                     </thead>
                                     <tbody>
                                         <tr>
-                                            <td>Basic</td>
+                                            <!-- <td>Basic</td> -->
+                                            <td>CTC</td>
                                             <td>
                                                 <div class="w-100 d-flex align-items-center gap-2 fw-bold">
                                                     <input type="number" placeholder="ctc" formControlName="ctc"
@@ -411,6 +425,9 @@
                                                 </div>
                                                 <div *ngIf="salaryAmount==0">
                                                     <h5 class="fw-bold me-5">Rs. {{ salaryAmount }}</h5>
+                                                </div>
+                                                <div *ngIf="salaryAmount<0">
+                                                    <small class="text-warning">CTC is too low.</small>
                                                 </div>
                                             </td>
                                         </tr>

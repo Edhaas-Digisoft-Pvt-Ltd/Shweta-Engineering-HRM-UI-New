@@ -6,6 +6,7 @@ import { HrmserviceService } from 'src/app/hrmservice.service';
 import { ToastrService } from 'ngx-toastr';
 import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
+
 declare var bootstrap: any;
 @Component({
   selector: 'app-employee',
@@ -20,7 +21,7 @@ export class EmployeeComponent {
   selectedValue: string = 'Company A';
   employee: any = [];
   Employee_Data: any;
-  selectedCompanyId: any = 1;
+  selectedCompanyId: any;
   rowData: any = [];
   importExcelCompanyId: string = '';
   isLoading: boolean = false;
@@ -28,6 +29,9 @@ export class EmployeeComponent {
   constructor(private router: Router, private service: HrmserviceService, private toastr: ToastrService) { }
 
   ngOnInit() {
+    // this.selectedCompanyId = this.CompanyIdService.selectedCompanyId();
+    this.selectedCompanyId = this.service.selectedCompanyId();
+    
     this.getEmployee();
     this.getCompanyNames();
   }
@@ -47,7 +51,6 @@ export class EmployeeComponent {
       if (res.status == "success") {
         // this.optionsArray = res.map((company: any) => company.CompanyName); // <-- only CompanyName
         this.CompanyNames = res.data;
-        console.log(this.CompanyNames);
       }
     },
       (error) => {

@@ -13,7 +13,7 @@ import { ToastrService } from 'ngx-toastr';
 })
 export class PayrollListComponent {
   CompanyNames: any = [];
-  selectedCompanyId: any = 1;
+  selectedCompanyId: any;
   selectedYear: any;
   selectedMonth: any;
   rowData: any = [];
@@ -57,6 +57,8 @@ export class PayrollListComponent {
   }
 
   ngOnInit() {
+    this.selectedCompanyId = this.service.selectedCompanyId();
+
     this.selectedYear = new Date().getFullYear();
     this.selectedMonth = new Date().getMonth() + 1;
     const currentDate = new Date();

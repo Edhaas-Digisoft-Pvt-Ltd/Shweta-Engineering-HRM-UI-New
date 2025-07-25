@@ -20,7 +20,7 @@ export class DashboardComponent {
   selectedYear: string = '';
   selectedCompany: string = ''; 
   CompanyNames: any = [] ;
-  selectedCompanyId: any = 1;
+  selectedCompanyId: any;
 
   leaveCards = [
     {
@@ -59,6 +59,8 @@ export class DashboardComponent {
   }
 
   ngOnInit() {
+    this.selectedCompanyId = this.service.selectedCompanyId();
+    
     const currentYear = new Date().getFullYear();
     for (let i = 0; i < 4; i++) {
       const startYear = currentYear - i;
@@ -74,6 +76,9 @@ export class DashboardComponent {
  selectCompany(company: any) {
   this.selectedCompany = company.company_name;
   this.selectedCompanyId = company.company_id;
+
+  // this.CompanyIdService.setCompanyId(this.selectedCompanyId);
+  this.service.setCompanyId(this.selectedCompanyId);
 }
 
   getCompanyNames() {

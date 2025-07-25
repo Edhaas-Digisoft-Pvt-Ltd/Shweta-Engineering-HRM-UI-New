@@ -12,10 +12,10 @@ import { HrmserviceService } from 'src/app/hrmservice.service';
 export class CreateEmployeeComponent {
 
   CompanyNames: any = [];
+  roles: any;
   selectedCompanyId: any = 1;
   multiStepForm: FormGroup;
   currentStep: number = 1;
-
 
   ctc: number = 0;
   value: number = 0;
@@ -78,6 +78,7 @@ export class CreateEmployeeComponent {
       // employee_code: ['', Validators.required,],
       gender: ['', Validators.required],
       company:['', Validators.required],
+      role:['', Validators.required],
       department: ['', Validators.required],
       designation: ['', Validators.required],
       // ctc: ['', Validators.required],
@@ -121,6 +122,7 @@ export class CreateEmployeeComponent {
       // this.calculateAmount();
     }); 
     this.getCompanyNames();
+    this.getRoles();
 
   }
 
@@ -200,12 +202,24 @@ export class CreateEmployeeComponent {
     );
   }
 
+  getRoles() {
+    this.service.post('fetch/roles', {}).subscribe((res: any) => {
+      try {
+        if (res.status == "success") {
+          this.roles = res.data
+        }
+      } catch (error) {
+        console.log(error);
+
+      }
+    })
+  }
+
   getDepartmentNames() {
     this.service.post('fetch/department', { company_id: this.selectedCompanyId }).subscribe(
       (res: any) => {
         if (res.status === 'success') {
           this.departmentNames = res.data;
-          console.log(this.departmentNames.department_id)
         }
       },
       (error) => {
@@ -294,6 +308,7 @@ export class CreateEmployeeComponent {
 
       case 2:
         return (
+          this.multiStepForm.controls['role'].valid &&
           this.multiStepForm.controls['department'].valid &&
           this.multiStepForm.controls['designation'].valid &&
           this.multiStepForm.controls['join_date'].valid &&
@@ -362,7 +377,7 @@ export class CreateEmployeeComponent {
         "emp_contact": this.multiStepForm.value.contact,
         "status": "Active",
         "emp_address": this.multiStepForm.value.address,
-        "role_id": 3,
+        "role_id": this.multiStepForm.value.role,
         // "department_name": this.multiStepForm.value.department,
         // "designation_name": this.multiStepForm.value.designation
       }

@@ -8,12 +8,21 @@
       <div class="col-12">
         <div class="row justify-content-end">
           <div class="col-3">
+            <label for="">Select Company</label>
+            <select class="form-select" (change)="onCompanyChange($event)">
+              <option selected>--select company--</option>
+              <option *ngFor="let item of CompanyNames" [value]="item.company_id">{{ item.company_name }}
+              </option>
+            </select>
+          </div>
+
+          <div class="col-3">
             <label class="fw-bold">Search Emp Code</label>
             <input class="form-control" type="text" #searchBox placeholder="Search Employee Code"
               [(ngModel)]="searchValue" (change)="searchEmployeeAdvanceSalary()" />
           </div>
 
-          <div class="col-2 dotted-line">
+          <div class="col-2">
             <label for="">Select Year</label>
             <select class="form-select" [(ngModel)]="selectedYear" (change)="onYearMonthChange()">
               <option *ngFor="let year of years" [value]="year">{{ year }}</option>
@@ -22,12 +31,12 @@
           <!-- <div class="col vector">
             <span class="mt-4"></span>
           </div> -->
-          <div class="col-2">
+          <!-- <div class="col-2">
             <label for="">Select Month</label>
             <select class="form-select" [(ngModel)]="selectedMonth" (change)="onYearMonthChange()">
               <option *ngFor="let month of months" [value]="month.id">{{ month.value }}</option>
             </select>
-          </div>
+          </div> -->
 
           <div class="col-auto d-flex align-items-end">
             <button class="btn btn-primary searchBtn" (click)="searchEmployeeAdvanceSalary()">Search</button>
@@ -63,27 +72,30 @@
             <div class="modal-body p-4">
 
               <div class="row mb-3">
-                <div class="col-md-2"><strong>ID</strong><input class="form-control" formControlName="id" value="id">
+                <div class="col-md-3"><strong>ID</strong><input class="form-control" formControlName="id" value="id">
                 </div>
-                <div class="col-md-3"><strong>Employee Name</strong><input class="form-control"
+                <div class="col-md-5"><strong>Employee Name</strong><input class="form-control"
                     formControlName="employeeName"></div>
-                <div class="col-md-2"><strong>Company</strong><input class="form-control" formControlName="company">
+                <div class="col-md-4"><strong>Company</strong><input class="form-control" formControlName="company">
                 </div>
-                <div class="col-md-3"><strong>Department</strong><input class="form-control"
-                    formControlName="department"></div>
-                <div class="col-md-2"><strong>Role</strong><input class="form-control" formControlName="role"></div>
               </div>
 
               <div class="row mb-3">
-                <div class="col-md-2"><strong>Request Date</strong><input class="form-control"
+                <div class="col-md-3"><strong>Department</strong><input class="form-control"
+                    formControlName="department"></div>
+                <div class="col-md-4"><strong>Role</strong><input class="form-control" formControlName="role"></div>
+                <div class="col-md-3"><strong>Apply Date</strong><input class="form-control"
                     formControlName="requestData"></div>
                 <div class="col-md-2"><strong>Tenure</strong><input class="form-control" formControlName="tenure"></div>
-                <div class="col-md-2"><strong>Amount (in ₹)</strong><input class="form-control"
-                    formControlName="amount"></div>
-                <div class="col-md-2"><strong>status</strong><input class="form-control" formControlName="status"></div>
               </div>
 
-              <div class="mb-3">
+              <div class="row mb-3">
+                <div class="col-md-3"><strong>Amount (in ₹)</strong><input class="form-control"
+                    formControlName="amount"></div>
+                <div class="col-md-3"><strong>status</strong><input class="form-control" formControlName="status"></div>
+              </div>
+
+              <!-- <div class="mb-3">
                 <label class="fw-bold">Loan Amount</label>
                 <div class="d-flex justify-content-between">
                   <span class="fw-bold text-dark">₹ {{ displayApprovedData.get('advanceAmount')?.value || '0' }}</span>
@@ -97,9 +109,9 @@
                     <span class="visually-hidden">Paid</span>
                   </div>
                 </div>
-              </div>
+              </div> -->
 
-              <div class="row mb-3">
+              <!-- <div class="row mb-3">
                 <div class="col-md-3"><strong>First Installment Date</strong><input class="form-control"
                     formControlName="firstInstallmentDate">
                 </div>
@@ -111,8 +123,34 @@
                 <div class="col-md-3"><strong>Next Installment Due Date</strong><input class="form-control"
                     formControlName="installmentDueDate">
                 </div>
+              </div> -->
+            </div>
+
+            <div class="row mb-3">
+              <div class="col-12 ps-5 pe-5">
+                <div class="table-responsive" style="border: 1px solid #ccc;">
+                  <table class="table table-hover text-center align-middle">
+                    <thead class="sticky-top" style="top: 0; z-index: 1;">
+                      <tr>
+                        <th>Sr. no.</th>
+                        <th>Installment Date</th>
+                        <th>Amount</th>
+                        <th>Status</th>
+                      </tr>
+                    </thead>
+                    <tbody *ngIf="selectedAdvpayid && tabledata[selectedAdvpayid]">
+                      <tr *ngFor="let item of tabledata[selectedAdvpayid]; let i = index">
+                        <td>{{ i + 1}}</td>
+                        <td>{{item.date}}</td>
+                        <td>{{item.EMI}}</td>
+                        <td>{{item.status}}</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
               </div>
             </div>
+
           </form>
         </div>
       </div>

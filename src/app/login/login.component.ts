@@ -62,6 +62,7 @@ export class LoginComponent {
     const body = {
       username: this.loginForm.get('email')?.value,
       password: this.loginForm.get('password')?.value,
+      role: this.loginForm.get('role')?.value
     };
 
     this.service.post('login', body).subscribe((res: any) => {
@@ -88,7 +89,6 @@ export class LoginComponent {
         }
       }
       else if (res.status === 'error') {
-        console.log("eeeeeeeeeeeee");
 
         alert(res.message)
         this.toastr.error(res.message);
