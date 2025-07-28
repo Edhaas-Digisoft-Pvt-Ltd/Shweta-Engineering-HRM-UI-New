@@ -24,58 +24,8 @@ export class AdvanceSalaryReportComponent {
   gridApi: any;
   selectedCompanyId: any = 1;
   CompanyNames: any = [];
-
-  data = [
-      {
-        "adv_pay_id": 23,
-        "employee_id": 14,
-        "advance_amount": 2000,
-        "tenure": 3,
-        "emi": 667,
-        "emi_status": null,
-        "remaining_balance": 2000,
-        "status": "Approved",
-        "remarks": "test",
-        "apply_date": "2025-07-16",
-        "updated_on": "2025-07-16",
-        "employee_code": "SEE2025051314",
-        "emp_name": "Ms Ankita Patel",
-        "department_name": "Accounts",
-        "designation_name": "Sr.Accountant"
-      },
-      {
-        "adv_pay_id": 14,
-        "employee_id": 14,
-        "advance_amount": 10000,
-        "tenure": 3,
-        "emi": 3333,
-        "emi_status": null,
-        "remaining_balance": 0,
-        "status": "Completed",
-        "remarks": "test",
-        "apply_date": "2025-02-16",
-        "updated_on": "2025-07-16",
-        "employee_code": "SEE2025051314",
-        "emp_name": "Ms Ankita Patel",
-        "department_name": "Accounts",
-        "designation_name": "Sr.Accountant"
-      },
-  ]
-selectedAdvpayid: number | null = null;
-tabledata: { [key: number]: { date: string; EMI: string; status: string }[] } = {
-  23: [
-    { date: '2025-10-07', EMI: '666', status: 'Pending' },
-    { date: '2025-09-07', EMI: '666', status: 'Pending' },
-    { date: '2025-08-07', EMI: '666', status: 'Pending' },
-  ],
-  14: [
-    { date: '2025-05-07', EMI: '3333', status: 'Paid' },
-    { date: '2025-04-07', EMI: '3333', status: 'Paid' },
-    { date: '2025-03-07', EMI: '3333', status: 'Paid' },
-  ]
-};
-
-
+  selectedAdvpayid: number = 0;
+  tabledata: any = [];
 
   years = [2023, 2024, 2025];
   months = [
@@ -113,6 +63,7 @@ tabledata: { [key: number]: { date: string; EMI: string; status: string }[] } = 
       reason: [{ value: '', disabled: true }],
       EMIStartDate: [{ value: '', disabled: true }],
       installmentAmount: [{ value: '', disabled: true }],
+      remainingBalance: [{ value: '', disabled: true }],
     })
   }
 
@@ -120,40 +71,44 @@ tabledata: { [key: number]: { date: string; EMI: string; status: string }[] } = 
     this.searchEmployeeAdvanceSalary();
   }
 
+  getPaidEmiCount(): number {
+    if (!this.selectedAdvpayid || !this.tabledata[this.selectedAdvpayid]) return 0;
+    return this.tabledata[this.selectedAdvpayid].filter((e: { date: any; EMI: any; }) => e.date && e.EMI).length;
+  }
+
   searchEmployeeAdvanceSalary() {
-    this.rowData = this.data
-    // this.rowData = [];
-    // const code = this.searchValue?.trim();
-    // if (!code) {
-    //   this.rowData = [];
-    //   this.toastr.error('Please Enter Employee Code');
-    //   return;
-    // }
+    this.rowData = [];
+    const code = this.searchValue?.trim();
+    if (!code) {
+      this.rowData = [];
+      this.toastr.error('Please Enter Employee Code');
+      return;
+    }
 
-    // const payload = {
-    //   employee_code: code,
-    //   year: this.selectedYear,
-    //   month: this.selectedMonth,
-    // };
+    const payload = {
+      employee_code: code,
+      year: this.selectedYear,
+      // month: this.selectedMonth,
+    };
 
-    // this.service.post('emp/advancesaraly/report', payload).subscribe(
-    //   (res: any) => {
-    //     if (res.status === 'success' && res.data.length > 0) {
-    //       this.rowData = res.data;
-    //     } else {
-    //       this.rowData = [];
-    //       this.toastr.warning('Data Not Found');
-    //     }
-    //   },
-    //   (error) => {
-    //     this.rowData = [];
-    //   if (error.status === 404) {
-    //     this.toastr.warning('Data Not Found');
-    //   } else {
-    //     this.toastr.error(error);
-    //   }
-    //   }
-    // );
+    this.service.post('emp/advancesaraly/report', payload).subscribe(
+      (res: any) => {
+        if (res.status === 'success' && res.data.length > 0) {
+          this.rowData = res.data;
+        } else {
+          this.rowData = [];
+          this.toastr.warning('Data Not Found');
+        }
+      },
+      (error) => {
+        this.rowData = [];
+        if (error.status === 404) {
+          this.toastr.warning('Data Not Found');
+        } else {
+          this.toastr.error(error);
+        }
+      }
+    );
   }
 
   onGridReady(params: any) {
@@ -232,7 +187,7 @@ tabledata: { [key: number]: { date: string; EMI: string; status: string }[] } = 
       { headerName: 'Remaining Amount', field: 'remaining_balance', sortable: true, filter: true, maxWidth: 190 },
       { headerName: 'EMI', field: 'emi', sortable: true, filter: true, maxWidth: 100 },
       {
-        headerName: 'Status', field: 'status', sortable: true, filter: true, maxWidth: 150,
+        headerName: 'EMI Status', field: 'emi_status', sortable: true, filter: true, maxWidth: 150,
         cellRenderer: this.statusButtonRenderer,
       },
     ];
@@ -268,27 +223,58 @@ tabledata: { [key: number]: { date: string; EMI: string; status: string }[] } = 
   }
 
   getSingleAdvanceSalary(data: any) {
-    this.selectedAdvpayid = data
-    this.service.post('single/advancesaraly', { adv_pay_id: data }).subscribe((res: any) => {
+    this.selectedAdvpayid = data;
+    this.service.post('single/report/advancesaraly', { adv_pay_id: data }).subscribe((res: any) => {
       if (res.status === 'success') {
-        const singleAdvanceSalary = res.data[0];
+        const advanceInfo = res.data.advance_info;
+        const emiHistory = res.data.emi_history
+
         this.EditAdvancePaymentData = {
-          id: singleAdvanceSalary?.employee_code,
-          employeeName: singleAdvanceSalary?.emp_name,
-          company: singleAdvanceSalary?.company_name,
-          department: singleAdvanceSalary?.department_name,
-          role: singleAdvanceSalary?.designation_name,
-          requestData: singleAdvanceSalary?.apply_date,
-          status: singleAdvanceSalary?.status,
-          tenure: singleAdvanceSalary?.tenure,
-          amount: singleAdvanceSalary?.advance_amount,
-          reason: singleAdvanceSalary?.remarks,
-          EMIStartDate: singleAdvanceSalary?.updated_on,
-          installmentAmount: singleAdvanceSalary?.emi,
-        }
+          id: advanceInfo.employee_code,
+          employeeName: advanceInfo.emp_name,
+          company: advanceInfo.company_name,
+          department: advanceInfo.department_name,
+          role: advanceInfo.designation_name,
+          requestData: advanceInfo.apply_date,
+          tenure: advanceInfo.tenure,
+          amount: advanceInfo.advance_amount,
+          status: advanceInfo.status,
+          EMIStartDate: '',
+          installmentAmount: advanceInfo.emi,
+          remainingBalance: advanceInfo.remaining_balance,
+        };
+
         this.displayApprovedData.patchValue(this.EditAdvancePaymentData);
+
+        if (this.selectedAdvpayid !== null) {
+          const sortedEmiHistory = [...emiHistory].sort((a, b) => {
+            return new Date(b.deducted_on || b.year_month).getTime() -
+              new Date(a.deducted_on || a.year_month).getTime();
+          });
+
+          const paidEmis = sortedEmiHistory.map((item: any) => ({
+            date: item.deducted_on || item.year_month,
+            EMI: item.amount_deducted,
+            status: 'Paid'
+          }));
+
+          const remainingEmis = advanceInfo.tenure - paidEmis.length;
+
+          if (remainingEmis > 0) {
+            paidEmis.push({
+              date: '',
+              EMI: '',
+              status: `${remainingEmis} EMI remaining`
+            });
+          }
+
+          this.tabledata[this.selectedAdvpayid] = paidEmis;
+        }
+
+      } else {
+        this.toastr.warning('Something went wrong!');
       }
-    })
+    });
   }
 
   calculatePaidAmount(): number {

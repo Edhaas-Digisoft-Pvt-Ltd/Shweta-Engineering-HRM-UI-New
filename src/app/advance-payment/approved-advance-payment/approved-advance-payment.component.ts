@@ -25,6 +25,8 @@ export class ApprovedAdvancePaymentComponent {
   displayApprovedData!: FormGroup;
   approvedData!: any;
   isLoading: boolean = false;
+  selectedAdvpayid: number = 0;
+  tabledata: any = [];
 
   constructor(private fb: FormBuilder, private service: HrmserviceService, private toastr: ToastrService) { }
 
@@ -79,6 +81,11 @@ export class ApprovedAdvancePaymentComponent {
         console.error('Error fetching companies:', error);
       }
     );
+  }
+
+  getPaidEmiCount(): number {
+    if (!this.selectedAdvpayid || !this.tabledata[this.selectedAdvpayid]) return 0;
+    return this.tabledata[this.selectedAdvpayid].filter((e: { date: any; EMI: any; }) => e.date && e.EMI).length;
   }
 
   getAllApprovedRequest() {
@@ -256,27 +263,55 @@ export class ApprovedAdvancePaymentComponent {
   }
 
   getSingleApprovedData(data: any) {
+    this.selectedAdvpayid = data;
     this.service.post('single/report/advancesaraly', { adv_pay_id: data }).subscribe((res: any) => {
       if (res.status === 'success') {
-        const singleApprovedData = res.data[0];
+        const advanceInfo = res.data.advance_info;
+        const emiHistory = res.data.emi_history;
+
         this.approvedData = {
-          id: singleApprovedData?.employee_code,
-          employeeName: singleApprovedData?.emp_name,
-          company: singleApprovedData?.company_name,
-          department: singleApprovedData?.department_name,
-          role: singleApprovedData?.designation_name,
-          requestDate: singleApprovedData?.apply_date,
-          status: singleApprovedData?.status,
-          tenure: singleApprovedData?.tenure,
-          amount: singleApprovedData?.advance_amount,
-          reason: singleApprovedData?.remarks,
-          EMIStartDate: singleApprovedData?.updated_on,
-          installmentAmount: singleApprovedData?.emi,
-          remainingBalance: singleApprovedData?.remaining_balance,
-          advanceAmount: singleApprovedData?.advance_amount,
-          firstInstallmentDate: singleApprovedData?.deducted_on,
+          id: advanceInfo?.employee_code,
+          employeeName: advanceInfo?.emp_name,
+          company: advanceInfo?.company_name,
+          department: advanceInfo?.department_name,
+          role: advanceInfo?.designation_name,
+          requestDate: advanceInfo?.apply_date,
+          status: advanceInfo?.status,
+          tenure: advanceInfo?.tenure,
+          amount: advanceInfo?.advance_amount,
+          reason: advanceInfo?.remarks,
+          EMIStartDate: advanceInfo?.updated_on,
+          installmentAmount: advanceInfo?.emi,
+          remainingBalance: advanceInfo?.remaining_balance,
+          advanceAmount: advanceInfo?.advance_amount,
+          firstInstallmentDate: advanceInfo?.deducted_on,
         }
         this.displayApprovedData.patchValue(this.approvedData);
+
+        if (this.selectedAdvpayid !== null) {
+          const sortedEmiHistory = [...emiHistory].sort((a, b) => {
+            return new Date(b.deducted_on || b.year_month).getTime() -
+              new Date(a.deducted_on || a.year_month).getTime();
+          });
+
+          const paidEmis = sortedEmiHistory.map((item: any) => ({
+            date: item.deducted_on || item.year_month,
+            EMI: item.amount_deducted,
+            status: 'Paid'
+          }));
+
+          const remainingEmis = advanceInfo.tenure - paidEmis.length;
+
+          if (remainingEmis > 0) {
+            paidEmis.push({
+              date: '',
+              EMI: '',
+              status: `${remainingEmis} EMI remaining`
+            });
+          }
+
+          this.tabledata[this.selectedAdvpayid] = paidEmis;
+        }
       }
     })
   }
