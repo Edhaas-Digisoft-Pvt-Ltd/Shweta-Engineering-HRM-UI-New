@@ -34,6 +34,7 @@ export class ManageBonusAndIncentiveComponent {
   isEditSubmitted = false;
   role: string = '';
   isLoading: boolean = false;
+  searchValue: string = '';
 
   constructor(private fb: FormBuilder, private service: HrmserviceService, private toastr: ToastrService) { }
 
@@ -188,6 +189,11 @@ export class ManageBonusAndIncentiveComponent {
   onGridReady(params: { api: any }) {
     this.gridApiActive = params.api;
   }
+
+  onFilterBoxChange() {
+    this.gridApiActive.setQuickFilter(this.searchValue);
+  }
+
   statusButtonRenderer(params: any) {
     const status = params.value;
     const button = document.createElement('button');

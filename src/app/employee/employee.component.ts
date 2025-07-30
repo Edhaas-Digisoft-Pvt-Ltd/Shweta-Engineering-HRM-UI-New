@@ -248,9 +248,6 @@ export class EmployeeComponent {
   }
 
   exportExcel() {
-    console.log('called');
-
-    if (this.gridApiActive) {
       this.gridApiActive.exportDataAsCsv({
         fileName: 'Employee_List.csv',
         columnKeys: [
@@ -265,9 +262,6 @@ export class EmployeeComponent {
         allColumns: false,
         onlySelected: false,
       });
-    } else {
-      console.error('Grid API not initialized.');
-    }
   }
 
 }

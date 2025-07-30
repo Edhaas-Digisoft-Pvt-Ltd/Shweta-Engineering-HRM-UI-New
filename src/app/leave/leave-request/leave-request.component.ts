@@ -271,6 +271,12 @@ export class LeaveRequestComponent {
     }
   }
 
+  exportExcel() {
+      this.gridApiActive.exportDataAsCsv({
+        columnKeys: ['employee_code', 'emp_name', 'department_name'],
+        fileName: 'LeaveRequests.csv',
+      });
+  }
 
 }
 

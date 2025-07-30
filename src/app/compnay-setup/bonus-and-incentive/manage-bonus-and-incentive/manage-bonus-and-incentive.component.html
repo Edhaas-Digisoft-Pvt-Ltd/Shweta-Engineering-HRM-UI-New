@@ -10,9 +10,14 @@
                     <div class="row">
                         <div class="col p-0">
                             <div class="d-flex justify-content-end align-items-center gap-2">
+                                <div class="me-2">
+                                    <input class="py-1 px-3 form-control" type="text" #searchBox
+                                        placeholder="Search Here" [(ngModel)]="searchValue"
+                                        (ngModelChange)="onFilterBoxChange()" />
+                                </div>
                                 <div *ngIf="role === 'accountant'" class="me-2">
-                                    <button class="btn rounded-3 BtnColor" (click)="downloadTemplate()">Download
-                                        Template</button>
+                                    <button class="btn rounded-3 BtnColor" (click)="downloadTemplate()">
+                                        <i class="bi bi-download"></i>&nbsp;Template</button>
                                 </div>
 
                                 <div *ngIf="role === 'accountant'" class="me-2">
