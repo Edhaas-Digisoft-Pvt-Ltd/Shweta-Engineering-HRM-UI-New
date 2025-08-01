@@ -5,6 +5,7 @@ import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
 import { ToastrService } from 'ngx-toastr';
 import { HrmserviceService } from '../hrmservice.service';
+import { Router } from '@angular/router';
 @Component({
   selector: 'app-attendance',
   templateUrl: './attendance.component.html',
@@ -20,13 +21,23 @@ export class AttendanceComponent {
   role: string = '';
   isLoading: boolean = false;
 
-  constructor(private toastr: ToastrService, private service: HrmserviceService) { }
+  constructor(private toastr: ToastrService, private service: HrmserviceService, private router: Router,) { }
 
   ngOnInit() {
     this.role = this.service.getRole();
 
     this.loadTodayDataFromStorage();
     this.fetchAttendance();
+    
+    if (sessionStorage.getItem('roleName') == 'admin' || sessionStorage.getItem('roleName') == 'accountant') {
+      this.router.navigate(['/authPanal/Attendance']);
+      return;
+    } else {
+      alert('Please Login To Proceed');
+      sessionStorage.clear(); 
+      this.router.navigate(['']);
+      return;
+    }
   }
 
   public defaultColDef: ColDef = {

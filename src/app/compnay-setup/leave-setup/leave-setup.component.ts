@@ -4,6 +4,7 @@ import { ColDef } from 'ag-grid-community';
 import { ToastrService } from 'ngx-toastr';
 import { HrmserviceService } from 'src/app/hrmservice.service';
 import { LeaveSetupBtnComponent } from './leave-setup-btn/leave-setup-btn.component';
+import { Router } from '@angular/router';
 declare var bootstrap: any;
 @Component({
   selector: 'app-leave-setup',
@@ -67,7 +68,7 @@ export class LeaveSetupComponent {
     this.gridApiActive = params.api;
   }
 
-  constructor(private fb: FormBuilder, private service: HrmserviceService, private toastr: ToastrService) {
+  constructor(private fb: FormBuilder, private service: HrmserviceService, private toastr: ToastrService, private router: Router) {
     this.companyForm = this.fb.group({
       // Company Name: Only letters, numbers, spaces, dots, and ampersands (e.g., TCS, Infosys Ltd., H&M)
       companyName: [
@@ -160,6 +161,16 @@ export class LeaveSetupComponent {
     this.getCompanyNames();
     this.getAllLeaves();
     this.initializeColumns();
+
+    if (sessionStorage.getItem('roleName') == 'admin') {
+      this.router.navigate(['/authPanal/LeaveSetup']);
+      return;
+    } else {
+      alert('Please Login To Proceed');
+      sessionStorage.clear();
+      this.router.navigate(['']);
+      return;
+    }
   }
 
   getAllLeaves() {

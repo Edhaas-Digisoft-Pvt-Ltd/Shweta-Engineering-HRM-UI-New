@@ -65,6 +65,16 @@ export class PayrollListComponent {
     this.today = currentDate.toISOString().split('T')[0];
     this.getCompanyNames();
     this.getpayrollList();
+
+     if (sessionStorage.getItem('roleName') == 'admin') {
+      this.router.navigate(['/authPanal/payrollList']);
+      return;
+    } else {
+      alert('Please Login To Proceed');
+      sessionStorage.clear();
+      this.router.navigate(['']);
+      return;
+    }
   }
 
   getMonthName(monthId: number): string {

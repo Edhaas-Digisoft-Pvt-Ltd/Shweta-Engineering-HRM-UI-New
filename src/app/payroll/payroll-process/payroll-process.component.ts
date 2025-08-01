@@ -64,6 +64,16 @@ export class PayrollProcessComponent {
     this.initializeColumns();
     this.initializeColumnsforProcess();
     this.getTempPayroll();
+
+    if (sessionStorage.getItem('roleName') == 'accountant') {
+      this.router.navigate(['/authPanal/payrollProcess']);
+      return;
+    } else {
+      alert('Please Login To Proceed');
+      sessionStorage.clear();
+      this.router.navigate(['']);
+      return;
+    }
   }
 
   getMonthName(monthId: number): string {
@@ -121,7 +131,15 @@ export class PayrollProcessComponent {
         }));
       }
       this.isLoading = false;
-    });
+    }, (error) => {
+      this.isLoading = false;
+      if (error.status === 404) {
+        this.toastr.warning('Data Not Found');
+      } else {
+        console.error(error);
+      }
+    })
+    this.isLoading = false;
   }
 
   getTempPayroll() {

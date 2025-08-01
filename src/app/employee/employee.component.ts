@@ -17,7 +17,7 @@ export class EmployeeComponent {
 
   gridApiActive!: GridApi;
   searchValue: string = '';
-  CompanyNames: any ;
+  CompanyNames: any;
   selectedValue: string = 'Company A';
   employee: any = [];
   Employee_Data: any;
@@ -31,9 +31,19 @@ export class EmployeeComponent {
   ngOnInit() {
     // this.selectedCompanyId = this.CompanyIdService.selectedCompanyId();
     this.selectedCompanyId = this.service.selectedCompanyId();
-    
+
     this.getEmployee();
     this.getCompanyNames();
+
+    if (sessionStorage.getItem('roleName') == 'admin') {
+      this.router.navigate(['/authPanal/Employee']);
+      return;
+    } else {
+      alert('Please Login To Proceed');
+      sessionStorage.clear();
+      this.router.navigate(['']);
+      return;
+    }
   }
 
   closeAllModals(): void {
@@ -72,8 +82,8 @@ export class EmployeeComponent {
   };
 
   columnDefs: ColDef[] = [
-    { headerName: 'Emp Code', field:'employee_code' ,sortable: true, filter: true, minWidth: 160, },
-    { headerName: 'Employee Name', field:'emp_name' ,sortable: true, filter: true, minWidth: 180, },
+    { headerName: 'Emp Code', field: 'employee_code', sortable: true, filter: true, minWidth: 160, },
+    { headerName: 'Employee Name', field: 'emp_name', sortable: true, filter: true, minWidth: 180, },
     { headerName: 'Department', field: 'department_name', sortable: true, filter: true },
     { headerName: 'Role', field: 'designation_name', sortable: true, filter: true },
     { headerName: 'Contact', field: 'emp_contact', sortable: true, filter: true },
@@ -86,8 +96,8 @@ export class EmployeeComponent {
     {
       headerName: 'Status',
       field: 'status',
-        cellRenderer: (params:any) => {
-          
+      cellRenderer: (params: any) => {
+
         const status = params.data.status;
         // console.log(status);
 
@@ -248,20 +258,20 @@ export class EmployeeComponent {
   }
 
   exportExcel() {
-      this.gridApiActive.exportDataAsCsv({
-        fileName: 'Employee_List.csv',
-        columnKeys: [
-          'employee_code',
-          'emp_name',
-          'emp_contact',
-          'doj',
-          'department_name',
-          'designation_name',
-          'status'
-        ],
-        allColumns: false,
-        onlySelected: false,
-      });
+    this.gridApiActive.exportDataAsCsv({
+      fileName: 'Employee_List.csv',
+      columnKeys: [
+        'employee_code',
+        'emp_name',
+        'emp_contact',
+        'doj',
+        'department_name',
+        'designation_name',
+        'status'
+      ],
+      allColumns: false,
+      onlySelected: false,
+    });
   }
 
 }

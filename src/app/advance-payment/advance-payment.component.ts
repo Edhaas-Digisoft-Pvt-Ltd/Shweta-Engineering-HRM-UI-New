@@ -3,6 +3,7 @@ import { FormGroup, FormBuilder, Validators } from '@angular/forms';
 import { ColDef, GridApi } from 'ag-grid-community';
 import { HrmserviceService } from '../hrmservice.service';
 import { ToastrService } from 'ngx-toastr';
+import { Router } from '@angular/router';
 declare var bootstrap: any;
 @Component({
   selector: 'app-advance-payment',
@@ -10,7 +11,7 @@ declare var bootstrap: any;
   styleUrls: ['./advance-payment.component.css'],
 })
 export class AdvancePaymentComponent {
-  constructor(private fb: FormBuilder, private service: HrmserviceService, private toastr: ToastrService) { }
+  constructor(private fb: FormBuilder, private service: HrmserviceService, private toastr: ToastrService, private router: Router,) { }
   today: string = new Date().toISOString().split('T')[0];
   title: String = 'Company Demo';
   role: string = '';
@@ -59,6 +60,16 @@ export class AdvancePaymentComponent {
       EMIStartDate: [{ value: '', disabled: true }, Validators.required],
       installmentAmount: [{ value: '', disabled: true }, Validators.required],
     })
+
+    if (sessionStorage.getItem('roleName') == 'admin' || sessionStorage.getItem('roleName') == 'accountant') {
+      this.router.navigate(['/authPanal/AdvancePayment']);
+      return;
+    } else {
+      alert('Please Login To Proceed');
+      sessionStorage.clear();
+      this.router.navigate(['']);
+      return;
+    }
   }
 
   closeAllModals(): void {

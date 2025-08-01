@@ -18,8 +18,8 @@ export class DashboardComponent {
 
   financialYears: string[] = [];
   selectedYear: string = '';
-  selectedCompany: string = ''; 
-  CompanyNames: any = [] ;
+  selectedCompany: string = '';
+  CompanyNames: any = [];
   selectedCompanyId: any;
 
   leaveCards = [
@@ -60,7 +60,7 @@ export class DashboardComponent {
 
   ngOnInit() {
     this.selectedCompanyId = this.service.selectedCompanyId();
-    
+
     const currentYear = new Date().getFullYear();
     for (let i = 0; i < 4; i++) {
       const startYear = currentYear - i;
@@ -70,27 +70,37 @@ export class DashboardComponent {
 
     this.selectedYear = this.financialYears[0]; // default selected
     this.getCompanyNames();
+
+    if (sessionStorage.getItem('roleName') == 'admin') {
+      this.router.navigate(['/authPanal/Dashboard']);
+      return;
+    } else {
+      alert('Please Login To Proceed');
+      sessionStorage.clear();
+      this.router.navigate(['']);
+      return;
+    }
   }
 
 
- selectCompany(company: any) {
-  this.selectedCompany = company.company_name;
-  this.selectedCompanyId = company.company_id;
+  selectCompany(company: any) {
+    this.selectedCompany = company.company_name;
+    this.selectedCompanyId = company.company_id;
 
-  // this.CompanyIdService.setCompanyId(this.selectedCompanyId);
-  this.service.setCompanyId(this.selectedCompanyId);
-}
+    // this.CompanyIdService.setCompanyId(this.selectedCompanyId);
+    this.service.setCompanyId(this.selectedCompanyId);
+  }
 
   getCompanyNames() {
-  this.service.post('fetch/company', {}).subscribe((res: any) => {
-    if (res.status === 'success') {
-      this.CompanyNames = res.data;
-      const defaultCompany = this.CompanyNames.find((comp: any) => comp.company_id === this.selectedCompanyId);
+    this.service.post('fetch/company', {}).subscribe((res: any) => {
+      if (res.status === 'success') {
+        this.CompanyNames = res.data;
+        const defaultCompany = this.CompanyNames.find((comp: any) => comp.company_id === this.selectedCompanyId);
         if (defaultCompany) {
           this.selectCompany(defaultCompany);
         }
-    }
-  });
+      }
+    });
   }
 
   loadChartData() {
@@ -245,7 +255,7 @@ export class DashboardComponent {
   // chart for the attendance system :
   public doughnutChartLabels: string[] = ['Present', 'Absent', 'Sick Leave', 'Casual Leave'];
 
-  
+
   public doughnutChartData: ChartData<'doughnut'> = {
     labels: this.doughnutChartLabels,
     datasets: [

@@ -51,7 +51,7 @@ export class LeaveRequestComponent {
   // leave request form : 
   ngOnInit(): void {
     this.selectedCompanyId = this.service.selectedCompanyId();
-    
+
     this.leaveRequestForm = this.fb.group({
       employeeName: [{ value: '', disabled: true }, Validators.required],
       startDate: [{ value: '', disabled: true }, Validators.required],
@@ -65,6 +65,15 @@ export class LeaveRequestComponent {
     this.getCompanyNames();
     this.getLeaveRequests();
 
+    if (sessionStorage.getItem('roleName') == 'admin') {
+      this.router.navigate(['/authPanal/Leave']);
+      return;
+    } else {
+      alert('Please Login To Proceed');
+      sessionStorage.clear();
+      this.router.navigate(['']);
+      return;
+    }
   }
 
   agInit(params: any): void {
@@ -272,10 +281,10 @@ export class LeaveRequestComponent {
   }
 
   exportExcel() {
-      this.gridApiActive.exportDataAsCsv({
-        columnKeys: ['employee_code', 'emp_name', 'department_name'],
-        fileName: 'LeaveRequests.csv',
-      });
+    this.gridApiActive.exportDataAsCsv({
+      columnKeys: ['employee_code', 'emp_name', 'department_name'],
+      fileName: 'LeaveRequests.csv',
+    });
   }
 
 }

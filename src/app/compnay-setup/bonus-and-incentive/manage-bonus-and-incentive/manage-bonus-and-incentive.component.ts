@@ -6,6 +6,7 @@ import { saveAs } from 'file-saver';
 import { ToastrService } from 'ngx-toastr';
 import { HrmserviceService } from 'src/app/hrmservice.service';
 import { EditBonusAndIncentiveComponent } from './edit-bonus-and-incentive/edit-bonus-and-incentive.component';
+import { Router } from '@angular/router';
 declare var bootstrap: any;
 declare var flatpickr: any;
 @Component({
@@ -36,7 +37,7 @@ export class ManageBonusAndIncentiveComponent {
   isLoading: boolean = false;
   searchValue: string = '';
 
-  constructor(private fb: FormBuilder, private service: HrmserviceService, private toastr: ToastrService) { }
+  constructor(private fb: FormBuilder, private service: HrmserviceService, private toastr: ToastrService, private router: Router) { }
 
   financialYears = [2022, 2023, 2024, 2025];
   months = [
@@ -97,6 +98,17 @@ export class ManageBonusAndIncentiveComponent {
       incentive_amount: [{ value: '' }, Validators.required],
       status: [{ value: '' }, Validators.required],
     });
+
+    const roleName = sessionStorage.getItem('roleName')
+    if (roleName == 'admin' || roleName == 'accountant') {
+      this.router.navigate(['/authPanal/BonusAndIncentive']);
+      return;
+    } else {
+      alert('Please Login To Proceed');
+      sessionStorage.clear();
+      this.router.navigate(['']);
+      return;
+    }
   }
 
   // ngAfterViewInit() {
