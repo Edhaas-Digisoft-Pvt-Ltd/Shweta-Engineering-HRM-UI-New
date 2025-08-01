@@ -35,7 +35,7 @@ export class EmployeeDashboardComponent {
   isSubmitted: any = false;
   isLeaveSubmitted: any = false;
   isAdvanceSalary: any = false;
-  employee_id!: number;
+  employee_id!: any;
   company_id: any;
   Employee_Data: any;
   role: string = '';
@@ -67,7 +67,6 @@ export class EmployeeDashboardComponent {
       this.selectedMonth = (previousMonth < 10 ? '0' : '') + previousMonth;
       this.selectedYear = currentYear;
     }
-    console.log('Default selected:', this.selectedYear, this.selectedMonth);
 
     this.role = this.service.getRole();
 
@@ -76,6 +75,8 @@ export class EmployeeDashboardComponent {
       console.log('Received employee code:', params['id']);
     });
 
+    // this.employee_id = this.service.EmployeeId();
+    // console.log('employee page',this.employee_id);
 
     this.editForm = this.fb.group({
       email: ['', [Validators.required, Validators.email, Validators.pattern(/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/)]],
@@ -102,6 +103,17 @@ export class EmployeeDashboardComponent {
     this.fetchEmployee(this.employee_id);
 
     this.isLoading = false;
+
+    const roleName = sessionStorage.getItem('roleName')
+    if (roleName == 'admin' || roleName == 'employee') {
+      this.router.navigate(['/authPanal/EmployeeInDetail']);
+      return;
+    } else {
+      alert('Please Login To Proceed');
+      sessionStorage.clear();
+      this.router.navigate(['']);
+      return;
+    }
   }
 
   amountNotStartWithZero(control: AbstractControl) {

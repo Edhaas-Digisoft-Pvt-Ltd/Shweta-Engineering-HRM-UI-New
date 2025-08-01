@@ -80,6 +80,9 @@ export class LoginComponent {
           this.router.navigate(['/authPanal/EmployeeInDetail'], {
             queryParams: { id: this.logindata.employe_id }
           });
+          // this.service.setEmployeeId(this.logindata.employe_id);
+          // console.log('login page',this.logindata.employe_id);
+          // this.router.navigate(['/authPanal/EmployeeInDetail']);
         }
         if (role === 'accountant') {
           this.router.navigate(['/authPanal/payrollProcess']);

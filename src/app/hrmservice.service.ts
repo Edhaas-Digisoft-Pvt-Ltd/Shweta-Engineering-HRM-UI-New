@@ -126,11 +126,22 @@ export class HrmserviceService {
   }
 
   //signal =========================================================================================
-    private _selectedCompanyId = signal<number>(1); //storing company id 
-  
-    setCompanyId(id: number) {
-      this._selectedCompanyId.set(id);   //temp store company id
-    }
-  
-    selectedCompanyId = this._selectedCompanyId.asReadonly(); //display company id
+  private _selectedCompanyId = signal<number>(1); //storing company id 
+
+  setCompanyId(id: number) {
+    this._selectedCompanyId.set(id);   //temp store company id
+  }
+
+  selectedCompanyId = this._selectedCompanyId.asReadonly(); //display company id
+
+  //signal - store employee id =====================================================================
+  // private _EmployeeId = signal<number | null>(null);
+
+  // setEmployeeId(id: number) {
+  //   this._EmployeeId.set(id);
+  //   console.log('service',this._EmployeeId);
+  // }
+
+  // EmployeeId = this._EmployeeId.asReadonly();
+
 }
