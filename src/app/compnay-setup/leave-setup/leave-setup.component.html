@@ -158,27 +158,29 @@
                         <div class="row">
                             <!-- Leave Type -->
                             <div class="col-4">
-                                <label for="leavetype">Leave Type</label>
+                                <label for="leavetype">Leave Type<span class="text-danger">*</span></label>
                                 <select id="leavetype" class="form-select" formControlName="leavetype"
                                     [ngClass]="{'input-error': isEditSubmitted && EditLeaveRule.get('leavetype')?.invalid}">
                                     <option value="" disabled selected>Select Leave Type</option>
-                                    <option value="monthly">Every Month</option>
-                                    <option value="yearly">Every Year</option>
+                                    <option >Every Month</option>
+                                    <option >Every Year</option>
                                 </select>
                             </div>
 
                             <!-- Leave Name -->
                             <div class="col-4">
-                                <label for="leavename">Leave Name</label>
+                                <label for="leavename">Leave Name<span class="text-danger">*</span></label>
                                 <input type="text" class="form-control" id="leavename" formControlName="leavename"
                                     placeholder="Please Enter Leave Name"
-                                    [ngClass]="{'input-error': isEditSubmitted && EditLeaveRule.get('leavename')?.invalid}">
-
+                                    [ngClass]="{
+                                        'input-error': isEditSubmitted && EditLeaveRule.get('leavename')?.invalid,
+                                        'is-invalid': isEditSubmitted && EditLeaveRule.get('leavename')?.invalid
+                                    }">
                             </div>
 
                             <!-- No. Of Leaves -->
                             <div class="col-4">
-                                <label for="leavenumber">No. of leaves</label>
+                                <label for="leavenumber">No. of leaves<span class="text-danger">*</span></label>
                                 <input type="number" class="form-control" id="leavenumber" formControlName="leavenumber"
                                     placeholder="Please Enter Leave number"
                                     [ngClass]="{'input-error': isEditSubmitted && EditLeaveRule.get('leavenumber')?.invalid}">
@@ -186,7 +188,7 @@
                         </div>
 
                         <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-                            <button type="submit" class="btn btn-primary mt-3 ml-auto btn-end">Update</button>
+                            <button type="submit" class="btn BtnColor mt-3 ml-auto btn-end">Update</button>
                         </div>
                     </form>
                 </div>
