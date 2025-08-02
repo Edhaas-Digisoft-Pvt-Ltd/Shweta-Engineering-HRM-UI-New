@@ -58,7 +58,7 @@ export class EmployeeDashboardComponent {
     this.isLoading = true;
     const today = new Date();
     const currentYear = today.getFullYear();
-    let previousMonth = today.getMonth(); 
+    let previousMonth = today.getMonth();
 
     if (previousMonth === 0) {
       this.selectedMonth = '12';
@@ -80,7 +80,7 @@ export class EmployeeDashboardComponent {
 
     this.editForm = this.fb.group({
       email: ['', [Validators.required, Validators.email, Validators.pattern(/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/)]],
-      contact: ['', [Validators.required, this.NoWhitespaceValidator, Validators.pattern('^[0-9]*$')]],
+      contact: ['', [Validators.required, Validators.minLength(10),Validators.maxLength(10),Validators.pattern('^[0-9]*$')]],
       status: ['', Validators.required],
       address: ['', [Validators.required, this.NoWhitespaceValidator, Validators.pattern(/^[A-Za-z0-9 ,.-]+$/), Validators.minLength(3)]]
     });
@@ -106,7 +106,9 @@ export class EmployeeDashboardComponent {
 
     const roleName = sessionStorage.getItem('roleName')
     if (roleName == 'admin' || roleName == 'employee') {
-      this.router.navigate(['/authPanal/EmployeeInDetail']);
+      this.router.navigate(['/authPanal/EmployeeInDetail'], {
+        queryParams: { id: this.employee_id }
+      });
       return;
     } else {
       alert('Please Login To Proceed');

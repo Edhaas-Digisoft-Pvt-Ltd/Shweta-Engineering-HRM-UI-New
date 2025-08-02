@@ -94,8 +94,8 @@ export class ManageBonusAndIncentiveComponent {
       employee_id: [{ value: '', disabled: true }, Validators.required],
       employee_name: [{ value: '', disabled: true }, Validators.required],
       bonus_incentive_date: [{ value: '' }, Validators.required],
-      bonus_amount: [{ value: '' }, Validators.required],
-      incentive_amount: [{ value: '' }, Validators.required],
+      bonus_amount: [{ value: '' }, [Validators.required, Validators.pattern(/^\d+$/)]],
+      incentive_amount: [{ value: '' }, [Validators.required, Validators.pattern(/^\d+$/)]],
       status: [{ value: '' }, Validators.required],
     });
 

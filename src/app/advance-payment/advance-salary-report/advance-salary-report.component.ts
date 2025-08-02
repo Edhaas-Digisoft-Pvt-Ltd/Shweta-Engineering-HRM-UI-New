@@ -94,7 +94,12 @@ export class AdvanceSalaryReportComponent {
     this.service.post('emp/advancesaraly/report', payload).subscribe(
       (res: any) => {
         if (res.status === 'success' && res.data.length > 0) {
-          this.rowData = res.data;
+          const transformedData = res.data.map((item: any) => ({
+            ...item,
+            emi_status: item.emi_status ?? 'Ongoing',
+          }));
+
+          this.rowData = transformedData;
         } else {
           this.rowData = [];
           this.toastr.warning('Data Not Found');
@@ -172,6 +177,16 @@ export class AdvanceSalaryReportComponent {
       button.style.backgroundColor = '#FFAFAF'; // light green
       button.style.color = 'black';
       button.style.border = '1px solid #FFAFAF';
+      button.style.borderRadius = '20px';
+    } else if (status === 'Ongoing') {
+      button.style.backgroundColor = '#faffafff'; // light green
+      button.style.color = 'black';
+      button.style.border = '1px solid #f7ffafff';
+      button.style.borderRadius = '20px';
+    } else if (status === 'Completed') {
+      button.style.backgroundColor = '#c2ffafff'; // light green
+      button.style.color = 'black';
+      button.style.border = '1px solid #bfffafff';
       button.style.borderRadius = '20px';
     }
 

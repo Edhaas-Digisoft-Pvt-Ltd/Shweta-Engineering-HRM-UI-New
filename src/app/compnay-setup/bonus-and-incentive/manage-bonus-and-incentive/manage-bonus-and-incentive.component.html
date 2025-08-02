@@ -187,12 +187,20 @@
                                                 <label>Bonus<span class="text-danger">*</span></label>
                                                 <input type="text" class="form-control" formControlName="bonus_amount"
                                                     [ngClass]="{'is-invalid': isEditSubmitted && editBonusAndIncentive.get('bonus_amount')?.invalid}">
+                                                     <div class="invalid-feedback"
+                                                    *ngIf="isEditSubmitted && editBonusAndIncentive.get('bonus_amount')?.errors?.['pattern']">
+                                                    Only Numbers are Allowed
+                                                </div>
                                             </div>
                                             <div class="col-md-4 mb-3">
                                                 <label>Incentive<span class="text-danger">*</span></label>
                                                 <input type="text" class="form-control"
                                                     formControlName="incentive_amount"
                                                     [ngClass]="{'is-invalid': isEditSubmitted && editBonusAndIncentive.get('incentive_amount')?.invalid}">
+                                                     <div class="invalid-feedback"
+                                                    *ngIf="isEditSubmitted && editBonusAndIncentive.get('bonus_amount')?.errors?.['pattern']">
+                                                    Only Numbers are Allowed
+                                                </div>
                                             </div>
                                             <div class="modal-footer d-grid gap-2 d-md-flex justify-content-md-end">
                                                 <button type="submit"
