@@ -135,13 +135,13 @@ export class HrmserviceService {
   selectedCompanyId = this._selectedCompanyId.asReadonly(); //display company id
 
   //signal - store employee id =====================================================================
-  // private _EmployeeId = signal<number | null>(null);
+  private _EmployeeId = signal<number | null>(null);
 
-  // setEmployeeId(id: number) {
-  //   this._EmployeeId.set(id);
-  //   console.log('service',this._EmployeeId);
-  // }
+  setEmployeeId(id: number) {
+    this._EmployeeId.set(id);
+    console.log('service',this._EmployeeId);
+  }
 
-  // EmployeeId = this._EmployeeId.asReadonly();
+  EmployeeId = this._EmployeeId.asReadonly();
 
 }

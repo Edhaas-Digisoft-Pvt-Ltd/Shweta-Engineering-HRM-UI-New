@@ -421,10 +421,10 @@
                                             </td>
                                             <td>
                                                 <div *ngIf="salaryAmount>0">
-                                                    <h5 class="fw-bold me-5">Rs. {{ salaryAmount }}</h5>
+                                                    <h5 class="fw-bold me-5">Rs. {{  salaryAmount | number: '1.2-2' }}</h5>
                                                 </div>
                                                 <div *ngIf="salaryAmount==0">
-                                                    <h5 class="fw-bold me-5">Rs. {{ salaryAmount }}</h5>
+                                                    <h5 class="fw-bold me-5">Rs. {{  salaryAmount | number: '1.2-2' }}</h5>
                                                 </div>
                                                 <div *ngIf="salaryAmount<0">
                                                     <small class="text-warning">CTC is too low.</small>

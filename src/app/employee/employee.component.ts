@@ -194,7 +194,7 @@ export class EmployeeComponent {
           department_name: item.department_name,
           designation_name: item.designation_name,
           status: item.status === "Active" ? "active" : "Inactive",
-        }));
+        })).reverse();;
       } else {
         this.rowData = [];
         this.toastr.warning('Data Not Found')

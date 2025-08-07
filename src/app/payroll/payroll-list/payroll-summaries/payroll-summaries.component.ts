@@ -165,7 +165,7 @@ export class PayrollSummariesComponent {
           {
             Compound: 'Provident Fund (PF)',
             deduction: 'Fixed %',
-            amount: '₹. 0'
+            amount: '₹. 200'
           },
 
           {

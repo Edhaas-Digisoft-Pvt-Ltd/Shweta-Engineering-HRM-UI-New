@@ -10,32 +10,30 @@
             </div>
             <div class="company-setup">
                 <div class="container-fluid ">
-                    <div class="row gap-2 my-4 justify-content-end">
+                    <div class="row my-4 justify-content-end">
+                        <div class="col-lg-6 col-md-8 d-flex justify-content-end gap-3">
 
-                        <div class="col col-lg-5 col-md-7 text-center d-flex align-items-end ">
-
-                            <div class="w-50 text-start select-company ">
-                                <label class="fw-bold">Select Company </label>
-                                <br>
-                                <select class="form-select" [(ngModel)]="selectedCompanyId" (change)="onCompanyChange($event)">
-                                    <!-- <option value="" selected>Select Company</option> -->
+                            <!-- Select Company -->
+                            <div class="w-50">
+                                <label class="fw-bold">Select Company</label>
+                                <select class="form-select" [(ngModel)]="selectedCompanyId"
+                                    (change)="onCompanyChange($event)">
                                     <option *ngFor="let item of CompanyNames" [value]="item.company_id">
                                         {{ item.company_name }}
                                     </option>
                                 </select>
                             </div>
-                            <div class="w-50 text-start ">
-                                <button type="button " class="btn text-white  add_company  mb-0 "
-                                    style="background-color: #3674B5; margin-left: 20px;" data-bs-toggle="modal"
-                                    data-bs-target="#addLeaveModal">
-                                    <i class="bi bi-plus-lg me-2 fw-bold"></i> Add New
+
+                            <div class="d-flex align-items-end me-2">
+                                <button type="button" class="btn text-white mb-0" style="background-color: #3674B5;"
+                                    data-bs-toggle="modal" data-bs-target="#addLeaveModal">
+                                    Add New
                                 </button>
-
-
                             </div>
-                        </div>
 
+                        </div>
                     </div>
+
                     <div class="row gap-4 row-wrap my-3 ">
                         <div class="container  ">
                             <div class="row g-3">
@@ -69,7 +67,8 @@
 
                             <!-- Company -->
                             <div class="col-md-3 text-start select-company">
-                                <label class="fw-bold" disabled selected>Select Company<span class="text-danger">*</span></label>
+                                <label class="fw-bold" disabled selected>Select Company<span
+                                        class="text-danger">*</span></label>
                                 <select class="form-select" formControlName="companyid" [ngClass]="{
                                 'input-error': isSubmitted && LeaveRule.get('companyid')?.invalid,
                                 'is-invalid': isSubmitted && LeaveRule.get('companyid')?.invalid
@@ -161,9 +160,8 @@
                                 <label for="leavetype">Leave Type<span class="text-danger">*</span></label>
                                 <select id="leavetype" class="form-select" formControlName="leavetype"
                                     [ngClass]="{'input-error': isEditSubmitted && EditLeaveRule.get('leavetype')?.invalid}">
-                                    <option value="" disabled selected>Select Leave Type</option>
-                                    <option >Every Month</option>
-                                    <option >Every Year</option>
+                                    <option>Every Month</option>
+                                    <option>Every Year</option>
                                 </select>
                             </div>
 
@@ -171,8 +169,7 @@
                             <div class="col-4">
                                 <label for="leavename">Leave Name<span class="text-danger">*</span></label>
                                 <input type="text" class="form-control" id="leavename" formControlName="leavename"
-                                    placeholder="Please Enter Leave Name"
-                                    [ngClass]="{
+                                    placeholder="Please Enter Leave Name" [ngClass]="{
                                         'input-error': isEditSubmitted && EditLeaveRule.get('leavename')?.invalid,
                                         'is-invalid': isEditSubmitted && EditLeaveRule.get('leavename')?.invalid
                                     }">
