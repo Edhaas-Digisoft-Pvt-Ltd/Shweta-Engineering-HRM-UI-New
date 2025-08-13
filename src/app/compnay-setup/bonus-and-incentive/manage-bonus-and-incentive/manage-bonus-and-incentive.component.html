@@ -139,13 +139,13 @@
                                                 <input type="text" class="form-control"
                                                     formControlName="incentive_amount">
                                             </div>
-                                            <div class="modal-footer">
+                                            <div class="modal-footer" *ngIf="!(editBonusAndIncentiveData?.status === 'Approved' || editBonusAndIncentiveData?.status === 'Rejected')">
                                                 <button type="button" class="btn approveBtn"
                                                     (click)="updateStatus('Approved')"
-                                                    [disabled]="editBonusAndIncentiveData?.status === 'Approved' || editBonusAndIncentiveData?.status === 'Rejected'">Approve</button>
+                                                    >Approve</button>
                                                 <button type="button" class="btn declineBtn"
                                                     (click)="updateStatus('Rejected')"
-                                                    [disabled]="editBonusAndIncentiveData?.status === 'Approved' || editBonusAndIncentiveData?.status === 'Rejected'">Decline</button>
+                                                   >Decline</button>
                                                 <button type="button" class="btn btn-outline-dark fw-semobild"
                                                     data-bs-dismiss="modal">Cancel</button>
                                             </div>

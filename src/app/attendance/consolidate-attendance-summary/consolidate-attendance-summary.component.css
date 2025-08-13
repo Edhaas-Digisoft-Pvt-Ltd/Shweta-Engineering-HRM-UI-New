@@ -47,7 +47,6 @@ label{
 .list ul {
     display: flex;
     gap: 20px;
-
 }
 
 .list ul li {
@@ -94,4 +93,8 @@ label{
 
 .list ul li:nth-of-type(8) .dot {
     background-color: #880021;
+}
+
+.dotted-line {
+    border-right : 1px dashed gray;padding-right:12px;
 }

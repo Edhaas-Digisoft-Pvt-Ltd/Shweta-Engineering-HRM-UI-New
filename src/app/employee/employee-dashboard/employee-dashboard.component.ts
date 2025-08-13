@@ -310,7 +310,7 @@ export class EmployeeDashboardComponent {
   //apply leave 
   addLeaveRequest() {
     this.isLeaveSubmitted = true;
-
+    
     if (!this.leaveForm.valid) {
       this.toastr.error('Invalid Credentials');
       this.leaveForm.markAllAsTouched();
@@ -351,12 +351,18 @@ export class EmployeeDashboardComponent {
     });
   }
 
-  resetLeaveForm() {
-    this.leaveForm.reset();
-    this.leaveForm.markAsUntouched();
-    this.leaveForm.markAsPristine();
-    this.isLeaveSubmitted = false;
-  }
+resetLeaveForm() {
+  this.leaveForm.reset({
+    leave_id: null,
+    noOfDays: 1,
+    start_date: '',
+    end_date: '',
+    leave_reason: ''
+  });
+  this.leaveForm.markAsUntouched();
+  this.leaveForm.markAsPristine();
+  this.isLeaveSubmitted = false;
+}
 
   // advance salary request 
   addAdvanceSalary() {

@@ -5,9 +5,16 @@
                 <!-- <img src="assets/img/Animation - 1743094888648.gif" alt=""> -->
 
                 <h2> <i class="bi bi-currency-rupee me-2"></i> Payroll</h2>
-                <p><span (click)="backtoPayroll()" style="cursor: pointer;"><i class="bi bi-arrow-left-circle"></i>
-                        Back</span> / <span style="color: #3674B5;"><b>Payroll
-                        Summaries</b> for {{employeeDetails.employee_code}}</span></p>
+                <p style="color: #3674B5;">
+                    <span (click)="backtoPayroll()" style="cursor: pointer;">
+                        <i class="bi bi-arrow-left-circle ms-2"></i>
+                        <span class="fw-bolder ms-2">Payroll List</span>
+                    </span>
+                    /
+                    <span>
+                        <span class="fw-bold">Payroll Summaries</span> : {{employeeDetails.employee_code}}
+                    </span>
+                </p>
             </div>
 
             <div class="col-12 mb-2">

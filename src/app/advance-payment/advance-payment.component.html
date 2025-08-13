@@ -169,12 +169,12 @@
             </div>
           </form>
 
-          <div class="modal-footer">
+          <div class="modal-footer" *ngIf="!(EditAdvancePaymentData?.status === 'Approved' || EditAdvancePaymentData?.status === 'Rejected')">
             <button type="button" class="btn approveBtn" (click)="updateStatus('Approved')"
-              [disabled]="EditAdvancePaymentData?.status === 'Approved' || EditAdvancePaymentData?.status === 'Rejected'">Approve
+            >Approve
               Request</button>
             <button type="button" class="btn declineBtn" (click)="updateStatus('Rejected')"
-              [disabled]="EditAdvancePaymentData?.status === 'Approved' || EditAdvancePaymentData?.status === 'Rejected'">Decline
+             >Decline
               Request</button>
             <button type="button" class="btn btn-outline-dark fw-semobild " data-bs-dismiss="modal">Cancel</button>
           </div>
