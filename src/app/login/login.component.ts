@@ -111,5 +111,25 @@ export class LoginComponent {
   }
   //--------------------------------------------------------------------------------------
 
+  demoAccounts = [
+    { role: 'Admin', email: 'sm1982@gmail.com', password: '9423369362' },
+    { role: 'Emp', email: 'pravin.j@gmail.com', password: '9823012345' },
+    { role: 'Accountant', email: 'sunil15@gmail.com', password: '987545632' }
+  ];
+
+  selectedRole: string = ''; 
+
+  selectCredentials(role: string) {
+    this.selectedRole = role;
+
+    const account = this.demoAccounts.find(a => a.role === role);
+    if (account) {
+      this.loginForm.patchValue({
+        email: account.email,
+        password: account.password
+      });
+    }
+  }
+
 
 }
