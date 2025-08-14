@@ -1,9 +1,10 @@
 import { Component } from '@angular/core';
-import { FormBuilder, FormGroup } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ColDef, GridApi } from 'ag-grid-community';
 import { EmployeeActionComponent } from 'src/app/employee/employee-action/employee-action.component';
 import { HrmserviceService } from 'src/app/hrmservice.service';
 import { ToastrService } from 'ngx-toastr';
+import * as bootstrap from 'bootstrap';
 
 @Component({
   selector: 'app-approved-advance-payment',
@@ -27,6 +28,10 @@ export class ApprovedAdvancePaymentComponent {
   isLoading: boolean = false;
   selectedAdvpayid: number = 0;
   tabledata: any = [];
+  skipEmiForm!: FormGroup;
+  isSkipConfirmed: boolean = false;
+  skipEmiReason: any;
+  isSkipFormSubmitted = false;
 
   constructor(private fb: FormBuilder, private service: HrmserviceService, private toastr: ToastrService) { }
 
@@ -59,6 +64,38 @@ export class ApprovedAdvancePaymentComponent {
       remainingBalance: [{ value: '', disabled: true }],
       advanceAmount: [{ value: '', disabled: true }]
     })
+
+    this.skipEmiForm = this.fb.group({
+      isSkipConfirmed: [false],
+      skipEmiReason: ['', Validators.required]
+    })
+  }
+
+  ngAfterViewInit() {
+    const skipModalEl = document.getElementById('openSkipEmiModal');
+    if (skipModalEl) {
+      skipModalEl.addEventListener('hidden.bs.modal', () => {
+        const advanceModalEl = document.getElementById('advanceSalaryModalinfo');
+        if (advanceModalEl) {
+          new bootstrap.Modal(advanceModalEl).show();
+        }
+      });
+    }
+  }
+
+  closeAllModals(): void {
+    const modals = document.querySelectorAll('.modal.show');
+    modals.forEach((modalElement: any) => {
+      const modalInstance = bootstrap.Modal.getInstance(modalElement);
+      if (modalInstance) {
+        modalInstance.hide();
+      }
+    });
+  }
+  removeBackdrop() {
+    document.querySelectorAll('.modal-backdrop').forEach(backdrop => backdrop.remove());
+    document.body.classList.remove('modal-open');
+    document.body.style.removeProperty('padding-right');
   }
 
   onCompanyChange(event: Event): void {
@@ -360,6 +397,27 @@ export class ApprovedAdvancePaymentComponent {
     }
 
     return button;
+  }
+
+  SkipEMI() {
+    this.isSkipFormSubmitted = true;
+    if (this.skipEmiForm.valid) {
+      const payload = {
+        skipEmiReason: this.skipEmiForm.value.skipEmiReason
+      }
+      console.log(payload)
+      this.service.post('skip/emi', payload).subscribe({
+        next: (res) => {
+          this.toastr.success('EMI Skipped successfully.');
+          this.isSkipFormSubmitted = false
+          this.closeAllModals();
+        },
+        error: (err) => {
+          console.error(err);
+          this.toastr.error('Something went wrong.');
+        }
+      });
+    }
   }
 
   gridOptions = {

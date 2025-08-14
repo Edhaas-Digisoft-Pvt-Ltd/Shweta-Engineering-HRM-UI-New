@@ -58,6 +58,10 @@ import { PayrollProcessRejectedComponent } from './payroll/payroll-process/payro
 import { PayrollProcessApprovedComponent } from './payroll/payroll-process/payroll-process-approved/payroll-process-approved.component';
 import { EditBonusAndIncentiveComponent } from './compnay-setup/bonus-and-incentive/manage-bonus-and-incentive/edit-bonus-and-incentive/edit-bonus-and-incentive.component';
 import { LoaderComponent } from './shared/loader/loader.component';
+import { ConfigurationComponent } from './configuration/configuration.component';
+import { LeaveConfigComponent } from './configuration/leave-config/leave-config.component';
+import { BonusConfigComponent } from './configuration/bonus-config/bonus-config.component';
+import { IncentiveConfigComponent } from './configuration/incentive-config/incentive-config.component';
 
 
 // FullCalendarModule.registerPlugins([dayGridPlugin]);
@@ -111,6 +115,10 @@ import { LoaderComponent } from './shared/loader/loader.component';
     PayrollProcessRejectedComponent,
     PayrollProcessApprovedComponent,
     LoaderComponent,
+    ConfigurationComponent,
+    LeaveConfigComponent,
+    BonusConfigComponent,
+    IncentiveConfigComponent,
 
   ],
   imports: [

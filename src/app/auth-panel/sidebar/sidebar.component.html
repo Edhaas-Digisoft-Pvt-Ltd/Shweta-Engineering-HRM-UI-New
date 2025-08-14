@@ -112,7 +112,7 @@
                     </a>
                 </li> -->
                 <div class="accordion accordion-flush rounded-2 overflow-hidden bg-transparent mb-2"
-                    id="accordionFlushExample2" *ngIf="role === 'admin' || role === 'accountant'">
+                    id="accordionFlushExample2" *ngIf="role === 'admin'">
                     <div class="accordion-item ">
                         <h2 class="accordion-header ">
                             <button class="accordion-button collapsed px-2" type="button" data-bs-toggle="collapse"
@@ -137,18 +137,18 @@
                                             manage & Policies
                                         </a>
                                     </li>
-                                    <li  [routerLink]="['LeaveSetup']" class="nav-item" *ngIf="role === 'admin'">
+                                    <!-- <li  [routerLink]="['LeaveSetup']" class="nav-item" *ngIf="role === 'admin'">
                                         <a type="button" routerLinkActive="active-link"
                                             (click)="closeAccordion()" class="d-flex align-items-center">
                                             Leave Config
                                         </a>
-                                    </li>
-                                    <li [routerLink]="['BonusAndIncentive']" class="nav-item" *ngIf="role === 'admin' || role === 'accountant'">
+                                    </li> -->
+                                    <!-- <li [routerLink]="['BonusAndIncentive']" class="nav-item" *ngIf="role === 'admin' || role === 'accountant'">
                                         <a type="button" routerLinkActive="active-link"
                                             (click)="closeAccordion()" class="d-flex align-items-center">
                                             Bonus And Incentive
                                         </a>
-                                    </li>
+                                    </li> -->
                                 </ul>
                             </div>
                         </div>
@@ -157,6 +157,7 @@
                     </div>
 
                 </div>
+
                 <!-- <li [routerLink]="['demo']" class="nav-item">
 
                     <a type="button" routerLinkActive="active-link" (click)="closeAccordion()"
@@ -171,6 +172,13 @@
                         <i class="bi bi-gear ms-2 me-2"></i>demo2
                     </a>
                 </li> -->
+
+                <li [routerLink]="['configuration']" class="nav-item" *ngIf="role === 'admin'">
+                    <a type="button" routerLinkActive="active-link" (click)="closeAccordion()"
+                        class="nav-link btn-like d-flex align-items-center">
+                        <i class="bi bi-calendar-week ms-2 me-2"></i>Configuration
+                    </a>
+                </li>
             </ul>
           </div>
             <!-- Logout Button at the Bottom -->
