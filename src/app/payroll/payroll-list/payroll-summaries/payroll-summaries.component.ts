@@ -89,7 +89,7 @@ export class PayrollSummariesComponent {
 
   ngOnInit() {
     this.selectedYear = new Date().getFullYear();
-    this.selectedMonth = new Date().getMonth() + 1;
+    this.selectedMonth = new Date().getMonth();
     const currentDate = new Date();
     this.today = currentDate.toISOString().split('T')[0];
 
