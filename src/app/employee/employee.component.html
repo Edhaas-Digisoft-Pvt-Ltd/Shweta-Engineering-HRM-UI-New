@@ -46,7 +46,7 @@
                             <input type="file" #fileInput style="display: none" (change)="onFileChange($event)"
                                 accept=".xlsx, .xls" />
                             <button class="btn importExcel" style="background-color: #3674b5; color: white;"
-                                data-bs-toggle="modal" data-bs-target="#importEmployeeModal">Import
+                                (click)="openImportModal()">Import
                                 Employee
                             </button>
                         </div>

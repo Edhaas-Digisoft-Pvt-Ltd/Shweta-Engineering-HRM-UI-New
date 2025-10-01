@@ -2,3 +2,7 @@
     background-color: #3674B5;
     color: white;
 }
+
+.is-invalid {
+  border: 1px solid red !important;
+}

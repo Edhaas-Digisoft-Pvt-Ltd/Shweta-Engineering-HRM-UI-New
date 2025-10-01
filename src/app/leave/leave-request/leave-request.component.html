@@ -57,7 +57,8 @@
           <form [formGroup]="leaveRequestForm">
             <div class="modal-body" style="padding: 5px 40px !important">
               <div class="row">
-                <div class="col-lg-7   " style="border-right : 1px dashed gray; padding-right: 20px;">
+                <!-- <div class="col-lg-7   " style="border-right : 1px dashed gray; padding-right: 20px;"> -->
+                <div class="col-lg-12">
                   <div class="row my-3">
                     <div class="col-md-6">
                       <label for="employeeName">Employee Name</label>
@@ -160,7 +161,9 @@
                     </button>
                   </div>
                 </div>
-                <div class="col-lg-5 p-4">
+
+                <!-- leave balance -->
+                <!-- <div class="col-lg-5 p-4">
                   <div class="leavesSchedule p-0"
                     style="border-radius: 10px; border:1px solid rgb(188, 188, 188); overflow:hidden">
                     <div class="row">
@@ -168,12 +171,6 @@
                     </div>
 
                     <div class="row gx-3 px-3 pb-3">
-                      <!-- Casual Leaves -->
-                      <div class="col-12 text-dark fw-semibold">
-                        Casual Leaves
-                        <hr class="m-0">
-                      </div>
-
                       <div class="col-md-4 col-sm-6 my-2">
                         <div class="leaveStatusCard text-center border" style="border-radius: 5px">
                           <div class="heading p-2"
@@ -209,51 +206,9 @@
                           </div>
                         </div>
                       </div>
-
-                      <!-- Sick Leaves -->
-                      <div class="col-12 mt-2 text-dark fw-semibold">
-                        Sick Leaves
-                        <hr class="m-0">
-                      </div>
-
-                      <div class="col-md-4 col-sm-6 my-2">
-                        <div class="leaveStatusCard text-center border" style="border-radius: 5px">
-                          <div class="heading p-2"
-                            style="background-color: #C8E3FF; border-radius: 5px 5px 0px 0px; font-size: 13px;">
-                            Total Leaves
-                          </div>
-                          <div class="content p-2">
-                            {{ leaveBalance?.leave_count }}
-                          </div>
-                        </div>
-                      </div>
-
-                      <div class="col-md-4 col-sm-6 my-2">
-                        <div class="leaveStatusCard text-center border" style="border-radius: 5px">
-                          <div class="heading p-2"
-                            style="background-color: #C8E3FF; border-radius: 5px 5px 0px 0px; font-size: 13px;">
-                            Taken Leaves
-                          </div>
-                          <div class="content p-2">
-                            {{ leaveBalance?.leave_count }}
-                          </div>
-                        </div>
-                      </div>
-
-                      <div class="col-md-4 col-sm-6 my-2">
-                        <div class="leaveStatusCard text-center border" style="border-radius: 5px">
-                          <div class="heading p-2"
-                            style="background-color: #C8E3FF; border-radius: 5px 5px 0px 0px; font-size: 13px;">
-                            Balance Leaves
-                          </div>
-                          <div class="content p-2">
-                            {{ leaveBalance?.leave_count }}
-                          </div>
-                        </div>
-                      </div>
                     </div>
                   </div>
-                </div>
+                </div> -->
 
               </div>
 

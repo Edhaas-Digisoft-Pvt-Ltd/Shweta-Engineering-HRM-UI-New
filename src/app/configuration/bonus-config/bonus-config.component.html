@@ -1,91 +1,283 @@
 <div class="right-panel">
+    <div class="row">
+        <!-- Left Section: Form -->
+        <div class="col-md-5">
+            <div class="card shadow-sm p-4 h-100">
+                <!-- Main Heading Center -->
+                <h4 class="fw-bold text-center mb-4">Add Annual Bonus</h4>
 
-    <div class="row gx-3 align-items-center rounded-2">
-        <div class="col-12">
-            <div class="row justify-content-end align-items-end">
+                <form [formGroup]="addBonusForm">
 
-                <!-- <div class="col-3">
-                    <label class="mb-1 fw-semibold">Select Company</label>
-                    <select class="form-select" (change)="onCompanyChange($event)">
-                        <option *ngFor="let item of CompanyNames" [value]="item.company_id">
-                            {{ item.company_name }}
-                        </option>
-                    </select>
-                </div> -->
-
-                <div class="col-auto">
-                    <button type="button" class="btn text-white mb-1 px-4 BtnColor" data-bs-toggle="modal"
-                        data-bs-target="#addBonusIncentive">
-                        Add Bonus
-                    </button>
-                </div>
-
-            </div>
-        </div>
-    </div>
-
-    <div class="row mt-3">
-        <div class="col-12">
-            <ag-grid-angular class="ag-theme-alpine" style="width: 100%; height: 60vh;" [rowData]="rowData"
-                [columnDefs]="columnDefs" [pagination]="true" [defaultColDef]="defaultColDef">
-            </ag-grid-angular>
-        </div>
-    </div>
-
-    <!-- Modal Content -->
-    <div class="modal fade modal-xl text-left" id="addBonusIncentive" tabindex="-1" aria-labelledby="exampleModalLabel"
-        aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="exampleModalLabel">Add Bonus</h5>
-                    <button type="button text-white" class="btn-close" data-bs-dismiss="modal"
-                        aria-label="Close"></button>
-                </div>
-                <div class="modal-body text-left">
-                    <form [formGroup]="addBonusForm" (ngSubmit)="addBonusData()">
-                        <div class="row">
-
-                            <div class="col-md-3 text-start select-company">
-                                <label class="fw-bold" disabled selected>Select Company<span
+                    <h5 *ngIf="!update_bonus" class="fw-bold mb-3">Select Dates</h5>
+                    <h5 *ngIf="update_bonus" class="fw-bold mb-3">Selected Dates</h5>
+                    <div class="border rounded p-3 mb-4 bg-light">
+                        <div class="row mb-3">
+                            <div class="col-md-10">
+                                <label class="form-label fw-bold">Select Company<span
                                         class="text-danger">*</span></label>
-                                <select class="form-select" formControlName="companyid">
+                                <select class="form-select" formControlName="company_id"
+                                    [ngClass]="{'is-invalid': (isSaveClicked || isSubmitClicked) && !addBonusForm.value.company_id}">
                                     <option [value]="null" disabled>Select Company</option>
-                                    <option *ngFor="let item of CompanyNames" [value]="item.company_id">
-                                        {{ item.company_name }}
-                                    </option>
+                                    <option *ngFor="let item of CompanyNames" [value]="item.company_id"> {{
+                                        item.company_name }} </option>
                                 </select>
-
                             </div>
 
-                            <div class="col-md-3">
-                                <label class="form-label">From Date<span class="text-danger">*</span></label>
-                                <input type="date" class="form-control" formControlName="from_date" />
-
+                            <div class="col-md-6 mt-3">
+                                <label class="form-label fw-bold">From Date<span class="text-danger">*</span></label>
+                                <input type="date" class="form-control" formControlName="from_date"
+                                    [ngClass]="{'is-invalid': (isSaveClicked || isSubmitClicked) && !addBonusForm.value.from_date}" />
                             </div>
 
-                            <div class="col-md-3">
-                                <label class="form-label">To Date<span class="text-danger">*</span></label>
-                                <input type="date" class="form-control" formControlName="to_date" />
+                            <div class="col-md-6 mt-3">
+                                <label class="form-label fw-bold">To Date<span class="text-danger">*</span></label>
+                                <input type="date" class="form-control" formControlName="to_date"
+                                    [ngClass]="{'is-invalid': (isSaveClicked || isSubmitClicked) && !addBonusForm.value.to_date}" />
                             </div>
+                        </div>
 
-                            <div class="col-md-3">
-                                <label class="form-label">Rate</label>
-                                <input type="number" class="form-control" formControlName="rate"
-                                    placeholder="Enter Rate" />
+                        <div class="text-center  mt-4">
+                            <button *ngIf="!update_bonus" type="button" class="btn BtnColor px-4"
+                                (click)="saveDates()">Save</button>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="d-flex justify-content-between">
+                            <h5 class="fw-semibold mb-3">Define Rate </h5>
+                            <div class="d-flex justify-content-center align-items-center gap-3">
+                                <label class="form-check-label" for="flexSwitchCheckChecked">
+                                    Calculate
+                                </label>
+                                <div class="form-check form-switch ">
+
+                                    <input class="form-check-input" type="checkbox" role="switch"
+                                        id="flexSwitchCheckChecked" formControlName="showCalculate" />
+                                </div>
                             </div>
 
                         </div>
+                    </div>
+                    <!-- <h5 class="fw-semibold mb-3">Define Rate </h5> -->
+                    <div class="border rounded p-3 mb-4 bg-light">
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Rate<span class="text-danger">*</span></label>
+                                <input type="number" class="form-control" formControlName="bonus_rate"
+                                    placeholder="Enter Rate" (input)="calculateBudget()" />
+                            </div>
 
-                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-                            <button type="submit" class="btn BtnColor mt-3 ml-auto btn-end submit-btn">Submit</button>
+
+                            <div class="col-md-6">
+                                <label class="form-label">Bonus Applicable Month <span
+                                        class="text-danger">*</span></label>
+                                <input type="month" class="form-control" formControlName="bonus_month"
+                                    [attr.min]="currentMonth" placeholder="Select Month"
+                                    [ngClass]="{'is-invalid': isSubmitClicked && !addBonusForm.value.bonus_month}" />
+                            </div>
+
+                            <!-- <div class="col-md-6">
+                                <label class="form-label">Bonus Applicable Month <span
+                                        class="text-danger">*</span></label>
+                                <input type="month" class="form-control" formControlName="bonus_month" required
+                                    [ngClass]="{'is-invalid': isSubmitClicked && !addBonusForm.value.bonus_month}" /> -->
+                            <!-- <select class="form-select" formControlName="bonus_month">
+                <option value="" disabled selected>Select Month</option>
+                <option *ngFor="let month of months" [value]="month">{{ month }}</option>
+              </select> -->
+                            <!-- </div> -->
                         </div>
-                    </form>
 
+                        <!-- Checkbox Left Aligned -->
+                        <div class="form-check mb-3">
+                            <input type="checkbox" class="form-check-input me-2" formControlName="bonus_flag"
+                                id="lockRate" />
+                            <label for="lockRate" class="form-check-label text-semibold">Do you want to lock this
+                                rate?</label>
+                        </div>
 
+                        <!-- <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" role="switch" id="flexSwitchCheckChecked"
+                                formControlName="showCalculate" />
+                            <label class="form-check-label" for="flexSwitchCheckChecked">
+                                Calculate
+                            </label>
+                        </div> -->
+
+                        <div class="text-center" *ngIf="!update_bonus">
+                            <button *ngIf="addBonusForm.get('bonus_flag')?.value" type="submit"
+                                class="btn BtnColor px-4" (click)="onSubmitConfirm()">Submit</button>
+                            <button *ngIf="!addBonusForm.get('bonus_flag')?.value" type="submit"
+                                class="btn BtnColor px-4" (click)="submitRate()">Submit</button>
+                        </div>
+
+                        <div class="text-center" *ngIf="update_bonus">
+                            <button *ngIf="addBonusForm.get('bonus_flag')?.value" type="submit"
+                                class="btn BtnColor px-4" (click)="onSubmitConfirm()">Submit</button>
+                            <button *ngIf="!addBonusForm.get('bonus_flag')?.value" type="submit"
+                                class="btn BtnColor px-4" (click)="updateBonus()">Submit</button>
+                        </div>
+
+                        <!-- <div class="text-center" *ngIf="!update_bonus">
+                            <button type="submit" class="btn BtnColor px-4" data-bs-toggle="modal"
+                                data-bs-target="#SubmitConfirmModal" (click)="onSubmitConfirm()">Submit</button>
+                        </div>
+                        <div class="text-center" *ngIf="update_bonus">
+                            <button type="submit" *ngIf="!addBonusForm.get('bonus_rate')?.value"
+                                class="btn BtnColor px-4" (click)="updateBonus()">Submit</button>
+                            <button type="submit" *ngIf="addBonusForm.get('bonus_rate')?.value"
+                                class="btn BtnColor px-4" (click)="updateBonus()">Update</button>
+                        </div> -->
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Right Section: Grid -->
+        <div class="col-md-7" *ngIf="!addBonusForm.get('showCalculate')?.value">
+            <div class="card shadow-sm p-4 h-100">
+                <div class="row align-items-center mb-3">
+                    <div class="col-md-6 d-flex">
+                        <h5 class="fw-bold mb-0 ms-2">Bonus List</h5>
+                    </div>
+                    <div class="col-md-6 d-flex align-items-center justify-content-end">
+                        <label class="me-2 mb-0 fw-semibold">Select Company</label>
+                        <select class="form-select w-auto" [(ngModel)]="selectedCompanyId"
+                            (change)="onCompanyChange($event)">
+                            <option *ngFor="let item of CompanyNames" [value]="item.company_id">
+                                {{ item.company_name }}
+                            </option>
+                        </select>
+                    </div>
+                </div>
+                <ag-grid-angular class="ag-theme-alpine mt-1" style="width: 100%; height: 70vh;" [rowData]="rowData"
+                    [columnDefs]="columnDefs" [pagination]="true" [defaultColDef]="defaultColDef">
+                </ag-grid-angular>
+            </div>
+        </div>
+
+        <div class="col-md-7" *ngIf="addBonusForm.get('showCalculate')?.value">
+            <div class="card shadow-sm p-4 h-100">
+                <div class="row align-items-center mb-3">
+                    <div class="col-md-6 d-flex">
+                        <h5 class="fw-bolder mb-0 ms-2">Calculate</h5>
+                    </div>
+                    <div class="col-md-6 d-flex align-items-center justify-content-end">
+                        <label class="me-2 mb-0 fw-semibold" style="white-space: nowrap;">Selected Company</label>
+                        <select class="form-select" [(ngModel)]="active_company_id" [disabled]="true">
+                            <option *ngFor="let item of CompanyNames" [value]="item.company_id">
+                                {{ item.company_name }}
+                            </option>
+                        </select>
+                    </div>
+                    <hr class="mt-3 ">
+                </div>
+
+                <form [formGroup]="addBonusForm">
+                    <h5>Total Present Employee Net Count : {{present_days}}<span></span></h5>
+                    <div class="row align-items-center mt-3">
+                        <div class="col-md-5">
+                            <div class="col-md-12 mt-3">
+                                <label class="form-label fw-bold">Bonus Rate</label>
+                                <input type="number" class="form-control" formControlName="bonus_rate_display"
+                                    readonly />
+                            </div>
+
+                            <div class="d-flex justify-content-center my-3">
+                                <i class="bi bi-arrow-down fs-3"></i>
+                            </div>
+
+                            <div class="col-md-12 mt-3">
+                                <label class="form-label fw-bold">Estimated Budget</label>
+                                <input type="number" class="form-control" formControlName="bonus_budget" />
+                            </div>
+                        </div>
+
+                        <div class="col-md-2 d-flex justify-content-center">
+                            <div class="or-divider">
+                                <span>or</span>
+                            </div>
+                        </div>
+
+                        <div class="col-md-5">
+                            <div class="col-md-12 mt-3">
+                                <label class="form-label fw-bold">Enter your Budget</label>
+                                <input type="number" class="form-control" formControlName="entered_budget"
+                                    (input)="onBudgetInput($event)" />
+                            </div>
+
+                            <div class="d-flex justify-content-center my-3">
+                                <i class="bi bi-arrow-down fs-3"></i>
+                            </div>
+
+                            <div class="col-md-12 mt-3">
+                                <label class="form-label fw-bold">Derived Rate</label>
+                                <input type="text" class="form-control"
+                                    [value]="calculatedRateFromBudget ? calculatedRateFromBudget.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : ''"
+                                    [disabled]="true" />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row align-items-center mt-3">
+                        <div class="row align-items-center mt-3">
+
+                        </div>
+
+                    </div>
+                </form>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="SubmitConfirmModal" tabindex="-1" aria-labelledby="rejectAllLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content rounded-4">
+            <div class="modal-header text-white rounded-top-4">
+                <h5 class="modal-title" id="rejectAllLabel">Confirm Bonus Submission</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                    aria-label="Close"></button>
+            </div>
+
+            <div class="modal-body">
+                <p class="mb-3">Are you sure? You can't change this after submit.</p>
+
+                <p class="fw-semibold">
+                    Bonus Rate: {{ addBonusForm.value.bonus_rate || '-' }}
+                </p>
+
+                <div class="form-check mb-3">
+                    <input class="form-check-input" type="checkbox" id="confirmCheckbox"
+                        [(ngModel)]="isSubmitConfirmed" />
+                    <label class="form-check-label" for="confirmCheckbox">Yes</label>
+                </div>
+
+                <div *ngIf="isSubmitConfirmed">
+                    <p>
+                        <strong>Enter the text to confirm :&nbsp;</strong>
+                        <span style="font-size: 1.5rem; font-weight: bold; color: #3674B5;">{{ randomText
+                            }}</span>
+                    </p>
+
+                    <input type="text" class="form-control" placeholder="Enter the text shown above"
+                        [(ngModel)]="codeInput" [ngClass]="{ 'is-invalid': codeInput && codeInput !== randomText }" />
+                </div>
+
+                <div class="mt-4 d-flex justify-content-end">
+                    <button *ngIf="!update_bonus" class="btn BtnColor me-2" [disabled]="!cansubmitRate()"
+                        (click)="submitRate()">
+                        Submit
+                    </button>
+                    <button *ngIf="update_bonus" class="btn BtnColor me-2" [disabled]="!cansubmitRate()"
+                        (click)="updateBonus()">
+                        Submit
+                    </button>
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
                 </div>
             </div>
         </div>
     </div>
-
 </div>

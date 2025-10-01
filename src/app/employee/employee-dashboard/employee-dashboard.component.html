@@ -112,6 +112,19 @@
                                             </div>
                                         </div>
                                     </div>
+
+                                    <!-- <div class="col-md-6">
+                                        <div class="d-flex">
+                                            <div class="">
+                                                <i class="bi-check-circle-fill me-2 text-primary "></i>
+                                            </div>
+                                            <div class="">
+                                                <p class="mb-0 employeeData ">Present Days</p>
+                                                <p class="fw-bold employeeDetail">
+                                                    {{Employee_Data.present_days}}</p>
+                                            </div>
+                                        </div>
+                                    </div> -->
                                 </div>
 
                                 <div class="row mt-4">
@@ -119,7 +132,6 @@
                                 Edit
                             </div> -->
                                     <button *ngIf="role === 'admin'" type="button" class="btn dashboard-btn w-100"
-                                        data-bs-toggle="modal" data-bs-target="#editProfileModal"
                                         (click)="updateData()">
                                         Edit
                                     </button>
@@ -216,8 +228,7 @@
                                 <div class="col-lg-12  gx-2 mt-4 rounded-1 gap-2">
                                     <div class="" *ngIf="role === 'employee'">
 
-                                        <button type="button" class="btn dashboard-btn w-100" data-bs-toggle="modal"
-                                            data-bs-target="#applyLeaveModal">
+                                        <button type="button" class="btn dashboard-btn w-100" (click)="openLeaveModal()">
                                             Apply For Leave
                                         </button>
                                     </div>
@@ -264,8 +275,7 @@
 
                             <div class="col d-flex align-items-center border px-4 mt-4"
                                 style="border-radius: 10px; height: 122px;" *ngIf="role === 'employee'">
-                                <button class="btn dashboard-btn w-100" data-bs-toggle="modal"
-                                    data-bs-target="#advanceSalaryModal">
+                                <button class="btn dashboard-btn w-100" (click)="openAdvanceSalaryModal()">
                                     Apply for Advance Salary
                                 </button>
                             </div>

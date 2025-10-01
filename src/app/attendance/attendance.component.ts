@@ -28,13 +28,13 @@ export class AttendanceComponent {
 
     this.loadTodayDataFromStorage();
     this.fetchAttendance();
-    
+
     if (sessionStorage.getItem('roleName') == 'admin' || sessionStorage.getItem('roleName') == 'accountant') {
       this.router.navigate(['/authPanal/Attendance']);
       return;
     } else {
       alert('Please Login To Proceed');
-      sessionStorage.clear(); 
+      sessionStorage.clear();
       this.router.navigate(['']);
       return;
     }
@@ -108,12 +108,13 @@ export class AttendanceComponent {
     this.isLoading = true;
     this.service.post('fetch/attendance', {}).subscribe((res: any) => {
       if (res.status === 'success') {
-        this.rowData = res.data.reverse()
+        this.rowData = res.data.reverse();
+        this.isLoading = false;
       } else {
         console.log(res.error);
+        this.isLoading = false;
       }
     });
-    this.isLoading = false;
   }
 
   downloadTemplate(): void {

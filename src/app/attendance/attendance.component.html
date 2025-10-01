@@ -61,7 +61,7 @@
                                         <!-- Accountant-only Buttons -->
                                         <ng-container *ngIf="role === 'accountant'">
                                             <button class="btn btn-primary text-white rounded-3 ExcelBtn"
-                                                (click)="downloadTemplate()">Download Template</button>
+                                                (click)="downloadTemplate()"><i class="bi bi-download"></i>&nbsp;Template</button>
 
                                             <div>
                                                 <input type="file" #fileInput style="display: none"

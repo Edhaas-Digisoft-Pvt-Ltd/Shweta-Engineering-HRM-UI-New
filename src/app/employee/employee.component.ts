@@ -6,6 +6,7 @@ import { HrmserviceService } from 'src/app/hrmservice.service';
 import { ToastrService } from 'ngx-toastr';
 import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
+import { ModalServiceService } from '../modal-service.service';
 
 declare var bootstrap: any;
 @Component({
@@ -26,7 +27,7 @@ export class EmployeeComponent {
   importExcelCompanyId: string = '';
   isLoading: boolean = false;
 
-  constructor(private router: Router, private service: HrmserviceService, private toastr: ToastrService) { }
+  constructor(private router: Router, private service: HrmserviceService, private modalService: ModalServiceService, private toastr: ToastrService) { }
 
   ngOnInit() {
     // this.selectedCompanyId = this.CompanyIdService.selectedCompanyId();
@@ -46,14 +47,8 @@ export class EmployeeComponent {
     }
   }
 
-  closeAllModals(): void {
-    const modals = document.querySelectorAll('.modal.show');
-    modals.forEach((modalElement: any) => {
-      const modalInstance = bootstrap.Modal.getInstance(modalElement);
-      if (modalInstance) {
-        modalInstance.hide();
-      }
-    });
+  openImportModal(): void {
+    this.modalService.openModal('importEmployeeModal')
   }
 
   getCompanyNames() {
@@ -151,9 +146,9 @@ export class EmployeeComponent {
   downloadTemplate(): void {
     const userConfirmed = confirm("Do you want to download the employee template?");
     if (userConfirmed) {
-      const headers = ['role_id', 'emp_title', 'emp_name', 'emp_email', 'emp_gender', 'department_id', 'designation_id', 'CTC', 'statutory_list', 'bank_name', 'account_num', 'ifsc_code', 'doj', 'emp_contact', 'emp_address'];
+      const headers = ['role_id', 'emp_title', 'emp_name', 'emp_email', 'emp_gender', 'department_id', 'designation_id', 'statutory_list', 'bank_name', 'account_num', 'ifsc_code', 'doj', 'emp_contact', 'emp_address', 'basic_salary', 'house_rent_allowances', 'conveyance_allowances', 'medical_allowances', 'special_allowances'];
       const exampleRow = [
-        '3', 'mr', 'abc', 'abc@gmail.com', 'male', '1', '2', '4', 'xyz', 'SBI', '458438236526', 'SBIN0005088', '2/1/2022', '9999999999', 'Pune'
+        '3', 'mr', 'abc', 'abc@gmail.com', 'male', '1', '2', 'xyz', 'SBI', '458438236526', 'SBIN0005088', '2/1/2022', '9999999999', 'Pune', '200000', '18000', '1000', '1000', '1000'
       ];
 
       const worksheet: XLSX.WorkSheet = XLSX.utils.aoa_to_sheet([headers, exampleRow]);
@@ -199,11 +194,12 @@ export class EmployeeComponent {
         this.rowData = [];
         this.toastr.warning('Data Not Found')
       }
+      this.isLoading = false;
     }, (error) => {
       this.rowData = [];
       console.error('Error fetching employees:', error);
+      this.isLoading = false;
     });
-    this.isLoading = false;
   }
 
   selectedFile: File | null = null;
@@ -224,14 +220,14 @@ export class EmployeeComponent {
         this.toastr.success('File uploaded successfully!');
         const skippedInfo = res.skipped?.map((row: any) => `Row ${row.row}: skipped due to ${row.reason}`).join('\n');
         if (skippedInfo) this.toastr.warning(skippedInfo);
-        this.closeAllModals();
+        this.modalService.closeModal();
         this.importExcelCompanyId = '';
         this.getEmployee();
       } else {
         const skippedInfo = res.skipped?.map((row: any) => `Row ${row.row}: skipped due to ${row.reason}`).join('\n');
         this.toastr.error(skippedInfo || 'Upload failed.');
         this.importExcelCompanyId = '';
-        this.closeAllModals();
+        this.modalService.closeModal();
       }
 
       fileInput.value = '';

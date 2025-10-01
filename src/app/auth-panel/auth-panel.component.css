@@ -7,7 +7,16 @@ main {
 .sideNav {
   /* background-color: #f9f8fd; */
   /* padding-top: 40px; */
-  background-color: #3674B5;
+  /* background-color: #3674B5; */
+  /* background-color: #00ACC1; */
+  /* background-color: #0E9F6E; */
+
+  /* background: linear-gradient(360deg, #081494, #061494, #1e176b, #132455); */
+  /* background: linear-gradient(135deg, #2E8B57, #206040, #103820); */
+  /* background: linear-gradient(135deg, #3674B5, #285a8a, #1b3d5c); */
+
+  background-color: var(--role-color);
+  color: #fff;
   z-index: 999;
   color: white;
 }
@@ -108,6 +117,22 @@ main {
 .navbar-nav .nav-link {
   color: #f8f9fa;
   font-size: 16px;
+}
+
+.sideNav {
+  width: 250px; 
+  transition: width 0.3s ease;
+}
+
+.sideNav.closed {
+  width: 60px; 
+}
+
+.toggle-btn {
+  background: transparent;
+  border: none;
+  color: white;
+  font-size: 1.2rem;
 }
 
 /* Media query */

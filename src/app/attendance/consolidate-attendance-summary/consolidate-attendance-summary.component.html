@@ -4,32 +4,38 @@
   </div>
   <div class="main-content" [class.loading]="isLoading">
 
-    <div class="row">
-      <div class="col d-flex justify-content-end align-items-end gap-3">
+    <div class="row mb-3">
+      <div class="col d-flex justify-content-end align-items-end gap-3 flex-wrap">
 
-        <div class="dotted-line">
-          <label>Select Year</label><br />
-          <select class="form-control selectdata" [(ngModel)]="selectedYear" (change)="onMonthYearChange()">
-            <option *ngFor="let year of years" [value]="year">{{ year }}</option>
-          </select>
+        <!-- Search -->
+        <div class="d-flex flex-column">
+          <label class="form-label mb-1">Search</label>
+          <input class="form-control" type="text" placeholder="Search here" [(ngModel)]="searchValue"
+            (ngModelChange)="onFilterBoxChange()" />
         </div>
 
-        <div>
-          <label>Select Month</label><br />
-          <select class="form-control selectdata3" style="width: 150px;" [(ngModel)]="selectedMonth"
-            (change)="onMonthYearChange()">
-            <option *ngFor="let month of months" [ngValue]="month.value">{{ month.name }}</option>
-          </select>
+        <!-- From Date -->
+        <div class="d-flex flex-column">
+          <label class="form-label mb-1">From Date</label>
+          <input type="date" [(ngModel)]="fromDate" class="form-control" (change)="onDateRangeChange()" />
         </div>
 
-        <div class="d-flex align-items-end">
-          <button class="btn btn-primary exportExcelBtn" (click)="exportToExcel()">
+        <!-- To Date -->
+        <div class="d-flex flex-column">
+          <label class="form-label mb-1">To Date</label>
+          <input type="date" [(ngModel)]="toDate" class="form-control" (change)="onDateRangeChange()" />
+        </div>
+
+        <!-- Export Button -->
+        <div class="d-flex flex-column justify-content-end">
+          <button class="btn btn-primary exportExcelBtn">
             <i class="bi bi-file-earmark-text-fill"></i>
           </button>
         </div>
 
       </div>
     </div>
+
 
     <div class="row gap-4 row-wrap">
       <div class="container  ">

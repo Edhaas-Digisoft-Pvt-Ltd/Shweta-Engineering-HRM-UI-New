@@ -58,41 +58,13 @@ export class PayrollProcessApprovedComponent {
 
   ngOnInit() {
     this.selectedYear = new Date().getFullYear();
-    this.selectedMonth = new Date().getMonth() + 1;
+    this.selectedMonth = new Date().getMonth()-1;
     const currentDate = new Date();
     this.today = currentDate.toISOString().split('T')[0];
     this.getCompanyNames();
     this.getApprovedPayroll();
     this.initializeColumns();
     this.getAttendanceDetails();
-    // this.rowData = [
-    //   {
-    //     employeeName: 'Amit Sharma',
-    //     department: 'Sales',
-    //     presentDays: 22,
-    //     absentDays: 2,
-    //     hours: 176,
-    //     overTime: 7,
-    //     bonus: 1200,
-    //     incentive: 800,
-    //     advance_salary: 1000,
-    //     net_salary: 32000,
-    //     employe_id: 101,
-    //   },
-    //   {
-    //     employeeName: 'Neha Verma',
-    //     department: 'Support',
-    //     presentDays: 21,
-    //     absentDays: 3,
-    //     hours: 168,
-    //     overTime: 4,
-    //     bonus: 1400,
-    //     incentive: 950,
-    //     advance_salary: 1200,
-    //     net_salary: 34000,
-    //     employe_id: 102,
-    //   }
-    // ];
   }
 
   getMonthName(monthId: number): string {
@@ -133,7 +105,6 @@ export class PayrollProcessApprovedComponent {
       year: this.selectedYear,
       month: this.selectedMonth,
     }).subscribe((res: any) => {
-      console.log(res)
       try {
         if (res.status === 'success') {
           this.rowData = res.data.map((item: any) => ({
@@ -157,7 +128,6 @@ export class PayrollProcessApprovedComponent {
         this.isLoading = false;
       }
     })
-    this.isLoading = false;
   }
 
   initializeColumns() {

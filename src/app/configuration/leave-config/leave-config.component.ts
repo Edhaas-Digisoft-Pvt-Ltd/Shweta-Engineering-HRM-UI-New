@@ -6,6 +6,7 @@ import * as bootstrap from 'bootstrap';
 import { ToastrService } from 'ngx-toastr';
 import { HrmserviceService } from 'src/app/hrmservice.service';
 import { EditLeaveBtnComponent } from './edit-leave-btn/edit-leave-btn.component';
+import { ModalServiceService } from 'src/app/modal-service.service';
 
 @Component({
   selector: 'app-leave-config',
@@ -69,7 +70,7 @@ export class LeaveConfigComponent {
     this.gridApiActive = params.api;
   }
 
-  constructor(private fb: FormBuilder, private service: HrmserviceService, private toastr: ToastrService, private router: Router) {
+  constructor(private fb: FormBuilder, private service: HrmserviceService, private modalService: ModalServiceService, private toastr: ToastrService, private router: Router) {
     this.companyForm = this.fb.group({
       // Company Name: Only letters, numbers, spaces, dots, and ampersands (e.g., TCS, Infosys Ltd., H&M)
       companyName: [
@@ -151,7 +152,6 @@ export class LeaveConfigComponent {
     });
   }
 
-
   ngOnInit() {
     this.selectedCompanyId = this.service.selectedCompanyId();
 
@@ -174,6 +174,10 @@ export class LeaveConfigComponent {
     }
   }
 
+  openModal() {
+    this.modalService.openModal('addLeaveModal')
+  }
+
   getAllLeaves() {
     this.isLoading = true;
     this.rowData = [];
@@ -193,12 +197,13 @@ export class LeaveConfigComponent {
         this.isLoading = false;
         if (error.status === 400) {
           this.toastr.warning('Data Not Found');
+          this.isLoading = false;
         } else {
           console.error(error);
+          this.isLoading = false;
         }
       }
     );
-    this.isLoading = false;
   }
 
   selectTab(tab: string) {
@@ -256,19 +261,6 @@ export class LeaveConfigComponent {
     this.companyForm.patchValue({ companyLogo: file.name });
   }
 
-  closeAllModals(): void {
-    const modals = document.querySelectorAll('.modal.show');
-    modals.forEach((modalElement: any) => {
-      const modalInstance = bootstrap.Modal.getInstance(modalElement);
-      if (modalInstance) {
-        modalInstance.hide();
-      }
-    });
-    document.querySelectorAll('.modal-backdrop').forEach(backdrop => backdrop.remove());
-    document.body.classList.remove('modal-open');
-    document.body.style.removeProperty('padding-right');
-  }
-
   addCompany() {
     this.isSubmitted = true;
     if (this.companyForm.valid) {
@@ -294,7 +286,7 @@ export class LeaveConfigComponent {
       this.service.post("/addcompany", current_data).subscribe({
         next: (res) => {
           this.toastr.success('Form Submitted Successfully!');
-          this.closeAllModals();
+          this.modalService.closeModal();
           this.getCompanyData();
           this.companyForm.reset(); // reset only after success
           this.selectedLogoFile = null;
@@ -327,7 +319,7 @@ export class LeaveConfigComponent {
             this.toastr.success('Leave Rule Added!');
             this.LeaveRule.reset();
             this.isSubmitted = false;
-            this.closeAllModals();
+            this.modalService.closeModal();
             this.getAllLeaves();
           }
         },
@@ -343,7 +335,7 @@ export class LeaveConfigComponent {
   }
 
   openEditModal(id: any) {
-    this.service.post("fetch-specific/emp-leave", { leave_id: id }).subscribe((res: any) => {
+    this.service.post("fetch/leave", { leave_id: id }).subscribe((res: any) => {
       if (res.status === 'success') {
         this.leaveId = res.data.leave_id
         this.companyId = res.data.company_id
@@ -375,7 +367,7 @@ export class LeaveConfigComponent {
       this.service.post("update/leave", current_data).subscribe(
         (res: any) => {
           this.toastr.success(res.data);
-          this.closeAllModals();
+          this.modalService.closeModal();
           this.getAllLeaves()
         },
         (error) => {

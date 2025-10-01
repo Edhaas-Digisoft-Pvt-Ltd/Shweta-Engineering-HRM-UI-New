@@ -54,3 +54,11 @@
 .list ul li:nth-of-type(8) .dot {
     background-color: #880021;
 }
+
+.advance-salary-scroll {
+  max-height: 400px;   /* fixed height for the block */
+  overflow-y: auto;    /* vertical scrollbar */
+  overflow-x: hidden;  /* no horizontal scroll */
+  padding-right: 6px;  /* space for scrollbar */
+}
+

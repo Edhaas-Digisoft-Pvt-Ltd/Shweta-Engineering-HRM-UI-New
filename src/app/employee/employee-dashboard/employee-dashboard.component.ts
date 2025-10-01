@@ -4,6 +4,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { ChartData, ChartOptions } from 'chart.js';
 import { ToastrService } from 'ngx-toastr';
 import { HrmserviceService } from 'src/app/hrmservice.service';
+import { ModalServiceService } from 'src/app/modal-service.service';
 declare var bootstrap: any;
 @Component({
   selector: 'app-employee-dashboard',
@@ -18,7 +19,7 @@ export class EmployeeDashboardComponent {
   leaveForm!: FormGroup;
 
   advanceSalaryForm!: FormGroup;
-  tenures: string[] = ['3 Month', '6 Month'];
+  tenures: string[] = [];
   installmentAmount: number = 0;
   years: number[] = [];
   selectedMonth: string = '';
@@ -42,7 +43,7 @@ export class EmployeeDashboardComponent {
   leaveTypes: any;
   isLoading: boolean = false;
 
-  constructor(private route: ActivatedRoute, private fb: FormBuilder, private router: Router, private toastr: ToastrService, private service: HrmserviceService,) {
+  constructor(private route: ActivatedRoute, private fb: FormBuilder, private router: Router, private toastr: ToastrService, private service: HrmserviceService, private modalService: ModalServiceService,) {
     // Generate last 20 years dynamically
     let currentYear = new Date().getFullYear();
     for (let i = currentYear; i >= currentYear - 20; i--) {
@@ -51,7 +52,9 @@ export class EmployeeDashboardComponent {
     setInterval(() => {
       this.currentDateTime = new Date();
     }, 1000);
-
+    for (let i = 1; i <= 12; i++) {
+      this.tenures.push(`${i} Month${i > 1 ? 's' : ''}`);
+    }
   }
 
   ngOnInit(): void {
@@ -93,6 +96,9 @@ export class EmployeeDashboardComponent {
       });
     }
 
+    console.log(this.employee_id);
+
+
     this.editForm = this.fb.group({
       email: ['', [Validators.required, Validators.email, Validators.pattern(/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/)]],
       contact: ['', [Validators.required, Validators.minLength(10), Validators.maxLength(10), Validators.pattern('^[0-9]*$')]],
@@ -133,22 +139,30 @@ export class EmployeeDashboardComponent {
     // }
   }
 
+  ngAfterViewInit(): void {
+    document.querySelectorAll('.modal').forEach(modalEl => {
+      modalEl.addEventListener('hidden.bs.modal', () => {
+        document.querySelectorAll('.modal-backdrop').forEach(el => el.remove());
+        document.body.classList.remove('modal-open');
+        document.body.style.overflow = '';
+      });
+    });
+  }
+
+  openLeaveModal() {
+    this.modalService.openModal('applyLeaveModal')
+  }
+
+  openAdvanceSalaryModal() {
+    this.modalService.openModal('advanceSalaryModal')
+  }
+
   amountNotStartWithZero(control: AbstractControl) {
     const value = control.value?.toString();
     if (value && value.length > 1 && value.startsWith('0')) {
       return { leadingZero: true };
     }
     return null;
-  }
-
-  closeAllModals(): void {
-    const modals = document.querySelectorAll('.modal.show');
-    modals.forEach((modalElement: any) => {
-      const modalInstance = bootstrap.Modal.getInstance(modalElement);
-      if (modalInstance) {
-        modalInstance.hide();
-      }
-    });
   }
 
   leaveStatus = {
@@ -262,6 +276,7 @@ export class EmployeeDashboardComponent {
   };
 
   updateData() {
+    this.modalService.openModal('editProfileModal')
     this.editForm.patchValue({
       email: this.Employee_Data.employee.emp_email,
       contact: this.Employee_Data.employee.emp_contact,
@@ -289,7 +304,7 @@ export class EmployeeDashboardComponent {
           this.toastr.success('Updated Sucessfully !!!');
           this.fetchEmployee(this.employee_id);
           // location.reload();
-          this.closeAllModals();
+          this.modalService.closeModal();
           this.editForm.reset();
         }
         else {
@@ -310,7 +325,7 @@ export class EmployeeDashboardComponent {
   //apply leave 
   addLeaveRequest() {
     this.isLeaveSubmitted = true;
-    
+
     if (!this.leaveForm.valid) {
       this.toastr.error('Invalid Credentials');
       this.leaveForm.markAllAsTouched();
@@ -341,28 +356,27 @@ export class EmployeeDashboardComponent {
         }
 
         this.resetLeaveForm();
-        this.closeAllModals();
       },
       error: (err: any) => {
         this.toastr.error(err.error?.data || 'Server error occurred.');
         this.resetLeaveForm();
-        this.closeAllModals();
       }
     });
   }
 
-resetLeaveForm() {
-  this.leaveForm.reset({
-    leave_id: null,
-    noOfDays: 1,
-    start_date: '',
-    end_date: '',
-    leave_reason: ''
-  });
-  this.leaveForm.markAsUntouched();
-  this.leaveForm.markAsPristine();
-  this.isLeaveSubmitted = false;
-}
+  resetLeaveForm() {
+    this.leaveForm.reset({
+      leave_id: null,
+      noOfDays: 1,
+      start_date: '',
+      end_date: '',
+      leave_reason: ''
+    });
+    this.leaveForm.markAsUntouched();
+    this.leaveForm.markAsPristine();
+    this.isLeaveSubmitted = false;
+    this.modalService.closeModal();
+  }
 
   // advance salary request 
   addAdvanceSalary() {
@@ -409,7 +423,7 @@ resetLeaveForm() {
     this.advanceSalaryForm.markAsUntouched();
     this.advanceSalaryForm.markAsPristine();
     this.isAdvanceSalary = false;
-    this.closeAllModals();
+    this.modalService.closeModal();
   }
 
   backtoEmployeeList() {

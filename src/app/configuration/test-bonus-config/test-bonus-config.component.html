@@ -1,0 +1,135 @@
+<div class="right-panel" *ngIf="!addNew">
+
+    <div class="row gx-3 align-items-center rounded-2">
+        <div class="col-12">
+            <div class="row justify-content-end align-items-end">
+
+                <div class="col-3">
+                    <label class="mb-1 fw-semibold">Select Company</label>
+                    <select class="form-select" (change)="onCompanyChange($event)">
+                        <option *ngFor="let item of CompanyNames" [value]="item.company_id">
+                            {{ item.company_name }}
+                        </option>
+                    </select>
+                </div>
+
+                <div class="col-auto">
+                    <button type="button" class="btn text-white mb-1 px-4 BtnColor" (click)="toggleBonusWindow()">
+                        Add New
+                    </button>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-3">
+        <div class="col-12">
+            <ag-grid-angular class="ag-theme-alpine mt-1" style="width: 100%; height: 60vh;" [rowData]="rowData"
+                [columnDefs]="columnDefs" [pagination]="true" [defaultColDef]="defaultColDef">
+            </ag-grid-angular>
+        </div>
+    </div>
+</div>
+
+<div class="row" *ngIf="addNew">
+    <div class="col-md-12">
+        <button type="button" class="btn-close float-end me-2 mt-0" aria-label="Close"
+            (click)="toggleBonusWindow()"></button>
+    </div>
+    <div class="col-md-8">
+        <div class="card shadow-sm p-4 h-100">
+            <div class="row align-items-center mb-3">
+                <div class="col-md-6 d-flex">
+                    <h5 class="fw-bold mb-0 ms-2">Bonus List</h5>
+                </div>
+                <div class="col-md-6 d-flex align-items-center justify-content-end">
+                    <label class="me-2 mb-0 fw-semibold">Select Company</label>
+                    <select class="form-select w-auto" [(ngModel)]="selectedCompanyId"
+                        (change)="onCompanyChange($event)">
+                        <option *ngFor="let item of CompanyNames" [value]="item.company_id">
+                            {{ item.company_name }}
+                        </option>
+                    </select>
+                </div>
+            </div>
+            <ag-grid-angular class="ag-theme-alpine mt-1" style="width: 100%; height: 60vh;" [rowData]="rowData"
+                [columnDefs]="columnDefs" [pagination]="true" [defaultColDef]="defaultColDef">
+            </ag-grid-angular>
+        </div>
+    </div>
+
+    <!-- Right Section: Form -->
+    <div class="col-md-4">
+        <div class="card shadow-sm p-4 h-100">
+            <!-- Main Heading Center -->
+            <h4 class="fw-bold text-center mb-4">Create Bonus</h4>
+
+            <form [formGroup]="addBonusForm">
+
+                <div class="row mb-3">
+                    <div class="col-md-10">
+                        <label class="form-label fw-bold">Select Company<span class="text-danger">*</span></label>
+                        <select class="form-select" formControlName="company_id"
+                            [ngClass]="{'is-invalid': isInvalid('company_id')}">
+                            <option [value]="null" disabled>Select Company</option>
+                            <option *ngFor="let item of CompanyNames" [value]="item.company_id"> {{
+                                item.company_name }} </option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-6 mt-3">
+                        <label class="form-label fw-bold">From Date<span class="text-danger">*</span></label>
+                        <input type="date" class="form-control" formControlName="from_date"
+                            [ngClass]="{'is-invalid': isInvalid('from_date')}" />
+                    </div>
+
+                    <div class="col-md-6 mt-3">
+                        <label class="form-label fw-bold">To Date<span class="text-danger">*</span></label>
+                        <input type="date" class="form-control" formControlName="to_date"
+                            [ngClass]="{'is-invalid': isInvalid('to_date')}" />
+                    </div>
+                </div>
+
+                <div class="row mb-3 mt-3">
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold">Rate</label>
+                        <input type="number" class="form-control" formControlName="bonus_rate"
+                            [ngClass]="{'is-invalid': isInvalid('bonus_rate')}" placeholder="Enter Rate" />
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label">Bonus-Month</label>
+                        <input type="date" class="form-control" formControlName="bonus_month"
+                            [ngClass]="{'is-invalid': isInvalid('bonus_month')}" />
+                        <!-- <select class="form-select" formControlName="bonus_month">
+                <option value="" disabled selected>Select Month</option>
+                <option *ngFor="let month of months" [value]="month">{{ month }}</option>
+              </select> -->
+                    </div>
+                </div>
+
+                <!-- Checkbox Left Aligned -->
+                <div class="form-check mb-3 mt-4">
+                    <input type="checkbox" class="form-check-input me-2" formControlName="bonus_flag" id="lockRate" />
+                    <label for="lockRate" class="form-check-label text-semibold">Do you want to lock this
+                        rate?</label>
+                </div>
+
+                <div class="text-center mt-3" *ngIf="!update_bonus && !updatebtnhide">
+                    <button type="button" (click)="submitRate()" class="btn btn-primary">
+                        {{ bonus_id ? 'Update' : 'Submit' }}
+                    </button>
+                </div>
+
+                 <div class="text-center mt-3" *ngIf="update_bonus &&  !updatebtnhide">
+                    <button type="button" (click)="updateBonus()" class="btn btn-primary">
+                        Update
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+
+</div>

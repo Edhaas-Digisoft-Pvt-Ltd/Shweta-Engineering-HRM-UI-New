@@ -37,7 +37,7 @@ export class ApprovedAdvancePaymentComponent {
 
   ngOnInit() {
     this.selectedCompanyId = this.service.selectedCompanyId();
-    
+
     const currentDate = new Date();
     this.selectedYear = new Date().getFullYear();
     this.selectedMonth = new Date().getMonth() + 1;
@@ -62,7 +62,9 @@ export class ApprovedAdvancePaymentComponent {
       lastInstallmentDate: [{ value: '', disabled: true }],
       installmentDueDate: [{ value: '', disabled: true }],
       remainingBalance: [{ value: '', disabled: true }],
-      advanceAmount: [{ value: '', disabled: true }]
+      advanceAmount: [{ value: '', disabled: true }],
+      skipEmi: [false],
+      skipreason: ['', Validators.required]
     })
 
     this.skipEmiForm = this.fb.group({
@@ -129,7 +131,7 @@ export class ApprovedAdvancePaymentComponent {
     this.isLoading = true;
     this.rowData = [];
     this.service.post('all/companyapprovedrequest', {
-      company_id: this.selectedCompanyId, 
+      company_id: this.selectedCompanyId,
       year: this.selectedYear,
       month: this.selectedMonth
     }).subscribe((res: any) => {
@@ -148,21 +150,21 @@ export class ApprovedAdvancePaymentComponent {
             tenure: item.tenure,
             adv_pay_id: item.adv_pay_id
           }));
-        }else {
+        } else {
           this.toastr.warning('Data Not Found');
         }
       } catch (error) {
         console.log(error);
       }
-    },(error) => {
       this.isLoading = false;
+    }, (error) => {
       if (error.status === 400) {
         this.toastr.warning('Data Not Found');
       } else {
-        console.error( error);
+        console.error(error);
       }
+      this.isLoading = false;
     })
-    this.isLoading = false;
   }
 
   selectTab(tab: string) {
@@ -326,26 +328,18 @@ export class ApprovedAdvancePaymentComponent {
         this.displayApprovedData.patchValue(this.approvedData);
 
         if (this.selectedAdvpayid !== null) {
-          const sortedEmiHistory = [...emiHistory].sort((a, b) => {
-            return new Date(b.deducted_on || b.year_month).getTime() -
-              new Date(a.deducted_on || a.year_month).getTime();
-          });
+          // const sortedEmiHistory = [...emiHistory].sort((a, b) => {
+          //   return new Date(b.deducted_on || b.year_month).getTime() -
+          //     new Date(a.deducted_on || a.year_month).getTime();
+          // });
 
-          const paidEmis = sortedEmiHistory.map((item: any) => ({
-            date: item.deducted_on || item.year_month,
-            EMI: item.amount_deducted,
-            status: 'Paid'
-          }));
-
-          const remainingEmis = advanceInfo.tenure - paidEmis.length;
-
-          if (remainingEmis > 0) {
-            paidEmis.push({
-              date: '',
-              EMI: '',
-              status: `${remainingEmis} EMI remaining`
-            });
-          }
+          const paidEmis = emiHistory.map((item: any) => ({
+            date: item.year_month,
+            installment_amount: item.installment_amount,
+            installment_status: item.installment_status,
+            remarks: item.remarks ? item.remarks : '-',
+          }))
+            .reverse();
 
           this.tabledata[this.selectedAdvpayid] = paidEmis;
         }
@@ -399,27 +393,6 @@ export class ApprovedAdvancePaymentComponent {
     return button;
   }
 
-  SkipEMI() {
-    this.isSkipFormSubmitted = true;
-    if (this.skipEmiForm.valid) {
-      const payload = {
-        skipEmiReason: this.skipEmiForm.value.skipEmiReason
-      }
-      console.log(payload)
-      this.service.post('skip/emi', payload).subscribe({
-        next: (res) => {
-          this.toastr.success('EMI Skipped successfully.');
-          this.isSkipFormSubmitted = false
-          this.closeAllModals();
-        },
-        error: (err) => {
-          console.error(err);
-          this.toastr.error('Something went wrong.');
-        }
-      });
-    }
-  }
-
   gridOptions = {
     pagination: false,
     paginationPageSize: 10,
@@ -430,9 +403,83 @@ export class ApprovedAdvancePaymentComponent {
     alert('update');
   }
 
+  skipEmiConfirm() {
+    this.isSkipFormSubmitted = true;
+
+    const skipReason = this.displayApprovedData.get('skipreason')?.value;
+
+    if (skipReason && skipReason.trim() !== '') {
+      if (confirm("Are you sure you want to skip EMI for this month?")) {
+        const payload = {
+          adv_pay_id: this.selectedAdvpayid,
+          remarks: skipReason
+        };
+
+        this.service.post('emp/advancesaraly/skip/emi', payload).subscribe({
+          next: (res: any) => {
+            this.toastr.success('EMI Skipped successfully.');
+            this.isSkipFormSubmitted = false;
+            this.getSingleApprovedData(this.selectedAdvpayid);
+
+            this.displayApprovedData.patchValue({
+              skipEmi: false,
+              skipreason: ''
+            });
+          },
+          error: (err) => {
+            console.error('Error:', err);
+
+            if (err.status === 404) {
+              this.toastr.error(err.error.message);
+            } else if (err.status === 409) {
+              this.toastr.error(err.error.message);
+            } else {
+              this.toastr.error("Something went wrong!");
+            }
+            this.isSkipFormSubmitted = false;
+          }
+        });
+      } else {
+        this.isSkipFormSubmitted = false;
+      }
+    } else {
+      this.toastr.warning('Please enter skip reason before submitting.');
+      this.isSkipFormSubmitted = false;
+    }
+  }
+
+
   exportExcel() {
     if (this.gridApiActive) {
       this.gridApiActive.exportDataAsCsv();
     }
   }
 }
+
+// skipEmiConfirm() {
+//   const reason = this.displayApprovedData.get('skipreason')?.value;
+//   const advPayId = this.selectedAdvpayid;
+
+//   if (!reason) {
+//     this.toastr.warning("Please enter a reason before skipping EMI.");
+//     return;
+//   }
+
+//   if (confirm("Are you sure you want to skip EMI for this month?")) {
+//     const payload = {
+//       adv_pay_id: advPayId,
+//       remarks: reason
+//     };
+
+//     this.service.post('emp/advancesaraly/skip/emi', payload).subscribe({
+//       next: (res: any) => {
+//         this.toastr.success("EMI skipped successfully");
+//         this.closeAllModals();
+//       },
+//       error: (err: any) => {
+//         console.error(err);
+//         this.toastr.error("Something went wrong.");
+//       }
+//     });
+//   }
+// }

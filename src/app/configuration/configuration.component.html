@@ -12,25 +12,40 @@
                     <a class="nav-link fw-bold" [ngClass]="{'active': activeTab === 'tab1'}">Leave Config</a>
                 </li>
                 <li class="nav-item" (click)="selectTab('tab2')">
-                    <a class="nav-link fw-bold" [ngClass]="{'active': activeTab === 'tab2'}">Bonus Config</a>
+                    <a class="nav-link fw-bold" [ngClass]="{'active': activeTab === 'tab2'}">Annual Bonus Config</a>
                 </li>
                 <li class="nav-item" (click)="selectTab('tab3')">
                     <a class="nav-link fw-bold" [ngClass]="{'active': activeTab === 'tab3'}">Incentive Config</a>
                 </li>
+                <!-- <li class="nav-item" (click)="selectTab('tab4')">
+                    <a class="nav-link fw-bold" [ngClass]="{'active': activeTab === 'tab4'}">Bonus Config</a>
+                </li> -->
             </ul>
         </div>
     </div>
 
-     <div *ngIf="activeTab === 'tab1'">
-      <div class="container ">
-        <app-leave-config></app-leave-config>
-      </div>
+    <div *ngIf="activeTab === 'tab1'">
+        <div class="container ">
+            <app-leave-config></app-leave-config>
+        </div>
     </div>
 
     <div *ngIf="activeTab === 'tab2'">
-      <div class="container ">
-        <app-bonus-config></app-bonus-config>
-      </div>
+        <div class="container ">
+            <app-bonus-config></app-bonus-config>
+        </div>
+    </div>
+
+    <div *ngIf="activeTab === 'tab3'">
+        <div class="container ">
+            <app-incentive-config></app-incentive-config>
+        </div>
+    </div>
+
+    <div *ngIf="activeTab === 'tab4'">
+        <div class="container ">
+            <app-test-bonus-config></app-test-bonus-config>
+        </div>
     </div>
 
 </div>

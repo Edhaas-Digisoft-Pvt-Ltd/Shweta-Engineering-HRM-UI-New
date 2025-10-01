@@ -19,6 +19,7 @@
 }
 
 .accordion-button:not(.collapsed) {
+    /* background-color: var(--agGrid-Header) !important; */
     background-color: var(--agGrid-Header) !important;
     color: white;
     box-shadow: none;
@@ -71,7 +72,7 @@
 
 
 .btn-like[_ngcontent-ng-c3823116284][_ngcontent-ng-c3823116284] {
-    background-color: #2e6bbf;
+    /* background-color: #2e6bbf; */
     width: 100%;
     height: 50px;
     border-radius: 6px;
@@ -216,7 +217,8 @@ button.accordion-button.p-2.btn-bold.active-link i {
 }
 
 button.accordion-button.collapsed {
-    background: rgb(54 116 181);
+    /* background: rgb(54 116 181); */
+    background-color: var(--role-color);
     color: white;
 }
 .navbarList {

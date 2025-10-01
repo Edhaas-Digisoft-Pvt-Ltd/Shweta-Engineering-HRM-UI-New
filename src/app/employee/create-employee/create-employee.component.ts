@@ -16,8 +16,14 @@ export class CreateEmployeeComponent {
   selectedCompanyId: any = 1;
   multiStepForm: FormGroup;
   currentStep: number = 1;
-
-  ctc: number = 0;
+  // ctc: number = 0;
+  basic_salary = 0;
+  house_rent_allowances = 0;
+  conveyance_allowances = 0;
+  medical_allowances = 0;
+  special_allowances = 0;
+  annual_gross_salary = 0;
+  monthly_gross_salary = 0;
   value: number = 0;
   amount: number = 0;
   pf: number = 0;
@@ -77,8 +83,8 @@ export class CreateEmployeeComponent {
       ],
       // employee_code: ['', Validators.required,],
       gender: ['', Validators.required],
-      company:['', Validators.required],
-      role:['', Validators.required],
+      company: ['', Validators.required],
+      role: ['', Validators.required],
       department: ['', Validators.required],
       designation: ['', Validators.required],
       // ctc: ['', Validators.required],
@@ -101,14 +107,23 @@ export class CreateEmployeeComponent {
         '',
         [Validators.required, Validators.pattern(/^[A-Z]{4}0[A-Z0-9]{6}$/)],
       ],
-      Enable_PF_Employee: [''],
-      Opt_for_EPS_entitled: [''],
-      Enable_ESIC_for_employee: [''],
-      Enable_PT_for_employee: [''],
-      Enable_LWF_for_employee: [''],
-      National_Pension_Scheme: [''],
-      ctc: [0, Validators.required],
+      // Enable_PF_Employee: [''],
+      // Opt_for_EPS_entitled: [''],
+      // Enable_ESIC_for_employee: [''],
+      // Enable_PT_for_employee: [''],
+      // Enable_LWF_for_employee: [''],
+      // National_Pension_Scheme: [''],
+      basic_salary: [0, Validators.required],
+      house_rent_allowances: [0],
+      conveyance_allowances: [0],
+      medical_allowances: [0],
+      special_allowances: [0],
+      annual_gross_salary: [0],
+      monthly_gross_salary: [0],
       salary: [0],
+      pf_employee_applicable: [false],
+      pf_employer_applicable: [false],
+      esic_employee_applicable: [false],
     });
     this.salaryStructureForm = this.fb.group({
       salaryComponents: this.fb.group({}),
@@ -116,14 +131,16 @@ export class CreateEmployeeComponent {
   }
 
   ngOnInit() {
-
-    this.multiStepForm.get('ctc')?.valueChanges.subscribe((value) => {
-      this.ctc = value;
+    this.multiStepForm.get('annual_gross_salary')?.valueChanges.subscribe((value) => {
+      this.annual_gross_salary = value;
       // this.calculateAmount();
-    }); 
+    });
     this.getCompanyNames();
     this.getRoles();
 
+    this.multiStepForm.valueChanges.subscribe(values => {
+      this.calculateGrossSalary(values);
+    });
   }
 
   removeSpaces(): void {
@@ -132,15 +149,13 @@ export class CreateEmployeeComponent {
     this.multiStepForm.get('ifsc')?.setValue(cleanedValue, { emitEvent: false });
   }
 
-
-
   handleSalary(salary: number): void {
     console.log('Received salary from child:', salary);
     this.multiStepForm.get('salary')?.setValue(salary);
   }
-  handleCTCFromChild(ctc: number): void {
-    console.log('CTC received from child:', ctc);
-    this.multiStepForm.get('ctc')?.setValue(ctc); // Optional: Update form control
+  handleCTCFromChild(annual_gross_salary: number): void {
+    console.log('CTC received from child:', annual_gross_salary);
+    this.multiStepForm.get('annual_gross_salary')?.setValue(annual_gross_salary); // Optional: Update form control
   }
   gmailValidator(control: any) {
     const value = control.value;
@@ -174,18 +189,12 @@ export class CreateEmployeeComponent {
     const option = this.checkboxOptions.find(opt => opt.label === label);
 
     if (event.target.checked) {
-      if (!this.statutoryInfo.includes(label)) {
-        this.statutoryInfo.push(label);
-      }
-      if (option && !this.selectedStatutoryOptions.some(o => o.label === label)) {
-        this.selectedStatutoryOptions.push(option);
-      }
+      if (!this.statutoryInfo.includes(label)) this.statutoryInfo.push(label);
+      if (option && !this.selectedStatutoryOptions.some(o => o.label === label)) this.selectedStatutoryOptions.push(option);
     } else {
       this.statutoryInfo = this.statutoryInfo.filter(item => item !== label);
       this.selectedStatutoryOptions = this.selectedStatutoryOptions.filter(item => item.label !== label);
     }
-    
-    this.calculateSalaryAmount();
   }
 
   getCompanyNames() {
@@ -234,7 +243,6 @@ export class CreateEmployeeComponent {
     );
   }
 
-
   getDesignationNames() {
     this.service.post('fetch/designation', { company_id: this.selectedCompanyId }).subscribe(
       (res: any) => {
@@ -281,7 +289,7 @@ export class CreateEmployeeComponent {
     //   }
     // }
 
-   
+
     if (this.currentStep < 6) {
       this.currentStep++;
     }
@@ -292,7 +300,7 @@ export class CreateEmployeeComponent {
       this.currentStep--;
     }
   }
-  
+
   isStepValid(step: number): boolean {
     switch (step) {
       case 1:
@@ -341,7 +349,7 @@ export class CreateEmployeeComponent {
   //   this.calculateAmount(); // call your calculation logic
   //   this.isSalaryVisible = true;
   // }
-  
+
   showStatutoryValues(): void {
     const values = this.multiStepForm.getRawValue(); // or this.form.value
     let message = 'Statutory Values:\n';
@@ -354,6 +362,17 @@ export class CreateEmployeeComponent {
   }
 
   onSubmit() {
+    if (!this.multiStepForm.valid) {
+      console.log('Invalid controls:', this.multiStepForm.controls);
+      Object.keys(this.multiStepForm.controls).forEach(key => {
+        if (this.multiStepForm.controls[key].invalid) {
+          console.log('Invalid:', key, this.multiStepForm.controls[key].errors);
+        }
+      });
+      this.toastr.error('Please fill all required fields.');
+      return;
+    }
+
     if (this.multiStepForm.valid) {
 
 
@@ -363,12 +382,11 @@ export class CreateEmployeeComponent {
 
         "company_id": this.selectedCompanyId,
         "emp_title": this.multiStepForm.value.title,
-        "emp_name": this.multiStepForm.value.fname +" "+ this.multiStepForm.value.lname,
+        "emp_name": this.multiStepForm.value.fname + " " + this.multiStepForm.value.lname,
         "emp_email": this.multiStepForm.value.email,
         "emp_gender": this.multiStepForm.value.gender,
-        "department_id":this.multiStepForm.value.department,
+        "department_id": this.multiStepForm.value.department,
         "designation_id": this.multiStepForm.value.designation,
-        "CTC": this.multiStepForm.value.ctc,
         "statutory_list": JSON.stringify(this.statutoryInfo),
         "bank_name": this.multiStepForm.value.bankName,
         "account_num": this.multiStepForm.value.accountNumber,
@@ -378,25 +396,43 @@ export class CreateEmployeeComponent {
         "status": "Active",
         "emp_address": this.multiStepForm.value.address,
         "role_id": this.multiStepForm.value.role,
+
+        "basic_salary": this.multiStepForm.value.basic_salary,
+        "house_rent_allowances": this.multiStepForm.value.house_rent_allowances || 0,
+        "conveyance_allowances": this.multiStepForm.value.conveyance_allowances || 0,
+        "medical_allowances": this.multiStepForm.value.medical_allowances || 0,
+        "special_allowances": this.multiStepForm.value.special_allowances || 0,
+
+        "annual_gross_salary": parseFloat(this.annual_gross_salary.toFixed(2)),
+        "monthly_gross_salary": parseFloat(this.monthly_gross_salary.toFixed(2)),
+
+        "pf_employee_applicable": this.multiStepForm.value.pf_employee_applicable || false,
+        "pf_employer_applicable": this.multiStepForm.value.pf_employer_applicable || false,
+        "esic_employee_applicable": this.multiStepForm.value.esic_employee_applicable || false,
+
         // "department_name": this.multiStepForm.value.department,
         // "designation_name": this.multiStepForm.value.designation
       }
 
       console.log('Form Submitted:', this.multiStepForm.value);
 
-      this.service.post("create/employee", current_data).subscribe((res: any) => {
-        if (res.status === 'success') {
-          this.toastr.success('Successfully Submitted!');
-        } else {
-          this.toastr.error(res.message || 'Submission failed!');
+      this.service.post("create/employee", current_data).subscribe({
+        next: (res: any) => {
+          if (res.status === 'success') {
+            this.toastr.success('Successfully Submitted!');
+          } else {
+            this.toastr.error('Submission failed!');
+          }
+        },
+        error: (err) => {
+          this.toastr.error(err.error?.message || 'Something went wrong!');
         }
       });
-
 
       this.multiStepForm.reset();
       this.currentStep = 1;
       this.salaryAmount = 0;
-      this.ctc = 0;
+      this.annual_gross_salary = 0;
 
     } else {
       this.toastr.error('Please fill all required fields.');
@@ -405,25 +441,26 @@ export class CreateEmployeeComponent {
     }
   }
 
-  calculateSalaryAmount() {
-    const monthlyAmount = this.ctc / 12;
+  calculateGrossSalary(values: any) {
+    const total =
+      Number(values.basic_salary || 0) +
+      Number(values.house_rent_allowances || 0) +
+      Number(values.conveyance_allowances || 0) +
+      Number(values.medical_allowances || 0) +
+      Number(values.special_allowances || 0);
 
-    // Sum of all selected statutory field values from the form
-    let totalDeduction = 0;
-    this.selectedStatutoryOptions.forEach(field => {
-      const control = this.multiStepForm.get(field.formControl);
-      const value = control?.value || 0;
-      totalDeduction += Number(value);
-    });
+    const annual = total;
+    const monthly = total / 12;
 
-    const total = this.logTotalDeductions();
+    // Update component vars
+    this.annual_gross_salary = annual;
+    this.monthly_gross_salary = monthly;
 
-    
-    this.salaryAmount = monthlyAmount - total;
-
-    console.log('Monthly Amount:', this.amount);
-    console.log('Deductions:', total);
-    console.log('Final Salary:', this.salaryAmount);
+    // Update form controls so they go in payload
+    this.multiStepForm.patchValue({
+      annual_gross_salary: annual,
+      monthly_gross_salary: monthly,
+    }, { emitEvent: false });
   }
 
   logTotalDeductions() {
@@ -432,4 +469,13 @@ export class CreateEmployeeComponent {
     }, 0);
     return total;
   }
+
+  // formatWithCommas(controlName: string): void {
+  //   const control = this.multiStepForm.get(controlName);
+  //   if (!control) return;
+
+  //   const num = +String(control.value).replace(/,/g, '');
+  //   control.setValue(num ? num.toLocaleString('en-IN') : '', { emitEvent: false });
+  // }
+
 }

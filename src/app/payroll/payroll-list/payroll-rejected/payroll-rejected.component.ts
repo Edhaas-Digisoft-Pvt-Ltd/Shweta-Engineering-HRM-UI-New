@@ -54,11 +54,11 @@ export class PayrollRejectedComponent {
     this.selectedCompanyId = this.service.selectedCompanyId();
 
     this.selectedYear = new Date().getFullYear();
-    this.selectedMonth = new Date().getMonth() + 1;
+    this.selectedMonth = new Date().getMonth()-1;
     const currentDate = new Date();
     this.today = currentDate.toISOString().split('T')[0];
     this.getCompanyNames();
-    this.ApproveRejectPayrollList();
+    this.RejectedPayrollList();
   }
 
   onGridReady(params: { api: any }) {
@@ -81,14 +81,14 @@ export class PayrollRejectedComponent {
   onCompanyChange(event: Event): void {
     this.selectedCompanyId = (event.target as HTMLSelectElement).value;
     console.log('Selected Company ID:', this.selectedCompanyId);
-    this.ApproveRejectPayrollList();
+    this.RejectedPayrollList();
   }
 
   onYearMonthChange() {
-    this.ApproveRejectPayrollList();
+    this.RejectedPayrollList();
   }
 
-  ApproveRejectPayrollList() {
+  RejectedPayrollList() {
     this.isLoading = true;
     this.service.post('fetch/rejected/payroll', {
       company_id: this.selectedCompanyId,
@@ -107,7 +107,7 @@ export class PayrollRejectedComponent {
               hours: item.total_hours,
               overTime: item.total_overtime,
               employe_id: item.employe_id,
-              bonus_incentive_amount: item.bonus_incentive_amount ? `₹${item.bonus_incentive_amount}` : 'NA',
+              bonus_amount: item.bonus_amount ? `₹${item.bonus_amount}` : 'NA',
               advance_salary: item.advance_salary ? `₹${item.advance_salary}` : 'NA',
               net_salary: item.net_salary ? `₹${item.net_salary}` : 'NA',
             }));
@@ -116,87 +116,89 @@ export class PayrollRejectedComponent {
             this.toastr.warning('Data Not Found');
           }
         } catch (error) {
-          console.error( error);
-          this.rowData = []; 
+          console.error(error);
+          this.rowData = [];
         }
+        this.isLoading = false;
       },
       (error) => {
         this.isLoading = false;
         this.rowData = [];
         if (error.status === 404) {
           this.toastr.warning('Data Not Found');
+          this.isLoading = false;
         } else {
           console.error(error);
+          this.isLoading = false;
         }
       }
     );
-    this.isLoading = false;
   }
 
   columnDefs: ColDef[] = [
-      {
-        headerName: 'Emp Code',
-        field: 'employee_code',
-        sortable: true,
-        filter: true,
-        minWidth: 150,
-      },
-      {
-        headerName: 'Department',
-        field: 'department',
-        sortable: true,
-        filter: true,
-        minWidth: 140,
-      },
-      {
-        headerName: 'P',
-        field: 'presentDays',
-        sortable: true,
-        filter: true,
-        minWidth: 80,
-      },
-      {
-        headerName: 'A',
-        field: 'absentDays',
-        sortable: true,
-        filter: true,
-        minWidth: 80,
-      },
-      {
-        headerName: 'OT(hrs)',
-        field: 'overTime',
-        sortable: true,
-        filter: true,
-        minWidth: 100,
-      },
-      {
-        headerName: 'hours',
-        field: 'hours',
-        sortable: true,
-        filter: true,
-        minWidth: 100,
-      },
-      {
-        headerName: 'Bonus & Incentive',
-        field: 'bonus_incentive_amount',
-        sortable: true,
-        filter: true,
-        minWidth: 120,
-      },
-      {
-        headerName: 'Adv Salary',
-        field: 'advance_salary',
-        sortable: true,
-        filter: true,
-        minWidth: 140,
-      },
-      {
-        headerName: 'Net Salary',
-        field: 'net_salary',
-        sortable: true,
-        filter: true,
-        minWidth: 140,
-      },
+    {
+      headerName: 'Emp Code',
+      field: 'employee_code',
+      sortable: true,
+      filter: true,
+      minWidth: 150,
+    },
+    {
+      headerName: 'Department',
+      field: 'department',
+      sortable: true,
+      filter: true,
+      minWidth: 140,
+    },
+    {
+      headerName: 'P',
+      field: 'presentDays',
+      sortable: true,
+      filter: true,
+      minWidth: 80,
+    },
+    {
+      headerName: 'A',
+      field: 'absentDays',
+      sortable: true,
+      filter: true,
+      minWidth: 80,
+    },
+    {
+      headerName: 'OT(hrs)',
+      field: 'overTime',
+      sortable: true,
+      filter: true,
+      minWidth: 100,
+    },
+    {
+      headerName: 'hours',
+      field: 'hours',
+      sortable: true,
+      filter: true,
+      minWidth: 100,
+    },
+    {
+      headerName: 'Bonus',
+      field: 'bonus_amount',
+      sortable: true,
+      filter: true,
+      minWidth: 120,
+    },
+    {
+      headerName: 'Adv Salary',
+      field: 'advance_salary',
+      sortable: true,
+      filter: true,
+      minWidth: 140,
+    },
+    {
+      headerName: 'Net Salary',
+      field: 'net_salary',
+      sortable: true,
+      filter: true,
+      minWidth: 140,
+    },
   ];
 
   statusButtonRenderer(params: any) {

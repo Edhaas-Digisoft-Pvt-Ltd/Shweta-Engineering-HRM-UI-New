@@ -59,7 +59,7 @@ export class PayrollProcessComponent {
 
   ngOnInit() {
     this.selectedYear = new Date().getFullYear();
-    this.selectedMonth = new Date().getMonth() + 1;
+    this.selectedMonth = new Date().getMonth()-1;
     this.getCompanyNames();
     this.initializeColumns();
     this.initializeColumnsforProcess();
@@ -135,11 +135,12 @@ export class PayrollProcessComponent {
       this.isLoading = false;
       if (error.status === 404) {
         this.toastr.warning('Data Not Found');
+        this.isLoading = false;
       } else {
         console.error(error);
+        this.isLoading = false;
       }
     })
-    this.isLoading = false;
   }
 
   getTempPayroll() {
@@ -162,8 +163,8 @@ export class PayrollProcessComponent {
             total_hours: item.total_hours,
             total_overtime: item.total_overtime ?? 'NA',
             employe_id: item.employe_id,
-            bonus_incentive_amount: item.bonus_incentive_amount ? `₹ ${item.bonus_incentive_amount}` : 'NA',
-            advance_salary: item.advance_salary ? `₹ ${item.advance_salary}` : 'NA',
+            bonus_amount: item.bonus_amount ? `₹ ${item.bonus_amount}` : 'NA',
+            adv_deduction: item.adv_deduction ? `₹ ${item.adv_deduction}` : 'NA',
             net_salary: item.net_salary ? `₹ ${item.net_salary}` : 'NA',
           }));
         }
@@ -172,17 +173,19 @@ export class PayrollProcessComponent {
           this.tempRowData = [];
           this.getPayrollProcess();
         }
+        this.isLoading = false;
       },
       error: () => {
         this.isProcess = false;
         this.tempRowData = [];
         this.getPayrollProcess();
+        this.isLoading = false;
       }
     });
-    this.isLoading = false;
   }
 
   generatePayroll() {
+    this.isLoading = true;
     const payrolls = this.rowData.map((emp: any) => ({
       employee_id: emp.employe_id,
       year: this.selectedYear,
@@ -195,9 +198,11 @@ export class PayrollProcessComponent {
       next: () => {
         this.toastr.success('Temporary payroll created.');
         this.getTempPayroll();
+        this.isLoading = true;
       },
       error: () => {
         this.toastr.error('Failed to create temp payroll.');
+        this.isLoading = true;
       }
     });
   }
@@ -229,6 +234,7 @@ export class PayrollProcessComponent {
   // }
 
   processPayroll() {
+    this.isLoading = true;
     const payrolls = this.tempRowData.map((emp: any) => ({
       employee_id: emp.employe_id,
       year: this.selectedYear,
@@ -239,8 +245,10 @@ export class PayrollProcessComponent {
       if (res.status == 'success') {
         this.toastr.success('Payroll processed successfully.');
         this.getTempPayroll();
+        this.isLoading = true;
       } else {
         this.toastr.error('Something went wrong');
+        this.isLoading = true;
       }
     })
   }
@@ -266,8 +274,8 @@ export class PayrollProcessComponent {
       { headerName: 'A', field: 'absent_days', sortable: true, filter: true },
       { headerName: 'OT(hrs)', field: 'total_overtime', sortable: true, filter: true },
       { headerName: 'Hrs', field: 'total_hours', sortable: true, filter: true },
-      { headerName: 'B&I', field: 'bonus_incentive_amount', sortable: true, filter: true },
-      { headerName: 'Adv Salary', field: 'advance_salary', sortable: true, filter: true },
+      { headerName: 'Bonus', field: 'bonus_amount', sortable: true, filter: true },
+      { headerName: 'Adv Salary', field: 'adv_deduction', sortable: true, filter: true },
       { headerName: 'Net Salary', field: 'net_salary', sortable: true, filter: true },
       {
         headerName: 'Action',

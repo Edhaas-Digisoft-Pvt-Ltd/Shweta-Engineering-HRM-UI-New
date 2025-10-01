@@ -109,3 +109,9 @@ canvas {
   background-position: center;
   z-index: -1;
 }
+
+.attendaceWrapper{
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px; 
+}

@@ -39,7 +39,7 @@ export class AttendanceSummaryComponent {
   rowData: any[] = [];
   isLoading: boolean = false;
 
-  constructor(private service: HrmserviceService) {}
+  constructor(private service: HrmserviceService) { }
 
   ngOnInit() {
     this.loadData();
@@ -103,11 +103,12 @@ export class AttendanceSummaryComponent {
       if (res.status === 'success') {
         const rawData = res.data;
         this.rowData = this.buildExportRowMap(rawData);
+        this.isLoading = false;
       } else {
-        console.log(res.error);
+        console.log(res.error); 
+        this.isLoading = false;
       }
     });
-    this.isLoading = false;
   }
 
   dotAndImageRenderer(params: any, isSunday: boolean) {
@@ -118,16 +119,16 @@ export class AttendanceSummaryComponent {
     wrapper.style.alignItems = 'center';
     wrapper.style.height = '100%';
 
-    if (isSunday) {
-      const img = document.createElement('img');
-      img.src = 'assets/sunday.png';
-      img.style.width = '100%';
-      img.style.height = '100%';
-      img.style.marginBottom = '2px';
-      img.style.position = 'absolute';
-      img.style.zIndex = '-1';
-      wrapper.appendChild(img);
-    }
+    // if (isSunday) {
+    //   const img = document.createElement('img');
+    //   img.src = 'assets/sunday.png';
+    //   img.style.width = '100%';
+    //   img.style.height = '100%';
+    //   img.style.marginBottom = '2px';
+    //   img.style.position = 'absolute';
+    //   img.style.zIndex = '-1';
+    //   wrapper.appendChild(img);
+    // }
 
     const valueDiv = document.createElement('div');
     valueDiv.innerText = value || '';
@@ -147,6 +148,7 @@ export class AttendanceSummaryComponent {
     else if (value === 'W/od') dot.style.background = '#9FFF04';
     else if (value === 'HD') dot.style.background = '#E000B0';
     else if (value === 'LT') dot.style.background = '#880021';
+    else if (value === 'OT') dot.style.background = '#eb9900ff';
 
     if (dot.style.background) {
       wrapper.appendChild(dot);

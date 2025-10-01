@@ -228,41 +228,40 @@
                                 </div>
 
 
-                                    <div class="col-lg-4 my-3">
-                                        <label>Department <span class="text-danger">*</span></label>
-                                        <select id="roleSelect" formControlName="department" class="form-select"
-                                            [ngClass]="{'input-error': nextCheck && multiStepForm.get('department')?.invalid}">
-                                            <option value="" selected disabled>Select Department</option>
+                                <div class="col-lg-4 my-3">
+                                    <label>Department <span class="text-danger">*</span></label>
+                                    <select id="roleSelect" formControlName="department" class="form-select"
+                                        [ngClass]="{'input-error': nextCheck && multiStepForm.get('department')?.invalid}">
+                                        <option value="" selected disabled>Select Department</option>
 
-                                            <option *ngFor="let dept of departmentNames" [value]="dept.department_id">
-                                                {{ dept.department_name }}
-                                            </option>
+                                        <option *ngFor="let dept of departmentNames" [value]="dept.department_id">
+                                            {{ dept.department_name }}
+                                        </option>
 
-                                        </select>
-                                    </div>
+                                    </select>
+                                </div>
 
-                                    <div class="col-lg-4 my-3">
-                                        <label>Designation <span class="text-danger">*</span></label>
-                                        <select id="roleSelect" formControlName="designation" class="form-select"
-                                            [ngClass]="{'input-error': nextCheck && multiStepForm.get('designation')?.invalid}">
-                                            <option value="" selected disabled>Select Designation</option>
-                                            <option *ngFor="let desig of designationNames"
-                                                [value]="desig.designation_id">
-                                                {{ desig.designation_name }}
-                                            </option>
-                                        </select>
-                                    </div>
+                                <div class="col-lg-4 my-3">
+                                    <label>Designation <span class="text-danger">*</span></label>
+                                    <select id="roleSelect" formControlName="designation" class="form-select"
+                                        [ngClass]="{'input-error': nextCheck && multiStepForm.get('designation')?.invalid}">
+                                        <option value="" selected disabled>Select Designation</option>
+                                        <option *ngFor="let desig of designationNames" [value]="desig.designation_id">
+                                            {{ desig.designation_name }}
+                                        </option>
+                                    </select>
+                                </div>
 
-                                    <div class="col-lg-4 my-3">
-                                        <label>Working Pattern</label>
-                                        <select id="roleSelect" formControlName="work_pattern" class="form-select"
-                                            [ngClass]="{'input-error': nextCheck && multiStepForm.get('work_pattern')?.invalid}">
-                                            <option value="" selected>Select Work Pattern</option>
-                                            <option value="5">5 Days Week</option>
-                                            <option value="6">6 Days Week</option>
-                                            <option value="7">7 Days Week</option>
-                                        </select>
-                                    </div>
+                                <div class="col-lg-4 my-3">
+                                    <label>Working Pattern</label>
+                                    <select id="roleSelect" formControlName="work_pattern" class="form-select"
+                                        [ngClass]="{'input-error': nextCheck && multiStepForm.get('work_pattern')?.invalid}">
+                                        <option value="" selected>Select Work Pattern</option>
+                                        <option value="5">5 Days Week</option>
+                                        <option value="6">6 Days Week</option>
+                                        <option value="7">7 Days Week</option>
+                                    </select>
+                                </div>
                             </div>
                         </div>
 
@@ -351,7 +350,7 @@
                     <!-- Step 4 : statutory Info -->
                     <div *ngIf="currentStep === 4">
 
-                        <div class="border statutoryCheckbox" style="padding: 30px; border-radius: 10px;">
+                        <!-- <div class="border statutoryCheckbox" style="padding: 30px; border-radius: 10px;">
                             <div class="row">
                                 <div class="col-4" *ngFor="let option of checkboxOptions">
                                     <div class="input-group mb-3 w-100">
@@ -359,10 +358,30 @@
                                             <input type="checkbox" [id]="option.id" [value]="option.label"
                                                 [checked]="statutoryInfo.includes(option.label)"
                                                 (change)="onCheckboxChange($event)">
-                                            <label [for]="option.id" class="ms-2">{{ option.label }}</label>
+                                            <label [for]="option.id" class="ms-2">{{ option.label }}({{ option.value }}%)</label>
                                         </div>
                                     </div>
                                 </div>
+                            </div>
+                        </div> -->
+                        <div class="mb-3">
+
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" formControlName="pf_employee_applicable"
+                                    id="pfEmployee">
+                                <label class="form-check-label" for="pfEmployee">PF Employee Applicable</label>
+                            </div>
+
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" formControlName="pf_employer_applicable"
+                                    id="pfEmployer">
+                                <label class="form-check-label" for="pfEmployer">PF Employer Applicable</label>
+                            </div>
+
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox"
+                                    formControlName="esic_employee_applicable" id="esicEmployee">
+                                <label class="form-check-label" for="esicEmployee">ESIC Employee Applicable</label>
                             </div>
                         </div>
 
@@ -394,8 +413,7 @@
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        <tr>
-                                            <!-- <td>Basic</td> -->
+                                        <!-- <tr>
                                             <td>CTC</td>
                                             <td>
                                                 <div class="w-100 d-flex align-items-center gap-2 fw-bold">
@@ -405,30 +423,80 @@
                                                     <span class="ml-3">12</span>
                                                 </div>
                                             </td>
-                                        </tr>
+                                        </tr> -->
 
-                                        <tr *ngFor="let field of selectedStatutoryOptions">
-                                            <td>{{field.label}}</td>
+                                        <tr>
+                                            <td>Basic Salary</td>
                                             <td>
-                                                {{field.value}}
+                                                <div class="w-100 d-flex align-items-center gap-2 fw-bold">
+                                                    <input type="number" placeholder="Basic Salary"
+                                                        formControlName="basic_salary" class="form-control w-50">
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>House Rent Allowances</td>
+                                            <td>
+                                                <div class="w-100 d-flex align-items-center gap-2 fw-bold">
+                                                    <input type="number" placeholder="House Rent Allowances"
+                                                        formControlName="house_rent_allowances"
+                                                        class="form-control w-50">
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>Conveyance Allowances</td>
+                                            <td>
+                                                <div class="w-100 d-flex align-items-center gap-2 fw-bold">
+                                                    <input type="number" placeholder="Conveyance Allowances"
+                                                        formControlName="conveyance_allowances"
+                                                        class="form-control w-50">
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>Medical Allowances</td>
+                                            <td>
+                                                <div class="w-100 d-flex align-items-center gap-2 fw-bold">
+                                                    <input type="number" placeholder="Medical Allowances"
+                                                        formControlName="medical_allowances" class="form-control w-50">
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>Special Allowances</td>
+                                            <td>
+                                                <div class="w-100 d-flex align-items-center gap-2 fw-bold">
+                                                    <input type="number" placeholder="Special Allowances"
+                                                        formControlName="special_allowances" class="form-control w-50">
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        <tr *ngFor="let field of selectedStatutoryOptions">
+                                            <td>{{ field.label }}</td>
+                                            <td>
+                                                {{ field.value }}{{ field.label.includes('PF') ||
+                                                field.label.includes('ESIC') ? '%' : '' }}
                                             </td>
                                         </tr>
 
+                                        <tr>
+                                            <td>Gross Salary</td>
+                                            <td>
+                                                <div class="w-100 d-flex align-items-center gap-2 fw-bold">
+                                                    <h5>Rs. {{ annual_gross_salary | number: '1.2-2' }}</h5> /
+                                                    <span class="ml-3">12</span>
+                                                </div>
+                                            </td>
+                                        </tr>
 
                                         <tr class="amountPayable">
                                             <td>
-                                                <h5>Monthly Payable Amount</h5>
+                                                <h5>Monthly Gross Salary</h5>
                                             </td>
                                             <td>
-                                                <div *ngIf="salaryAmount>0">
-                                                    <h5 class="fw-bold me-5">Rs. {{  salaryAmount | number: '1.2-2' }}</h5>
-                                                </div>
-                                                <div *ngIf="salaryAmount==0">
-                                                    <h5 class="fw-bold me-5">Rs. {{  salaryAmount | number: '1.2-2' }}</h5>
-                                                </div>
-                                                <div *ngIf="salaryAmount<0">
-                                                    <small class="text-warning">CTC is too low.</small>
-                                                </div>
+                                                <h5 class="fw-bold me-5">Rs. {{ monthly_gross_salary | number: '1.2-2'
+                                                    }}</h5>
                                             </td>
                                         </tr>
                                     </tbody>
@@ -446,10 +514,6 @@
                             </div>
                         </div>
                     </div>
-
-
-
-
                 </form>
             </div>
         </div>

@@ -245,47 +245,36 @@ export class AdvanceSalaryReportComponent {
         const emiHistory = res.data.emi_history
 
         this.EditAdvancePaymentData = {
-          id: advanceInfo.employee_code,
-          employeeName: advanceInfo.emp_name,
-          company: advanceInfo.company_name,
-          department: advanceInfo.department_name,
-          role: advanceInfo.designation_name,
-          requestData: advanceInfo.apply_date,
-          tenure: advanceInfo.tenure,
-          amount: advanceInfo.advance_amount,
-          status: advanceInfo.status,
-          EMIStartDate: '',
-          installmentAmount: advanceInfo.emi,
-          remainingBalance: advanceInfo.remaining_balance,
+          id: advanceInfo?.employee_code,
+          employeeName: advanceInfo?.emp_name,
+          company: advanceInfo?.company_name,
+          department: advanceInfo?.department_name,
+          role: advanceInfo?.designation_name,
+          requestDate: advanceInfo?.apply_date,
+          status: advanceInfo?.status,
+          tenure: advanceInfo?.tenure,
+          amount: advanceInfo?.advance_amount,
+          reason: advanceInfo?.remarks,
+          EMIStartDate: advanceInfo?.updated_on,
+          installmentAmount: advanceInfo?.emi,
+          remainingBalance: advanceInfo?.remaining_balance,
+          advanceAmount: advanceInfo?.advance_amount,
+          firstInstallmentDate: advanceInfo?.deducted_on,
         };
 
         this.displayApprovedData.patchValue(this.EditAdvancePaymentData);
 
         if (this.selectedAdvpayid !== null) {
-          const sortedEmiHistory = [...emiHistory].sort((a, b) => {
-            return new Date(b.deducted_on || b.year_month).getTime() -
-              new Date(a.deducted_on || a.year_month).getTime();
-          });
-
-          const paidEmis = sortedEmiHistory.map((item: any) => ({
-            date: item.deducted_on || item.year_month,
-            EMI: item.amount_deducted,
-            status: 'Paid'
-          }));
-
-          const remainingEmis = advanceInfo.tenure - paidEmis.length;
-
-          if (remainingEmis > 0) {
-            paidEmis.push({
-              date: '',
-              EMI: '',
-              status: `${remainingEmis} EMI remaining`
-            });
-          }
+          const paidEmis = emiHistory.map((item: any) => ({
+            date: item.year_month,
+            installment_amount: item.installment_amount,
+            installment_status: item.installment_status,
+            remarks: item.remarks ? item.remarks : '-',
+          }))
+            .reverse();
 
           this.tabledata[this.selectedAdvpayid] = paidEmis;
         }
-
       } else {
         this.toastr.warning('Something went wrong!');
       }

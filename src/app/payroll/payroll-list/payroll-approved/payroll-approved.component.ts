@@ -57,7 +57,7 @@ export class PayrollApprovedComponent {
     this.selectedCompanyId = this.service.selectedCompanyId();
 
     this.selectedYear = new Date().getFullYear();
-    this.selectedMonth = new Date().getMonth() + 1;
+    this.selectedMonth = new Date().getMonth()-1;
     const currentDate = new Date();
     this.today = currentDate.toISOString().split('T')[0];
     this.getCompanyNames();
@@ -98,17 +98,17 @@ export class PayrollApprovedComponent {
         try {
           if (res.status === 'success' && res.data && res.data.length > 0) {
             this.rowData = res.data.map((item: any) => ({
-            employee_code: item.employee_code,
-            department: item.department_name,
-            role: item.role_name,
-            presentDays: item.present_days,
-            absentDays: item.absent_days,
-            hours: item.total_hours,
-            overTime: item.total_overtime + ' hrs',
-            employe_id: item.employe_id,
-            bonus_incentive_amount: item.bonus_incentive_amount ? `₹ ${item.bonus_incentive_amount}` : 'NA',
-            advance_salary: item.advance_salary ? `₹ ${item.advance_salary}` : 'NA',
-            net_salary: item.net_salary  ? `₹ ${item.net_salary}` : 'NA',
+              employee_code: item.employee_code,
+              department: item.department_name,
+              role: item.role_name,
+              presentDays: item.present_days,
+              absentDays: item.absent_days,
+              hours: item.total_hours,
+              overTime: item.total_overtime + ' hrs',
+              employe_id: item.employe_id,
+              bonus_amount: item.bonus_amount ? `₹ ${item.bonus_amount}` : 'NA',
+              advance_salary: item.advance_salary ? `₹ ${item.advance_salary}` : 'NA',
+              net_salary: item.net_salary ? `₹ ${item.net_salary}` : 'NA',
             }));
           } else {
             this.rowData = [];
@@ -116,92 +116,93 @@ export class PayrollApprovedComponent {
           }
         } catch (error) {
           console.log(error);
-          this.rowData = []; 
+          this.rowData = [];
         }
+        this.isLoading = false;
       },
       (error) => {
-       this.isLoading = false;
         this.rowData = [];
         if (error.status === 404) {
           this.toastr.warning('Data Not Found');
+          this.isLoading = false;
         } else {
           console.error(error);
+          this.isLoading = false;
         }
       }
     );
-    this.isLoading = false;
   }
 
   columnDefs: ColDef[] = [
-      {
-        headerName: '',
-        maxWidth: 50,
-        checkboxSelection: true, 
-        headerCheckboxSelection: true,
-      },
-      {
-        headerName: 'Emp Code',
-        field: 'employee_code',
-        sortable: true,
-        filter: true,
-        minWidth: 150,
-      },
-      {
-        headerName: 'Department',
-        field: 'department',
-        sortable: true,
-        filter: true,
-        minWidth: 140,
-      },
-      {
-        headerName: 'P',
-        field: 'presentDays',
-        sortable: true,
-        filter: true,
-        maxWidth: 70,
-      },
-      {
-        headerName: 'A',
-        field: 'absentDays',
-        sortable: true,
-        filter: true,
-        maxWidth: 70,
-      },
-       {
-        headerName: 'OT(hrs)',
-        field: 'overTime',
-        sortable: true,
-        filter: true,
-        minWidth: 100,
-      },
-      {
-        headerName: 'hours',
-        field: 'hours',
-        sortable: true,
-        filter: true,
-        minWidth: 100,
-      },
-      {
-        headerName: 'B & I',
-        field: 'bonus_incentive_amount',
-        sortable: true,
-        filter: true,
-        minWidth: 120,
-      },
-      {
-        headerName: 'Adv Salary',
-        field: 'advance_salary',
-        sortable: true,
-        filter: true,
-        minWidth: 140,
-      },
-      {
-        headerName: 'Net Salary',
-        field: 'net_salary',
-        sortable: true,
-        filter: true,
-        minWidth: 140,
-      },
+    {
+      headerName: '',
+      maxWidth: 50,
+      checkboxSelection: true,
+      headerCheckboxSelection: true,
+    },
+    {
+      headerName: 'Emp Code',
+      field: 'employee_code',
+      sortable: true,
+      filter: true,
+      minWidth: 150,
+    },
+    {
+      headerName: 'Department',
+      field: 'department',
+      sortable: true,
+      filter: true,
+      minWidth: 140,
+    },
+    {
+      headerName: 'P',
+      field: 'presentDays',
+      sortable: true,
+      filter: true,
+      maxWidth: 70,
+    },
+    {
+      headerName: 'A',
+      field: 'absentDays',
+      sortable: true,
+      filter: true,
+      maxWidth: 70,
+    },
+    {
+      headerName: 'OT(hrs)',
+      field: 'overTime',
+      sortable: true,
+      filter: true,
+      minWidth: 100,
+    },
+    {
+      headerName: 'hours',
+      field: 'hours',
+      sortable: true,
+      filter: true,
+      minWidth: 100,
+    },
+    {
+      headerName: 'Bonus',
+      field: 'bonus_amount',
+      sortable: true,
+      filter: true,
+      minWidth: 120,
+    },
+    {
+      headerName: 'Adv Salary',
+      field: 'advance_salary',
+      sortable: true,
+      filter: true,
+      minWidth: 140,
+    },
+    {
+      headerName: 'Net Salary',
+      field: 'net_salary',
+      sortable: true,
+      filter: true,
+      minWidth: 140,
+    },
   ];
 
   onSelectionChanged(event: any): void {
@@ -274,7 +275,7 @@ export class PayrollApprovedComponent {
 
     this.gridApi.exportDataAsCsv({
       onlySelected: true,
-      columnKeys: ['employee_code', 'department', 'presentDays', 'absentDays', 'overTime', 'hours', 'bonus_incentive_amount','advance_salary', 'net_salary'],
+      columnKeys: ['employee_code', 'department', 'presentDays', 'absentDays', 'overTime', 'hours', 'bonus_amount', 'advance_salary', 'net_salary'],
       fileName: 'payrollApproved.csv',
     });
   }

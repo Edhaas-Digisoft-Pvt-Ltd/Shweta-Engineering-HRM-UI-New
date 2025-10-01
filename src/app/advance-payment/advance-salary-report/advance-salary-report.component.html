@@ -83,16 +83,11 @@
               <div class="row mb-3">
                 <div class="col-md-3"><strong>Department</strong><input class="form-control"
                     formControlName="department"></div>
-                <div class="col-md-4"><strong>Role</strong><input class="form-control" formControlName="role"></div>
-                <div class="col-md-3"><strong>Apply Date</strong><input class="form-control"
-                    formControlName="requestData"></div>
+                <div class="col-md-3"><strong>Role</strong><input class="form-control" formControlName="role"></div>
                 <div class="col-md-2"><strong>Tenure</strong><input class="form-control" formControlName="tenure"></div>
-              </div>
-
-              <div class="row mb-3">
-                <div class="col-md-3"><strong>Amount (in ₹)</strong><input class="form-control"
+                <div class="col-md-2"><strong>Amount (in ₹)</strong><input class="form-control"
                     formControlName="amount"></div>
-                <div class="col-md-3"><strong>status</strong><input class="form-control" formControlName="status"></div>
+                <div class="col-md-2"><strong>status</strong><input class="form-control" formControlName="status"></div>
               </div>
 
               <!-- <div class="mb-3">
@@ -127,35 +122,35 @@
             </div>
 
             <div class="row mb-3">
-              <div class="col-12 ps-5 pe-5">
-                <div class="table-responsive" style="border: 1px solid #ccc;">
-                  <table class="table table-hover text-center align-middle">
-                    <thead class="sticky-top" style="top: 0; z-index: 1;">
-                      <tr>
-                        <th>Sr. no.</th>
-                        <th>Installment Date</th>
-                        <th>Amount</th>
-                        <th>EMI Status</th>
-                      </tr>
-                    </thead>
-                    <tbody *ngIf="selectedAdvpayid && tabledata[selectedAdvpayid]">
-                      <tr *ngFor="let item of tabledata[selectedAdvpayid]; let i = index; let len = count">
-                        <ng-container *ngIf="item.date || item.EMI; else mergedRow">
-                          <td>{{ getPaidEmiCount() - i }}</td> 
-                          <td>{{ item.date }}</td>
-                          <td>{{ item.EMI }}</td>
-                          <td>{{ item.status }}</td>
-                        </ng-container>
+                <div class="col-12 ps-5 pe-5">
+                  <div class="table-responsive" style="border: 1px solid #ccc;">
+                    <table class="table table-hover text-center align-middle">
+                      <thead class="sticky-top" style="top: 0; z-index: 1;">
+                        <tr>
+                          <th>Sr. no.</th>
+                          <th>Installment Date</th>
+                          <th>Amount</th>
+                          <th>EMI Status</th>
+                          <th>Remarks</th>
+                        </tr>
+                      </thead>
+                      <tbody *ngIf="selectedAdvpayid && tabledata[selectedAdvpayid]">
+                        <tr *ngFor="let item of tabledata[selectedAdvpayid]; let i = index">
+                            <td>{{ i + 1 }}</td>
+                            <td>{{ item.date }}</td>
+                            <td>{{ item.installment_amount }}</td>
+                            <td>{{ item.installment_status }}</td>
+                            <td>{{ item.remarks }}</td>
 
-                        <ng-template #mergedRow>
-                          <td colspan="4" class="text-center fw-bold">{{ item.status }}</td>
-                        </ng-template>
-                      </tr>
-                    </tbody>
-                  </table>
+                          <ng-template #mergedRow>
+                            <td colspan="4" class="text-center fw-bold">{{ item.status }}</td>
+                          </ng-template>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
                 </div>
               </div>
-            </div>
 
           </form>
         </div>

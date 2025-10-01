@@ -5,6 +5,7 @@ import { FormGroup, FormBuilder, Validators } from '@angular/forms';
 import { HrmserviceService } from 'src/app/hrmservice.service';
 import { EditLeaveRequestComponent } from './edit-leave-request/edit-leave-request.component';
 import { ToastrService } from 'ngx-toastr';
+import { ModalServiceService } from 'src/app/modal-service.service';
 
 declare var bootstrap: any;
 
@@ -44,11 +45,10 @@ export class LeaveRequestComponent {
   // };
 
   CompanyNames: any = [];
-  selectedValue: any = 1; // Default selected
+  selectedValue: any = 1;
 
-  constructor(private route: ActivatedRoute, private router: Router, private fb: FormBuilder, private service: HrmserviceService, private toastr: ToastrService) { }
+  constructor(private route: ActivatedRoute, private router: Router, private fb: FormBuilder, private service: HrmserviceService, private modalService: ModalServiceService, private toastr: ToastrService) { }
 
-  // leave request form : 
   ngOnInit(): void {
     this.selectedCompanyId = this.service.selectedCompanyId();
 
@@ -86,6 +86,10 @@ export class LeaveRequestComponent {
     flex: 1,
     resizable: true,
   };
+
+  openModel() {
+    this.modalService.openModal('leaveRequestModal')
+  }
 
   columnDefs: ColDef[] = [
     { headerName: 'Employee Code', field: 'employee_code', sortable: true, filter: true },
@@ -160,6 +164,7 @@ export class LeaveRequestComponent {
         } else {
           this.toastr.warning('Data Not Found')
         }
+        this.isLoading = false;
       },
       (error) => {
         if (error.status === 400) {
@@ -167,9 +172,9 @@ export class LeaveRequestComponent {
         } else {
           console.error(error);
         }
+        this.isLoading = false;
       }
     );
-    this.isLoading = false;
   }
 
   statusButtonRenderer(params: any) {
@@ -211,7 +216,6 @@ export class LeaveRequestComponent {
     this.router.navigate(['/authPanal/CreateEmployee']);
   }
 
-  // search feild code :
   onGridReady(params: { api: any }) {
     this.gridApiActive = params.api;
   }
@@ -247,12 +251,7 @@ export class LeaveRequestComponent {
           this.toastr.success("Updated Successfully");
           this.getLeaveRequests()
           const modalElement = document.getElementById('leaveRequestModal');
-          if (modalElement) {
-            const modalInstance = bootstrap.Modal.getInstance(modalElement);
-            if (modalInstance) {
-              modalInstance.hide();
-            }
-          }
+          this.modalService.closeModal();
         }
       }, (error) => {
         console.error('Error fetching leave request:', error);
@@ -260,19 +259,10 @@ export class LeaveRequestComponent {
     }
   }
 
-  // data1 = [
-  //   { emp_code: 'SEE202505129', date: '2025-06-01', end_date: '2025-06-03', type: 'Sick Leave', status: 'Pending' },
-  // ];
-  // leaveHistory = [
-  //   { emp_code: 'SEE202505129', date: '2025-06-01', end_date: '2025-06-03', type: 'Sick Leave', status: 'Approved' },
-  //   { emp_code: 'SEE202505129', date: '2025-06-01', end_date: '2025-06-03', type: 'c Leave', status: 'Rejected' },
-  // ];
-
   submitForm() {
     if (this.leaveRequestForm.valid) {
       console.log('Form submitted:', this.leaveRequestForm.value);
 
-      // Perform your action here (e.g., send data to server)
     } else {
       this.leaveRequestForm.markAllAsTouched();
       alert("Please fil form properly !!!");

@@ -65,7 +65,7 @@ export class PayrollProcessRejectedComponent {
 
   ngOnInit() {
     this.selectedYear = new Date().getFullYear();
-    this.selectedMonth = new Date().getMonth() + 1;
+    this.selectedMonth = new Date().getMonth()-1;
     const currentDate = new Date();
     this.today = currentDate.toISOString().split('T')[0];
     this.getCompanyNames();
@@ -112,7 +112,6 @@ export class PayrollProcessRejectedComponent {
       year: this.selectedYear,
       month: this.selectedMonth,
     }).subscribe((res: any) => {
-      console.log(res)
       try {
         if (res.status === 'success') {
           this.rowData = res.data.map((item: any) => ({
@@ -125,18 +124,17 @@ export class PayrollProcessRejectedComponent {
             hours: item.total_hours,
             overTime: item.total_overtime,
             employe_id: item.employe_id,
-            bonus_incentive_amount: item.bonus_incentive_amount ? `₹${item.bonus_incentive_amount}` : 'NA',
-            advance_salary: item.advance_salary ? `₹${item.advance_salary}` : 'NA',
+            bonus_amount: item.bonus_amount ? `₹${item.bonus_amount}` : 'NA',
+            adv_deduction: item.adv_deduction ? `₹${item.adv_deduction}` : 'NA',
             net_salary: item.net_salary ? `₹${item.net_salary}` : 'NA',
           }));
         }
         this.isLoading = false;
       } catch (error) {
-        console.log('hi',error);
+        console.log(error);
         this.isLoading = false;
       }
     })
-      this.isLoading = false;
   }
 
   processAction() {
@@ -215,15 +213,15 @@ export class PayrollProcessRejectedComponent {
         minWidth: 100,
       },
       {
-        headerName: 'B & I',
-        field: 'bonus_incentive_amount',
+        headerName: 'Bonus',
+        field: 'bonus_amount',
         sortable: true,
         filter: true,
         minWidth: 120,
       },
       {
         headerName: 'Adv Salary',
-        field: 'advance_salary',
+        field: 'adv_deduction',
         sortable: true,
         filter: true,
         minWidth: 140,
@@ -291,7 +289,7 @@ export class PayrollProcessRejectedComponent {
 
   exportExcel() {
       this.gridApiActive.exportDataAsCsv({
-        columnKeys: ['employee_code', 'department', 'presentDays', 'absentDays', 'overTime', 'hours', 'bonus_incentive_amount', 'advance_salary', 'net_salary'],
+        columnKeys: ['employee_code', 'department', 'presentDays', 'absentDays', 'overTime', 'hours', 'bonus_amount', 'adv_deduction', 'net_salary'],
         fileName: 'payrollRejected.csv',
       });
   }

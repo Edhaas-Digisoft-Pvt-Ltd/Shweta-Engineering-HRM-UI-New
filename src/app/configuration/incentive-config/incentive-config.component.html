@@ -1,92 +1,39 @@
 <div class="right-panel">
-
-    <div class="row gx-3 align-items-center rounded-2">
-        <div class="col-12">
-            <div class="row justify-content-end align-items-end">
-
-                <!-- <div class="col-3">
-                    <label class="mb-1 fw-semibold">Select Company</label>
-                    <select class="form-select" (change)="onCompanyChange($event)">
-                        <option *ngFor="let item of CompanyNames" [value]="item.company_id">
-                            {{ item.company_name }}
-                        </option>
-                    </select>
-                </div> -->
-
-                <div class="col-auto">
-                    <button type="button" class="btn text-white mb-1 px-4 BtnColor" data-bs-toggle="modal"
-                        data-bs-target="#addIncentive">
-                        Add Incentive
-                    </button>
-                </div>
-
-            </div>
-        </div>
+    <div class="row">
+        <ag-grid-angular class="ag-theme-alpine" style="width: 100%; height: 70vh;" [rowData]="rowData"
+            [columnDefs]="columnDefs" [pagination]="true" [defaultColDef]="defaultColDef">
+        </ag-grid-angular>
     </div>
+</div>
 
-    <!-- <div class="row mt-3">
-        <div class="col-12">
-            <ag-grid-angular class="ag-theme-alpine" style="width: 100%; height: 60vh;" [rowData]="rowData"
-                [columnDefs]="columnDefs" [pagination]="true" [defaultColDef]="defaultColDef">
-            </ag-grid-angular>
-        </div>
-    </div> -->
-
-    <!-- Modal Content -->
-    <div class="modal fade modal-xl text-left" id="addIncentive" tabindex="-1" aria-labelledby="exampleModalLabel"
-        aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="exampleModalLabel">Add Incentive</h5>
-                    <button type="button text-white" class="btn-close" data-bs-dismiss="modal"
-                        aria-label="Close"></button>
-                </div>
-                <div class="modal-body text-left">
-                    <form >
-                        <div class="row">
-
-                            <div class="col-md-3 text-start select-company">
-                                <label class="fw-bold" disabled selected>Select Company<span
-                                        class="text-danger">*</span></label>
-                                <select class="form-select" formControlName="companyid">
-                                    <option [value]="null" disabled>Select Company</option>
-                                    <option *ngFor="let item of CompanyNames" [value]="item.company_id">
-                                        {{ item.company_name }}
-                                    </option>
-                                </select>
-
-                            </div>
-
-                            <div>
-                                <label class="form-label">No. of Machines worked on</label>
-                                <input type="number" class="form-control" formControlName="machinesWorkedOn"
-                                placeholder="Enter Rate" />
-                            </div>
-
-                             <div>
-                                <label class="form-label">Hours</label>
-                                <input type="number" class="form-control" formControlName="Hours"
-                                placeholder="Enter Rate" />
-                            </div>
-
-                            <div class="col-md-3">
-                                <label class="form-label">Rate</label>
-                                <input type="number" class="form-control" formControlName="rate"
-                                    placeholder="Enter Rate" />
-                            </div>
-
+<div class="modal fade modal-lg" id="editIncentiveModal" tabindex="-1" aria-labelledby="exampleModalLabel">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editIncentiveModalLabel">Edit Incentive Configuration</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form [formGroup]="EditIncentiveForm" (ngSubmit)="editIncentiveRate()">
+                    <div class="row">  
+                        <div class="col-6">
+                            <label for="leavename">Total no. of hours worked</label>
+                            <input type="text" class="form-control" id="leavename"  formControlName="total_no_hours_worked"/>
                         </div>
 
-                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-                            <button type="submit" class="btn BtnColor mt-3 ml-auto btn-end submit-btn">Submit</button>
+                        <div class="col-4">
+                            <label for="leavenumber">Incentive Per Day<span class="text-danger">*</span></label>
+                            <input type="number" class="form-control" formControlName="incentive_rate"
+                            [ngClass]="{'is-invalid': isEditSubmitted && EditIncentiveForm.get('incentive_rate')?.invalid}" />
                         </div>
-                    </form>
+                    </div>
 
-
-                </div>
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                        <button type="submit" class="btn BtnColor mt-3 ml-auto btn-end">Update</button>
+                    </div>
+                </form>
             </div>
+
         </div>
     </div>
-
 </div>

@@ -69,6 +69,8 @@ export class LoginComponent {
       if (res.status == 'success') {
         this.toastr.success('Login successful !!!');
         this.logindata = res.data
+        console.log( this.logindata);
+        
         sessionStorage.setItem('roleName', this.logindata.employe_role)
         sessionStorage.setItem('employeeId', this.logindata.employe_id)
         sessionStorage.setItem('employeeName', this.logindata.employee_name)

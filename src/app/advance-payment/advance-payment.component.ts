@@ -4,6 +4,7 @@ import { ColDef, GridApi } from 'ag-grid-community';
 import { HrmserviceService } from '../hrmservice.service';
 import { ToastrService } from 'ngx-toastr';
 import { Router } from '@angular/router';
+import { ModalServiceService } from '../modal-service.service';
 declare var bootstrap: any;
 @Component({
   selector: 'app-advance-payment',
@@ -11,7 +12,7 @@ declare var bootstrap: any;
   styleUrls: ['./advance-payment.component.css'],
 })
 export class AdvancePaymentComponent {
-  constructor(private fb: FormBuilder, private service: HrmserviceService, private toastr: ToastrService, private router: Router,) { }
+  constructor(private fb: FormBuilder, private service: HrmserviceService, private modalService: ModalServiceService, private toastr: ToastrService, private router: Router,) { }
   today: string = new Date().toISOString().split('T')[0];
   title: String = 'Company Demo';
   role: string = '';
@@ -72,16 +73,6 @@ export class AdvancePaymentComponent {
     }
   }
 
-  closeAllModals(): void {
-    const modals = document.querySelectorAll('.modal.show');
-    modals.forEach((modalElement: any) => {
-      const modalInstance = bootstrap.Modal.getInstance(modalElement);
-      if (modalInstance) {
-        modalInstance.hide();
-      }
-    });
-  }
-
   selectTab(tab: string) {
     this.activeTab = tab;
   }
@@ -123,23 +114,23 @@ export class AdvancePaymentComponent {
             tenure: item.tenure,
             status: item.status,
             adv_pay_id: item.adv_pay_id
-          }));
+          })).reverse();
         } else {
           this.toastr.warning('Data Not Found');
         }
       } catch (error) {
         console.log(error);
       }
+      this.isLoading = false;
     },
       (error) => {
-        this.isLoading = false;
         if (error.status === 404) {
           this.toastr.warning('Data Not Found');
         } else {
           console.error(error);
         }
+        this.isLoading = false;
       })
-    this.isLoading = false;
   }
 
   // getAllAdvSalary() {
@@ -283,7 +274,6 @@ export class AdvancePaymentComponent {
   getSingleAdvanceSalary(data: any) {
     this.isLoading = true;
     this.advPayId = data;
-    console.log(this.advPayId);
 
     this.service.post('single/advancesaraly', { adv_pay_id: data }).subscribe((res: any) => {
       if (res.status === 'success') {
@@ -363,7 +353,7 @@ export class AdvancePaymentComponent {
         if (res.status === 'success') {
           this.toastr.success("Advance salary status updated successfully");
           this.getAllAdvSalary();
-          this.closeAllModals();
+          this.modalService.closeModal();
         }
       }, (error) => {
         console.error('Error:', error);

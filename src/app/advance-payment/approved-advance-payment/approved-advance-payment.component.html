@@ -86,23 +86,38 @@
               </div>
 
               <!-- Row 2 -->
-              <div class="row mb-3 align-items-end">
+              <div class="row mb-3 align-items-center">
                 <div class="col-md-2">
                   <strong>Request Date</strong>
                   <input class="form-control" formControlName="requestDate">
                 </div>
-                <div class="col-md-2">
+
+                <div class="col-md-1">
                   <strong>Tenure</strong>
                   <input class="form-control" formControlName="tenure">
                 </div>
+
                 <div class="col-md-2">
                   <strong>Amount (in ₹)</strong>
                   <input class="form-control" formControlName="amount">
                 </div>
-                <div class="col-md-2 ms-auto text-end me-2">
-                  <button type="button" class="btn BtnColor" data-bs-toggle="modal" data-bs-target="#openSkipEmiModal">
-                    Skip EMI
-                  </button>
+
+                <div class="col-md-6 d-flex align-items-center mt-3">
+                  <div class="form-check me-3">
+                    <input class="form-check-input" type="checkbox" formControlName="skipEmi" id="flexCheckSkipEmi">
+                    <label class="form-check-label" for="flexCheckSkipEmi" style="white-space: nowrap;">
+                      Skip EMI
+                    </label>
+                  </div>
+
+                  <!-- <input *ngIf="displayApprovedData.get('skipEmi')?.value" class="form-control"
+                    formControlName="skipreason" type="text" placeholder="Enter Reason" /> -->
+                  <textarea *ngIf="displayApprovedData.get('skipEmi')?.value" class="form-control"
+                    formControlName="skipreason" placeholder="Enter Reason" id="floatingTextarea"></textarea>
+                </div>
+
+                <div class="col-md-1 mt-3" *ngIf="displayApprovedData.get('skipEmi')?.value">
+                  <button class="btn BtnColor" type="button" (click)="skipEmiConfirm()">Skip</button>
                 </div>
               </div>
 
@@ -110,18 +125,24 @@
               <div class="mb-3">
                 <label class="fw-bold">Loan Amount</label>
                 <div class="d-flex justify-content-between">
-                  <span class="fw-bold text-dark">₹ {{ displayApprovedData.get('advanceAmount')?.value || '0' }}</span>
-                  <span class="text-muted small">
-                    Remaining<br>₹ {{ displayApprovedData.get('remainingBalance')?.value || '0' }}
+                  <span class="fw-bold text-dark">
+                    ₹ {{ displayApprovedData.get('advanceAmount')?.value || '0' }}
                   </span>
                 </div>
+
                 <div class="progress mt-2" style="height: 12px;">
                   <div class="progress-bar bg-success" role="progressbar" [style.width.%]="calculatePaidPercentage()"
                     [attr.aria-valuenow]="calculatePaidPercentage()" aria-valuemin="0" aria-valuemax="100">
                     <span class="visually-hidden">Paid</span>
                   </div>
                 </div>
-                <div class="small text-success mt-1">● Paid ₹ {{ calculatePaidAmount() }}</div>
+
+                <!-- Paid & Remaining in same line -->
+                <div class="d-flex justify-content-between small mt-1">
+                  <span class="text-success">● Paid ₹ {{ calculatePaidAmount() }}</span>
+                  <span class="text-secondary">● Remaining ₹ {{ displayApprovedData.get('remainingBalance')?.value || '0'
+                    }}</span>
+                </div>
               </div>
 
               <!-- Row 3 -->
@@ -149,16 +170,16 @@
                           <th>Installment Date</th>
                           <th>Amount</th>
                           <th>EMI Status</th>
+                          <th>Remarks</th>
                         </tr>
                       </thead>
                       <tbody *ngIf="selectedAdvpayid && tabledata[selectedAdvpayid]">
-                        <tr *ngFor="let item of tabledata[selectedAdvpayid]; let i = index; let len = count">
-                          <ng-container *ngIf="item.date || item.EMI; else mergedRow">
-                            <td>{{ getPaidEmiCount() - i }}</td>
+                        <tr *ngFor="let item of tabledata[selectedAdvpayid]; let i = index">
+                            <td>{{ i + 1 }}</td>
                             <td>{{ item.date }}</td>
-                            <td>{{ item.EMI }}</td>
-                            <td>{{ item.status }}</td>
-                          </ng-container>
+                            <td>{{ item.installment_amount }}</td>
+                            <td>{{ item.installment_status }}</td>
+                            <td>{{ item.remarks }}</td>
 
                           <ng-template #mergedRow>
                             <td colspan="4" class="text-center fw-bold">{{ item.status }}</td>
@@ -183,41 +204,5 @@
       </div>
     </div>
 
-  </div>
-</div>
-
-<!-- Modal -->
-<div class="modal fade" id="openSkipEmiModal" tabindex="-1" aria-labelledby="rejectAllLabel" aria-hidden="true">
-  <div class="modal-dialog modal-lg modal-dialog-centered">
-    <div class="modal-content rounded-4">
-      <div class="modal-header text-white rounded-top-4">
-        <h5 class="modal-title" id="rejectAllLabel">Skip EMI</h5>
-        <button type="button text-white" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-
-      <div class="modal-body">
-        <form [formGroup]="skipEmiForm" (ngSubmit)="SkipEMI()">
-          <p class="mb-3">Are you sure you want to skip EMI?</p>
-          <div class="form-check mb-3">
-            <input class="form-check-input" type="checkbox" id="confirmCheckbox" formControlName="isSkipConfirmed"
-              [ngClass]="{'is-invalid': isSkipFormSubmitted && skipEmiForm.get('isSkipConfirmed')?.invalid}" />
-            <label class="form-check-label" for="confirmCheckbox">Yes</label>
-          </div>
-        
-          <div *ngIf="skipEmiForm.get('isSkipConfirmed')?.value">
-            <input type="text" class="form-control" placeholder="Enter Reason" formControlName="skipEmiReason"
-            [ngClass]="{
-            'input-error': isSkipFormSubmitted && skipEmiForm.get('skipEmiReason')?.invalid,
-            'is-invalid': isSkipFormSubmitted && skipEmiForm.get('skipEmiReason')?.invalid}" />
-          </div>
-
-          <div class="mt-4 d-flex justify-content-end">
-            <button type="submit" class="btn BtnColor me-2">
-              Skip
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
   </div>
 </div>
