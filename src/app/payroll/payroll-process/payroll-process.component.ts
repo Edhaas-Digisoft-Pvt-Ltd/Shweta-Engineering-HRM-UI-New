@@ -59,7 +59,7 @@ export class PayrollProcessComponent {
 
   ngOnInit() {
     this.selectedYear = new Date().getFullYear();
-    this.selectedMonth = new Date().getMonth()-1;
+    this.selectedMonth = new Date().getMonth();
     this.getCompanyNames();
     this.initializeColumns();
     this.initializeColumnsforProcess();
