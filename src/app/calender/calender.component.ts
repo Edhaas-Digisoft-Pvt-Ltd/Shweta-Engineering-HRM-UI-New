@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import interactionPlugin from '@fullcalendar/interaction';
 
@@ -32,6 +33,7 @@ export class CalenderComponent implements OnInit {
     }
   ];
 
+  constructor(private router: Router) { }
 
   calendarOptions: any = {
     initialView: 'dayGridMonth',
@@ -43,6 +45,17 @@ export class CalenderComponent implements OnInit {
   ngOnInit(): void {
     // Load initial events into calendar from dateEvents
     this.calendarOptions.events = [...this.dateEvents];
+    
+    const roleName = sessionStorage.getItem('roleName')
+    if (roleName == 'admin' || roleName == 'accountant' || roleName == 'employee') {
+      this.router.navigate(['/authPanal/Calender']);
+      return;
+    } else {
+      alert('Please Login To Proceed');
+      sessionStorage.clear();
+      this.router.navigate(['']);
+      return;
+    }
   }
 
   handleDateClick(arg: any) {

@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { ColDef } from 'ag-grid-community';
+import { ColDef, GridApi } from 'ag-grid-community';
 import { Router } from '@angular/router';
 import { HrmserviceService } from 'src/app/hrmservice.service';
 import { ToastrService } from 'ngx-toastr';
@@ -11,13 +11,21 @@ import { ToastrService } from 'ngx-toastr';
 })
 export class PayrollRejectedComponent {
   CompanyNames: any = [];
-  selectedCompanyId: any = 1;
+  selectedCompanyId: any;
   selectedYear: any;
   selectedMonth: any;
   today: string = new Date().toISOString().split('T')[0];
   rowData: any = [];
   selectedRowData: any[] = [];
   activeTab: string = 'tab1';
+  gridApiActive!: GridApi;
+  isLoading: boolean = false;
+
+  totalRows: number = 0;
+  currentPage: number = 1;
+  lastPage: number = 1;
+  pagesToShow: (number | string)[] = [];
+  paginationvalue: any;
 
   constructor(private router: Router, private service: HrmserviceService, private toastr: ToastrService) { }
 
@@ -48,14 +56,20 @@ export class PayrollRejectedComponent {
     this.activeTab = tab;
   }
 
-
   ngOnInit() {
+    this.selectedCompanyId = this.service.selectedCompanyId();
+
     this.selectedYear = new Date().getFullYear();
-    this.selectedMonth = new Date().getMonth() + 1;
+    this.selectedMonth = new Date().getMonth();
     const currentDate = new Date();
     this.today = currentDate.toISOString().split('T')[0];
     this.getCompanyNames();
-    this.ApproveRejectPayrollList();
+    // this.RejectedPayrollList();
+    this.getPagination();
+  }
+
+  onGridReady(params: { api: any }) {
+    this.gridApiActive = params.api;
   }
 
 
@@ -74,91 +88,128 @@ export class PayrollRejectedComponent {
   onCompanyChange(event: Event): void {
     this.selectedCompanyId = (event.target as HTMLSelectElement).value;
     console.log('Selected Company ID:', this.selectedCompanyId);
-    this.ApproveRejectPayrollList();
+    this.RejectedPayrollList();
   }
 
   onYearMonthChange() {
-    this.ApproveRejectPayrollList();
+    this.RejectedPayrollList();
   }
 
-  ApproveRejectPayrollList() {
-    this.service.post('payroll_list/status', {
+  RejectedPayrollList(page: number = 1): void {
+    this.isLoading = true;
+    this.service.post('fetch/rejected/payroll', {
       company_id: this.selectedCompanyId,
       year: this.selectedYear,
       month: this.selectedMonth,
+      page:page,
     }).subscribe(
       (res: any) => {
         try {
           if (res.status === 'success' && res.data && res.data.length > 0) {
             this.rowData = res.data.map((item: any) => ({
               employee_code: item.employee_code,
-              employeeName: item.emp_name,
-              grossAmount: item.gross_salary,
+              department: item.department_name,
+              role: item.role_name,
+              presentDays: item.present_days,
+              absentDays: item.absent_days,
+              hours: item.total_hours,
               overTime: item.total_overtime,
-              netAmount: item.net_salary,
-              deduction: item.deduction,
               employe_id: item.employe_id,
-              payroll_status: item.payroll_status
+              bonus_amount: item.bonus_amount ? `₹${item.bonus_amount}` : 'NA',
+              advance_salary: item.advance_salary ? `₹${item.advance_salary}` : 'NA',
+              net_salary: item.net_salary ? `₹${item.net_salary}` : 'NA',
             }));
+            this.totalRows = res.pagination.total;
+            this.currentPage = res.pagination.page;
+            this.lastPage = res.pagination.last_page;
+            this.generatePageNumbers(this.paginationvalue);
           } else {
             this.rowData = [];
+            this.toastr.warning('Data Not Found');
           }
         } catch (error) {
-          console.error('Error mapping payroll data:', error);
-          this.rowData = []; 
+          console.error(error);
+          this.rowData = [];
         }
+        this.isLoading = false;
       },
       (error) => {
-        console.error('Error fetching payroll list:', error);
+        this.isLoading = false;
         this.rowData = [];
+        if (error.status === 404) {
+          this.toastr.warning('Data Not Found');
+          this.isLoading = false;
+        } else {
+          console.error(error);
+          this.isLoading = false;
+        }
       }
     );
   }
 
   columnDefs: ColDef[] = [
     {
-      headerName: 'Employee Code',
+      headerName: 'Emp Code',
       field: 'employee_code',
       sortable: true,
       filter: true,
+      minWidth: 150,
     },
     {
-      headerName: 'Employee Name',
-      field: 'employeeName',
+      headerName: 'Department',
+      field: 'department',
       sortable: true,
       filter: true,
+      minWidth: 140,
     },
-
     {
-      headerName: 'Gross Amount',
-      field: 'grossAmount',
+      headerName: 'P',
+      field: 'presentDays',
       sortable: true,
       filter: true,
+      minWidth: 80,
     },
     {
-      headerName: 'Over Time',
+      headerName: 'A',
+      field: 'absentDays',
+      sortable: true,
+      filter: true,
+      minWidth: 80,
+    },
+    {
+      headerName: 'OT(hrs)',
       field: 'overTime',
       sortable: true,
       filter: true,
+      minWidth: 100,
     },
     {
-      headerName: 'Deductions',
-      field: 'deduction',
+      headerName: 'hours',
+      field: 'hours',
       sortable: true,
       filter: true,
+      minWidth: 100,
     },
     {
-      headerName: 'Net Amount',
-      field: 'netAmount',
+      headerName: 'Bonus',
+      field: 'bonus_amount',
       sortable: true,
       filter: true,
+      minWidth: 120,
     },
     {
-      headerName: 'Status',
-      field: 'payroll_status',
+      headerName: 'Adv Salary',
+      field: 'advance_salary',
       sortable: true,
       filter: true,
-      cellRenderer: this.statusButtonRenderer,
+      minWidth: 140,
+    },
+    {
+      headerName: 'Net Salary',
+      field: 'net_salary',
+      sortable: true,
+      filter: true,
+      minWidth: 140,
     },
   ];
 
@@ -211,6 +262,86 @@ export class PayrollRejectedComponent {
   };
 
 
+  exportExcel() {
+    if (this.gridApiActive) {
+      this.gridApiActive.exportDataAsCsv();
+    }
+  }
 
+  getPagination() {
+    this.service.post('get-pagination', {}).subscribe((res: any) => {
+      if (res.status === 'success') {
+        this.paginationvalue = res.data;
+
+        this.RejectedPayrollList();
+      } else {
+        this.paginationvalue = 10;
+        this.RejectedPayrollList();
+      }
+    });
+  }
+
+  getpaginationvalue() {
+    this.service.post('get-pagination', {}).subscribe((res: any) => {
+      if (res.status === 'success') {
+        this.paginationvalue = res.data
+        this.generatePageNumbers(this.paginationvalue)
+      }
+    });
+  }
+
+  generatePageNumbers(pageWindow: number) {
+    const total = this.lastPage;
+    const current = this.currentPage;
+
+    let startPage = current;
+    let endPage = current + pageWindow - 1;
+
+    if (endPage >= total) {
+      endPage = total - 1;
+      startPage = Math.max(2, total - pageWindow); 
+    }
+    if (current === 1) {
+      startPage = 2;
+      endPage = Math.min(total - 1, pageWindow);
+    }
+    const pages: (number | string)[] = [];
+    pages.push(1); 
+    if (startPage > 2) {
+      pages.push('...');
+    }
+    for (let i = startPage; i <= endPage; i++) {
+      pages.push(i);
+    }
+    if (endPage < total - 1) {
+      pages.push('...');
+    }
+    if (total > 1) pages.push(total);
+
+    this.pagesToShow = pages;
+  }
+
+
+  goToPage(page: number | string) {
+    if (page === '...') return;
+    if (page !== this.currentPage) {
+      this.currentPage = page as number;
+      this.RejectedPayrollList(this.currentPage);
+    }
+  }
+
+  prevPage() {
+    if (this.currentPage > 1) {
+      this.currentPage--;
+      this.RejectedPayrollList(this.currentPage);
+    }
+  }
+
+  nextPage() {
+    if (this.currentPage < this.lastPage) {
+      this.currentPage++;
+      this.RejectedPayrollList(this.currentPage);
+    }
+  }
 
 }

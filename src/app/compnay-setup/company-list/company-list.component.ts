@@ -21,7 +21,7 @@ export class CompanyListComponent {
   selectedLeaveID: any;
   valData: any;
   companyForm: FormGroup;
-  EditcompanyForm : FormGroup;
+  EditcompanyForm: FormGroup;
   readonly NoWhitespaceRegExp: RegExp = new RegExp("\\S");
   Companydata: any = {};
   selectedLogoFile: any;
@@ -29,9 +29,6 @@ export class CompanyListComponent {
   isEditSubmitted = false;
   selectedId: any;
   textInputControl: any;
-
-
-
 
   constructor(private router: Router, private fb: FormBuilder, private service: HrmserviceService, private toastr: ToastrService) {
     this.companyForm = this.fb.group({
@@ -57,7 +54,7 @@ export class CompanyListComponent {
       // Company Logo: Required (file/image input)
       EditcompanyLogo: [null, Validators.required],
       EditcompanyAddress: ['', Validators.required],
-      EditmasterCompanyList: [{ value: '', disabled: true,},Validators.required],
+      EditmasterCompanyList: [{ value: '', disabled: true, }, Validators.required],
       radioChoice: ['yes'],
 
       EditcompanyDescription: [
@@ -83,16 +80,16 @@ export class CompanyListComponent {
   }
   CompanyNameList = [
     {
-      name:'hrishikesh',
+      name: 'hrishikesh',
     },
     {
-      name:'Onkar',
+      name: 'Onkar',
     },
     {
-      name:'sonal',
+      name: 'sonal',
     },
     {
-      name:'Shivani',
+      name: 'Shivani',
     },
   ]
   ngOnInit() {
@@ -100,6 +97,17 @@ export class CompanyListComponent {
     this.today = currentDate.toISOString().split('T')[0]; // Format YYYY-MM-DD
     this.getCompanyData();
     this.getCompanyNames();
+
+
+    if (sessionStorage.getItem('roleName') == 'admin') {
+      this.router.navigate(['/authPanal/companyList']);
+      return;
+    } else {
+      alert('Please Login To Proceed');
+      sessionStorage.clear();
+      this.router.navigate(['']);
+      return;
+    }
   }
 
   onMasterCompanyChange(event: Event): void {
@@ -192,13 +200,13 @@ export class CompanyListComponent {
   //     console.log(this.companyForm.value);
   //   }
   // }
-redirect(){
+  redirect() {
     this.router.navigate(['/authPanal/CompanyDashboard/'])
   }
 
   addCompany() {
     this.isSubmitted = true;
-    if (this.companyForm.value.radioChoice == 'no') { 
+    if (this.companyForm.value.radioChoice == 'no') {
       if (this.companyForm.valid && this.selectedLogoFile) {
         const current_data = {
           master_id: this.selectedId,
@@ -269,4 +277,30 @@ redirect(){
 
     }
 
-  }}
+  }
+
+  allowOnlyLetters(event: KeyboardEvent) {
+    const char = String.fromCharCode(event.keyCode);
+    const pattern = /^[A-Za-z ]+$/;
+
+    if (!pattern.test(char)) {
+      event.preventDefault();
+    }
+  }
+
+  blockPaste(event: ClipboardEvent) {
+    const pasteData = event.clipboardData?.getData('text') || '';
+    if (!/^[A-Za-z ]+$/.test(pasteData)) {
+      event.preventDefault();
+    }
+  }
+
+  allowNumbersCharacters(event: KeyboardEvent) {
+    const char = event.key;
+    const pattern = /^[A-Za-z0-9 ]$/;
+
+    if (!pattern.test(char)) {
+      event.preventDefault();
+    }
+  }
+}

@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { AbstractControl, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { Router } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
 import { HrmserviceService } from 'src/app/hrmservice.service';
 declare var bootstrap: any;
@@ -9,7 +10,7 @@ declare var bootstrap: any;
   styleUrls: ['./com-mange-and-policies.component.css']
 })
 export class ComMangeAndPoliciesComponent {
-// today: string = '';ta
+  // today: string = '';ta
   today = new Date().toISOString().split('T')[0];
   title: String = "Company Demo";
   CompanyDetails: any[] = [];
@@ -28,7 +29,7 @@ export class ComMangeAndPoliciesComponent {
   isSubmitted = false;
   isEditSubmitted = false;
 
-  constructor(private fb: FormBuilder, private service: HrmserviceService, private toastr: ToastrService) {
+  constructor(private fb: FormBuilder, private service: HrmserviceService, private toastr: ToastrService, private router: Router,) {
     this.companyForm = this.fb.group({
       // Company Name: Only letters, numbers, spaces, dots, and ampersands (e.g., TCS, Infosys Ltd., H&M)
       companyName: [
@@ -42,7 +43,7 @@ export class ComMangeAndPoliciesComponent {
 
       // Company Logo: Required (file/image input)
       companyLogo: [null, Validators.required],
-      masterCompanyList: [{ value: '', disabled: true,},Validators.required],
+      masterCompanyList: [{ value: '', disabled: true, }, Validators.required],
       radioChoice: ['yes'],
 
       companyDescription: [
@@ -130,6 +131,16 @@ export class ComMangeAndPoliciesComponent {
     this.getCompanyData();
     this.getleaveData(this.selectedValue);
     this.getCompanyNames();
+
+    if (sessionStorage.getItem('roleName') == 'admin') {
+      this.router.navigate(['/authPanal/comMange&Plolicies']);
+      return;
+    } else {
+      alert('Please Login To Proceed');
+      sessionStorage.clear();
+      this.router.navigate(['']);
+      return;
+    }
   }
 
   selectTab(tab: string) {

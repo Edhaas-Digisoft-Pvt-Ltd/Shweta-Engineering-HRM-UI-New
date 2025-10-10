@@ -4,6 +4,7 @@ import { ColDef } from 'ag-grid-community';
 import { ToastrService } from 'ngx-toastr';
 import { HrmserviceService } from 'src/app/hrmservice.service';
 import { LeaveSetupBtnComponent } from './leave-setup-btn/leave-setup-btn.component';
+import { Router } from '@angular/router';
 declare var bootstrap: any;
 @Component({
   selector: 'app-leave-setup',
@@ -29,13 +30,14 @@ export class LeaveSetupComponent {
   isSubmitted = false;
   isEditSubmitted = false;
   CompanyNames: any = [];
-  selectedCompanyId: any = 1;
+  selectedCompanyId: any;
   rowData: any = [];
   columnDefs: ColDef[] = [];
   gridApiActive: any;
   singleleave: any;
-  companyId:any;
-  leaveId:any
+  companyId: any;
+  leaveId: any;
+  isLoading: boolean = false;
 
   public defaultColDef: ColDef = {
     editable: true,
@@ -66,7 +68,7 @@ export class LeaveSetupComponent {
     this.gridApiActive = params.api;
   }
 
-  constructor(private fb: FormBuilder, private service: HrmserviceService, private toastr: ToastrService) {
+  constructor(private fb: FormBuilder, private service: HrmserviceService, private toastr: ToastrService, private router: Router) {
     this.companyForm = this.fb.group({
       // Company Name: Only letters, numbers, spaces, dots, and ampersands (e.g., TCS, Infosys Ltd., H&M)
       companyName: [
@@ -150,6 +152,8 @@ export class LeaveSetupComponent {
 
 
   ngOnInit() {
+    this.selectedCompanyId = this.service.selectedCompanyId();
+
     const currentDate = new Date();
     this.today = currentDate.toISOString().split('T')[0]; // Format YYYY-MM-DD
     this.getCompanyData();
@@ -157,9 +161,20 @@ export class LeaveSetupComponent {
     this.getCompanyNames();
     this.getAllLeaves();
     this.initializeColumns();
+
+    if (sessionStorage.getItem('roleName') == 'admin') {
+      this.router.navigate(['/authPanal/LeaveSetup']);
+      return;
+    } else {
+      alert('Please Login To Proceed');
+      sessionStorage.clear();
+      this.router.navigate(['']);
+      return;
+    }
   }
 
   getAllLeaves() {
+    this.isLoading = true;
     this.rowData = [];
     this.service.post("fetch/companyleave", { company_id: this.selectedCompanyId }).subscribe((res: any) => {
       if (res.status === 'success') {
@@ -171,11 +186,18 @@ export class LeaveSetupComponent {
           leave_id: item.leave_id
         }));
       }
+      this.isLoading = false;
     },
       (error) => {
-        console.error('Error fetching leave request:', error);
+        this.isLoading = false;
+        if (error.status === 400) {
+          this.toastr.warning('Data Not Found');
+        } else {
+          console.error(error);
+        }
       }
     );
+    this.isLoading = false;
   }
 
   selectTab(tab: string) {

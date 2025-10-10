@@ -23,6 +23,11 @@ export class ConsolidateAttendanceSummaryComponent {
   rowData: any[] = [];
   selectedYear = new Date().getFullYear();
   selectedMonth = new Date().getMonth();
+  isLoading: boolean = false;
+
+  fromDate: string = '';
+  toDate: string = '';
+
 
   constructor(private service: HrmserviceService) { }
 
@@ -74,6 +79,12 @@ export class ConsolidateAttendanceSummaryComponent {
     setTimeout(() => this.scrollToSelectedMonth(), 200);
   }
 
+  onFilterBoxChange() {
+    if (this.gridApi) {
+      this.gridApi.setQuickFilter(this.searchValue);
+    }
+  }
+
   onSelectionChange() {
     this.loadData();
     setTimeout(() => this.scrollToSelectedMonth(), 200);
@@ -83,7 +94,7 @@ export class ConsolidateAttendanceSummaryComponent {
     if (this.gridApi) {
       // Middle index of the HEADERS array (11 items -> index 5)
       const firstHeader = this.HEADERS[0].key;
-    // Construct the field name like 'month-4-PR'
+      // Construct the field name like 'month-4-PR'
       const targetField = `month-${this.selectedMonth}-${firstHeader}`;
       this.gridApi.ensureColumnVisible(targetField);
     }
@@ -91,7 +102,7 @@ export class ConsolidateAttendanceSummaryComponent {
 
   loadData() {
     const baseCols: (ColDef | ColGroupDef)[] = [
-      { headerName: 'Employee Code', field: 'id', pinned: 'left', width: 150},
+      { headerName: 'Employee Code', field: 'id', pinned: 'left', width: 150 },
       { headerName: 'Employee Name', field: 'employeeName', pinned: 'left' },
     ];
 
@@ -128,51 +139,161 @@ export class ConsolidateAttendanceSummaryComponent {
               </div>`;
   }
 
+  // fetchConsolidateSummary() {
+  //   this.isLoading = true;
+  //   this.service.post('fetch/ConsolidatedSummary', {}).subscribe((res: any) => {
+  //     if (res.status === 'success') {
+  //       const result = res.data;
+  //       const employeeMap = new Map();
+
+  //       Object.keys(result).forEach((monthKey) => {
+  //         const monthIndex = parseInt(monthKey.split('-')[1]) - 1; // e.g., '2025-06' -> 5
+
+  //         result[monthKey].forEach((item: any) => {
+  //           const empId = item.employee_code;
+
+  //           if (!employeeMap.has(empId)) {
+  //             employeeMap.set(empId, {
+  //               id: empId,
+  //               employeeName: item.emp_name,
+  //             });
+  //           }
+
+  //           const row = employeeMap.get(empId);
+
+  //           row[`month-${monthIndex}-P`] = item.present_days || '';
+  //           row[`month-${monthIndex}-A`] = item.absent_days || '';
+  //           row[`month-${monthIndex}-W`] = item.weekend || '';
+  //           row[`month-${monthIndex}-W/od`] = item.weekend_od || '';
+  //           row[`month-${monthIndex}-H`] = item.holiday_days || '';
+  //           row[`month-${monthIndex}-WFH/2`] = item.work_from_home_half_day || '';
+  //           row[`month-${monthIndex}-HD`] = item.half_day || '';
+  //           row[`month-${monthIndex}-LT`] = item.late || '';
+  //           row[`month-${monthIndex}-HR`] = ''; // Add logic if needed
+  //           row[`month-${monthIndex}-OT`] = item.total_overtime || '';
+  //           row[`month-${monthIndex}-Th`] = ''; // Add logic if needed
+
+  //           employeeMap.set(empId, row);
+  //         });
+  //       });
+
+  //       this.rowData = Array.from(employeeMap.values());
+  //       setTimeout(() => this.scrollToSelectedMonth(), 200);
+  //     } else {
+  //       this.rowData = [];
+  //       console.error(res.error);
+  //     }
+  //   });
+  //   this.isLoading = false;
+  // }
+
   fetchConsolidateSummary() {
-    this.service.post('fetch/ConsolidatedSummary', {}).subscribe((res: any) => {
-      if (res.status === 'success') {
-        const result = res.data;
-        const employeeMap = new Map();
+    if (!this.fromDate || !this.toDate) return;
 
-        Object.keys(result).forEach((monthKey) => {
-          const monthIndex = parseInt(monthKey.split('-')[1]) - 1; // e.g., '2025-06' -> 5
+    this.isLoading = true;
+    this.service.post('fetch/ConsolidatedSummary', { from_date: this.fromDate, to_date: this.toDate })
+      .subscribe((res: any) => {
+        if (res.status === 'success') {
+          const result = res.data;
+          const employeeMap = new Map<string, any>();
 
-          result[monthKey].forEach((item: any) => {
-            const empId = item.employee_code;
+          Object.keys(result).forEach((monthKey) => {
+            result[monthKey].forEach((item: any) => {
+              const empId = item.employee_code;
 
-            if (!employeeMap.has(empId)) {
-              employeeMap.set(empId, {
-                id: empId,
-                employeeName: item.emp_name,
-              });
-            }
+              if (!employeeMap.has(empId)) {
+                employeeMap.set(empId, {
+                  employeeCode: empId,
+                  employeeName: item.emp_name
+                });
+              }
 
-            const row = employeeMap.get(empId);
+              const row = employeeMap.get(empId);
 
-            row[`month-${monthIndex}-P`] = item.present_days || '';
-            row[`month-${monthIndex}-A`] = item.absent_days || '';
-            row[`month-${monthIndex}-W`] = item.weekend || '';
-            row[`month-${monthIndex}-W/od`] = item.weekend_od || '';
-            row[`month-${monthIndex}-H`] = item.holiday_days || '';
-            row[`month-${monthIndex}-WFH/2`] = item.work_from_home_half_day || '';
-            row[`month-${monthIndex}-HD`] = item.half_day || '';
-            row[`month-${monthIndex}-LT`] = item.late || '';
-            row[`month-${monthIndex}-HR`] = ''; // Add logic if needed
-            row[`month-${monthIndex}-OT`] = item.total_overtime || '';
-            row[`month-${monthIndex}-Th`] = ''; // Add logic if needed
+              // safe field names
+              row[`${monthKey}-P`] = item.present_days || '';
+              row[`${monthKey}-A`] = item.absent_days || '';
+              row[`${monthKey}-W`] = item.weekend || '';
+              row[`${monthKey}-WOD`] = item.weekend_od || '';
+              row[`${monthKey}-H`] = item.holiday_days || '';
+              row[`${monthKey}-WFH2`] = item.work_from_home_half_day || '';
+              row[`${monthKey}-HD`] = item.half_day || '';
+              row[`${monthKey}-LT`] = item.late || '';
+              row[`${monthKey}-OT`] = item.total_overtime || '';
+              row[`${monthKey}-Period`] = `${item.period_start} - ${item.period_end}`;
 
-            employeeMap.set(empId, row);
+              employeeMap.set(empId, row);
+            });
           });
-        });
 
-        this.rowData = Array.from(employeeMap.values());
-        setTimeout(() => this.scrollToSelectedMonth(), 200);
-      } else {
-        this.rowData = [];
-        console.error(res.error);
-      }
-    });
+          this.rowData = Array.from(employeeMap.values());
+
+          // rebuild columns to match safe field names
+          this.loadDynamicMonthColumns(result);
+
+        } else {
+          this.rowData = [];
+        }
+        this.isLoading = false;
+      });
   }
+
+  loadDynamicMonthColumns(groupedData: any): void {
+    const dynamicCols: (ColDef | ColGroupDef)[] = [
+      { headerName: 'Employee Code', field: 'employeeCode', pinned: 'left', width: 160 },
+      { headerName: 'Employee Name', field: 'employeeName', pinned: 'left', width: 180 },
+    ];
+
+    // Sort month keys chronologically
+    const sortedMonthKeys = Object.keys(groupedData).sort(
+      (a, b) => new Date(a + '-01').getTime() - new Date(b + '-01').getTime()
+    );
+
+    sortedMonthKeys.forEach((monthKey) => {
+      const sample = groupedData[monthKey][0];
+      const monthLabel = new Date(monthKey + '-01').toLocaleString('default', { month: 'short', year: 'numeric' });
+      const period = sample?.period_start && sample?.period_end
+        ? ` (${sample.period_start} - ${sample.period_end})`
+        : '';
+
+      const group: ColGroupDef = {
+        headerName: `${monthLabel}${period}`,
+        children: [
+          { headerName: this.getHeaderWithDot('P', '#11FFA1'), field: `${monthKey}-P`, width: 70, valueFormatter: this.showDashIfEmpty, headerComponentParams: { template: this.getHeaderWithDot('P', '#11FFA1') } },
+          { headerName: this.getHeaderWithDot('A', '#F90004'), field: `${monthKey}-A`, width: 70, valueFormatter: this.showDashIfEmpty, headerComponentParams: { template: this.getHeaderWithDot('A', '#F90004') } },
+          { headerName: this.getHeaderWithDot('W', '#EDD000'), field: `${monthKey}-W`, width: 70, valueFormatter: this.showDashIfEmpty, headerComponentParams: { template: this.getHeaderWithDot('W', '#EDD000') } },
+          { headerName: this.getHeaderWithDot('W/OD', '#9FFF04'), field: `${monthKey}-WOD`, width: 70, valueFormatter: this.showDashIfEmpty, headerComponentParams: { template: this.getHeaderWithDot('W/OD', '#9FFF04') } },
+          { headerName: this.getHeaderWithDot('H', '#04BCFF'), field: `${monthKey}-H`, width: 70, valueFormatter: this.showDashIfEmpty, headerComponentParams: { template: this.getHeaderWithDot('H', '#04BCFF') } },
+          { headerName: this.getHeaderWithDot('WFH/2', '#0066EB'), field: `${monthKey}-WFH2`, width: 70, valueFormatter: this.showDashIfEmpty, headerComponentParams: { template: this.getHeaderWithDot('WFH/2', '#0066EB') } },
+          { headerName: this.getHeaderWithDot('HD', '#0066EB'), field: `${monthKey}-HD`, width: 70, valueFormatter: this.showDashIfEmpty, headerComponentParams: { template: this.getHeaderWithDot('HD', '#0066EB') } },
+          { headerName: this.getHeaderWithDot('LT', '#880021'), field: `${monthKey}-LT`, width: 70, valueFormatter: this.showDashIfEmpty, headerComponentParams: { template: this.getHeaderWithDot('LT', '#880021') } },
+          { headerName: this.getHeaderWithDot('OT', '#FFA704'), field: `${monthKey}-OT`, width: 70, valueFormatter: this.showDashIfEmpty, headerComponentParams: { template: this.getHeaderWithDot('OT', '#FFA704') } },
+        ]
+      };
+
+      dynamicCols.push(group);
+    });
+
+    this.columnDefs = dynamicCols;
+  }
+
+  showDashIfEmpty(params: any) {
+    return params.value || '-';
+  }
+
+  getHeaderWithDot(label: string, color: string): string {
+    return `<div style="display:flex; flex-direction:column; align-items:center;">
+            <span>${label}</span>
+            <span style="width:8px; height:8px; border-radius:50%; background:${color}; margin-top:2px;"></span>
+          </div>`;
+  }
+
+  onDateRangeChange() {
+    if (this.fromDate && this.toDate) {
+      this.fetchConsolidateSummary();
+    }
+  }
+
 
   // search code
   emptyInput() {
@@ -195,8 +316,9 @@ export class ConsolidateAttendanceSummaryComponent {
     const endMonth = 11;
 
     const headerRow1 = ['ID', 'Employee Name'];
-    for (let m = startMonth; m <= endMonth; m++) {
-      headerRow1.push(`${monthLabels[m]} ${year}`, ...Array(statuses.length - 1).fill(''));
+    for (let m = startMonth; m <= endMonth; m++) {    
+      const cleanLabel = monthLabels[m].split('(')[0].trim();
+      headerRow1.push(`${cleanLabel} ${year}`, ...Array(statuses.length - 1).fill(''));
     }
 
     const headerRow2 = ['', ''];

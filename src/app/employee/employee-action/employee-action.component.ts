@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { ICellRendererAngularComp } from 'ag-grid-angular';
 import { Router } from '@angular/router';
+import { HrmserviceService } from 'src/app/hrmservice.service';
 
 @Component({
   selector: 'app-employee-action',
@@ -21,16 +22,16 @@ import { Router } from '@angular/router';
 })
 export class EmployeeActionComponent implements ICellRendererAngularComp {
   params: any;
-  employeID : any;
-  constructor(private router: Router) {}
+  employeID: any;
+  constructor(private router: Router, private service: HrmserviceService) { }
 
   agInit(params: any): void {
     this.params = params;
     this.employeID = params.data.employee_id; // or the correct property name
-    console.log("employee_action :",this.params.data);
-    console.log(this.employeID);
+    // console.log("employee_action :",this.params.data);
+    // console.log(this.employeID);
   }
-  
+
 
   refresh(): boolean {
     return false;
@@ -38,9 +39,12 @@ export class EmployeeActionComponent implements ICellRendererAngularComp {
 
   viewEmployee() {
     this.router.navigate(['/authPanal/EmployeeInDetail'],{
-    queryParams: { id: this.employeID }
-  });
+      queryParams: { id: this.employeID }
+    });
     console.log(this.employeID);
+    // this.service.setEmployeeId(this.employeID);
+    // console.log('login page', this.employeID);
+    // this.router.navigate(['/authPanal/EmployeeInDetail']);
   }
 
 }

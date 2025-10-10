@@ -174,3 +174,12 @@ label{
     height: 40px;
     font-size: 18px;
 }
+
+input {
+    height: 38px;
+}
+
+.BtnColor{
+    background-color: #3674B5;
+    color: white;
+}

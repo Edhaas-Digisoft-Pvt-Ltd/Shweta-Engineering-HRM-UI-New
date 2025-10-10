@@ -11,7 +11,7 @@ export class AuthPanelComponent {
   isDarkTheme = false;
   empName: any;
   roleName: any;
-  
+
   constructor(private router: Router, private renderer: Renderer2) { }
 
   ngOnInit(): void {
@@ -21,6 +21,10 @@ export class AuthPanelComponent {
 
     this.empName = sessionStorage.getItem('employeeName')
     this.roleName = sessionStorage.getItem('roleName')
+
+    console.log(this.roleName);
+
+    this.rolewiseSidebarColor(this.roleName);
   }
 
   toggleTheme() {
@@ -40,7 +44,8 @@ export class AuthPanelComponent {
   }
   logout() {
     let cnf = confirm('Are You sure you want to Log OUT??');
-    if (cnf == true) {
+
+    if (cnf) {
       sessionStorage.clear();
       this.router.navigate(['/']);
     }
@@ -54,5 +59,22 @@ export class AuthPanelComponent {
   toggleSideNav() {
     this.isSideNavOpen = !this.isSideNavOpen;
   }
+
+  rolewiseSidebarColor(role: string) {
+    let color = 'var(--primary-color)';
+    if (role === 'admin') {
+      document.documentElement.style.setProperty('--role-color', '#3674B5');
+      document.documentElement.style.setProperty('--role-accent', '#578FCA');
+    }
+    if (role === 'accountant') {
+      document.documentElement.style.setProperty('--role-color', '#0E9F6E');
+      document.documentElement.style.setProperty('--role-accent', '#51d6aa');
+    }
+    if (role === 'employee') {
+      document.documentElement.style.setProperty('--role-color', '#f48634');
+      document.documentElement.style.setProperty('--role-accent', '#e4a87a');
+    }
+  }
+
 
 }

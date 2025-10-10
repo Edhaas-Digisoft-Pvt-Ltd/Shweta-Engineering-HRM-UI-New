@@ -36,7 +36,7 @@ export class CompnaySetupComponent {
         '',
         [
           Validators.required,
-          Validators.pattern(/^[A-Za-z ]{2,}$/),
+          Validators.pattern(/^.+$/),
           Validators.pattern(this.NoWhitespaceRegExp)
         ]
       ],

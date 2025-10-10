@@ -16,6 +16,7 @@ import {
 import { PayrollSummariesBtnComponent } from './Payroll-summaries-btn/Payroll-summaries-btn.component';
 import { ToastrService } from 'ngx-toastr';
 import { HrmserviceService } from 'src/app/hrmservice.service';
+declare var bootstrap: any;
 
 @Component({
   selector: 'app-payroll-summaries',
@@ -34,18 +35,24 @@ export class PayrollSummariesComponent {
   AdvanceSalaryDetails: any;
   hasAdvanceSalary: any;
   prevAdvanceSalaryDetails: any;
+  tempPayrollId: any;
   calculationData: any;
   deduct: any[] = [];
   today: string = new Date().toISOString().split('T')[0];
+  rejectreasons: any;
 
-  rejectreasons: string[] = ['Leaves', 'OverTime', 'Other'];
+  // rejectreasons=[
+  //   {value:1, name:'leaves'},
+  //   {value:2, name:'OverTime'},
+  // ];
   selectedRejectedReason: string = '';
   otherReason: string = '';
 
   showReasonError: boolean = false;
   showOtherReasonError: boolean = false;
+  isLoading: boolean = false;
 
-  constructor(private route: ActivatedRoute, private router: Router, private formBuilder: FormBuilder, private service: HrmserviceService) {
+  constructor(private route: ActivatedRoute, private router: Router, private formBuilder: FormBuilder, private service: HrmserviceService, private toastr: ToastrService) {
     this.payrollDetails = this.formBuilder.group({
       id: ['', [Validators.required]],
       employeeName: ['', [Validators.required]],
@@ -69,15 +76,28 @@ export class PayrollSummariesComponent {
     { id: 12, value: 'December' }
   ];
 
+
+  closeAllModals(): void {
+    const modals = document.querySelectorAll('.modal.show');
+    modals.forEach((modalElement: any) => {
+      const modalInstance = bootstrap.Modal.getInstance(modalElement);
+      if (modalInstance) {
+        modalInstance.hide();
+      }
+    });
+  }
+
   ngOnInit() {
     this.selectedYear = new Date().getFullYear();
-    this.selectedMonth = new Date().getMonth() + 1;
+    this.selectedMonth = new Date().getMonth();
     const currentDate = new Date();
     this.today = currentDate.toISOString().split('T')[0];
 
     this.route.queryParams.subscribe(params => {
       this.employee_id = params['id'];
-      console.log('Received employee  payroll:', params['id']);
+      this.tempPayrollId = params['temp_payroll_id']
+      console.log('Received employee  payroll:', this.employee_id);
+      console.log('tempPayrollId:', this.tempPayrollId);
     });
     this.getSinglePayroll()
     this.setMonthGroupHeader();
@@ -89,14 +109,25 @@ export class PayrollSummariesComponent {
     return month ? month.value : '';
   }
 
+  getRejectReasons() {
+    this.service.post('fetch/rejection/reason', { employee_id: this.employee_id }).subscribe((res: any) => {
+      if (res.status == 'success') {
+        this.rejectreasons = res.data
+      }
+    });
+  }
+
   getSinglePayroll() {
+    this.isLoading = true;
     this.service.post('get/single/payroll_list', { employee_id: this.employee_id }).subscribe((res: any) => {
       if (res.status == 'success') {
         this.employeeDetails = res.data.payroll_summary[0];
         const attendanceData = res.data.attendance_summary[0];
-        this.AdvanceSalaryDetails = res.data.advance_salary.length > 0 ? res.data.advance_salary[0] : null;
-        this.hasAdvanceSalary = !!this.AdvanceSalaryDetails;
-        this.calculationData = res.data.calculation[0];
+        this.AdvanceSalaryDetails = res.data.advance_salary || [];;
+        this.hasAdvanceSalary = this.AdvanceSalaryDetails.length > 0;;
+        this.calculationData = res.data.calculation;
+        console.log(this.calculationData);
+
 
         this.payrollDetails.patchValue({
           id: this.employeeDetails.employee_code,
@@ -106,72 +137,77 @@ export class PayrollSummariesComponent {
 
         this.attendanceDetails = [
           {
-            P: parseInt(attendanceData.present_days),
-            A: parseInt(attendanceData.absent_days),
-            W: parseInt(attendanceData.weekend),
-            W_Od: parseInt(attendanceData.weekend_od),
-            H: parseInt(attendanceData.holiday_days),
-            WFH_2: parseInt(attendanceData.work_from_home_half_day),
-            HD: parseInt(attendanceData.half_day),
-            HR: parseInt(attendanceData.total_days),
-            OT: parseInt(attendanceData.total_overtime),
-            LT: parseInt(attendanceData.late),
-            TH: parseInt(attendanceData.total_days),
+            P: (attendanceData.present_days),
+            A: (attendanceData.absent_days),
+            H: (attendanceData.holiday_days),
+            HD: (attendanceData.half_day),
+            OT: (attendanceData.total_overtime),
+            LT: (attendanceData.late_mark),
+            TD: (attendanceData.total_days),
           }
         ]
 
-        if (res.data.prvadvancesalary.length > 0) {
-          this.prevAdvanceSalaryDetails = res.data.prvadvancesalary[0];
-          this.rowData = [{
-            emp_name: this.prevAdvanceSalaryDetails.emp_name,
-            first_InstallmentDate: this.prevAdvanceSalaryDetails.first_InstallmentDate,
-            last_InstallmentDate: this.prevAdvanceSalaryDetails.last_InstallmentDate || '-',
-            tenure: this.prevAdvanceSalaryDetails.tenure,
-            advance_amount: this.prevAdvanceSalaryDetails.advance_amount,
-            status: this.prevAdvanceSalaryDetails.status,
-          }];
-        } else {
-          this.rowData = [];
-        }
+        // if (res.data.prvadvancesalary.length > 0) {
+        //   this.prevAdvanceSalaryDetails = res.data.prvadvancesalary[0];
+        //   this.rowData = [{
+        //     apply_date: this.prevAdvanceSalaryDetails.apply_date,
+        //     tenure: this.prevAdvanceSalaryDetails.tenure,
+        //     advance_amount: this.prevAdvanceSalaryDetails.advance_amount || '-',
+        //     emi: this.prevAdvanceSalaryDetails.emi,
+        //     emi_status: this.prevAdvanceSalaryDetails.emi_status,
+        //   }];
+        // } else {
+        //   this.rowData = [];
+        // }
 
         this.deduct = [
           {
             Compound: 'Provident Fund (PF)',
-            deduction: 'Fixed %',
-            amount: 'Rs. 1000'
+            deduction: 'PF',
+            amount: `₹. ${this.calculationData.pf_employee_deduction ?? 0}`
           },
 
           {
             Compound: 'Professional Tax (PT)',
             deduction: 'Tax Deduction',
-            amount: `Rs. ${this.calculationData.total_tax_deduction ?? 0}`
+            amount: `₹. ${this.calculationData.total_tax_deduction ?? 0}`
           },
 
           {
             Compound: 'ESIC',
-            deduction: 'Fixed %',
-            amount: 'Rs. 0'
+            deduction: 'ESIC',
+            amount: `₹. ${this.calculationData.esic_deduction ?? 0}`
           },
           {
             Compound: 'Advance Salary',
             deduction: 'Advance Deduction',
-            amount: `Rs. ${this.calculationData.advance_amount ?? 0}`
+            amount: `₹. ${this.calculationData.advance_amount ?? 0}`
           },
           {
             Compound: 'Other',
-            deduction: 'lorem',
-            amount: 'Rs. 0',
+            deduction: '-',
+            amount: '₹. 0',
           },
         ];
-
+        this.isLoading = false;
       }
     })
   }
 
-  calculateProgress(): number {
-    if (!this.AdvanceSalaryDetails) return 0;
-    const paid = this.AdvanceSalaryDetails.advance_amount - this.AdvanceSalaryDetails.remaining_balance;
-    return Math.round((paid / this.AdvanceSalaryDetails.advance_amount) * 100);
+  formatted(value: number): string {
+    return value.toLocaleString('en-IN');
+  }
+
+  // calculateProgress(): number {
+  //   if (!this.AdvanceSalaryDetails) return 0;
+  //   const paid = this.AdvanceSalaryDetails.advance_amount - this.AdvanceSalaryDetails.remaining_balance;
+  //   return Math.round((paid / this.AdvanceSalaryDetails.advance_amount) * 100);
+  // }
+
+  calculateProgress(adv: any): number {
+    if (!adv || adv.advance_amount === 0) return 0;
+    const paid = adv.advance_amount - adv.remaining_balance;
+    return Math.round((paid / adv.advance_amount) * 100);
   }
 
   backtoPayroll() {
@@ -212,29 +248,12 @@ export class PayrollSummariesComponent {
   // ];
 
   columnDefs: ColDef[] = [
-    //  {
-    //   headerName: 'Employee Id',
-    //   field: 'employee_id',
-    //   sortable: true,
-    //   filter: true,
-    //   flex: 1,
-    //   maxWidth:250,
-    // },
     {
-      headerName: 'First Installment Date',
-      field: 'first_InstallmentDate',
+      headerName: 'Apply Date',
+      field: 'apply_date',
       sortable: true,
       filter: true,
       flex: 1,
-      maxWidth: 260,
-    },
-    {
-      headerName: 'Installment End Date',
-      field: 'last_InstallmentDate',
-      sortable: true,
-      filter: true,
-      flex: 1,
-      maxWidth: 280,
     },
     {
       headerName: 'Tenure',
@@ -242,7 +261,6 @@ export class PayrollSummariesComponent {
       sortable: true,
       filter: true,
       flex: 1,
-      maxWidth: 130,
     },
     {
       headerName: 'Amount',
@@ -250,27 +268,19 @@ export class PayrollSummariesComponent {
       sortable: true,
       filter: true,
       flex: 1,
-      maxWidth: 130,
     },
     {
-      headerName: 'Status',
-      field: 'status',
+      headerName: 'Emi',
+      field: 'emi',
       sortable: true,
       filter: true,
       flex: 1,
-      maxWidth: 120,
     },
     {
-      headerName: 'Actions',
-      // field: 'inquiry_id',
-      cellStyle: { border: '1px solid #ddd' },
-      maxWidth: 120,
-      cellRenderer: PayrollSummariesBtnComponent,
-      cellRendererParams: {
-        // clickedEdit: (field: any) => this.getqutation(field),
-        // clickedView: (field: any) => this.viewqutation(field),
-        // quotationEdit: (field: any) => this.editqutation(field),
-      },
+      headerName: 'Emi Status',
+      field: 'emi_status',
+      sortable: true,
+      filter: true,
       flex: 1,
     },
   ];
@@ -283,24 +293,20 @@ export class PayrollSummariesComponent {
         children: [
           { headerName: 'P', field: 'P' },
           { headerName: 'A', field: 'A' },
-          { headerName: 'W', field: 'W' },
-          { headerName: 'W/Od', field: 'W_Od' },
           { headerName: 'H', field: 'H' },
-          { headerName: 'WFH/2', field: 'WFH_2' },
-          { headerName: 'HD', field: 'HD' },
-          { headerName: 'HR', field: 'HR' },
-          { headerName: 'OT', field: 'OT' },
+          // { headerName: 'HD', field: 'HD' },
+          { headerName: 'OT(hrs)', field: 'OT' },
           { headerName: 'LT', field: 'LT' },
-          { headerName: 'TH', field: 'TH' },
+          { headerName: 'TD', field: 'TD' },
         ],
       },
     ];
   }
 
   defaultColDef: ColDef = {
-    width: 100,
     resizable: true,
-    cellStyle: { textAlign: 'center' }
+    cellStyle: { textAlign: 'center' },
+    flex: 1
   };
 
   onMonthChange() {
@@ -368,13 +374,15 @@ export class PayrollSummariesComponent {
       return;
     }
 
-    const payload = {
-      reject_reason: this.selectedRejectedReason === 'Other' ? this.otherReason.trim() : this.selectedRejectedReason,
-      employee_code: this.employeeDetails.employee_code
-    };
-    console.log(payload)
-    this.service.post('reject/payroll', { payload }).subscribe((res: any) => {
-      console.log('Payroll rejected successfully', res);
+    this.service.post('rejected/payroll', { temp_payroll_id: this.tempPayrollId, rejection_id: this.selectedRejectedReason }).subscribe((res: any) => {
+      if (res.status == 'success') {
+        this.toastr.success('Payroll rejected successfully');
+        this.closeAllModals();
+        this.router.navigate(['/authPanal/payrollList']);
+      }
+      else {
+        this.toastr.error('Something went wrong');
+      }
     });
   }
 

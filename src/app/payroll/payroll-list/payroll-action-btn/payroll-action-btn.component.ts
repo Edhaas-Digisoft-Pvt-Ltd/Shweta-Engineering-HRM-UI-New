@@ -14,15 +14,15 @@ import { Router } from '@angular/router';
 })
 export class PayrollActionBtnComponent implements ICellRendererAngularComp {
   params: any;
-  employeID : any;
+  employeeID : any;
+  tempPayrollID : any
 
   constructor(private router: Router) {}
 
   agInit(params: any): void {
     this.params = params;
-    this.employeID = params.data.employe_id; 
-    console.log("employee_action :",this.params.data);
-    console.log(this.employeID);
+    this.employeeID = params.data.employe_id; 
+    this.tempPayrollID = params.data.temp_payroll_id; 
   }
 
   refresh(): boolean {
@@ -31,7 +31,7 @@ export class PayrollActionBtnComponent implements ICellRendererAngularComp {
 
   viewPayroll() {
     this.router.navigate(['/authPanal/payrollSummary'],{
-      queryParams: { id: this.employeID }
+      queryParams: { id: this.employeeID, temp_payroll_id: this.tempPayrollID}
     });
   }
 

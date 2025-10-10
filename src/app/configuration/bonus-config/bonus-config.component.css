@@ -1,0 +1,42 @@
+.BtnColor {
+  background-color: #3674B5;
+  color: white;
+}
+
+.is-invalid {
+  border: 1px solid red !important;
+}
+
+input[type="month"]:invalid::before {
+  content: "MM/YYYY";
+  color: #aaa;
+}
+
+input[type="month"]:focus::before {
+  content: "";
+}
+
+.arrow::before {
+  content: "\2194";
+  font-size: 30px;
+  font-weight: bold;
+}
+
+.or-divider {
+  position: relative;
+  width: 2px;
+  background: #6c757d;
+  height: 100%;             /* full height */
+  min-height: 200px;        /* force visibility (adjust as needed) */
+}
+
+.or-divider span {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) rotate(-90deg);
+  background: #fff;         /* covers the line behind "or" */
+  padding: 0 5px;
+  font-weight: bold;
+  color: #6c757d;
+}

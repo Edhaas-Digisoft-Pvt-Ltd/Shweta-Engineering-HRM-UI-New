@@ -3,6 +3,7 @@ import { ColDef } from 'ag-grid-community';
 import { Router } from '@angular/router';
 import { HrmserviceService } from 'src/app/hrmservice.service';
 import { ToastrService } from 'ngx-toastr';
+import { IRowNode } from 'ag-grid-community';
 
 @Component({
   selector: 'app-payroll-approved',
@@ -11,13 +12,22 @@ import { ToastrService } from 'ngx-toastr';
 })
 export class PayrollApprovedComponent {
   CompanyNames: any = [];
-  selectedCompanyId: any = 1;
+  selectedCompanyId: any;
   selectedYear: any;
   selectedMonth: any;
   today: string = new Date().toISOString().split('T')[0];
   rowData: any = [];
   selectedRowData: any[] = [];
+  gridApi: any;
+  gridColumnApi: any;
   activeTab: string = 'tab1';
+  isLoading: boolean = false;
+
+  totalRows: number = 0;
+  currentPage: number = 1;
+  lastPage: number = 1;
+  pagesToShow: (number | string)[] = [];
+  paginationvalue: any;
 
   constructor(private router: Router, private service: HrmserviceService, private toastr: ToastrService) { }
 
@@ -50,12 +60,15 @@ export class PayrollApprovedComponent {
 
 
   ngOnInit() {
+    this.selectedCompanyId = this.service.selectedCompanyId();
+
     this.selectedYear = new Date().getFullYear();
-    this.selectedMonth = new Date().getMonth() + 1;
+    this.selectedMonth = new Date().getMonth();
     const currentDate = new Date();
     this.today = currentDate.toISOString().split('T')[0];
     this.getCompanyNames();
-    this.ApproveRejectPayrollList();
+    // this.ApprovePayrollList();
+    this.getPagination();
   }
 
 
@@ -74,93 +87,140 @@ export class PayrollApprovedComponent {
   onCompanyChange(event: Event): void {
     this.selectedCompanyId = (event.target as HTMLSelectElement).value;
     console.log('Selected Company ID:', this.selectedCompanyId);
-    this.ApproveRejectPayrollList();
+    this.ApprovePayrollList();
   }
 
   onYearMonthChange() {
-    this.ApproveRejectPayrollList();
+    this.ApprovePayrollList();
   }
 
-  ApproveRejectPayrollList() {
-    this.service.post('payroll_list/status', {
+  ApprovePayrollList(page: number = 1): void {
+    this.isLoading = true;
+    this.service.post('fetch/approved/payroll', {
       company_id: this.selectedCompanyId,
       year: this.selectedYear,
       month: this.selectedMonth,
+      page:page,
     }).subscribe(
       (res: any) => {
         try {
           if (res.status === 'success' && res.data && res.data.length > 0) {
             this.rowData = res.data.map((item: any) => ({
               employee_code: item.employee_code,
-              employeeName: item.emp_name,
-              grossAmount: item.gross_salary,
-              overTime: item.total_overtime,
-              netAmount: item.net_salary,
-              deduction: item.deduction,
+              department: item.department_name,
+              role: item.role_name,
+              presentDays: item.present_days,
+              absentDays: item.absent_days,
+              hours: item.total_hours,
+              overTime: item.total_overtime + ' hrs',
               employe_id: item.employe_id,
-              payroll_status: item.payroll_status
+              bonus_amount: item.bonus_amount ? `₹ ${item.bonus_amount}` : 'NA',
+              advance_salary: item.advance_salary ? `₹ ${item.advance_salary}` : 'NA',
+              net_salary: item.net_salary ? `₹ ${item.net_salary}` : 'NA',
             }));
+            this.totalRows = res.pagination.total;
+            this.currentPage = res.pagination.page;
+            this.lastPage = res.pagination.last_page;
+            this.generatePageNumbers(this.paginationvalue);
           } else {
             this.rowData = [];
+            this.toastr.warning('Data Not Found');
           }
         } catch (error) {
-          console.error('Error mapping payroll data:', error);
-          this.rowData = []; 
+          console.log(error);
+          this.rowData = [];
         }
+        this.isLoading = false;
       },
       (error) => {
-        console.error('Error fetching payroll list:', error);
         this.rowData = [];
+        if (error.status === 404) {
+          this.toastr.warning('Data Not Found');
+          this.isLoading = false;
+        } else {
+          console.error(error);
+          this.isLoading = false;
+        }
       }
     );
   }
 
   columnDefs: ColDef[] = [
     {
-      headerName: 'Employee Code',
+      headerName: '',
+      maxWidth: 50,
+      checkboxSelection: true,
+      headerCheckboxSelection: true,
+    },
+    {
+      headerName: 'Emp Code',
       field: 'employee_code',
       sortable: true,
       filter: true,
+      minWidth: 150,
     },
     {
-      headerName: 'Employee Name',
-      field: 'employeeName',
+      headerName: 'Department',
+      field: 'department',
       sortable: true,
       filter: true,
+      minWidth: 140,
     },
-
     {
-      headerName: 'Gross Amount',
-      field: 'grossAmount',
+      headerName: 'P',
+      field: 'presentDays',
       sortable: true,
       filter: true,
+      maxWidth: 70,
     },
     {
-      headerName: 'Over Time',
+      headerName: 'A',
+      field: 'absentDays',
+      sortable: true,
+      filter: true,
+      maxWidth: 70,
+    },
+    {
+      headerName: 'OT(hrs)',
       field: 'overTime',
       sortable: true,
       filter: true,
+      minWidth: 100,
     },
     {
-      headerName: 'Deductions',
-      field: 'deduction',
+      headerName: 'hours',
+      field: 'hours',
       sortable: true,
       filter: true,
+      minWidth: 100,
     },
     {
-      headerName: 'Net Amount',
-      field: 'netAmount',
+      headerName: 'Bonus',
+      field: 'bonus_amount',
       sortable: true,
       filter: true,
+      minWidth: 120,
     },
     {
-      headerName: 'Status',
-      field: 'payroll_status',
+      headerName: 'Adv Salary',
+      field: 'advance_salary',
       sortable: true,
       filter: true,
-      cellRenderer: this.statusButtonRenderer,
+      minWidth: 140,
+    },
+    {
+      headerName: 'Net Salary',
+      field: 'net_salary',
+      sortable: true,
+      filter: true,
+      minWidth: 140,
     },
   ];
+
+  onSelectionChanged(event: any): void {
+    this.selectedRowData = event.api.getSelectedRows();
+    console.log('Selected rows:', this.selectedRowData);
+  }
 
   statusButtonRenderer(params: any) {
     const status = params.value;
@@ -211,6 +271,107 @@ export class PayrollApprovedComponent {
   };
 
 
+  onGridReady(params: any): void {
+    this.gridApi = params.api;
+    this.gridColumnApi = params.columnApi;
+  }
 
+  exportSelectedRowsToCSV() {
+    const selectedNodes: IRowNode<any>[] = this.gridApi.getSelectedNodes();
+    const selectedData = selectedNodes.map((node: IRowNode<any>) => node.data);
+
+    if (selectedData.length === 0) {
+      this.toastr.warning('Please select at least one row to export.');
+      return;
+    }
+
+    this.gridApi.exportDataAsCsv({
+      onlySelected: true,
+      columnKeys: ['employee_code', 'department', 'presentDays', 'absentDays', 'overTime', 'hours', 'bonus_amount', 'advance_salary', 'net_salary'],
+      fileName: 'payrollApproved.csv',
+    });
+  }
+
+  getPagination() {
+    this.service.post('get-pagination', {}).subscribe((res: any) => {
+      if (res.status === 'success') {
+        this.paginationvalue = res.data;
+
+        this.ApprovePayrollList();
+      } else {
+        this.paginationvalue = 10;
+        this.ApprovePayrollList();
+      }
+    });
+  }
+
+  getpaginationvalue() {
+    this.service.post('get-pagination', {}).subscribe((res: any) => {
+      if (res.status === 'success') {
+        this.paginationvalue = res.data
+        this.generatePageNumbers(this.paginationvalue)
+      }
+    });
+  }
+
+  generatePageNumbers(pageWindow: number) {
+    const total = this.lastPage;
+    const current = this.currentPage;
+
+    let startPage = current;
+    let endPage = current + pageWindow - 1;
+
+    if (endPage >= total) {
+      endPage = total - 1;
+      startPage = Math.max(2, total - pageWindow); 
+    }
+
+    if (current === 1) {
+      startPage = 2;
+      endPage = Math.min(total - 1, pageWindow);
+    }
+
+    const pages: (number | string)[] = [];
+    pages.push(1); 
+
+    if (startPage > 2) {
+      pages.push('...');
+    }
+
+    for (let i = startPage; i <= endPage; i++) {
+      pages.push(i);
+    }
+
+    if (endPage < total - 1) {
+      pages.push('...');
+    }
+
+    if (total > 1) pages.push(total);
+
+    this.pagesToShow = pages;
+  }
+
+
+  goToPage(page: number | string) {
+    if (page === '...') return;
+    if (page !== this.currentPage) {
+      this.currentPage = page as number;
+      this.ApprovePayrollList(this.currentPage);
+    }
+  }
+
+  prevPage() {
+    if (this.currentPage > 1) {
+      this.currentPage--;
+      this.ApprovePayrollList(this.currentPage);
+    }
+  }
+
+  nextPage() {
+    if (this.currentPage < this.lastPage) {
+      this.currentPage++;
+      this.ApprovePayrollList(this.currentPage);
+    }
+  }
 
 }

@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import {
   HttpClient,
@@ -19,7 +19,8 @@ export class HrmserviceService {
 
   // url: string = 'http://127.0.0.1:8000/api/v1/';
 
-  url: string = 'https://edhaasdigisoft.co.in/shwetapayroll/api/v1/';
+  // url: string = 'https://edhaasdigisoft.co.in/shwetapayroll/api/v1/';
+  url: string = 'http://127.0.0.1:8000/api/v1/';
 
 
   // url: string = 'http://localhost/CRM_rest/index.php/';
@@ -124,4 +125,24 @@ export class HrmserviceService {
   clearRole(): void {
     sessionStorage.removeItem(this.roleKey);
   }
+
+  //signal =========================================================================================
+  private _selectedCompanyId = signal<number>(1); //storing company id 
+
+  setCompanyId(id: number) {
+    this._selectedCompanyId.set(id);   //temp store company id
+  }
+
+  selectedCompanyId = this._selectedCompanyId.asReadonly(); //display company id
+
+  //signal - store employee id =====================================================================
+  private _EmployeeId = signal<number | null>(null);
+
+  setEmployeeId(id: number) {
+    this._EmployeeId.set(id);
+    console.log('service',this._EmployeeId);
+  }
+
+  EmployeeId = this._EmployeeId.asReadonly();
+
 }

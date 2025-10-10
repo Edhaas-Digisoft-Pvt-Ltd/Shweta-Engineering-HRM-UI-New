@@ -5,6 +5,8 @@ import { PayrollActionBtnComponent } from './payroll-action-btn/payroll-action-b
 import { Router } from '@angular/router';
 import { HrmserviceService } from 'src/app/hrmservice.service';
 import { ToastrService } from 'ngx-toastr';
+import * as ExcelJS from 'exceljs';
+import * as FileSaver from 'file-saver';
 
 @Component({
   selector: 'app-payroll-list',
@@ -13,7 +15,7 @@ import { ToastrService } from 'ngx-toastr';
 })
 export class PayrollListComponent {
   CompanyNames: any = [];
-  selectedCompanyId: any = 1;
+  selectedCompanyId: any;
   selectedYear: any;
   selectedMonth: any;
   rowData: any = [];
@@ -24,6 +26,15 @@ export class PayrollListComponent {
   codeInput: string = '';
   gridApi: any;
   gridColumnApi: any;
+  isLoading: boolean = false;
+  dataToExportExcel: any[] = [];
+  dataToExportExcel_totals: any = {}
+
+  totalRows: number = 0;
+  currentPage: number = 1;
+  lastPage: number = 1;
+  pagesToShow: (number | string)[] = [];
+  paginationvalue: any;
 
   today: string = new Date().toISOString().split('T')[0];
   constructor(private router: Router, private service: HrmserviceService, private toastr: ToastrService) { }
@@ -56,12 +67,26 @@ export class PayrollListComponent {
   }
 
   ngOnInit() {
+    this.selectedCompanyId = this.service.selectedCompanyId();
+
     this.selectedYear = new Date().getFullYear();
-    this.selectedMonth = new Date().getMonth() + 1;
+    this.selectedMonth = new Date().getMonth();
     const currentDate = new Date();
     this.today = currentDate.toISOString().split('T')[0];
     this.getCompanyNames();
-    this.getpayrollList();
+    // this.getpayrollList();
+
+    this.getPagination();
+
+    if (sessionStorage.getItem('roleName') == 'admin') {
+      this.router.navigate(['/authPanal/payrollList']);
+      return;
+    } else {
+      alert('Please Login To Proceed');
+      sessionStorage.clear();
+      this.router.navigate(['']);
+      return;
+    }
   }
 
   getMonthName(monthId: number): string {
@@ -91,34 +116,55 @@ export class PayrollListComponent {
     this.getpayrollList();
   }
 
-  getpayrollList() {
+  getpayrollList(page: number = 1): void {
+    this.isLoading = true;
     this.rowData = [];
     this.service.post('get/payroll_list', {
       company_id: this.selectedCompanyId,
       year: this.selectedYear,
       month: this.selectedMonth,
+      page: page,
+      isexport: false,
     }).subscribe((res: any) => {
       try {
         if (res.status === 'success' && res.data?.length > 0) {
+          this.dataToExportExcel = res.data;
+          this.dataToExportExcel_totals = res.totals;
           this.rowData = res.data.map((item: any) => ({
             employee_code: item.employee_code,
             employeeName: item.emp_name,
-            grossAmount: item.gross_salary,
+            total_hours: item.total_hours,
             overTime: item.total_overtime,
-            netAmount: item.net_salary,
-            deduction: item.deduction,
-            employe_id: item.employe_id
+            netAmount: item.net_salary ? `₹ ${item.net_salary}` : 'NA',
+            deduction: item.deduction ? `₹ ${item.deduction}` : 'NA',
+            employe_id: item.employe_id,
+            temp_payroll_id: item.temp_payroll_id
           }));
+          this.totalRows = res.pagination.total;
+          this.currentPage = res.pagination.page;
+          this.lastPage = res.pagination.last_page;
+          this.generatePageNumbers(this.paginationvalue);
         } else {
           this.rowData = [];
+          this.toastr.warning('Data Not Found');
         }
       } catch (error) {
         console.log(error);
         this.rowData = [];
       }
-    });
+      this.isLoading = false;
+    },
+      (error) => {
+        this.rowData = [];
+        if (error.status === 404) {
+          this.toastr.warning('Data Not Found');
+          this.isLoading = false;
+        } else {
+          console.error(error);
+          this.isLoading = false;
+        }
+      });
   }
-
 
   columnDefs: ColDef[] = [
     {
@@ -143,14 +189,14 @@ export class PayrollListComponent {
     },
 
     {
-      headerName: 'Gross Amount',
-      field: 'grossAmount',
+      headerName: 'Total Hours',
+      field: 'total_hours',
       sortable: true,
       filter: true,
       maxWidth: 170
     },
     {
-      headerName: 'Over Time',
+      headerName: 'OT(hrs)',
       field: 'overTime',
       sortable: true,
       filter: true,
@@ -217,24 +263,22 @@ export class PayrollListComponent {
     paginationPageSizeSelector: [10, 50, 100],
   };
 
-  approveRejectPayrollList(status: any) {
+  approvePayrollList() {
     if (this.selectedRowData.length === 0) {
       this.toastr.warning('Please select at least one employee.');
       return;
     }
 
-    const payrolls = this.selectedRowData.map((emp: any) => ({
-      employee_id: emp.employe_id,
-      year: this.selectedYear,
-      month: this.selectedMonth,
-      payroll_status: status,
+    const temp_payroll_ids = this.selectedRowData.map((emp: any) => ({
+      temp_payroll_id: emp.temp_payroll_id
+
     }));
-    const payload = { payrolls };
+    const payload = { temp_payroll_ids };
     console.log('payloadArray', payload)
-    this.service.post("update/payroll_list", payload).subscribe({
+    this.service.post("approved/payroll", payload).subscribe({
       next: (res) => {
         console.log(res);
-        this.toastr.success('Payroll List status updated successfully.');
+        this.toastr.success('Payrolls approved successfully.');
         this.getpayrollList();
       },
       error: (err) => {
@@ -249,18 +293,12 @@ export class PayrollListComponent {
     this.gridColumnApi = params.columnApi;
   }
 
-
   onRejectAllClick() {
     this.gridApi.selectAll();
     this.selectedRowData = this.gridApi.getSelectedRows();
-
-
-
     this.isRejectConfirmed = false;
     this.codeInput = '';
     this.randomText = this.generaterandomText();
-
-
   }
 
   generaterandomText(): string {
@@ -300,6 +338,281 @@ export class PayrollListComponent {
     });
   }
 
+  exportExcel() {
+    if (!this.selectedCompanyId || !this.selectedYear || !this.selectedMonth) {
+      this.toastr.warning('Select company, year and month first');
+      return;
+    }
+
+    this.isLoading = true;
+
+    this.service.post('get/payroll_list', {
+      company_id: this.selectedCompanyId,
+      year: this.selectedYear,
+      month: this.selectedMonth,
+      isexport: true
+    }).subscribe((res: any) => {
+      this.isLoading = false;
+
+      if (res.status === 'success' && res.data?.length > 0) {
+        this.dataToExportExcel = res.data;
+        this.dataToExportExcel_totals = res.totals;
+
+        this.generateExcel();
+      } else {
+        this.toastr.warning('No data to export');
+      }
+    }, (error) => {
+      console.error(error);
+      this.isLoading = false;
+      this.toastr.error('Failed to fetch payroll data for export');
+    });
+  }
+
+  generateExcel() {
+    if (!this.dataToExportExcel || this.dataToExportExcel.length === 0) {
+      this.toastr.warning('No data to export');
+      return;
+    }
+
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet('Payroll');
+
+    const year = this.selectedYear;
+    const month = this.selectedMonth;
+    const daysInMonth = new Date(year, month, 0).getDate();
+    const monthName = new Date(year, month - 1).toLocaleString('en-US', { month: 'long' });
+
+    // Header row 1
+    const headerRow1: any[] = ['Employee Code', 'Employee Name'];
+    for (let d = 1; d <= daysInMonth; d++) headerRow1.push('');
+    headerRow1.push(
+      'Absent Days',
+      'Present Days',
+      'Hours',
+      'OT Hours',
+      'Late In',
+      'Every 4 late mark 4hrs deduction',
+      'Total Hours',
+      'Gross Salary',
+      'Hours of Month',
+      'Per Hours Salary',
+      'Overtime Salary',
+      'Present Day Hrs salary',
+      'Deduction',
+      'Total_Salary',
+      'Professional Tax',
+      'Employee contri. PF',
+      'Employer contri. PF',
+      'ESIC Employee 0.75%',
+      'Advance Salary',
+      'Salary Payable',
+    );
+    worksheet.addRow(headerRow1);
+
+    // Merge headers
+    worksheet.mergeCells(1, 1, 2, 1);
+    worksheet.mergeCells(1, 2, 2, 2);
+    worksheet.mergeCells(1, 3, 1, 2 + daysInMonth);
+    worksheet.mergeCells(1, 3 + daysInMonth, 2, 3 + daysInMonth);
+    worksheet.mergeCells(1, 4 + daysInMonth, 2, 4 + daysInMonth);
+    worksheet.mergeCells(1, 5 + daysInMonth, 2, 5 + daysInMonth);
+    worksheet.mergeCells(1, 6 + daysInMonth, 2, 6 + daysInMonth);
+    worksheet.mergeCells(1, 7 + daysInMonth, 2, 7 + daysInMonth); // Present
+    worksheet.mergeCells(1, 8 + daysInMonth, 2, 8 + daysInMonth); // Absent
+    worksheet.mergeCells(1, 9 + daysInMonth, 2, 9 + daysInMonth); // Hours
+    worksheet.mergeCells(1, 10 + daysInMonth, 2, 10 + daysInMonth); // OT Hours
+    worksheet.mergeCells(1, 11 + daysInMonth, 2, 11 + daysInMonth); // Late
+    worksheet.mergeCells(1, 12 + daysInMonth, 2, 12 + daysInMonth); // Early leave
+    worksheet.mergeCells(1, 13 + daysInMonth, 2, 13 + daysInMonth); // Early leave
+
+    worksheet.getCell('C1').value = monthName;
+
+    // Header row 2 - attendance dates
+    const headerRow2: any[] = ['', ''];
+    for (let d = 1; d <= daysInMonth; d++) {
+      headerRow2.push(`${d} ${monthName.slice(0, 3)}`);
+    }
+    headerRow2.push('', '', '', '', '', '', '', '', '', '');
+    worksheet.addRow(headerRow2);
+
+    worksheet.getRow(1).font = { bold: true };
+    worksheet.getRow(2).font = { bold: true };
+
+    // ✅ Fill employee data (only ONE loop)
+    this.dataToExportExcel.forEach(emp => {
+      // -------- Row 1: Attendance Status --------
+      const rowStatus: any[] = [emp.employee_code, emp.emp_name];
+      for (let d = 1; d <= daysInMonth; d++) {
+        const attObj = emp.attendance.find((a: any) => {
+          const date = new Date(a.attendance_date);
+          return date.getDate() === d;
+        });
+        rowStatus.push(attObj ? attObj.status : '');
+      }
+      rowStatus.push(
+        emp.absent_days,
+        emp.present_days,
+        emp.hours,
+        emp.total_overtime,
+        emp.late_in,
+        emp.every_4_late_mark_4_hrs_deduction,
+        emp.total_hours,
+        emp.basic_salary,
+        emp.total_month_hours,
+        emp.per_hours_amount,
+        emp.overtime_amount,
+        emp.present_day_hrs_salary,
+        emp.deduction,
+        emp.total_salary,
+        emp.total_tax_deduction,
+        emp.pf_employee_deduction,
+        emp.pf_employer_contribution,
+        emp.esic_deduction,
+        emp.adv_deduction,
+        emp.net_salary,
+      );
+      worksheet.addRow(rowStatus);
+
+      // -------- Row 2: Overtime Hours --------
+      const rowOvertime: any[] = ['', ''];
+      for (let d = 1; d <= daysInMonth; d++) {
+        const attObj = emp.attendance.find((a: any) => {
+          const date = new Date(a.attendance_date);
+          return date.getDate() === d;
+        });
+
+        let overtimeVal = attObj && attObj.over_time_hr != null ? Number(attObj.over_time_hr) : 0;
+
+        // ✅ Remove ".0" if decimal part is 0
+        if (Number.isInteger(overtimeVal)) {
+          overtimeVal = Math.floor(overtimeVal);
+        }
+
+        rowOvertime.push(overtimeVal);
+      }
+      rowOvertime.push('', '', '', '', '', '', '', '', '', '');
+      worksheet.addRow(rowOvertime);
+    });
+
+    //Add Totals Row BELOW ALL EMPLOYEES
+    const totals = this.dataToExportExcel_totals;
+
+    const totalsRow: any[] = ['TOTAL', ''];
+    for (let d = 1; d <= daysInMonth; d++) totalsRow.push(''); // leave attendance blank
+
+    totalsRow.push(
+      '', '', '', '', '', '', '', '', '', '',
+      totals.total_overtime_salary, // Overtime Salary
+      '',                            // Present Day Hrs salary
+      '',                            // Deduction
+      totals.total_salary,           // Total Salary
+      totals.total_tax,              // Professional Tax
+      totals.total_pf_employee,      // Employee PF
+      totals.total_pf_employer,      // Employer PF
+      totals.total_esic,             // ESIC
+      totals.total_adv_salary,       // Advance Salary
+      totals.total_net_salary        // Net Salary (Salary Payable)
+    );
+
+    worksheet.addRow(totalsRow);
+    const lastRow = worksheet.lastRow;
+    if (lastRow) lastRow.font = { bold: true };
+
+    // Optional column widths
+    worksheet.columns.forEach((col, i) => {
+      if (i < 2) col.width = 20;
+      else if (i < 2 + daysInMonth) col.width = 5;
+      else col.width = 15;
+    });
+
+    // Export file
+    workbook.xlsx.writeBuffer().then(buffer => {
+      const blob = new Blob([buffer], { type: 'application/octet-stream' });
+      FileSaver.saveAs(blob, 'Payroll.xlsx');
+    });
+  }
+
+  getPagination() {
+    this.service.post('get-pagination', {}).subscribe((res: any) => {
+      if (res.status === 'success') {
+        this.paginationvalue = res.data;
+
+        this.getpayrollList();
+      } else {
+        this.paginationvalue = 10;
+        this.getpayrollList();
+      }
+    });
+  }
+
+  getpaginationvalue() {
+    this.service.post('get-pagination', {}).subscribe((res: any) => {
+      if (res.status === 'success') {
+        this.paginationvalue = res.data
+        this.generatePageNumbers(this.paginationvalue)
+      }
+    });
+  }
+
+  generatePageNumbers(pageWindow: number) {
+    const total = this.lastPage;
+    const current = this.currentPage;
+
+    let startPage = current;
+    let endPage = current + pageWindow - 1;
+
+    if (endPage >= total) {
+      endPage = total - 1;
+      startPage = Math.max(2, total - pageWindow);
+    }
+
+    if (current === 1) {
+      startPage = 2;
+      endPage = Math.min(total - 1, pageWindow);
+    }
+
+    const pages: (number | string)[] = [];
+    pages.push(1);
+
+    if (startPage > 2) {
+      pages.push('...');
+    }
+
+    for (let i = startPage; i <= endPage; i++) {
+      pages.push(i);
+    }
+
+    if (endPage < total - 1) {
+      pages.push('...');
+    }
+
+    if (total > 1) pages.push(total);
+
+    this.pagesToShow = pages;
+  }
+
+
+  goToPage(page: number | string) {
+    if (page === '...') return;
+    if (page !== this.currentPage) {
+      this.currentPage = page as number;
+      this.getpayrollList(this.currentPage);
+    }
+  }
+
+  prevPage() {
+    if (this.currentPage > 1) {
+      this.currentPage--;
+      this.getpayrollList(this.currentPage);
+    }
+  }
+
+  nextPage() {
+    if (this.currentPage < this.lastPage) {
+      this.currentPage++;
+      this.getpayrollList(this.currentPage);
+    }
+  }
+
 }
-
-

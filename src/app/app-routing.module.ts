@@ -30,6 +30,7 @@ import { CreateEmployeeComponent } from './employee/create-employee/create-emplo
 import { EmployeeDashboardComponent } from './employee/employee-dashboard/employee-dashboard.component';
 
 import { BonusAndIncentiveComponent } from './compnay-setup/bonus-and-incentive/bonus-and-incentive.component';
+import { ConfigurationComponent } from './configuration/configuration.component';
 const routes: Routes = [
   {
     path: '',
@@ -129,9 +130,14 @@ const routes: Routes = [
         component: ComMangeAndPoliciesComponent,
 
       },
+      // {
+      //   path: 'LeaveSetup',
+      //   component: LeaveSetupComponent,
+
+      // },
       {
-        path: 'LeaveSetup',
-        component: LeaveSetupComponent,
+        path: 'configuration',
+        component: ConfigurationComponent,
 
       },
     ]
@@ -147,9 +153,14 @@ const routes: Routes = [
 
 
 @NgModule({
-  imports: [RouterModule.forRoot(routes)],
+  imports: [RouterModule.forRoot(routes,{
+   
+      useHash: true
+   
+  })],
   exports: [RouterModule]
 })
+ 
 export class AppRoutingModule {
 
 

@@ -5,6 +5,7 @@ import { FormGroup, FormBuilder, Validators } from '@angular/forms';
 import { HrmserviceService } from 'src/app/hrmservice.service';
 import { EditLeaveRequestComponent } from './edit-leave-request/edit-leave-request.component';
 import { ToastrService } from 'ngx-toastr';
+import { ModalServiceService } from 'src/app/modal-service.service';
 
 declare var bootstrap: any;
 
@@ -19,36 +20,28 @@ export class LeaveRequestComponent {
 
   params: any;
   leaveRequestForm!: FormGroup;
-  selectedCompanyId : any = 1;
-  rowData : any = [];
+  selectedCompanyId: any;
+  rowData: any = [];
   leaveRequestData!: any;
-  empLeaveId : any;
-  leaveBalance : any = {};
+  empLeaveId: any;
+  leaveBalance: any = {};
   previousLeaves: any;
+  isLoading: boolean = false;
 
-  // @ViewChild('leaveModal') leaveModalRef!: ElementRef;
+  totalRows: number = 0;
+  currentPage: number = 1;
+  lastPage: number = 1;
+  pagesToShow: (number | string)[] = [];
+  paginationvalue: any;
 
-  // leaves data 
-  // leaveBalance = {
-  //   casual: {
-  //     total: 8,
-  //     taken: 5,
-  //     balance: 3
-  //   },
-  //   sick: {
-  //     total: 8,
-  //     taken: 2,
-  //     balance: 6
-  //   }
-  // };
+  CompanyNames: any = [];
+  selectedValue: any = 1;
 
-  CompanyNames: any = [] ;
-  selectedValue: any = 1 ; // Default selected
+  constructor(private route: ActivatedRoute, private router: Router, private fb: FormBuilder, private service: HrmserviceService, private modalService: ModalServiceService, private toastr: ToastrService) { }
 
-  constructor(private route: ActivatedRoute, private router: Router, private fb: FormBuilder, private service: HrmserviceService, private toastr: ToastrService) { }
-
-  // leave request form : 
   ngOnInit(): void {
+    this.selectedCompanyId = this.service.selectedCompanyId();
+
     this.leaveRequestForm = this.fb.group({
       employeeName: [{ value: '', disabled: true }, Validators.required],
       startDate: [{ value: '', disabled: true }, Validators.required],
@@ -60,8 +53,18 @@ export class LeaveRequestComponent {
       leavereason: [{ value: '', disabled: true }, Validators.required]
     });
     this.getCompanyNames();
-    this.getLeaveRequests();
+    // this.getLeaveRequests();
+    this.getPagination();
 
+    if (sessionStorage.getItem('roleName') == 'admin') {
+      this.router.navigate(['/authPanal/Leave']);
+      return;
+    } else {
+      alert('Please Login To Proceed');
+      sessionStorage.clear();
+      this.router.navigate(['']);
+      return;
+    }
   }
 
   agInit(params: any): void {
@@ -75,25 +78,29 @@ export class LeaveRequestComponent {
     resizable: true,
   };
 
+  openModel() {
+    this.modalService.openModal('leaveRequestModal')
+  }
+
   columnDefs: ColDef[] = [
-    { headerName: 'Employee Code', field: 'employee_code', sortable: true, filter: true},
-    { headerName: 'Employee Name', field: 'emp_name', sortable: true, filter: true},
-    { headerName: 'Department', field: 'department_name',sortable: true, filter: true},
+    { headerName: 'Employee Code', field: 'employee_code', sortable: true, filter: true },
+    { headerName: 'Employee Name', field: 'emp_name', sortable: true, filter: true },
+    { headerName: 'Department', field: 'department_name', sortable: true, filter: true },
     {
       headerName: 'Actions',
       cellStyle: { border: '1px solid #ddd' },
       cellRenderer: EditLeaveRequestComponent,
       cellRendererParams: {
-        editCallback: (leaveId: any) => this.getSingleLeaveRequest(leaveId), 
+        editCallback: (leaveId: any) => this.getSingleLeaveRequest(leaveId),
       }
     }
   ];
 
   getSingleLeaveRequest(params: any) {
     this.empLeaveId = params;
-     this.service.post(`single/leave/request`,{ "tbl_emp_leave_id": this.empLeaveId}).subscribe((res: any) => {
-       if (res.status === 'success') {
-        const singleleaveRequestData = res.current_leave; 
+    this.service.post(`single/leave/request`, { "tbl_emp_leave_id": this.empLeaveId }).subscribe((res: any) => {
+      if (res.status === 'success') {
+        const singleleaveRequestData = res.current_leave;
         this.leaveRequestData = {
           employeeName: singleleaveRequestData?.emp_name,
           startDate: singleleaveRequestData?.start_date,
@@ -104,16 +111,15 @@ export class LeaveRequestComponent {
           department: singleleaveRequestData?.department_name,
           leavereason: singleleaveRequestData?.leave_reason,
         };
-        this.leaveRequestForm.patchValue(this.leaveRequestData);  
-        this.leaveBalance = res.leavebalnce[0];   
+        this.leaveRequestForm.patchValue(this.leaveRequestData);
+        this.leaveBalance = res.leavebalnce[0];
         this.previousLeaves = res.previous_leaves;
-       }
+      }
     });
   }
- 
+
   onCompanyChange(event: Event): void {
     this.selectedCompanyId = (event.target as HTMLSelectElement).value;
-    console.log('Selected Company ID:', this.selectedCompanyId);
     this.getLeaveRequests();
   }
 
@@ -129,26 +135,39 @@ export class LeaveRequestComponent {
     );
   }
 
-  getLeaveRequests(){
-     this.rowData = [];
-     this.service.post('leave/request', { company_id: this.selectedCompanyId }).subscribe(
+  getLeaveRequests(page: number = 1): void {
+    this.isLoading = true;
+    this.rowData = [];
+    this.service.post('leave/request', { company_id: this.selectedCompanyId, page: page }).subscribe(
       (res: any) => {
         if (res.status === 'success') {
-          this.rowData = res.data.map((item:any)=>({
-            employee_code:item.employee_code,
-            emp_name:item.emp_name,
-            company_name:item.company_name,
-            department_name:item.department_name,
-            start_date:item.start_date,
-            end_date:item.end_date,
-            apply_leave_count : item.apply_leave_count,
-            leave_status:item.leave_status,
+          this.rowData = res.data.map((item: any) => ({
+            employee_code: item.employee_code,
+            emp_name: item.emp_name,
+            company_name: item.company_name,
+            department_name: item.department_name,
+            start_date: item.start_date,
+            end_date: item.end_date,
+            apply_leave_count: item.apply_leave_count,
+            leave_status: item.leave_status,
             tbl_emp_leave_id: item.tbl_emp_leave_id,
-        }));
-        } 
+          }));
+          this.totalRows = res.pagination.total;
+          this.currentPage = res.pagination.page;
+          this.lastPage = res.pagination.last_page;
+          this.generatePageNumbers(this.paginationvalue);
+        } else {
+          this.toastr.warning('Data Not Found')
+        }
+        this.isLoading = false;
       },
-       (error) => {
-        console.error(error);
+      (error) => {
+        if (error.status === 400) {
+          this.toastr.warning('Data Not Found');
+        } else {
+          console.error(error);
+        }
+        this.isLoading = false;
       }
     );
   }
@@ -192,7 +211,6 @@ export class LeaveRequestComponent {
     this.router.navigate(['/authPanal/CreateEmployee']);
   }
 
-  // search feild code :
   onGridReady(params: { api: any }) {
     this.gridApiActive = params.api;
   }
@@ -206,7 +224,7 @@ export class LeaveRequestComponent {
     this.searchInputValue = '';
     window.location.reload();
   }
-  
+
   gridOptions = {
     pagination: false,
     paginationPageSize: 10,
@@ -218,42 +236,28 @@ export class LeaveRequestComponent {
   }
 
   updateStatus(data: any) {
-    if(confirm("Do you want to update Status?") == true){
+    if (confirm("Do you want to update Status?") == true) {
       const payload = {
-        tbl_emp_leave_id : this.empLeaveId,
-        leave_status : data
+        tbl_emp_leave_id: this.empLeaveId,
+        leave_status: data
       }
-      this.service.post(`update/leave/request`,payload).subscribe((res: any) => {
-        if(res.status === 'success'){
-        this.toastr.success("Updated Successfully");
+      this.service.post(`update/leave/request`, payload).subscribe((res: any) => {
+        if (res.status === 'success') {
+          this.toastr.success("Updated Successfully");
           this.getLeaveRequests()
           const modalElement = document.getElementById('leaveRequestModal');
-            if (modalElement) {
-              const modalInstance = bootstrap.Modal.getInstance(modalElement);
-              if (modalInstance) {
-                modalInstance.hide();
-              }
-            }
+          this.modalService.closeModal();
         }
-      },(error) => {
+      }, (error) => {
         console.error('Error fetching leave request:', error);
       });
     }
   }
 
-  // data1 = [
-  //   { emp_code: 'SEE202505129', date: '2025-06-01', end_date: '2025-06-03', type: 'Sick Leave', status: 'Pending' },
-  // ];
-  // leaveHistory = [
-  //   { emp_code: 'SEE202505129', date: '2025-06-01', end_date: '2025-06-03', type: 'Sick Leave', status: 'Approved' },
-  //   { emp_code: 'SEE202505129', date: '2025-06-01', end_date: '2025-06-03', type: 'c Leave', status: 'Rejected' },
-  // ];
-
   submitForm() {
     if (this.leaveRequestForm.valid) {
       console.log('Form submitted:', this.leaveRequestForm.value);
 
-      // Perform your action here (e.g., send data to server)
     } else {
       this.leaveRequestForm.markAllAsTouched();
       alert("Please fil form properly !!!");
@@ -261,7 +265,88 @@ export class LeaveRequestComponent {
     }
   }
 
-  
+  exportExcel() {
+    this.gridApiActive.exportDataAsCsv({
+      columnKeys: ['employee_code', 'emp_name', 'department_name'],
+      fileName: 'LeaveRequests.csv',
+    });
+  }
+
+  getPagination() {
+    this.service.post('get-pagination', {}).subscribe((res: any) => {
+      if (res.status === 'success') {
+        this.paginationvalue = res.data;
+
+        this.getLeaveRequests();
+      } else {
+        this.paginationvalue = 10;
+        this.getLeaveRequests();
+      }
+    });
+  }
+
+  getpaginationvalue() {
+    this.service.post('get-pagination', {}).subscribe((res: any) => {
+      if (res.status === 'success') {
+        this.paginationvalue = res.data
+        this.generatePageNumbers(this.paginationvalue)
+      }
+    });
+  }
+
+  generatePageNumbers(pageWindow: number) {
+    const total = this.lastPage;
+    const current = this.currentPage;
+    let startPage = current;
+    let endPage = current + pageWindow - 1;
+
+    if (endPage >= total) {
+      endPage = total - 1;
+      startPage = Math.max(2, total - pageWindow);
+    }
+    if (current === 1) {
+      startPage = 2;
+      endPage = Math.min(total - 1, pageWindow);
+    }
+    const pages: (number | string)[] = [];
+    pages.push(1);
+    if (startPage > 2) {
+      pages.push('...');
+    }
+    for (let i = startPage; i <= endPage; i++) {
+      pages.push(i);
+    }
+    if (endPage < total - 1) {
+      pages.push('...');
+    }
+    if (total > 1) pages.push(total);
+
+    this.pagesToShow = pages;
+  }
+
+
+  goToPage(page: number | string) {
+    if (page === '...') return;
+    if (page !== this.currentPage) {
+      this.currentPage = page as number;
+      this.getLeaveRequests(this.currentPage);
+    }
+  }
+
+  prevPage() {
+    if (this.currentPage > 1) {
+      this.currentPage--;
+      this.getLeaveRequests(this.currentPage);
+    }
+  }
+
+  nextPage() {
+    if (this.currentPage < this.lastPage) {
+      this.currentPage++;
+      this.getLeaveRequests(this.currentPage);
+    }
+  }
+
 }
 
 

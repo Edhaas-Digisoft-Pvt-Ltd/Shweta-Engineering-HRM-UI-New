@@ -26,6 +26,13 @@ export class PayrollProcessComponent {
   columnDefs: ColDef[] = [];
   tempColumnDefs: ColDef[] = [];
   selectedEmployee: any = null;
+  isLoading: boolean = false;
+
+  totalRows: number = 0;
+  currentPage: number = 1;
+  lastPage: number = 1;
+  pagesToShow: (number | string)[] = [];
+  paginationvalue: any;
 
   today: string = new Date().toISOString().split('T')[0];
   constructor(private router: Router, private service: HrmserviceService, private toastr: ToastrService) { }
@@ -57,13 +64,26 @@ export class PayrollProcessComponent {
   }
 
   ngOnInit() {
+    console.log(this.isProcess);
+
     this.selectedYear = new Date().getFullYear();
-    this.selectedMonth = new Date().getMonth() + 1;
+    this.selectedMonth = new Date().getMonth();
     this.getCompanyNames();
-    this.getPayrollProcess();
     this.initializeColumns();
     this.initializeColumnsforProcess();
-    this.getTempPayroll();
+    // this.getTempPayroll();
+
+    this.getPagination();
+
+    if (sessionStorage.getItem('roleName') == 'accountant') {
+      this.router.navigate(['/authPanal/payrollProcess']);
+      return;
+    } else {
+      alert('Please Login To Proceed');
+      sessionStorage.clear();
+      this.router.navigate(['']);
+      return;
+    }
   }
 
   getMonthName(monthId: number): string {
@@ -100,16 +120,19 @@ export class PayrollProcessComponent {
     this.gridApiTemp = params.api;
   }
 
-  getPayrollProcess() {
+  //generatetab
+  getPayrollProcess(page: number = 1): void {
+    this.isLoading = true;
     this.rowData = [];
     this.service.post('fetch/payroll', {
       company_id: this.selectedCompanyId,
       year: this.selectedYear,
       month: this.selectedMonth,
+      page: page,
     }).subscribe((res: any) => {
       if (res.status === 'success') {
         this.rowData = res.data.map((item: any) => ({
-          employeeName: item.emp_name,
+          employee_code: item.employee_code,
           department: item.department_name,
           role: item.role_name,
           presentDays: item.present_days,
@@ -118,15 +141,32 @@ export class PayrollProcessComponent {
           overTime: item.total_overtime,
           employe_id: item.employe_id,
         }));
+        this.totalRows = res.pagination.total;
+        this.currentPage = res.pagination.page;
+        this.lastPage = res.pagination.last_page;
+        this.generatePageNumbers(this.paginationvalue);
       }
-    });
+      this.isLoading = false;
+    }, (error) => {
+      this.isLoading = false;
+      if (error.status === 404) {
+        this.toastr.warning('Data Not Found');
+        this.isLoading = false;
+      } else {
+        console.error(error);
+        this.isLoading = false;
+      }
+    })
   }
 
-  getTempPayroll() {
+  //processtab
+  getTempPayroll(page: number = 1): void {
+    this.isLoading = true;
     const payload = {
       company_id: this.selectedCompanyId,
       year: this.selectedYear,
-      month: this.selectedMonth
+      month: this.selectedMonth,
+      page: page,
     };
 
     this.service.post('fetch/temp/payroll', payload).subscribe({
@@ -134,31 +174,40 @@ export class PayrollProcessComponent {
         if (res.status === 'success' && res.data && res.data.length > 0) {
           this.isProcess = true;
           this.tempRowData = res.data.map((item: any) => ({
-            emp_name: item.emp_name,
+            employee_code: item.employee_code,
             department_name: item.department_name,
             present_days: item.present_days,
             absent_days: item.absent_days,
             total_hours: item.total_hours,
-            total_overtime: item.total_overtime ?? '-',
+            total_overtime: item.total_overtime ?? 'NA',
             employe_id: item.employe_id,
-            bonus_incentive_amount: item.bonus_incentive_amount ?? '-',
-            advance_salary: item.advance_salary ?? '-',
-            net_salary: item.net_salary,
+            bonus_amount: item.bonus_amount ? `₹ ${item.bonus_amount}` : 'NA',
+            adv_deduction: item.adv_deduction ? `₹ ${item.adv_deduction}` : 'NA',
+            net_salary: item.net_salary ? `₹ ${item.net_salary}` : 'NA',
           }));
+          this.totalRows = res.pagination.total;
+          this.currentPage = res.pagination.page;
+          this.lastPage = res.pagination.last_page;
+          this.generatePageNumbers(this.paginationvalue);
         }
         else {
           this.isProcess = false;
           this.tempRowData = [];
+          this.getPayrollProcess();
         }
+        this.isLoading = false;
       },
       error: () => {
         this.isProcess = false;
         this.tempRowData = [];
+        this.getPayrollProcess();
+        this.isLoading = false;
       }
     });
   }
 
   generatePayroll() {
+    this.isLoading = true;
     const payrolls = this.rowData.map((emp: any) => ({
       employee_id: emp.employe_id,
       year: this.selectedYear,
@@ -171,62 +220,84 @@ export class PayrollProcessComponent {
       next: () => {
         this.toastr.success('Temporary payroll created.');
         this.getTempPayroll();
+        this.isLoading = true;
       },
       error: () => {
         this.toastr.error('Failed to create temp payroll.');
+        this.isLoading = true;
       }
     });
   }
 
-  processPayroll() {
-    if (!this.tempRowData || this.tempRowData.length === 0) {
-      this.toastr.warning('No employee data available.');
-      return;
-    }
+  // processPayroll() {
+  //   if (!this.tempRowData || this.tempRowData.length === 0) {
+  //     this.toastr.warning('Data Not Available.');
+  //     return;
+  //   }
 
+  //   const payrolls = this.tempRowData.map((emp: any) => ({
+  //     employee_id: emp.employe_id,
+  //     year: this.selectedYear,
+  //     month: this.selectedMonth
+  //   }));
+
+  //   const payload = { payrolls };
+
+  //   this.service.post('craete/payroll', payload).subscribe({
+  //     next: () => {
+  //       this.toastr.success('Payroll processed successfully.');
+  //       this.getPayrollProcess();
+  //       this.getTempPayroll();
+  //     },
+  //     error: () => {
+  //       this.toastr.error('Failed to process payroll.');
+  //     }
+  //   });
+  // }
+
+  processPayroll() {
+    this.isLoading = true;
     const payrolls = this.tempRowData.map((emp: any) => ({
       employee_id: emp.employe_id,
       year: this.selectedYear,
       month: this.selectedMonth
     }));
-
     const payload = { payrolls };
-
-    this.service.post('craete/payroll', payload).subscribe({
-      next: () => {
+    this.service.post('craete/payroll', payload).subscribe((res: any) => {
+      if (res.status == 'success') {
         this.toastr.success('Payroll processed successfully.');
-        this.getPayrollProcess();
         this.getTempPayroll();
-      },
-      error: () => {
-        this.toastr.error('Failed to process payroll.');
+        this.isLoading = true;
+      } else {
+        this.toastr.error('Something went wrong');
+        this.isLoading = true;
       }
-    });
+    })
   }
 
 
   initializeColumns() {
     this.columnDefs = [
-      { headerName: 'Emp Name', field: 'employeeName', sortable: true, filter: true },
+      { headerName: 'Emp Code', field: 'employee_code', sortable: true, filter: true },
       { headerName: 'Department', field: 'department', sortable: true, filter: true },
       { headerName: 'Role', field: 'role', sortable: true, filter: true },
       { headerName: 'Present Days', field: 'presentDays', sortable: true, filter: true },
-      { headerName: 'Absent', field: 'absentDays', sortable: true, filter: true },
-      { headerName: 'hours', field: 'hours', sortable: true, filter: true },
-      { headerName: 'OT', field: 'overTime', sortable: true, filter: true },
+      { headerName: 'Absent', field: 'absentDays', sortable: true, filter: true, },
+      { headerName: 'hours', field: 'hours', sortable: true, filter: true, },
+      { headerName: 'OT(hrs)', field: 'overTime', sortable: true, filter: true, },
     ];
   }
 
   initializeColumnsforProcess() {
     this.tempColumnDefs = [
-      { headerName: 'Emp Name', field: 'emp_name', sortable: true, filter: true },
-      { headerName: 'Department', field: 'department_name', sortable: true, filter: true },
-      { headerName: 'PD', field: 'present_days', sortable: true, filter: true },
+      { headerName: 'Emp Code', field: 'employee_code', sortable: true, filter: true, minWidth: 160 },
+      { headerName: 'Department', field: 'department_name', sortable: true, filter: true, minWidth: 140 },
+      { headerName: 'P', field: 'present_days', sortable: true, filter: true },
       { headerName: 'A', field: 'absent_days', sortable: true, filter: true },
+      { headerName: 'OT(hrs)', field: 'total_overtime', sortable: true, filter: true },
       { headerName: 'Hrs', field: 'total_hours', sortable: true, filter: true },
-      { headerName: 'OT', field: 'total_overtime', sortable: true, filter: true },
-      { headerName: 'B&I', field: 'bonus_incentive_amount', sortable: true, filter: true },
-      { headerName: 'Adv Salary', field: 'advance_salary', sortable: true, filter: true },
+      { headerName: 'Bonus', field: 'bonus_amount', sortable: true, filter: true },
+      { headerName: 'Adv Salary', field: 'adv_deduction', sortable: true, filter: true },
       { headerName: 'Net Salary', field: 'net_salary', sortable: true, filter: true },
       {
         headerName: 'Action',
@@ -239,7 +310,7 @@ export class PayrollProcessComponent {
         },
         onCellClicked: (params: any) => {
           this.selectedEmployee = params.data;
-          this.fileInput.nativeElement.click(); 
+          this.fileInput.nativeElement.click();
         }
       }
     ];
@@ -271,8 +342,14 @@ export class PayrollProcessComponent {
   }
 
   exportExcel() {
-    if (this.gridApiActive) {
-      this.gridApiActive.exportDataAsCsv();
+    const gridApiToUse = this.isProcess ? this.gridApiTemp : this.gridApiActive;
+
+    if (gridApiToUse) {
+      gridApiToUse.exportDataAsCsv({
+        fileName: this.isProcess ? 'Processed_Payroll.csv' : 'generate_payroll.csv'
+      });
+    } else {
+      this.toastr.warning('Grid not ready.');
     }
   }
 
@@ -283,15 +360,103 @@ export class PayrollProcessComponent {
     const formData = new FormData();
     formData.append('upload_file', file);
 
-    this.service.post('import-attendance', formData).subscribe((res: any) => {
+    this.service.post('import/attendance', formData).subscribe((res: any) => {
       if (res.status === 'success') {
         this.toastr.success(res.data);
-        this.getPayrollProcess();
+        this.getTempPayroll();
       } else {
         console.log(res.error);
       }
     });
 
     this.fileInput.nativeElement.value = '';
+  }
+
+  getPagination() {
+    this.service.post('get-pagination', {}).subscribe((res: any) => {
+      if (res.status === 'success') {
+        this.paginationvalue = res.data;
+        this.getTempPayroll();
+      } else {
+        this.paginationvalue = 10;
+        this.getTempPayroll();
+      }
+    });
+  }
+
+  getpaginationvalue() {
+    this.service.post('get-pagination', {}).subscribe((res: any) => {
+      if (res.status === 'success') {
+        this.paginationvalue = res.data
+        this.generatePageNumbers(this.paginationvalue)
+      }
+    });
+  }
+
+  generatePageNumbers(pageWindow: number) {
+    const total = this.lastPage;
+    const current = this.currentPage;
+    let startPage = current;
+    let endPage = current + pageWindow - 1;
+    if (endPage >= total) {
+      endPage = total - 1;
+      startPage = Math.max(2, total - pageWindow);
+    }
+
+    if (current === 1) {
+      startPage = 2;
+      endPage = Math.min(total - 1, pageWindow);
+    }
+    const pages: (number | string)[] = [];
+    pages.push(1);
+    if (startPage > 2) {
+      pages.push('...');
+    }
+    for (let i = startPage; i <= endPage; i++) {
+      pages.push(i);
+    }
+    if (endPage < total - 1) {
+      pages.push('...');
+    }
+    if (total > 1) pages.push(total);
+    this.pagesToShow = pages;
+  }
+
+
+  goToPage(page: number | string) {
+    if (page === '...') return;
+    if (page !== this.currentPage) {
+      this.currentPage = page as number;
+      if (this.isProcess === false) {
+        this.getPayrollProcess(this.currentPage);
+      }
+      if (this.isProcess === true) {
+        this.getTempPayroll(this.currentPage);
+      }
+    }
+  }
+
+  prevPage() {
+    if (this.currentPage > 1) {
+      this.currentPage--;
+      if (this.isProcess === false) {
+        this.getPayrollProcess(this.currentPage);
+      }
+      if (this.isProcess === true) {
+        this.getTempPayroll(this.currentPage);
+      }
+    }
+  }
+
+  nextPage() {
+    if (this.currentPage < this.lastPage) {
+      this.currentPage++;
+      if (this.isProcess === false) {
+        this.getPayrollProcess(this.currentPage);
+      }
+      if (this.isProcess === true) {
+        this.getTempPayroll(this.currentPage);
+      }
+    }
   }
 }

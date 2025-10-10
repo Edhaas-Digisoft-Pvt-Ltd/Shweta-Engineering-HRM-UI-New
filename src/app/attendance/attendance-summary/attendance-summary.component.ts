@@ -37,8 +37,9 @@ export class AttendanceSummaryComponent {
 
   columnDefs: any[] = [];
   rowData: any[] = [];
+  isLoading: boolean = false;
 
-  constructor(private service: HrmserviceService) {}
+  constructor(private service: HrmserviceService) { }
 
   ngOnInit() {
     this.loadData();
@@ -46,7 +47,7 @@ export class AttendanceSummaryComponent {
   }
 
   onMonthYearChange() {
-    this.selectedMonth = Number(this.selectedMonth); 
+    this.selectedMonth = Number(this.selectedMonth);
     this.loadData();
     this.fetchDailySummary();
   }
@@ -92,17 +93,22 @@ export class AttendanceSummaryComponent {
   }
 
   fetchDailySummary() {
+    this.isLoading = true;
     const payload = {
+      company_id : 1,
       month: this.selectedMonth + 1,
-      year: this.selectedYear
+      year: this.selectedYear,
+      page:1
     };
 
     this.service.post('fetch/DailySummary', payload).subscribe((res: any) => {
       if (res.status === 'success') {
         const rawData = res.data;
         this.rowData = this.buildExportRowMap(rawData);
+        this.isLoading = false;
       } else {
-        console.log(res.error);
+        console.log(res.error); 
+        this.isLoading = false;
       }
     });
   }
@@ -115,16 +121,16 @@ export class AttendanceSummaryComponent {
     wrapper.style.alignItems = 'center';
     wrapper.style.height = '100%';
 
-    if (isSunday) {
-      const img = document.createElement('img');
-      img.src = 'assets/sunday.png';
-      img.style.width = '100%';
-      img.style.height = '100%';
-      img.style.marginBottom = '2px';
-      img.style.position = 'absolute';
-      img.style.zIndex = '-1';
-      wrapper.appendChild(img);
-    }
+    // if (isSunday) {
+    //   const img = document.createElement('img');
+    //   img.src = 'assets/sunday.png';
+    //   img.style.width = '100%';
+    //   img.style.height = '100%';
+    //   img.style.marginBottom = '2px';
+    //   img.style.position = 'absolute';
+    //   img.style.zIndex = '-1';
+    //   wrapper.appendChild(img);
+    // }
 
     const valueDiv = document.createElement('div');
     valueDiv.innerText = value || '';
@@ -144,6 +150,7 @@ export class AttendanceSummaryComponent {
     else if (value === 'W/od') dot.style.background = '#9FFF04';
     else if (value === 'HD') dot.style.background = '#E000B0';
     else if (value === 'LT') dot.style.background = '#880021';
+    else if (value === 'OT') dot.style.background = '#eb9900ff';
 
     if (dot.style.background) {
       wrapper.appendChild(dot);
@@ -175,14 +182,14 @@ export class AttendanceSummaryComponent {
     data.forEach((item) => {
       const key = item.employee_code;
       const date = new Date(item.attendance_date);
-      const field = this.formatDateKey(date); 
+      const field = this.formatDateKey(date);
       const status = (item.status || '').toUpperCase();
 
       if (!employeeMap[key]) {
         employeeMap[key] = {
           id: item.employee_code,
           name: item.emp_name,
-          _dates: new Set<string>() 
+          _dates: new Set<string>()
         };
       }
 

@@ -1,0 +1,51 @@
+<div class="right-panel">
+
+    <div class="main-content">
+        <div class="row gx-3  align-items-center p-2 rounded-2 mt-3">
+            <div class="col-12 d-flex">
+                <h2 class="fw-bold"> <i class="bi bi-currency-rupee me-2"></i>Configurtion</h2>
+            </div>
+        </div>
+        <div class="tabs-container m-2">
+            <ul class="nav nav-tabs">
+                <li class="nav-item" (click)="selectTab('tab1')">
+                    <a class="nav-link fw-bold" [ngClass]="{'active': activeTab === 'tab1'}">Leave Config</a>
+                </li>
+                <li class="nav-item" (click)="selectTab('tab2')">
+                    <a class="nav-link fw-bold" [ngClass]="{'active': activeTab === 'tab2'}">Annual Bonus Config</a>
+                </li>
+                <li class="nav-item" (click)="selectTab('tab3')">
+                    <a class="nav-link fw-bold" [ngClass]="{'active': activeTab === 'tab3'}">Incentive Config</a>
+                </li>
+                <li class="nav-item" (click)="selectTab('tab4')">
+                    <a class="nav-link fw-bold" [ngClass]="{'active': activeTab === 'tab4'}">Settings</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <div *ngIf="activeTab === 'tab1'">
+        <div class="container ">
+            <app-leave-config></app-leave-config>
+        </div>
+    </div>
+
+    <div *ngIf="activeTab === 'tab2'">
+        <div class="container ">
+            <app-bonus-config></app-bonus-config>
+        </div>
+    </div>
+
+    <div *ngIf="activeTab === 'tab3'">
+        <div class="container ">
+            <app-incentive-config></app-incentive-config>
+        </div>
+    </div>
+
+    <div *ngIf="activeTab === 'tab4'">
+        <div class="container ">
+            <app-settings-config></app-settings-config>
+        </div>
+    </div>
+
+</div>

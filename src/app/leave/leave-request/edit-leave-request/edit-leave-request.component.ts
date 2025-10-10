@@ -1,6 +1,7 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { Router } from '@angular/router';
 import { ICellRendererAngularComp } from 'ag-grid-angular';
+import { ModalServiceService } from 'src/app/modal-service.service';
 declare var bootstrap: any;
 
 @Component({
@@ -11,6 +12,8 @@ declare var bootstrap: any;
 export class EditLeaveRequestComponent implements ICellRendererAngularComp {
   params: any;
   leaveRequestForm: any;
+
+  constructor(private modalService:ModalServiceService){}
 
   agInit(params: any): void {
     this.params = params;
@@ -36,6 +39,7 @@ export class EditLeaveRequestComponent implements ICellRendererAngularComp {
   editID(params: any) {
     if (this.params.editCallback) {
       this.params.editCallback(params.data.tbl_emp_leave_id);
+      this.modalService.openModal('leaveRequestModal')
     }
   }
 }

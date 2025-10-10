@@ -130,6 +130,11 @@ a.nav-link {
     border: 1px solid rgb(220, 53, 69) !important;
 }
 
+.BtnColor{
+    background-color: #3674B5;
+    color: white;
+}
+
 @media(max-width:768px) {
     ul.nav.nav-tabs {
         padding-left: 50px;

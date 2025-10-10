@@ -33,9 +33,19 @@ export class SidebarComponent implements OnInit {
     this.roleName = sessionStorage.getItem('roleName')
     
   }
-  closeAccordion() {
-    this.isAccordionOpen1 = false;
-    this.isAccordionOpen2 = false;
+  
+  closeAccordion(parent?: 'accordion1' | 'accordion2' | 'all') {
+    if (parent === 'accordion1') {
+      // clicked Payroll -> close Company Settings
+      this.isAccordionOpen2 = false;
+    } else if (parent === 'accordion2') {
+      // clicked Company Settings -> close Payroll
+      this.isAccordionOpen1 = false;
+    } else if (parent === 'all') {
+      // clicked something outside parents (like Configuration, Calendar, Employee, etc.)
+      this.isAccordionOpen1 = false;
+      this.isAccordionOpen2 = false;
+    }
   }
 
   // Set accordion active class if its child route is active
@@ -50,13 +60,23 @@ export class SidebarComponent implements OnInit {
   //   // console.log( this.service.get(data$))
   // }
 
+  // logout() {
+  //   if (confirm('Do you want to logout?') == true) {
+  //     // alert("Logout ...");
+  //     this.router.navigate(['']);
+  //   } else {
+  //     alert('Stay Here !!!');
+  //   }
+  //   this.service.clearRole();
+  // }
+
   logout() {
-    if (confirm('Do you want to logout?') == true) {
-      // alert("Logout ...");
-      this.router.navigate(['']);
-    } else {
-      alert('Stay Here !!!');
+    let cnf = confirm('Are You sure you want to Log OUT??');
+    console.log(cnf);
+    
+    if (cnf) {
+      sessionStorage.clear();
+      this.router.navigate(['/']);
     }
-    this.service.clearRole();
   }
 }

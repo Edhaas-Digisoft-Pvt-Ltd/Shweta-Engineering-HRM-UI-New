@@ -6,6 +6,8 @@ import { HrmserviceService } from 'src/app/hrmservice.service';
 import { ToastrService } from 'ngx-toastr';
 import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
+import { ModalServiceService } from '../modal-service.service';
+
 declare var bootstrap: any;
 @Component({
   selector: 'app-employee',
@@ -16,29 +18,44 @@ export class EmployeeComponent {
 
   gridApiActive!: GridApi;
   searchValue: string = '';
-  CompanyNames: any ;
+  CompanyNames: any;
   selectedValue: string = 'Company A';
   employee: any = [];
   Employee_Data: any;
-  selectedCompanyId: any = 1;
+  selectedCompanyId: any;
   rowData: any = [];
-  importExcelCompanyId: string = ''; 
-  
-  constructor(private router: Router, private service: HrmserviceService, private toastr: ToastrService) { }
+  importExcelCompanyId: string = '';
+  isLoading: boolean = false;
+
+  totalRows: number = 0;
+  currentPage: number = 1;
+  lastPage: number = 1;
+  pagesToShow: (number | string)[] = [];
+  paginationvalue: any;
+
+  constructor(private router: Router, private service: HrmserviceService, private modalService: ModalServiceService, private toastr: ToastrService) { }
 
   ngOnInit() {
-    this.getEmployee();
+    // this.selectedCompanyId = this.CompanyIdService.selectedCompanyId();
+    this.selectedCompanyId = this.service.selectedCompanyId();
+
+    // this.getEmployee();
+    this.getPagination();
     this.getCompanyNames();
+
+    if (sessionStorage.getItem('roleName') == 'admin') {
+      this.router.navigate(['/authPanal/Employee']);
+      return;
+    } else {
+      alert('Please Login To Proceed');
+      sessionStorage.clear();
+      this.router.navigate(['']);
+      return;
+    }
   }
 
-  closeAllModals(): void {
-    const modals = document.querySelectorAll('.modal.show');
-    modals.forEach((modalElement: any) => {
-      const modalInstance = bootstrap.Modal.getInstance(modalElement);
-      if (modalInstance) {
-        modalInstance.hide();
-      }
-    });
+  openImportModal(): void {
+    this.modalService.openModal('importEmployeeModal')
   }
 
   getCompanyNames() {
@@ -46,7 +63,6 @@ export class EmployeeComponent {
       if (res.status == "success") {
         // this.optionsArray = res.map((company: any) => company.CompanyName); // <-- only CompanyName
         this.CompanyNames = res.data;
-        console.log(this.CompanyNames);
       }
     },
       (error) => {
@@ -54,7 +70,7 @@ export class EmployeeComponent {
       }
     );
   }
-  
+
   onCompanyChange(event: Event): void {
     this.selectedCompanyId = (event.target as HTMLSelectElement).value;
     console.log('Selected Company ID:', this.selectedCompanyId);
@@ -68,8 +84,8 @@ export class EmployeeComponent {
   };
 
   columnDefs: ColDef[] = [
-    { headerName: 'Emp Code', field:'employee_code' ,sortable: true, filter: true, minWidth: 160, },
-    { headerName: 'Employee Name', field:'emp_name' ,sortable: true, filter: true, minWidth: 180, },
+    { headerName: 'Emp Code', field: 'employee_code', sortable: true, filter: true, minWidth: 160, },
+    { headerName: 'Employee Name', field: 'emp_name', sortable: true, filter: true, minWidth: 180, },
     { headerName: 'Department', field: 'department_name', sortable: true, filter: true },
     { headerName: 'Role', field: 'designation_name', sortable: true, filter: true },
     { headerName: 'Contact', field: 'emp_contact', sortable: true, filter: true },
@@ -82,16 +98,16 @@ export class EmployeeComponent {
     {
       headerName: 'Status',
       field: 'status',
-        cellRenderer: (params:any) => {
-          
+      cellRenderer: (params: any) => {
+
         const status = params.data.status;
         // console.log(status);
-        
+
         const button = document.createElement('button');
-    
+
         // Set the text of the button
         button.innerText = status === 'active' ? 'Active' : 'Inactive';
-        
+
         // Apply the styles based on the status
         if (status === 'active') {
           button.style.backgroundColor = '#CAFFEA';  // Green
@@ -100,7 +116,7 @@ export class EmployeeComponent {
           button.style.backgroundColor = '#FFAFAF';  // Blue
           button.style.color = '#000';
         }
-        
+
         // Additional button styling
         button.style.border = 'none';
         button.style.padding = '8px 16px';
@@ -110,16 +126,16 @@ export class EmployeeComponent {
         button.style.display = 'flex';
         button.style.justifyContent = 'center';
         button.style.alignItems = 'center';
-        button.style.height ="28px";
-        button.style.width ="100px";
+        button.style.height = "28px";
+        button.style.width = "100px";
 
-        
-    
+
+
         // Optional: Add event listener for button click if needed
         button.addEventListener('click', () => {
           console.log(`Button for ${status} clicked!`);
         });
-    
+
         return button;  // Return the button to be rendered
       }
     },
@@ -129,27 +145,32 @@ export class EmployeeComponent {
       cellStyle: { border: '1px solid #ddd' },
       cellRenderer: EmployeeActionComponent,
       cellRendererParams: {
-        viewEmployee : (field: any) => this.editApp(field),  
+        viewEmployee: (field: any) => this.editApp(field),
       },
     }
   ];
 
+  gridOptions = {
+    pagination: false,
+    paginationPageSize: 10,
+  };
+
   downloadTemplate(): void {
     const userConfirmed = confirm("Do you want to download the employee template?");
-      if (userConfirmed) {
-        const headers = ['role_id','emp_title','emp_name','emp_email','emp_gender','department_id','designation_id','CTC','statutory_list','bank_name','account_num','ifsc_code','doj','emp_contact','emp_address'];
-        const exampleRow = [
-        '3','mr','abc','abc@gmail.com','male','1','2','4','xyz','SBI','458438236526','SBIN0005088','2/1/2022','9999999999','Pune'
-        ];
+    if (userConfirmed) {
+      const headers = ['role_id', 'emp_title', 'emp_name', 'emp_email', 'emp_gender', 'department_id', 'designation_id', 'statutory_list', 'bank_name', 'account_num', 'ifsc_code', 'doj', 'emp_contact', 'emp_address', 'basic_salary', 'house_rent_allowances', 'conveyance_allowances', 'medical_allowances', 'special_allowances'];
+      const exampleRow = [
+        '3', 'mr', 'abc', 'abc@gmail.com', 'male', '1', '2', 'xyz', 'SBI', '458438236526', 'SBIN0005088', '2/1/2022', '9999999999', 'Pune', '200000', '18000', '1000', '1000', '1000'
+      ];
 
-        const worksheet: XLSX.WorkSheet = XLSX.utils.aoa_to_sheet([headers, exampleRow]);
-        const workbook: XLSX.WorkBook = { Sheets: { 'Template': worksheet }, SheetNames: ['Template'] };
-        const excelBuffer: any = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
-        const blob: Blob = new Blob([excelBuffer], { type: 'application/octet-stream' });
-        saveAs(blob, 'Employee_Template.xlsx');
+      const worksheet: XLSX.WorkSheet = XLSX.utils.aoa_to_sheet([headers, exampleRow]);
+      const workbook: XLSX.WorkBook = { Sheets: { 'Template': worksheet }, SheetNames: ['Template'] };
+      const excelBuffer: any = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+      const blob: Blob = new Blob([excelBuffer], { type: 'application/octet-stream' });
+      saveAs(blob, 'Employee_Template.xlsx');
 
-        this.toastr.success('Download successfully !');
-      }
+      this.toastr.success('Download successfully !');
+    }
   }
 
   onGridReady(params: { api: any }) {
@@ -166,70 +187,78 @@ export class EmployeeComponent {
   }
 
   // getting all data from api : 
-  getEmployee() {
-    let company_id = this.selectedCompanyId ;
-    this.service.post("company/employee", {company_id}).subscribe((res: any) => {
+  getEmployee(page: number = 1): void {
+    this.isLoading = true;
+    let company_id = this.selectedCompanyId;
+    this.service.post("company/employee", { company_id, page:page }).subscribe((res: any) => {
       if (res.status == 'success') {
-        this.rowData = res.data.map((item:any)=>({
-          employee_id:item.employe_id,
-          employee_code:item.employee_code,
-          emp_name:item.emp_name,
-          emp_contact:item.emp_contact,
-          doj:item.doj,
-          department_name:item.department_name,
-          designation_name : item.designation_name, 
-          status:item.status ==="Active"?"active":"Inactive",
-        }));
-      }else {
-        this.rowData = []; 
+        this.rowData = res.data.map((item: any) => ({
+          employee_id: item.employe_id,
+          employee_code: item.employee_code,
+          emp_name: item.emp_name,
+          emp_contact: item.emp_contact,
+          doj: item.doj,
+          department_name: item.department_name,
+          designation_name: item.designation_name,
+          status: item.status === "Active" ? "active" : "Inactive",
+        }))
+        this.totalRows = res.pagination.total;
+        this.currentPage = res.pagination.page;
+        this.lastPage = res.pagination.last_page;
+        this.generatePageNumbers(this.paginationvalue);
+      } else {
+        this.rowData = [];
+        this.toastr.warning('Data Not Found')
       }
+      this.isLoading = false;
     }, (error) => {
       this.rowData = [];
       console.error('Error fetching employees:', error);
+      this.isLoading = false;
     });
   }
-  
+
   selectedFile: File | null = null;
 
-onFileChange(event: any) {
-  const fileInput = event.target as HTMLInputElement;
-  const file = fileInput.files?.[0];
-  if (!file) return;
+  onFileChange(event: any) {
+    const fileInput = event.target as HTMLInputElement;
+    const file = fileInput.files?.[0];
+    if (!file) return;
 
-  this.selectedFile = file;
+    this.selectedFile = file;
 
-  const formData = new FormData();
-  formData.append('upload_file', file);
-  formData.append('company_id', this.importExcelCompanyId); 
+    const formData = new FormData();
+    formData.append('upload_file', file);
+    formData.append('company_id', this.importExcelCompanyId);
 
-  this.service.post('import/employee/excel', formData).subscribe((res: any) => {
-    if (res.status === 'success') {
-      this.toastr.success('File uploaded successfully!');
-      const skippedInfo = res.skipped?.map((row: any) => `Row ${row.row}: skipped due to ${row.reason}`).join('\n');
-      if (skippedInfo) this.toastr.warning(skippedInfo);
-      this.closeAllModals();
-      this.importExcelCompanyId = '';
-      this.getEmployee();
-    } else {
-      const skippedInfo = res.skipped?.map((row: any) => `Row ${row.row}: skipped due to ${row.reason}`).join('\n');
-      this.toastr.error(skippedInfo || 'Upload failed.');
-      this.importExcelCompanyId = '';
-      this.closeAllModals();
-    }
+    this.service.post('import/employee/excel', formData).subscribe((res: any) => {
+      if (res.status === 'success') {
+        this.toastr.success('File uploaded successfully!');
+        const skippedInfo = res.skipped?.map((row: any) => `Row ${row.row}: skipped due to ${row.reason}`).join('\n');
+        if (skippedInfo) this.toastr.warning(skippedInfo);
+        this.modalService.closeModal();
+        this.importExcelCompanyId = '';
+        this.getEmployee();
+      } else {
+        const skippedInfo = res.skipped?.map((row: any) => `Row ${row.row}: skipped due to ${row.reason}`).join('\n');
+        this.toastr.error(skippedInfo || 'Upload failed.');
+        this.importExcelCompanyId = '';
+        this.modalService.closeModal();
+      }
 
-    fileInput.value = '';
-  });
-}
+      fileInput.value = '';
+    });
+  }
 
 
-// const skippedInfo = res.skipped?.map((row: any) => `Row ${row.row}: ${row.reason}`).join('\n');
-// this.toastr.warning(`${message}\n${skippedInfo}`, 'Upload Notice');
+  // const skippedInfo = res.skipped?.map((row: any) => `Row ${row.row}: ${row.reason}`).join('\n');
+  // this.toastr.warning(`${message}\n${skippedInfo}`, 'Upload Notice');
 
   onOptionSelected() {
     console.log('Selected option:', this.selectedValue);
   }
 
-  editApp(params :any ){
+  editApp(params: any) {
 
     alert(params);
     // this.service.post(`fetchsingleemployee`,{ "employe_id": params}).subscribe((res: any) => {
@@ -237,13 +266,10 @@ onFileChange(event: any) {
     //   console.log("employee component data : ",this.Employee_Data);
 
     // });
-    console.log("editApp",params);
+    console.log("editApp", params);
   }
 
   exportExcel() {
-    console.log('called');
-    
-  if (this.gridApiActive) {
     this.gridApiActive.exportDataAsCsv({
       fileName: 'Employee_List.csv',
       columnKeys: [
@@ -255,12 +281,91 @@ onFileChange(event: any) {
         'designation_name',
         'status'
       ],
-      allColumns: false,        
-      onlySelected: false,      
+      allColumns: false,
+      onlySelected: false,
     });
-  } else {
-    console.error('Grid API not initialized.');
   }
-}
+
+   getPagination() {
+    this.service.post('get-pagination', {}).subscribe((res: any) => {
+      if (res.status === 'success') {
+        this.paginationvalue = res.data;
+
+        this.getEmployee();
+      } else {
+        this.paginationvalue = 10;
+        this.getEmployee();
+      }
+    });
+  }
+
+  getpaginationvalue() {
+    this.service.post('get-pagination', {}).subscribe((res: any) => {
+      if (res.status === 'success') {
+        this.paginationvalue = res.data
+        this.generatePageNumbers(this.paginationvalue)
+      }
+    });
+  }
+
+  generatePageNumbers(pageWindow: number) {
+    const total = this.lastPage;
+    const current = this.currentPage;
+
+    let startPage = current;
+    let endPage = current + pageWindow - 1;
+
+    if (endPage >= total) {
+      endPage = total - 1; 
+      startPage = Math.max(2, total - pageWindow); 
+    }
+
+    if (current === 1) {
+      startPage = 2;
+      endPage = Math.min(total - 1, pageWindow);
+    }
+
+    const pages: (number | string)[] = [];
+    pages.push(1);
+
+    if (startPage > 2) {
+      pages.push('...');
+    }
+
+    for (let i = startPage; i <= endPage; i++) {
+      pages.push(i);
+    }
+
+    if (endPage < total - 1) {
+      pages.push('...');
+    }
+
+    if (total > 1) pages.push(total);
+
+    this.pagesToShow = pages;
+  }
+
+
+  goToPage(page: number | string) {
+    if (page === '...') return;
+    if (page !== this.currentPage) {
+      this.currentPage = page as number;
+      this.getEmployee(this.currentPage);
+    }
+  }
+
+  prevPage() {
+    if (this.currentPage > 1) {
+      this.currentPage--;
+      this.getEmployee(this.currentPage);
+    }
+  }
+
+  nextPage() {
+    if (this.currentPage < this.lastPage) {
+      this.currentPage++;
+      this.getEmployee(this.currentPage);
+    }
+  }
 
 }
