@@ -113,14 +113,14 @@ export class CreateEmployeeComponent {
       // Enable_PT_for_employee: [''],
       // Enable_LWF_for_employee: [''],
       // National_Pension_Scheme: [''],
-      basic_salary: [0, Validators.required],
-      house_rent_allowances: [0],
-      conveyance_allowances: [0],
-      medical_allowances: [0],
-      special_allowances: [0],
-      annual_gross_salary: [0],
-      monthly_gross_salary: [0],
-      salary: [0],
+      basic_salary: [0, [Validators.required, Validators.min(1)]],
+      house_rent_allowances: [0, [Validators.min(0)]],
+      conveyance_allowances: [0, [Validators.min(0)]],
+      medical_allowances: [0, [Validators.min(0)]],
+      special_allowances: [0, [Validators.min(0)]],
+      annual_gross_salary: [0, [Validators.min(0)]],
+      monthly_gross_salary: [0, [Validators.min(0)]],
+      salary: [0, [Validators.min(0)]],
       pf_employee_applicable: [false],
       pf_employer_applicable: [false],
       esic_employee_applicable: [false],
@@ -477,5 +477,40 @@ export class CreateEmployeeComponent {
   //   const num = +String(control.value).replace(/,/g, '');
   //   control.setValue(num ? num.toLocaleString('en-IN') : '', { emitEvent: false });
   // }
+
+  
+  allowOnlyLetters(event: KeyboardEvent) {
+    const char = String.fromCharCode(event.keyCode);
+    const pattern = /^[A-Za-z]+$/;
+
+    if (!pattern.test(char)) {
+      event.preventDefault();
+    }
+  }
+
+  allowOnlyNumbers(event: KeyboardEvent) {
+    const char = String.fromCharCode(event.keyCode);
+    const pattern = /^[0-9]*$/;
+
+    if (!pattern.test(char)) {
+      event.preventDefault();
+    }
+  }
+
+  allowNumbersCharacters(event: KeyboardEvent) {
+    const char = event.key;
+    const pattern = /^[A-Za-z0-9]$/; 
+
+    if (!pattern.test(char)) {
+      event.preventDefault();
+    }
+  }
+
+  blockPaste(event: ClipboardEvent) {
+    const pasteData = event.clipboardData?.getData('text') || '';
+    if (!/^[A-Za-z]+$/.test(pasteData)) {
+      event.preventDefault();
+    }
+  }
 
 }

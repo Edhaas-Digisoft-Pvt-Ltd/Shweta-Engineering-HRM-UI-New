@@ -22,7 +22,7 @@ export class DashboardComponent {
   CompanyNames: any = [];
   selectedCompanyId: any;
   optionsArray: string[] = ['Company A', 'Company B', 'Company C'];
-  selectedValue: string = 'Company A'; 
+  selectedValue: string = 'Company A';
   searchValue: string = '';
   gridApiActive: any;
   leaveCards: any = [];
@@ -49,7 +49,7 @@ export class DashboardComponent {
     const currentYear = new Date().getFullYear();
     this.financialYears = [];
 
-    for (let i = 3; i >= 0; i--) { 
+    for (let i = 3; i >= 0; i--) {
       this.financialYears.push(currentYear - i);
     }
 
@@ -131,6 +131,14 @@ export class DashboardComponent {
           { title: 'Rejected Leaves', count: res.data.rejected, icon: 'bi-calendar-x', bgColor: '#880021' },
         ];
         this.isLoading = false;
+      }
+      else {
+        this.leaveCards = [
+          { title: 'Total Leave Request', icon: 'bi-calendar-event', bgColor: '#3674B5' },
+          { title: 'Approved Leaves', icon: 'bi-calendar2-check', bgColor: '#006D42' },
+          { title: 'Pending Leaves', icon: 'bi-calendar2-week', bgColor: '#C8B100' },
+          { title: 'Rejected Leaves', icon: 'bi-calendar-x', bgColor: '#880021' },
+        ]
       }
     });
   }

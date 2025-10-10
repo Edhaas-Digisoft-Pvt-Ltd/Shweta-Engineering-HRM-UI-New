@@ -41,7 +41,8 @@
                                                         <input type="text" id="companyName" class="form-control"
                                                             formControlName="companyName"
                                                             placeholder="Enter Company Name" [max]="today"
-                                                            [ngClass]="{'is-invalid': isSubmitted && companyForm.get('companyName')?.invalid}">
+                                                            [ngClass]="{'is-invalid': isSubmitted && companyForm.get('companyName')?.invalid}"
+                                                            (keypress)="allowOnlyLetters($event)" (paste)="blockPaste($event)">
                                                         <div class="invalid-feedback"
                                                             *ngIf="isSubmitted && companyForm.get('companyName')?.errors?.['pattern']">
                                                             Cannot contain special characters or numbers.
@@ -160,7 +161,8 @@
                                                         <textarea id="address" class="form-control"
                                                             formControlName="companyAddress" rows="2"
                                                             placeholder="Enter Address"
-                                                            [ngClass]="{'is-invalid': isSubmitted && companyForm.get('companyAddress')?.invalid}">
+                                                            [ngClass]="{'is-invalid': isSubmitted && companyForm.get('companyAddress')?.invalid}"
+                                                            (keypress)="allowNumbersCharacters($event)" (paste)="blockPaste($event)">
                                                         </textarea>
                                                         <div class="invalid-feedback"
                                                             *ngIf="isSubmitted && companyForm.get('companyAddress')?.errors?.['pattern']">

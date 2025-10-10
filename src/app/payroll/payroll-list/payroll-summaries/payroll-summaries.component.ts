@@ -147,18 +147,18 @@ export class PayrollSummariesComponent {
           }
         ]
 
-        if (res.data.prvadvancesalary.length > 0) {
-          this.prevAdvanceSalaryDetails = res.data.prvadvancesalary[0];
-          this.rowData = [{
-            apply_date: this.prevAdvanceSalaryDetails.apply_date,
-            tenure: this.prevAdvanceSalaryDetails.tenure,
-            advance_amount: this.prevAdvanceSalaryDetails.advance_amount || '-',
-            emi: this.prevAdvanceSalaryDetails.emi,
-            emi_status: this.prevAdvanceSalaryDetails.emi_status,
-          }];
-        } else {
-          this.rowData = [];
-        }
+        // if (res.data.prvadvancesalary.length > 0) {
+        //   this.prevAdvanceSalaryDetails = res.data.prvadvancesalary[0];
+        //   this.rowData = [{
+        //     apply_date: this.prevAdvanceSalaryDetails.apply_date,
+        //     tenure: this.prevAdvanceSalaryDetails.tenure,
+        //     advance_amount: this.prevAdvanceSalaryDetails.advance_amount || '-',
+        //     emi: this.prevAdvanceSalaryDetails.emi,
+        //     emi_status: this.prevAdvanceSalaryDetails.emi_status,
+        //   }];
+        // } else {
+        //   this.rowData = [];
+        // }
 
         this.deduct = [
           {

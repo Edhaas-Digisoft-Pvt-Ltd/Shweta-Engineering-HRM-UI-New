@@ -36,8 +36,26 @@
         <div class="col-12 mt-4 p-0">
           <ag-grid-angular style="width: 100%; height: 60vh;" class="ag-theme-alpine" [rowData]="rowData"
             [columnDefs]="columnDefs" [defaultColDef]="defaultColDef" (gridReady)="onGridReady($event)"
-            [gridOptions]="gridOptions" [pagination]="true">
+            [gridOptions]="gridOptions" [pagination]="false">
           </ag-grid-angular>
+
+          <div class="d-flex align-items-center justify-content-end flex-wrap mt-3 gap-2">
+            <button class="btn btn-sm btn-primary rounded" (click)="prevPage()"
+              [disabled]="currentPage === 1">Prev</button>
+            <button class="btn btn-sm btn-primary rounded" (click)="nextPage()"
+              [disabled]="currentPage === lastPage">Next</button>
+
+            <ng-container *ngFor="let page of pagesToShow">
+              <span *ngIf="page !== '...'; else ellipsis" (click)="goToPage(page)"
+                [class.current]="page === currentPage" class="page-text">
+                <ng-container *ngIf="page === currentPage">[{{ page
+                  }}]</ng-container>
+                <ng-container *ngIf="page !== currentPage">{{ page
+                  }}</ng-container>
+              </span>
+              <ng-template #ellipsis><span class="mx-1">...</span></ng-template>
+            </ng-container>
+          </div>
         </div>
       </div>
     </div>
@@ -48,16 +66,17 @@
     <!-- Modal  -->
 
     <div class="modal fade" id="leaveRequestModal" tabindex="-1" aria-labelledby="exampleModalLabel">
-      <div class="modal-dialog modal-dialog-centered modal-xl" style="max-height: 60vh;">
-        <div class="modal-content" style="max-height: 60vh; overflow-y: auto;">
-          <div class="modal-header " style="padding: 20px 40px !important">
+      <div class="modal-dialog modal-dialog-centered modal-xl">
+        <div class="modal-content">
+          <div class="modal-header" style="padding: 20px 40px !important">
             <h1 class="modal-title fs-5" id="exampleModalLabel">Leave Request Info</h1>
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
-          <form [formGroup]="leaveRequestForm">
-            <div class="modal-body" style="padding: 5px 40px !important">
+
+          <div class="modal-body" style="max-height: 70vh; overflow-y: auto; padding: 5px 40px !important">
+            <form [formGroup]="leaveRequestForm">
               <div class="row">
-                <!-- <div class="col-lg-7   " style="border-right : 1px dashed gray; padding-right: 20px;"> -->
+                <!-- <div class="col-lg-7" style="border-right : 1px dashed gray; padding-right: 20px;"> -->
                 <div class="col-lg-12">
                   <div class="row my-3">
                     <div class="col-md-6">
@@ -90,6 +109,7 @@
                       </div>
                     </div>
                   </div>
+
                   <div class="row my-3">
                     <div class="col-lg-3 col-md-6">
                       <label for="leaveType">Leave Type</label>
@@ -104,11 +124,11 @@
 
                     <div class="col-lg-3 col-md-6">
                       <label for="status">Status</label>
-                      <input type="text" id="status" class="form-control " formControlName="status" [ngClass]="{
-                                            'custom-bg-warning': leaveRequestData?.status === 'pending',
-                                            'custom-bg-success': leaveRequestData?.status === 'Approved',
-                                            'custom-bg-danger': leaveRequestData?.status === 'Rejected'
-                                        }" [value]="leaveRequestData?.status" />
+                      <input type="text" id="status" class="form-control" formControlName="status" [ngClass]="{
+                    'custom-bg-warning': leaveRequestData?.status === 'pending',
+                    'custom-bg-success': leaveRequestData?.status === 'Approved',
+                    'custom-bg-danger': leaveRequestData?.status === 'Rejected'
+                  }" [value]="leaveRequestData?.status" />
                       <div *ngIf="leaveRequestForm.get('status')?.invalid && leaveRequestForm.get('status')?.touched"
                         class="text-danger">
                         Status is required
@@ -137,6 +157,7 @@
                       </div>
                     </div>
                   </div>
+
                   <div class="row my-3">
                     <div class="col-12">
                       <label for="leavereason">Reason</label>
@@ -148,8 +169,8 @@
                         Reason is required
                       </div>
                     </div>
-
                   </div>
+
                   <div class="modal-footer">
                     <button type="button" class="btn approveBtn" (click)="updateStatus('Approved')"
                       [disabled]="leaveRequestData?.status === 'Approved' || leaveRequestData?.status === 'Rejected'">
@@ -164,90 +185,83 @@
 
                 <!-- leave balance -->
                 <!-- <div class="col-lg-5 p-4">
-                  <div class="leavesSchedule p-0"
-                    style="border-radius: 10px; border:1px solid rgb(188, 188, 188); overflow:hidden">
-                    <div class="row">
-                      <p class="py-2 px-4 leaveBalance">Leave Balance</p>
-                    </div>
+              <div class="leavesSchedule p-0"
+                style="border-radius: 10px; border:1px solid rgb(188, 188, 188); overflow:hidden">
+                <div class="row">
+                  <p class="py-2 px-4 leaveBalance">Leave Balance</p>
+                </div>
 
-                    <div class="row gx-3 px-3 pb-3">
-                      <div class="col-md-4 col-sm-6 my-2">
-                        <div class="leaveStatusCard text-center border" style="border-radius: 5px">
-                          <div class="heading p-2"
-                            style="background-color: #C8E3FF; border-radius: 5px 5px 0px 0px; font-size: 13px;">
-                            Total Leaves
-                          </div>
-                          <div class="content p-2">
-                            {{ leaveBalance?.leave_count }}
-                          </div>
-                        </div>
+                <div class="row gx-3 px-3 pb-3">
+                  <div class="col-md-4 col-sm-6 my-2">
+                    <div class="leaveStatusCard text-center border" style="border-radius: 5px">
+                      <div class="heading p-2"
+                        style="background-color: #C8E3FF; border-radius: 5px 5px 0px 0px; font-size: 13px;">
+                        Total Leaves
                       </div>
-
-                      <div class="col-md-4 col-sm-6 my-2">
-                        <div class="leaveStatusCard text-center border" style="border-radius: 5px">
-                          <div class="heading p-2"
-                            style="background-color: #C8E3FF; border-radius: 5px 5px 0px 0px; font-size: 13px;">
-                            Taken Leaves
-                          </div>
-                          <div class="content p-2">
-                            {{ leaveBalance?.apply_leave_count}}
-                          </div>
-                        </div>
-                      </div>
-
-                      <div class="col-md-4 col-sm-6 my-2">
-                        <div class="leaveStatusCard text-center border" style="border-radius: 5px">
-                          <div class="heading p-2"
-                            style="background-color: #C8E3FF; border-radius: 5px 5px 0px 0px; font-size: 13px;">
-                            Balance Leaves
-                          </div>
-                          <div class="content p-2">
-                            {{ leaveBalance?.leave_balance_count }}
-                          </div>
-                        </div>
+                      <div class="content p-2">
+                        {{ leaveBalance?.leave_count }}
                       </div>
                     </div>
                   </div>
-                </div> -->
 
-              </div>
+                  <div class="col-md-4 col-sm-6 my-2">
+                    <div class="leaveStatusCard text-center border" style="border-radius: 5px">
+                      <div class="heading p-2"
+                        style="background-color: #C8E3FF; border-radius: 5px 5px 0px 0px; font-size: 13px;">
+                        Taken Leaves
+                      </div>
+                      <div class="content p-2">
+                        {{ leaveBalance?.apply_leave_count }}
+                      </div>
+                    </div>
+                  </div>
 
-            </div>
-
-            <div class="row my-3" *ngIf="previousLeaves?.length">
-              <div class="col-12 p-5">
-                <div class="table-responsive" style="border: 1px solid #ccc;">
-                  <table class="table table-hover text-center align-middle">
-                    <thead class="sticky-top" style="top: 0; z-index: 1;">
-                      <tr>
-                        <th>Emp Code</th>
-                        <th>Start Date</th>
-                        <th>End Date</th>
-                        <th>Leave Type</th>
-                        <th>Status</th>
-                      </tr>
-                    </thead>
-                    <tbody *ngFor="let item of previousLeaves">
-                      <tr>
-                        <td>{{ item.employee_code }}</td>
-                        <td>{{ item.start_date }}</td>
-                        <td>{{ item.end_date }}</td>
-                        <td>{{ item.leave_name }}</td>
-                        <td>{{ item.leave_status }}</td>
-                      </tr>
-                    </tbody>
-                  </table>
+                  <div class="col-md-4 col-sm-6 my-2">
+                    <div class="leaveStatusCard text-center border" style="border-radius: 5px">
+                      <div class="heading p-2"
+                        style="background-color: #C8E3FF; border-radius: 5px 5px 0px 0px; font-size: 13px;">
+                        Balance Leaves
+                      </div>
+                      <div class="content p-2">
+                        {{ leaveBalance?.leave_balance_count }}
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
-            </div>
-          </form>
+            </div> -->
+              </div>
 
-          <div class="row">
-
+              <div class="row my-3" *ngIf="previousLeaves?.length">
+                <div class="col-12 p-5">
+                  <div class="table-responsive" style="border: 1px solid #ccc;">
+                    <table class="table table-hover text-center align-middle">
+                      <thead class="sticky-top" style="top: 0; background: #fff; z-index: 2;">
+                        <tr>
+                          <th>Emp Code</th>
+                          <th>Start Date</th>
+                          <th>End Date</th>
+                          <th>Leave Type</th>
+                          <th>Status</th>
+                        </tr>
+                      </thead>
+                      <tbody *ngFor="let item of previousLeaves">
+                        <tr>
+                          <td>{{ item.employee_code }}</td>
+                          <td>{{ item.start_date }}</td>
+                          <td>{{ item.end_date }}</td>
+                          <td>{{ item.leave_name }}</td>
+                          <td>{{ item.leave_status }}</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </form>
           </div>
         </div>
       </div>
-    </div>
 
+    </div>
   </div>
-</div>

@@ -46,9 +46,27 @@
         <div class="row g-3">
           <div class="col-12">
             <ag-grid-angular class="ag-theme-alpine" style="width: 100%; height: 60vh;" [rowData]="rowData"
-              [gridOptions]="gridOptions" [pagination]="true" [columnDefs]="columnDefs" [defaultColDef]="defaultColDef"
+              [gridOptions]="gridOptions" [pagination]="false" [columnDefs]="columnDefs" [defaultColDef]="defaultColDef"
               (gridReady)="onGridReady($event)">
             </ag-grid-angular>
+
+            <div class="d-flex align-items-center justify-content-end flex-wrap mt-3 gap-2">
+              <button class="btn btn-sm btn-primary rounded" (click)="prevPage()"
+                [disabled]="currentPage === 1">Prev</button>
+              <button class="btn btn-sm btn-primary rounded" (click)="nextPage()"
+                [disabled]="currentPage === lastPage">Next</button>
+
+              <ng-container *ngFor="let page of pagesToShow">
+                <span *ngIf="page !== '...'; else ellipsis" (click)="goToPage(page)"
+                  [class.current]="page === currentPage" class="page-text">
+                  <ng-container *ngIf="page === currentPage">[{{ page
+                    }}]</ng-container>
+                  <ng-container *ngIf="page !== currentPage">{{ page
+                    }}</ng-container>
+                </span>
+                <ng-template #ellipsis><span class="mx-1">...</span></ng-template>
+              </ng-container>
+            </div>
           </div>
         </div>
       </div>
@@ -140,7 +158,8 @@
                 <!-- Paid & Remaining in same line -->
                 <div class="d-flex justify-content-between small mt-1">
                   <span class="text-success">● Paid ₹ {{ calculatePaidAmount() }}</span>
-                  <span class="text-secondary">● Remaining ₹ {{ displayApprovedData.get('remainingBalance')?.value || '0'
+                  <span class="text-secondary">● Remaining ₹ {{ displayApprovedData.get('remainingBalance')?.value ||
+                    '0'
                     }}</span>
                 </div>
               </div>
@@ -175,11 +194,11 @@
                       </thead>
                       <tbody *ngIf="selectedAdvpayid && tabledata[selectedAdvpayid]">
                         <tr *ngFor="let item of tabledata[selectedAdvpayid]; let i = index">
-                            <td>{{ i + 1 }}</td>
-                            <td>{{ item.date }}</td>
-                            <td>{{ item.installment_amount }}</td>
-                            <td>{{ item.installment_status }}</td>
-                            <td>{{ item.remarks }}</td>
+                          <td>{{ i + 1 }}</td>
+                          <td>{{ item.date }}</td>
+                          <td>{{ item.installment_amount }}</td>
+                          <td>{{ item.installment_status }}</td>
+                          <td>{{ item.remarks }}</td>
 
                           <ng-template #mergedRow>
                             <td colspan="4" class="text-center fw-bold">{{ item.status }}</td>

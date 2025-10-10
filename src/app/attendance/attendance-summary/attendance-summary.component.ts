@@ -95,8 +95,10 @@ export class AttendanceSummaryComponent {
   fetchDailySummary() {
     this.isLoading = true;
     const payload = {
+      company_id : 1,
       month: this.selectedMonth + 1,
-      year: this.selectedYear
+      year: this.selectedYear,
+      page:1
     };
 
     this.service.post('fetch/DailySummary', payload).subscribe((res: any) => {

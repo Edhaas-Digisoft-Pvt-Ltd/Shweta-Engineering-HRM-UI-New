@@ -28,21 +28,11 @@ export class LeaveRequestComponent {
   previousLeaves: any;
   isLoading: boolean = false;
 
-  // @ViewChild('leaveModal') leaveModalRef!: ElementRef;
-
-  // leaves data 
-  // leaveBalance = {
-  //   casual: {
-  //     total: 8,
-  //     taken: 5,
-  //     balance: 3
-  //   },
-  //   sick: {
-  //     total: 8,
-  //     taken: 2,
-  //     balance: 6
-  //   }
-  // };
+  totalRows: number = 0;
+  currentPage: number = 1;
+  lastPage: number = 1;
+  pagesToShow: (number | string)[] = [];
+  paginationvalue: any;
 
   CompanyNames: any = [];
   selectedValue: any = 1;
@@ -63,7 +53,8 @@ export class LeaveRequestComponent {
       leavereason: [{ value: '', disabled: true }, Validators.required]
     });
     this.getCompanyNames();
-    this.getLeaveRequests();
+    // this.getLeaveRequests();
+    this.getPagination();
 
     if (sessionStorage.getItem('roleName') == 'admin') {
       this.router.navigate(['/authPanal/Leave']);
@@ -144,10 +135,10 @@ export class LeaveRequestComponent {
     );
   }
 
-  getLeaveRequests() {
+  getLeaveRequests(page: number = 1): void {
     this.isLoading = true;
     this.rowData = [];
-    this.service.post('leave/request', { company_id: this.selectedCompanyId }).subscribe(
+    this.service.post('leave/request', { company_id: this.selectedCompanyId, page: page }).subscribe(
       (res: any) => {
         if (res.status === 'success') {
           this.rowData = res.data.map((item: any) => ({
@@ -161,6 +152,10 @@ export class LeaveRequestComponent {
             leave_status: item.leave_status,
             tbl_emp_leave_id: item.tbl_emp_leave_id,
           }));
+          this.totalRows = res.pagination.total;
+          this.currentPage = res.pagination.page;
+          this.lastPage = res.pagination.last_page;
+          this.generatePageNumbers(this.paginationvalue);
         } else {
           this.toastr.warning('Data Not Found')
         }
@@ -275,6 +270,81 @@ export class LeaveRequestComponent {
       columnKeys: ['employee_code', 'emp_name', 'department_name'],
       fileName: 'LeaveRequests.csv',
     });
+  }
+
+  getPagination() {
+    this.service.post('get-pagination', {}).subscribe((res: any) => {
+      if (res.status === 'success') {
+        this.paginationvalue = res.data;
+
+        this.getLeaveRequests();
+      } else {
+        this.paginationvalue = 10;
+        this.getLeaveRequests();
+      }
+    });
+  }
+
+  getpaginationvalue() {
+    this.service.post('get-pagination', {}).subscribe((res: any) => {
+      if (res.status === 'success') {
+        this.paginationvalue = res.data
+        this.generatePageNumbers(this.paginationvalue)
+      }
+    });
+  }
+
+  generatePageNumbers(pageWindow: number) {
+    const total = this.lastPage;
+    const current = this.currentPage;
+    let startPage = current;
+    let endPage = current + pageWindow - 1;
+
+    if (endPage >= total) {
+      endPage = total - 1;
+      startPage = Math.max(2, total - pageWindow);
+    }
+    if (current === 1) {
+      startPage = 2;
+      endPage = Math.min(total - 1, pageWindow);
+    }
+    const pages: (number | string)[] = [];
+    pages.push(1);
+    if (startPage > 2) {
+      pages.push('...');
+    }
+    for (let i = startPage; i <= endPage; i++) {
+      pages.push(i);
+    }
+    if (endPage < total - 1) {
+      pages.push('...');
+    }
+    if (total > 1) pages.push(total);
+
+    this.pagesToShow = pages;
+  }
+
+
+  goToPage(page: number | string) {
+    if (page === '...') return;
+    if (page !== this.currentPage) {
+      this.currentPage = page as number;
+      this.getLeaveRequests(this.currentPage);
+    }
+  }
+
+  prevPage() {
+    if (this.currentPage > 1) {
+      this.currentPage--;
+      this.getLeaveRequests(this.currentPage);
+    }
+  }
+
+  nextPage() {
+    if (this.currentPage < this.lastPage) {
+      this.currentPage++;
+      this.getLeaveRequests(this.currentPage);
+    }
   }
 
 }

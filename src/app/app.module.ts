@@ -62,7 +62,7 @@ import { ConfigurationComponent } from './configuration/configuration.component'
 import { LeaveConfigComponent } from './configuration/leave-config/leave-config.component';
 import { BonusConfigComponent } from './configuration/bonus-config/bonus-config.component';
 import { IncentiveConfigComponent } from './configuration/incentive-config/incentive-config.component';
-import { TestBonusConfigComponent } from './configuration/test-bonus-config/test-bonus-config.component';
+import { SettingsConfigComponent } from './configuration/settings-config/settings-config.component';
 
 // FullCalendarModule.registerPlugins([dayGridPlugin]);
 
@@ -119,7 +119,7 @@ import { TestBonusConfigComponent } from './configuration/test-bonus-config/test
     LeaveConfigComponent,
     BonusConfigComponent,
     IncentiveConfigComponent,
-    TestBonusConfigComponent,
+    SettingsConfigComponent,
 
   ],
   imports: [

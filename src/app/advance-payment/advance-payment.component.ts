@@ -33,6 +33,15 @@ export class AdvancePaymentComponent {
   EditAdvancePaymentData!: any;
   isLoading: boolean = false;
 
+  // Pagination & grid APIs
+  gridApi!: GridApi;
+  gridColumnApi: any;
+
+  totalRows: number = 0;
+  currentPage: number = 1;
+  lastPage: number = 1;
+  pagesToShow: (number | string)[] = [];
+
   ngOnInit() {
     this.selectedCompanyId = this.service.selectedCompanyId();
 
@@ -94,13 +103,14 @@ export class AdvancePaymentComponent {
     this.getAllAdvSalary();
   }
 
-  getAllAdvSalary() {
+  getAllAdvSalary(page: number = 1) {
     this.isLoading = true;
     this.rowData = [];
     this.service.post('fetch/allcompanyrequest', {
       company_id: this.selectedCompanyId,
       year: this.selectedYear,
       month: this.selectedMonth,
+      page: page
     }).subscribe((res: any) => {
       try {
         if (res.status === 'success' && res.data.length > 0) {
@@ -114,7 +124,12 @@ export class AdvancePaymentComponent {
             tenure: item.tenure,
             status: item.status,
             adv_pay_id: item.adv_pay_id
-          })).reverse();
+          }))
+          this.totalRows = res.pagination.total;
+          this.currentPage = res.pagination.page;
+          this.lastPage = res.pagination.last_page;
+
+          this.generatePageNumbers();
         } else {
           this.toastr.warning('Data Not Found');
         }
@@ -132,33 +147,6 @@ export class AdvancePaymentComponent {
         this.isLoading = false;
       })
   }
-
-  // getAllAdvSalary() {
-  //   this.rowData = [];
-  //   this.service.post('all/advancesaraly', { 
-  //     // company_id: this.selectedCompanyId, 
-  //     // year: this.selectedYear,
-  //     // month: this.selectedMonth,
-  //   }).subscribe((res: any) => {
-  //     try {
-  //       if (res.status === 'success') {
-  //         this.rowData = res.data.map((item:any)=>({
-  //           employee_code:item.employee_code,
-  //           apply_date:item.apply_date,
-  //           emp_name:item.emp_name,
-  //           department_name:item.department_name,
-  //           designation_name:item.designation_name,
-  //           advance_amount : item.advance_amount,
-  //           tenure:item.tenure,
-  //           status: item.status,
-  //           adv_pay_id: item.adv_pay_id,
-  //         }));
-  //       } 
-  //     } catch (error) {
-  //       console.log(error);
-  //     }
-  //   })
-  // }
 
   onFileSelected(event: any) {
     const file = event.target.files[0];
@@ -198,8 +186,16 @@ export class AdvancePaymentComponent {
     throw new Error('Method not implemented.');
   }
 
-  onGridReady(params: { api: any }) {
-    this.gridApiActive = params.api;
+  // onGridReady(params: { api: any }) {
+  //   this.gridApiActive = params.api;
+  // }
+
+  onGridReady(params: any) {
+    this.gridApi = params.api;
+    this.gridColumnApi = params.columnApi;
+
+    // load first page
+    this.getAllAdvSalary(1);
   }
 
   onFilterBoxChange() {
@@ -259,8 +255,8 @@ export class AdvancePaymentComponent {
         cellStyle: { border: '1px solid #ddd' },
         cellRenderer: (params: any) => {
           return `<button type="button" class="btn btn-sm mb-1" data-bs-toggle="modal" data-bs-target="#advanceRequestModal" style="background-color:#C8E3FF">
-            <i class="bi bi-pencil"></i>
-          </button>`;
+              <i class="bi bi-pencil"></i>
+            </button>`;
         },
         onCellClicked: (event: any) => {
           this.getSingleAdvanceSalary(event.data.adv_pay_id);
@@ -364,6 +360,63 @@ export class AdvancePaymentComponent {
   exportExcel() {
     if (this.gridApiActive) {
       this.gridApiActive.exportDataAsCsv();
+    }
+  }
+
+  generatePageNumbers() {
+    const total = this.lastPage;
+    const current = this.currentPage;
+    const delta = 2; // number of pages before/after current
+    const range: (number | string)[] = [];
+
+    // Always show first page
+    range.push(1);
+
+    // Add left ellipsis if needed
+    if (current - delta > 2) {
+      range.push('...');
+    }
+
+    // Pages around current
+    for (let i = Math.max(2, current - delta); i <= Math.min(total - 1, current + delta); i++) {
+      range.push(i);
+    }
+
+    // Add right ellipsis if needed
+    if (current + delta < total - 1) {
+      range.push('...');
+    }
+
+    // Always show last page
+    if (total > 1) {
+      range.push(total);
+    }
+
+    this.pagesToShow = range;
+  }
+
+  goToPage(page: number | string) {
+    if (page === '...') return;
+    if (page !== this.currentPage) {
+      this.currentPage = page as number;
+      this.getAllAdvSalary(this.currentPage); // call your API here
+      this.generatePageNumbers();
+    }
+  }
+
+  prevPage() {
+    if (this.currentPage > 1) {
+      this.currentPage--;
+      this.getAllAdvSalary(this.currentPage);
+      this.generatePageNumbers();
+    }
+  }
+
+  nextPage() {
+    if (this.currentPage < this.lastPage) {
+      this.currentPage++;
+      this.getAllAdvSalary(this.currentPage);
+      this.generatePageNumbers();
     }
   }
 }

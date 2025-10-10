@@ -27,13 +27,20 @@ export class EmployeeComponent {
   importExcelCompanyId: string = '';
   isLoading: boolean = false;
 
+  totalRows: number = 0;
+  currentPage: number = 1;
+  lastPage: number = 1;
+  pagesToShow: (number | string)[] = [];
+  paginationvalue: any;
+
   constructor(private router: Router, private service: HrmserviceService, private modalService: ModalServiceService, private toastr: ToastrService) { }
 
   ngOnInit() {
     // this.selectedCompanyId = this.CompanyIdService.selectedCompanyId();
     this.selectedCompanyId = this.service.selectedCompanyId();
 
-    this.getEmployee();
+    // this.getEmployee();
+    this.getPagination();
     this.getCompanyNames();
 
     if (sessionStorage.getItem('roleName') == 'admin') {
@@ -143,6 +150,11 @@ export class EmployeeComponent {
     }
   ];
 
+  gridOptions = {
+    pagination: false,
+    paginationPageSize: 10,
+  };
+
   downloadTemplate(): void {
     const userConfirmed = confirm("Do you want to download the employee template?");
     if (userConfirmed) {
@@ -175,10 +187,10 @@ export class EmployeeComponent {
   }
 
   // getting all data from api : 
-  getEmployee() {
+  getEmployee(page: number = 1): void {
     this.isLoading = true;
     let company_id = this.selectedCompanyId;
-    this.service.post("company/employee", { company_id }).subscribe((res: any) => {
+    this.service.post("company/employee", { company_id, page:page }).subscribe((res: any) => {
       if (res.status == 'success') {
         this.rowData = res.data.map((item: any) => ({
           employee_id: item.employe_id,
@@ -189,7 +201,11 @@ export class EmployeeComponent {
           department_name: item.department_name,
           designation_name: item.designation_name,
           status: item.status === "Active" ? "active" : "Inactive",
-        })).reverse();;
+        }))
+        this.totalRows = res.pagination.total;
+        this.currentPage = res.pagination.page;
+        this.lastPage = res.pagination.last_page;
+        this.generatePageNumbers(this.paginationvalue);
       } else {
         this.rowData = [];
         this.toastr.warning('Data Not Found')
@@ -268,6 +284,88 @@ export class EmployeeComponent {
       allColumns: false,
       onlySelected: false,
     });
+  }
+
+   getPagination() {
+    this.service.post('get-pagination', {}).subscribe((res: any) => {
+      if (res.status === 'success') {
+        this.paginationvalue = res.data;
+
+        this.getEmployee();
+      } else {
+        this.paginationvalue = 10;
+        this.getEmployee();
+      }
+    });
+  }
+
+  getpaginationvalue() {
+    this.service.post('get-pagination', {}).subscribe((res: any) => {
+      if (res.status === 'success') {
+        this.paginationvalue = res.data
+        this.generatePageNumbers(this.paginationvalue)
+      }
+    });
+  }
+
+  generatePageNumbers(pageWindow: number) {
+    const total = this.lastPage;
+    const current = this.currentPage;
+
+    let startPage = current;
+    let endPage = current + pageWindow - 1;
+
+    if (endPage >= total) {
+      endPage = total - 1; 
+      startPage = Math.max(2, total - pageWindow); 
+    }
+
+    if (current === 1) {
+      startPage = 2;
+      endPage = Math.min(total - 1, pageWindow);
+    }
+
+    const pages: (number | string)[] = [];
+    pages.push(1);
+
+    if (startPage > 2) {
+      pages.push('...');
+    }
+
+    for (let i = startPage; i <= endPage; i++) {
+      pages.push(i);
+    }
+
+    if (endPage < total - 1) {
+      pages.push('...');
+    }
+
+    if (total > 1) pages.push(total);
+
+    this.pagesToShow = pages;
+  }
+
+
+  goToPage(page: number | string) {
+    if (page === '...') return;
+    if (page !== this.currentPage) {
+      this.currentPage = page as number;
+      this.getEmployee(this.currentPage);
+    }
+  }
+
+  prevPage() {
+    if (this.currentPage > 1) {
+      this.currentPage--;
+      this.getEmployee(this.currentPage);
+    }
+  }
+
+  nextPage() {
+    if (this.currentPage < this.lastPage) {
+      this.currentPage++;
+      this.getEmployee(this.currentPage);
+    }
   }
 
 }

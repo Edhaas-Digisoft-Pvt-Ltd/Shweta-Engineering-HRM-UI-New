@@ -17,9 +17,9 @@
                 <li class="nav-item" (click)="selectTab('tab3')">
                     <a class="nav-link fw-bold" [ngClass]="{'active': activeTab === 'tab3'}">Incentive Config</a>
                 </li>
-                <!-- <li class="nav-item" (click)="selectTab('tab4')">
-                    <a class="nav-link fw-bold" [ngClass]="{'active': activeTab === 'tab4'}">Bonus Config</a>
-                </li> -->
+                <li class="nav-item" (click)="selectTab('tab4')">
+                    <a class="nav-link fw-bold" [ngClass]="{'active': activeTab === 'tab4'}">Settings</a>
+                </li>
             </ul>
         </div>
     </div>
@@ -44,7 +44,7 @@
 
     <div *ngIf="activeTab === 'tab4'">
         <div class="container ">
-            <app-test-bonus-config></app-test-bonus-config>
+            <app-settings-config></app-settings-config>
         </div>
     </div>
 

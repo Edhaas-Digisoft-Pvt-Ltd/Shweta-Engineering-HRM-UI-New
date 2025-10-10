@@ -21,6 +21,12 @@ export class PayrollRejectedComponent {
   gridApiActive!: GridApi;
   isLoading: boolean = false;
 
+  totalRows: number = 0;
+  currentPage: number = 1;
+  lastPage: number = 1;
+  pagesToShow: (number | string)[] = [];
+  paginationvalue: any;
+
   constructor(private router: Router, private service: HrmserviceService, private toastr: ToastrService) { }
 
   rowSelection: string = 'multiple';
@@ -58,7 +64,8 @@ export class PayrollRejectedComponent {
     const currentDate = new Date();
     this.today = currentDate.toISOString().split('T')[0];
     this.getCompanyNames();
-    this.RejectedPayrollList();
+    // this.RejectedPayrollList();
+    this.getPagination();
   }
 
   onGridReady(params: { api: any }) {
@@ -88,12 +95,13 @@ export class PayrollRejectedComponent {
     this.RejectedPayrollList();
   }
 
-  RejectedPayrollList() {
+  RejectedPayrollList(page: number = 1): void {
     this.isLoading = true;
     this.service.post('fetch/rejected/payroll', {
       company_id: this.selectedCompanyId,
       year: this.selectedYear,
       month: this.selectedMonth,
+      page:page,
     }).subscribe(
       (res: any) => {
         try {
@@ -111,6 +119,10 @@ export class PayrollRejectedComponent {
               advance_salary: item.advance_salary ? `₹${item.advance_salary}` : 'NA',
               net_salary: item.net_salary ? `₹${item.net_salary}` : 'NA',
             }));
+            this.totalRows = res.pagination.total;
+            this.currentPage = res.pagination.page;
+            this.lastPage = res.pagination.last_page;
+            this.generatePageNumbers(this.paginationvalue);
           } else {
             this.rowData = [];
             this.toastr.warning('Data Not Found');
@@ -253,6 +265,82 @@ export class PayrollRejectedComponent {
   exportExcel() {
     if (this.gridApiActive) {
       this.gridApiActive.exportDataAsCsv();
+    }
+  }
+
+  getPagination() {
+    this.service.post('get-pagination', {}).subscribe((res: any) => {
+      if (res.status === 'success') {
+        this.paginationvalue = res.data;
+
+        this.RejectedPayrollList();
+      } else {
+        this.paginationvalue = 10;
+        this.RejectedPayrollList();
+      }
+    });
+  }
+
+  getpaginationvalue() {
+    this.service.post('get-pagination', {}).subscribe((res: any) => {
+      if (res.status === 'success') {
+        this.paginationvalue = res.data
+        this.generatePageNumbers(this.paginationvalue)
+      }
+    });
+  }
+
+  generatePageNumbers(pageWindow: number) {
+    const total = this.lastPage;
+    const current = this.currentPage;
+
+    let startPage = current;
+    let endPage = current + pageWindow - 1;
+
+    if (endPage >= total) {
+      endPage = total - 1;
+      startPage = Math.max(2, total - pageWindow); 
+    }
+    if (current === 1) {
+      startPage = 2;
+      endPage = Math.min(total - 1, pageWindow);
+    }
+    const pages: (number | string)[] = [];
+    pages.push(1); 
+    if (startPage > 2) {
+      pages.push('...');
+    }
+    for (let i = startPage; i <= endPage; i++) {
+      pages.push(i);
+    }
+    if (endPage < total - 1) {
+      pages.push('...');
+    }
+    if (total > 1) pages.push(total);
+
+    this.pagesToShow = pages;
+  }
+
+
+  goToPage(page: number | string) {
+    if (page === '...') return;
+    if (page !== this.currentPage) {
+      this.currentPage = page as number;
+      this.RejectedPayrollList(this.currentPage);
+    }
+  }
+
+  prevPage() {
+    if (this.currentPage > 1) {
+      this.currentPage--;
+      this.RejectedPayrollList(this.currentPage);
+    }
+  }
+
+  nextPage() {
+    if (this.currentPage < this.lastPage) {
+      this.currentPage++;
+      this.RejectedPayrollList(this.currentPage);
     }
   }
 

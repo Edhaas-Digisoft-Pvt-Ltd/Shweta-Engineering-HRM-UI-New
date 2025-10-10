@@ -28,6 +28,12 @@ export class PayrollProcessComponent {
   selectedEmployee: any = null;
   isLoading: boolean = false;
 
+  totalRows: number = 0;
+  currentPage: number = 1;
+  lastPage: number = 1;
+  pagesToShow: (number | string)[] = [];
+  paginationvalue: any;
+
   today: string = new Date().toISOString().split('T')[0];
   constructor(private router: Router, private service: HrmserviceService, private toastr: ToastrService) { }
 
@@ -58,12 +64,16 @@ export class PayrollProcessComponent {
   }
 
   ngOnInit() {
+    console.log(this.isProcess);
+
     this.selectedYear = new Date().getFullYear();
     this.selectedMonth = new Date().getMonth();
     this.getCompanyNames();
     this.initializeColumns();
     this.initializeColumnsforProcess();
-    this.getTempPayroll();
+    // this.getTempPayroll();
+
+    this.getPagination();
 
     if (sessionStorage.getItem('roleName') == 'accountant') {
       this.router.navigate(['/authPanal/payrollProcess']);
@@ -110,13 +120,15 @@ export class PayrollProcessComponent {
     this.gridApiTemp = params.api;
   }
 
-  getPayrollProcess() {
+  //generatetab
+  getPayrollProcess(page: number = 1): void {
     this.isLoading = true;
     this.rowData = [];
     this.service.post('fetch/payroll', {
       company_id: this.selectedCompanyId,
       year: this.selectedYear,
       month: this.selectedMonth,
+      page: page,
     }).subscribe((res: any) => {
       if (res.status === 'success') {
         this.rowData = res.data.map((item: any) => ({
@@ -129,6 +141,10 @@ export class PayrollProcessComponent {
           overTime: item.total_overtime,
           employe_id: item.employe_id,
         }));
+        this.totalRows = res.pagination.total;
+        this.currentPage = res.pagination.page;
+        this.lastPage = res.pagination.last_page;
+        this.generatePageNumbers(this.paginationvalue);
       }
       this.isLoading = false;
     }, (error) => {
@@ -143,12 +159,14 @@ export class PayrollProcessComponent {
     })
   }
 
-  getTempPayroll() {
+  //processtab
+  getTempPayroll(page: number = 1): void {
     this.isLoading = true;
     const payload = {
       company_id: this.selectedCompanyId,
       year: this.selectedYear,
-      month: this.selectedMonth
+      month: this.selectedMonth,
+      page: page,
     };
 
     this.service.post('fetch/temp/payroll', payload).subscribe({
@@ -167,6 +185,10 @@ export class PayrollProcessComponent {
             adv_deduction: item.adv_deduction ? `₹ ${item.adv_deduction}` : 'NA',
             net_salary: item.net_salary ? `₹ ${item.net_salary}` : 'NA',
           }));
+          this.totalRows = res.pagination.total;
+          this.currentPage = res.pagination.page;
+          this.lastPage = res.pagination.last_page;
+          this.generatePageNumbers(this.paginationvalue);
         }
         else {
           this.isProcess = false;
@@ -348,5 +370,93 @@ export class PayrollProcessComponent {
     });
 
     this.fileInput.nativeElement.value = '';
+  }
+
+  getPagination() {
+    this.service.post('get-pagination', {}).subscribe((res: any) => {
+      if (res.status === 'success') {
+        this.paginationvalue = res.data;
+        this.getTempPayroll();
+      } else {
+        this.paginationvalue = 10;
+        this.getTempPayroll();
+      }
+    });
+  }
+
+  getpaginationvalue() {
+    this.service.post('get-pagination', {}).subscribe((res: any) => {
+      if (res.status === 'success') {
+        this.paginationvalue = res.data
+        this.generatePageNumbers(this.paginationvalue)
+      }
+    });
+  }
+
+  generatePageNumbers(pageWindow: number) {
+    const total = this.lastPage;
+    const current = this.currentPage;
+    let startPage = current;
+    let endPage = current + pageWindow - 1;
+    if (endPage >= total) {
+      endPage = total - 1;
+      startPage = Math.max(2, total - pageWindow);
+    }
+
+    if (current === 1) {
+      startPage = 2;
+      endPage = Math.min(total - 1, pageWindow);
+    }
+    const pages: (number | string)[] = [];
+    pages.push(1);
+    if (startPage > 2) {
+      pages.push('...');
+    }
+    for (let i = startPage; i <= endPage; i++) {
+      pages.push(i);
+    }
+    if (endPage < total - 1) {
+      pages.push('...');
+    }
+    if (total > 1) pages.push(total);
+    this.pagesToShow = pages;
+  }
+
+
+  goToPage(page: number | string) {
+    if (page === '...') return;
+    if (page !== this.currentPage) {
+      this.currentPage = page as number;
+      if (this.isProcess === false) {
+        this.getPayrollProcess(this.currentPage);
+      }
+      if (this.isProcess === true) {
+        this.getTempPayroll(this.currentPage);
+      }
+    }
+  }
+
+  prevPage() {
+    if (this.currentPage > 1) {
+      this.currentPage--;
+      if (this.isProcess === false) {
+        this.getPayrollProcess(this.currentPage);
+      }
+      if (this.isProcess === true) {
+        this.getTempPayroll(this.currentPage);
+      }
+    }
+  }
+
+  nextPage() {
+    if (this.currentPage < this.lastPage) {
+      this.currentPage++;
+      if (this.isProcess === false) {
+        this.getPayrollProcess(this.currentPage);
+      }
+      if (this.isProcess === true) {
+        this.getTempPayroll(this.currentPage);
+      }
+    }
   }
 }

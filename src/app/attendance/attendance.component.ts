@@ -21,13 +21,20 @@ export class AttendanceComponent {
   role: string = '';
   isLoading: boolean = false;
 
+  totalRows: number = 0;
+  currentPage: number = 1;
+  lastPage: number = 1;
+  pagesToShow: (number | string)[] = [];
+  paginationvalue: any;
+
   constructor(private toastr: ToastrService, private service: HrmserviceService, private router: Router,) { }
 
   ngOnInit() {
     this.role = this.service.getRole();
 
     this.loadTodayDataFromStorage();
-    this.fetchAttendance();
+    // this.fetchAttendance();
+    this.getPaginationValueAndFetchAttendance();
 
     if (sessionStorage.getItem('roleName') == 'admin' || sessionStorage.getItem('roleName') == 'accountant') {
       this.router.navigate(['/authPanal/Attendance']);
@@ -104,16 +111,19 @@ export class AttendanceComponent {
     });
   }
 
-  fetchAttendance(): void {
+  fetchAttendance(page: number = 1): void {
     this.isLoading = true;
-    this.service.post('fetch/attendance', {}).subscribe((res: any) => {
+    this.service.post('fetch/attendance', { page }).subscribe((res: any) => {
       if (res.status === 'success') {
-        this.rowData = res.data.reverse();
-        this.isLoading = false;
+        this.rowData = res.data;
+        this.totalRows = res.pagination.total;
+        this.currentPage = res.pagination.page;
+        this.lastPage = res.pagination.last_page;
+        this.generatePageNumbers(this.paginationvalue);
       } else {
         console.log(res.error);
-        this.isLoading = false;
       }
+      this.isLoading = false;
     });
   }
 
@@ -163,7 +173,6 @@ export class AttendanceComponent {
     }
   }
 
-
   onGridReady(params: any): void {
     this.gridApiActive = params.api;
     this.gridApiActive.setRowData(this.rowData);
@@ -202,4 +211,123 @@ export class AttendanceComponent {
     this.searchInputValue = '';
     this.onFilterBoxChange();
   }
+
+  exportAttendance() {
+    this.service.post('export-attendance', {}).subscribe((res: any) => {
+      if (res.status === 'success') {
+        const data = res.data.map((i: any) => ({
+          employee_code: i.login_id,
+          attendance_date: this.formatDate(i.currentdate),
+          check_in: this.formatTime(i.logged_in_time),
+          check_out: this.formatTime(i.logged_out_time),
+          shift_id: i.shift_details
+        }));
+
+        const ws = XLSX.utils.json_to_sheet(data);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, 'Attendance');
+        XLSX.writeFile(wb, 'Attendance.xlsx');
+      }
+    });
+  }
+
+  formatDate(dateStr: string): string {
+    const d = new Date(dateStr);
+    return `${String(d.getDate()).padStart(2, '0')}-${String(d.getMonth() + 1).padStart(2, '0')}-${d.getFullYear()}`;
+  }
+
+  formatTime(timeStr: string): string {
+    if (!timeStr) return '';
+    const date = new Date(`1970-01-01 ${timeStr}`);
+    return date.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+  }
+
+  getPaginationValueAndFetchAttendance() {
+    this.service.post('get-pagination', {}).subscribe((res: any) => {
+      if (res.status === 'success') {
+        this.paginationvalue = res.data;
+
+        this.fetchAttendance();
+      } else {
+        this.paginationvalue = 10;
+        this.fetchAttendance();
+      }
+    });
+  }
+
+  getpaginationvalue() {
+    this.service.post('get-pagination', {}).subscribe((res: any) => {
+      if (res.status === 'success') {
+        this.paginationvalue = res.data
+        this.generatePageNumbers(this.paginationvalue)
+      }
+    });
+  }
+
+  generatePageNumbers(pageWindow: number) {
+    const total = this.lastPage;
+    const current = this.currentPage;
+
+    let startPage = current;
+    let endPage = current + pageWindow - 1;
+
+    // Ensure window doesn't exceed total
+    if (endPage >= total) {
+      endPage = total - 1; // leave space for last page
+      startPage = Math.max(2, total - pageWindow); // maintain consistent window size
+    }
+
+    // Special case for first page
+    if (current === 1) {
+      startPage = 2;
+      endPage = Math.min(total - 1, pageWindow);
+    }
+
+    const pages: (number | string)[] = [];
+    pages.push(1); // always first page
+
+    // Add ellipsis if gap exists between first page and startPage
+    if (startPage > 2) {
+      pages.push('...');
+    }
+
+    // Add pages in window
+    for (let i = startPage; i <= endPage; i++) {
+      pages.push(i);
+    }
+
+    // Add ellipsis if gap exists between endPage and last page
+    if (endPage < total - 1) {
+      pages.push('...');
+    }
+
+    // Always add last page
+    if (total > 1) pages.push(total);
+
+    this.pagesToShow = pages;
+  }
+
+
+  goToPage(page: number | string) {
+    if (page === '...') return;
+    if (page !== this.currentPage) {
+      this.currentPage = page as number;
+      this.fetchAttendance(this.currentPage);
+    }
+  }
+
+  prevPage() {
+    if (this.currentPage > 1) {
+      this.currentPage--;
+      this.fetchAttendance(this.currentPage);
+    }
+  }
+
+  nextPage() {
+    if (this.currentPage < this.lastPage) {
+      this.currentPage++;
+      this.fetchAttendance(this.currentPage);
+    }
+  }
+
 }
