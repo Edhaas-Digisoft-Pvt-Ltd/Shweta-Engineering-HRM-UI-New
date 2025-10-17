@@ -77,16 +77,6 @@ export class PayrollListComponent {
     // this.getpayrollList();
 
     this.getPagination();
-
-    if (sessionStorage.getItem('roleName') == 'admin') {
-      this.router.navigate(['/authPanal/payrollList']);
-      return;
-    } else {
-      alert('Please Login To Proceed');
-      sessionStorage.clear();
-      this.router.navigate(['']);
-      return;
-    }
   }
 
   getMonthName(monthId: number): string {

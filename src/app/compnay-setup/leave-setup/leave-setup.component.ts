@@ -161,16 +161,6 @@ export class LeaveSetupComponent {
     this.getCompanyNames();
     this.getAllLeaves();
     this.initializeColumns();
-
-    if (sessionStorage.getItem('roleName') == 'admin') {
-      this.router.navigate(['/authPanal/LeaveSetup']);
-      return;
-    } else {
-      alert('Please Login To Proceed');
-      sessionStorage.clear();
-      this.router.navigate(['']);
-      return;
-    }
   }
 
   getAllLeaves() {

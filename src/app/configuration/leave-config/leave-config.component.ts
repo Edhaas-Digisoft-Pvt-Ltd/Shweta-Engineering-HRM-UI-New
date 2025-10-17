@@ -115,7 +115,8 @@ export class LeaveConfigComponent {
 
       leavenumber: ['', [
         Validators.required,
-        // Validators.max(20),
+        Validators.max(31),
+        Validators.min(1),
         Validators.pattern(/^\d+$/)  // only digits
       ]],
       leavename: ['', [
@@ -134,7 +135,7 @@ export class LeaveConfigComponent {
     this.EditLeaveRule = this.fb.group({
       leavenumber: ['', [
         Validators.required,
-        // Validators.max(30),
+        Validators.max(31),
         Validators.min(1),
         Validators.pattern(/^\d+$/)
       ]],
@@ -158,20 +159,10 @@ export class LeaveConfigComponent {
     const currentDate = new Date();
     this.today = currentDate.toISOString().split('T')[0]; // Format YYYY-MM-DD
     this.getCompanyData();
-    this.getleaveData(this.selectedValue);
+    // this.getleaveData(this.selectedValue);
     this.getCompanyNames();
     this.getAllLeaves();
     this.initializeColumns();
-
-    if (sessionStorage.getItem('roleName') == 'admin') {
-      this.router.navigate(['/authPanal/LeaveSetup']);
-      return;
-    } else {
-      alert('Please Login To Proceed');
-      sessionStorage.clear();
-      this.router.navigate(['']);
-      return;
-    }
   }
 
   openModal() {
@@ -305,6 +296,7 @@ export class LeaveConfigComponent {
 
   addLeaveRule() {
     this.isSubmitted = true;
+    this.LeaveRule.markAllAsTouched();
     if (this.LeaveRule.valid) {
       let current_data: any = {
         "company_id": this.LeaveRule.value.companyid,
@@ -394,4 +386,14 @@ export class LeaveConfigComponent {
       );
     }
   }
+
+  allowOnlyLetters(event: KeyboardEvent) {
+    const char = String.fromCharCode(event.keyCode);
+    const pattern = /^[A-Za-z ]+$/;
+
+    if (!pattern.test(char)) {
+      event.preventDefault();
+    }
+  }
+
 }

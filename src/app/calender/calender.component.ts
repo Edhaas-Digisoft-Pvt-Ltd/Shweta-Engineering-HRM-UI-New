@@ -47,7 +47,7 @@ export class CalenderComponent implements OnInit {
     this.calendarOptions.events = [...this.dateEvents];
     
     const roleName = sessionStorage.getItem('roleName')
-    if (roleName == 'admin' || roleName == 'accountant' || roleName == 'employee') {
+    if (roleName == 'Admin' || roleName == 'Accountant' || roleName == 'Employee') {
       this.router.navigate(['/authPanal/Calender']);
       return;
     } else {

@@ -35,16 +35,10 @@ export class AttendanceComponent {
     this.loadTodayDataFromStorage();
     // this.fetchAttendance();
     this.getPaginationValueAndFetchAttendance();
+  }
 
-    if (sessionStorage.getItem('roleName') == 'admin' || sessionStorage.getItem('roleName') == 'accountant') {
-      this.router.navigate(['/authPanal/Attendance']);
-      return;
-    } else {
-      alert('Please Login To Proceed');
-      sessionStorage.clear();
-      this.router.navigate(['']);
-      return;
-    }
+  hasAccess(module: string, permission: string): boolean {
+    return this.service.hasPermission(module, permission);
   }
 
   public defaultColDef: ColDef = {
@@ -133,7 +127,7 @@ export class AttendanceComponent {
       const headers = ['employee_code', 'attendance_date', 'check_in', 'check_out', 'shift_id'];
       const exampleRow = [
         'SEE20250501',
-        'mm-dd-yyyy',
+        'dd-mm-yyyy',
         '7:00',
         '19:00',
         '1',
@@ -212,23 +206,84 @@ export class AttendanceComponent {
     this.onFilterBoxChange();
   }
 
+  // exportAttendance() {
+  //   this.service.post('export-attendance', {}).subscribe((res: any) => {
+  //     if (res.status === 'success') {
+  //       const data = res.data.map((i: any) => ({
+  //         employee_code: i.login_id,
+  //         attendance_date: this.formatDate(i.currentdate),
+  //         check_in: this.formatTime(i.logged_in_time),
+  //         check_out: this.formatTime(i.logged_out_time),
+  //         shift_id: i.shift_details
+  //       }));
+
+  //       const ws = XLSX.utils.json_to_sheet(data);
+  //       const wb = XLSX.utils.book_new();
+  //       XLSX.utils.book_append_sheet(wb, ws, 'Attendance');
+  //       XLSX.writeFile(wb, 'Attendance.xlsx');
+  //     }
+  //   });
+  // }
+
   exportAttendance() {
-    this.service.post('export-attendance', {}).subscribe((res: any) => {
+    const today = new Date();
+    const firstDayLastMonth = new Date(today.getFullYear(), today.getMonth() - 1, 1);
+    const lastDayLastMonth = new Date(today.getFullYear(), today.getMonth(), 0);
+
+    //  const from_date = '2025-08-01';
+    //  const to_date = '2025-08-30';
+
+    const formatDate = (date: Date): string => {
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    };
+
+    const from_date = formatDate(firstDayLastMonth);
+    const to_date = formatDate(lastDayLastMonth);
+
+    console.log({ from_date, to_date });
+
+    this.service.post('export-attendance', { from_date, to_date }).subscribe((res: any) => {
       if (res.status === 'success') {
         const data = res.data.map((i: any) => ({
-          employee_code: i.login_id,
-          attendance_date: this.formatDate(i.currentdate),
-          check_in: this.formatTime(i.logged_in_time),
-          check_out: this.formatTime(i.logged_out_time),
+          employee_code: i.employee_code,
+          attendance_date: this.formatToDDMMYYYY(i.currentdate),
+          check_in: this.removeAMPM(i.logged_in_time),
+          check_out: this.removeAMPM(i.logged_out_time),
           shift_id: i.shift_details
         }));
 
         const ws = XLSX.utils.json_to_sheet(data);
         const wb = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(wb, ws, 'Attendance');
-        XLSX.writeFile(wb, 'Attendance.xlsx');
+
+        const monthName = firstDayLastMonth.toLocaleString('en-US', { month: 'short' });
+        XLSX.writeFile(wb, `Attendance_${monthName}_${firstDayLastMonth.getFullYear()}.xlsx`);
+
+        this.toastr.success('Attendance exported successfully!');
+      } else {
+        this.toastr.error('Failed to export attendance.');
       }
     });
+  }
+
+  // Convert date (yyyy-mm-dd) → mm-dd-yyyy
+  formatToDDMMYYYY(dateStr: string): string {
+    if (!dateStr) return '';
+    const d = new Date(dateStr);
+    const day = String(d.getDate()).padStart(2, '0');
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const year = d.getFullYear();
+    return `${day}-${month}-${year}`;
+  }
+
+  // Convert time to 07:00, 19:00 format
+  formatToHHMM(timeStr: string): string {
+    if (!timeStr) return '';
+    const [hours, minutes] = timeStr.split(':');
+    return `${hours.padStart(2, '0')}:${minutes.padStart(2, '0')}`;
   }
 
   formatDate(dateStr: string): string {
@@ -240,6 +295,38 @@ export class AttendanceComponent {
     if (!timeStr) return '';
     const date = new Date(`1970-01-01 ${timeStr}`);
     return date.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+  }
+
+  normalizeTimeToHHMM(timeStr: string | null): string {
+    if (!timeStr) return '';
+
+    timeStr = timeStr.trim();
+
+    // Check if time has AM/PM
+    const is12Hour = /AM|PM/i.test(timeStr);
+
+    let hours = 0;
+    let minutes = 0;
+
+    if (is12Hour) {
+      const [time, meridian] = timeStr.split(' ');
+      const [h, m] = time.split(':').map(Number);
+      hours = h % 12; // 12 AM/PM edge case
+      if (/PM/i.test(meridian)) hours += 12;
+      minutes = m || 0;
+    } else {
+      const [h, m] = timeStr.split(':').map(Number);
+      hours = h || 0;
+      minutes = m || 0;
+    }
+
+    return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
+  }
+
+  // Remove AM/PM from time string
+  removeAMPM(timeStr: string | null): string {
+    if (!timeStr) return '';
+    return timeStr.replace(/\s?(AM|PM)/i, '').trim();
   }
 
   getPaginationValueAndFetchAttendance() {

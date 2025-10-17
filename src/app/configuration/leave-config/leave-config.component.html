@@ -93,7 +93,7 @@
                                         placeholder="Please Enter Leave Name" [ngClass]="{
           'input-error': isSubmitted && LeaveRule.get('leavename')?.invalid,
           'is-invalid': isSubmitted && LeaveRule.get('leavename')?.invalid
-        }">
+        }" (keypress)="allowOnlyLetters($event)">
                                     <small class="text-danger"
                                         *ngIf="isSubmitted && LeaveRule.get('leavename')?.invalid && LeaveRule.get('leavename')?.value">
                                         Please enter a valid leave name.
@@ -105,13 +105,15 @@
                                     <label for="leavenumber">No. of leaves<span class="text-danger">*</span></label>
                                     <input type="number" class="form-control" id="leavenumber"
                                         formControlName="leavenumber" placeholder="Please Enter Leave number" [ngClass]="{
-          'input-error': isSubmitted && LeaveRule.get('leavenumber')?.invalid,
-          'is-invalid': isSubmitted && LeaveRule.get('leavenumber')?.invalid
-        }">
-                                    <small class="text-danger"
-                                        *ngIf="isSubmitted && LeaveRule.get('leavenumber')?.invalid && LeaveRule.get('leavenumber')?.value">
-                                        Please enter a valid number of leaves.
-                                    </small>
+                            'input-error': isSubmitted && LeaveRule.get('leavenumber')?.invalid,
+                            'is-invalid': isSubmitted && LeaveRule.get('leavenumber')?.invalid
+                            }">
+                            <small class="text-danger" *ngIf="LeaveRule.get('leavenumber')?.errors?.['min']">
+                                Number of leaves never less than 0.
+                            </small>
+                            <small class="text-danger" *ngIf="LeaveRule.get('leavenumber')?.errors?.['max']">
+                                Number of leaves cannot exceed 31.
+                            </small>
                                 </div>
 
                             </div>
@@ -167,6 +169,12 @@
                                     <input type="number" class="form-control" id="leavenumber"
                                         formControlName="leavenumber" placeholder="Please Enter Leave number"
                                         [ngClass]="{'input-error': isEditSubmitted && EditLeaveRule.get('leavenumber')?.invalid}">
+                                    <small class="text-danger" *ngIf="EditLeaveRule.get('leavenumber')?.errors?.['min']">
+                                        Number of leaves never less than 0.
+                                    </small>
+                                    <small class="text-danger" *ngIf="EditLeaveRule.get('leavenumber')?.errors?.['max']">
+                                        Number of leaves cannot exceed 31.
+                                    </small>
                                 </div>
                             </div>
 

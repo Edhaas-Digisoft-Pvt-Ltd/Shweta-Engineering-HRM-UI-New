@@ -20,14 +20,13 @@ export class HrmserviceService {
   // url: string = 'http://127.0.0.1:8000/api/v1/';
 
   // url: string = 'https://edhaasdigisoft.co.in/shwetapayroll/api/v1/';
-  url: string = 'http://127.0.0.1:8000/api/v1/';
+  url: string = 'http://127.0.0.1:8000/api/v1/'; 
 
 
-  // url: string = 'http://localhost/CRM_rest/index.php/';
-//   url: string = 'https://edhaasdigisoft.co.in/website1/Hrishi/CRM_rest/index.php/';
-  // url:  string =  'http://localhost/CRM_Portal_API/index.php';
-
-  constructor(private router: Router, private httpClient: HttpClient) { }
+  constructor(private router: Router, private httpClient: HttpClient) {
+    this.loadRoleFromStorage();
+    this.loadPermissionsFromStorage();
+   }
 
   get(endpoint: string, params?: any, reqOpts?: any) {
     if (!reqOpts) {
@@ -112,14 +111,20 @@ export class HrmserviceService {
     return this.httpClient.patch(this.url + '/' + endpoint, body, reqOpts);
   }
 
-  private roleKey = 'logIn';
+  // private roleKey = 'logIn';
 
+  private roleKey = 'role';
   setRole(role: string): void {
     sessionStorage.setItem(this.roleKey, role);
+    this._role = role;
   }
-
+  private _role: string = '';
   getRole(): string {
-    return sessionStorage.getItem(this.roleKey) || '';
+    return this._role || '';
+  }
+  private loadRoleFromStorage() {
+    const role = sessionStorage.getItem(this.roleKey);
+    if (role) this._role = role;
   }
 
   clearRole(): void {
@@ -140,9 +145,76 @@ export class HrmserviceService {
 
   setEmployeeId(id: number) {
     this._EmployeeId.set(id);
-    console.log('service',this._EmployeeId);
+    console.log('service', this._EmployeeId);
   }
 
   EmployeeId = this._EmployeeId.asReadonly();
+
+  // Fetch roles
+  fetchRoles() {
+    return this.post('fetch/roles', {});
+  }
+
+  // Fetch modules
+  fetchModules() {
+    return this.post('modules', {});
+  }
+
+  // Fetch permissions
+  fetchPermissions() {
+    return this.post('permissions', {});
+  }
+
+  // Fetch role-permissions
+  fetchRolePermissions(role_id: number) {
+    return this.post('role/permissions', { role_id });
+  }
+
+  // Assign role-permissions
+  assignRolePermissions(role_id: number, permissions: any) {
+    return this.post('assign-role-permissions', { role_id, permissions });
+  }
+
+  // Fetch employee permissions
+  // fetchEmployeePermissions(employee_id: number) {
+  //   return this.post('employee/permissions', { employee_id });
+  // }
+
+  // Permission cache
+  private permissions: { [module: string]: string[] } = {};
+  setPermissions(data: any[]) {
+    this.permissions = {};
+    data.forEach(item => {
+      const moduleName = item.module?.module_name;
+      const permissionName = item.permission?.permission_name?.toLowerCase();
+      if (moduleName && permissionName) {
+        if (!this.permissions[moduleName]) this.permissions[moduleName] = [];
+        this.permissions[moduleName].push(permissionName);
+      }
+    });
+    sessionStorage.setItem('permissions', JSON.stringify(this.permissions));
+  }
+
+  private loadPermissionsFromStorage() {
+    const stored = sessionStorage.getItem('permissions');
+    if (stored) this.permissions = JSON.parse(stored);
+  }
+
+  hasPermission(module: string, permission: string): boolean {
+    module = module.trim();
+    permission = permission.trim().toLowerCase();
+    return this.permissions[module]?.includes(permission) || false;
+  }
+
+  getPermissions() {
+    return this.permissions;
+  }
+
+  fetchEmployeePermissions(employee_id: number) { return this.post('employee/permissions', { employee_id }); }
+
+  clearPermissions() {
+    this.permissions = {};
+    sessionStorage.removeItem('permissions');
+  }
 
 }

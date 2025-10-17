@@ -36,6 +36,7 @@ export class LeaveRequestComponent {
 
   CompanyNames: any = [];
   selectedValue: any = 1;
+  exportData: any;
 
   constructor(private route: ActivatedRoute, private router: Router, private fb: FormBuilder, private service: HrmserviceService, private modalService: ModalServiceService, private toastr: ToastrService) { }
 
@@ -55,16 +56,6 @@ export class LeaveRequestComponent {
     this.getCompanyNames();
     // this.getLeaveRequests();
     this.getPagination();
-
-    if (sessionStorage.getItem('roleName') == 'admin') {
-      this.router.navigate(['/authPanal/Leave']);
-      return;
-    } else {
-      alert('Please Login To Proceed');
-      sessionStorage.clear();
-      this.router.navigate(['']);
-      return;
-    }
   }
 
   agInit(params: any): void {
@@ -138,7 +129,7 @@ export class LeaveRequestComponent {
   getLeaveRequests(page: number = 1): void {
     this.isLoading = true;
     this.rowData = [];
-    this.service.post('leave/request', { company_id: this.selectedCompanyId, page: page }).subscribe(
+    this.service.post('leave/request', { company_id: this.selectedCompanyId, page: page, isexport: false, }).subscribe(
       (res: any) => {
         if (res.status === 'success') {
           this.rowData = res.data.map((item: any) => ({
@@ -266,9 +257,46 @@ export class LeaveRequestComponent {
   }
 
   exportExcel() {
-    this.gridApiActive.exportDataAsCsv({
-      columnKeys: ['employee_code', 'emp_name', 'department_name'],
-      fileName: 'LeaveRequests.csv',
+    this.isLoading = true;
+    this.service.post('leave/request', { company_id: this.selectedCompanyId, isexport: true }).subscribe({
+      next: (res: any) => {
+        if (res.status === 'success' && res.data.length) {
+          const rows = res.data.map((r: any) => [
+            r.employee_code,
+            r.emp_name,
+            r.department_name,
+            r.start_date,
+            r.end_date,
+            r.apply_leave_count,
+            r.leave_status
+          ]);
+
+          const csvArray: string[][] = [
+            ['Employee Code', 'Employee Name', 'Department', 'Start Date', 'End Date', 'Days', 'Status'],
+            ...rows
+          ];
+
+          const csv = csvArray
+            .map((row: string[]) => row.map((v: string | number | null) => `"${v ?? ''}"`).join(','))
+            .join('\n');
+
+          const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+          const link = Object.assign(document.createElement('a'), {
+            href: URL.createObjectURL(blob),
+            download: 'LeaveRequests.csv'
+          });
+          link.click();
+
+          this.toastr.success('Leave Requests exported successfully!');
+        } else {
+          this.toastr.warning('No data found to export');
+        }
+        this.isLoading = false;
+      },
+      error: () => {
+        this.toastr.error('Error while exporting data');
+        this.isLoading = false;
+      }
     });
   }
 

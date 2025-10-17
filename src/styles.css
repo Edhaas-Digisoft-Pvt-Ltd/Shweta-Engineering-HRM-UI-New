@@ -16,6 +16,19 @@ body {
   --agGrid-Header: #578FCA;
   --readOnlyInput: #EDEDED;
   --agGrid-evenRow: #F3F9FF;
+
+  --role-admin: #3674B5;
+  --role-accountant: #0E9F6E;
+  --role-employee: #f48634;
+
+  --admin-agGrid-Header: #578FCA;
+  --accountant-agGrid-Header: #51d6aa;
+  --employee-agGrid-Header: #e4a87a;
+
+}
+
+.accordion-item {
+  background-color: transparent !important;
 }
 
 label {
@@ -27,6 +40,84 @@ label {
 button {
   font-size: 1rem !important;
 }
+
+.sideNav.closed .nav-name {
+  display: none;
+}
+
+.collapsIcons {
+  display: none;
+  position: relative;
+
+}
+
+.com-side {
+  position: absolute;
+  background-color: #0253aa;
+  box-sizing: border-box;
+  border-radius: 10px;
+}
+
+.com-side::before {
+  content: "";
+  position: absolute;
+  width: 15px;
+  height: 15px;
+  background-color: #0253aa;
+  left: -5px;
+  transform: rotate(45deg);
+  top: 12px;
+
+}
+
+.sideList {
+    right: -169px;
+    top: 14%;
+
+
+}
+
+.sideList2 {
+    right: -195px;
+    top: 3%;
+
+
+}
+
+.sideList li,
+.sideList2 li {
+  color: white;
+  text-align: start;
+}
+
+.sideList li a,
+.sideList2 li a {
+  color: white;
+}
+
+.sideNav.closed .accordion-sec {
+  display: none;
+}
+
+.sideNav.closed .collapsIcons {
+  display: block;
+}
+
+.sideNav.open .sideList {
+  display: none !important;
+}
+
+.sideNav.open .sideList2 {
+  display: none !important;
+}
+
+.sideNav.closed .company_heading {
+  display: none;
+}
+.sideNav.closed .userName {
+  display: none;
+}
+
 
 /* .modal-lg, .modal-xl {
   --bs-modal-width: 800px;
@@ -278,27 +369,33 @@ tr td:not(:last-of-type) {
   .table thead {
     display: none;
   }
-  .table .table tbody,.table tr, .table td{
+
+  .table .table tbody,
+  .table tr,
+  .table td {
     display: block;
     width: 100%;
   }
-  .table tbody tr td{
+
+  .table tbody tr td {
     text-align: right;
     padding-left: 50%;
     position: relative;
   }
-  .table tbody tr td.tableHeading{
+
+  .table tbody tr td.tableHeading {
     text-align: center !important;
-     padding-left: 0%;
+    padding-left: 0%;
   }
 
-  .table td::before{
+  .table td::before {
     content: attr(data-label);
     position: absolute;
     left: 0;
     padding-left: 15px;
   }
-  .comBtn{
+
+  .comBtn {
     width: 100%;
   }
 }
@@ -649,7 +746,9 @@ h2 {
 @media(min-width: 1025px) and (max-width:1440px) {}
 
 @media (min-width: 768px) and (max-width:1025px) {
-  .modal-lg, .modal-xl {
+
+  .modal-lg,
+  .modal-xl {
     --bs-modal-width: 700px;
     margin: auto !important;
   }
@@ -764,4 +863,8 @@ h2 {
   pointer-events: none;
   filter: blur(1px);
   opacity: 0.6;
+}
+
+.sideNav.open .userName {
+  display: flex;
 }

@@ -70,16 +70,10 @@ export class AdvancePaymentComponent {
       EMIStartDate: [{ value: '', disabled: true }, Validators.required],
       installmentAmount: [{ value: '', disabled: true }, Validators.required],
     })
+  }
 
-    if (sessionStorage.getItem('roleName') == 'admin' || sessionStorage.getItem('roleName') == 'accountant') {
-      this.router.navigate(['/authPanal/AdvancePayment']);
-      return;
-    } else {
-      alert('Please Login To Proceed');
-      sessionStorage.clear();
-      this.router.navigate(['']);
-      return;
-    }
+  hasAccess(module: string, permission: string): boolean {
+    return this.service.hasPermission(module, permission);
   }
 
   selectTab(tab: string) {
@@ -248,7 +242,7 @@ export class AdvancePaymentComponent {
         cellRenderer: this.statusButtonRenderer,
       },
     ];
-    if (this.role === 'admin') {
+    if (this.hasAccess('Advance Payment', 'ApproveOrReject')) {
       this.columnDefs.push({
         headerName: 'Actions',
         maxWidth: 120,

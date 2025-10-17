@@ -301,24 +301,58 @@ export class BonusConfigComponent {
       bonus_flag: this.addBonusForm.value.bonus_flag
     };
 
-    this.service.post("add/bonus", payload).subscribe((res: any) => {
-      if (res.status === "success") {
-        this.toastr.success("Bonus Submitted Successfully!");
+    // this.service.post("add/bonus", payload).subscribe((res: any) => {
+    //   if (res.status === "success") {
+    //     this.toastr.success("Bonus Submitted Successfully!");
 
-        const modalElement = document.getElementById('SubmitConfirmModal');
-        if (modalElement) {
-          const modalInstance = bootstrap.Modal.getInstance(modalElement);
-          modalInstance?.hide();
+    //     const modalElement = document.getElementById('SubmitConfirmModal');
+    //     if (modalElement) {
+    //       const modalInstance = bootstrap.Modal.getInstance(modalElement);
+    //       modalInstance?.hide();
+    //     }
+
+    //     this.isSaveClicked = false;
+    //     this.isSubmitClicked = false;
+    //     this.getActiveBonus();
+    //     this.getBonusList();
+
+    //     if (payload.bonus_flag) {
+    //       this.resetBonusForm();
+    //     }
+    //   }
+    // });
+
+    this.service.post("add/bonus", payload).subscribe({
+      next: (res: any) => {
+        if (res.status === 'success') {
+            this.toastr.success("Bonus Submitted Successfully!");
+            const modalElement = document.getElementById('SubmitConfirmModal');
+            if (modalElement) {
+              const modalInstance = bootstrap.Modal.getInstance(modalElement);
+              modalInstance?.hide();
+            }
+
+            this.isSaveClicked = false;
+            this.isSubmitClicked = false;
+            this.getActiveBonus();
+            this.getBonusList();
+
+            if (payload.bonus_flag) {
+              this.resetBonusForm();
+            }
         }
+      },
+      error: (err) => {
+        console.error('Error:', err);
 
+        if (err.status === 422) {
+          this.toastr.error(err.error.message || "Validation failed!");
+        } else if (err.status === 409) {
+          this.toastr.error(err.error.message || "Duplicate entry!");
+        } else {
+          this.toastr.error("Something went wrong!");
+        }
         this.isSaveClicked = false;
-        this.isSubmitClicked = false;
-        this.getActiveBonus();
-        this.getBonusList();
-
-        if (payload.bonus_flag) {
-          this.resetBonusForm();
-        }
       }
     });
   }

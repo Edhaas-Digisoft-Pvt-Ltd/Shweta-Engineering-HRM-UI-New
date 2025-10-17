@@ -15,7 +15,7 @@ main {
   /* background: linear-gradient(135deg, #2E8B57, #206040, #103820); */
   /* background: linear-gradient(135deg, #3674B5, #285a8a, #1b3d5c); */
 
-  background-color: var(--role-color);
+  background-color: #3674B5;
   color: #fff;
   z-index: 999;
   color: white;
@@ -120,12 +120,12 @@ main {
 }
 
 .sideNav {
-  width: 250px; 
-  transition: width 0.3s ease;
+  width: 250px;
+  transition: width 0.3s linear;
 }
 
 .sideNav.closed {
-  width: 60px; 
+  width: 70px;
 }
 
 .toggle-btn {
@@ -133,6 +133,11 @@ main {
   border: none;
   color: white;
   font-size: 1.2rem;
+  background-color: #3674B5;
+  position: absolute;
+  right: -30px;
+  top: 0px;
+  border-radius: 0px 2px 2px 0px;
 }
 
 /* Media query */
@@ -202,13 +207,15 @@ main {
 
 }
 
+
+
 /*# sourceMappingURL=navigation.component.css.map */
 
 /* sidebar collpasible  */
 .sideNav.closed {
-  width: 04.45% !important;
-  transition: width 1s ease-in !important;
-  overflow: hidden;
+  /* width: 04.45% !important; */
+  transition: width 0.3s linear !important;
+  /* overflow: hidden; */
 
 }
 
@@ -218,7 +225,7 @@ main {
 
 .sideNav.open {
   width: 20%;
-  transition: width 1s ease-in !important;
+  transition: width 0.3s linear !important;
   height: 100% !important;
 }
 
@@ -244,7 +251,7 @@ main {
   margin-left: 20.5%;
 }
 
-@media(max-width:850px){
+@media(max-width:850px) {
   .sideNav.open {
     width: 63px !important;
     transition: width 1s ease-in !important;
@@ -331,7 +338,7 @@ main {
   .sideNav.closed {
     width: 95px !important;
     transition: width 1s ease-in !important;
-    overflow: hidden;
+    /* overflow: hidden; */
     position: absolute;
     /* background: white !important; */
     border-right: 1px solid lightgray;

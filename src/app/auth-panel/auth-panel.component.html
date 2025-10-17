@@ -4,7 +4,7 @@
 
     <div class="row m-0 res-column" style="flex-grow: 1;">
 
-        <div class="col col-lg-3 col-sm-2 fixed-top custom-bg-side pe-3 ps-3 sideNav   text-end  "
+        <div class="col col-lg-3 col-sm-2 fixed-top custom-bg-side pe-3 ps-3 sideNav  h-100  text-end  " #sideNav
             [ngClass]="{ 'open': isSideNavOpen, 'closed': !isSideNavOpen }">
             <div class="d-flex justify-content-between align-items-center mt-3 mb-4 border-bottom pb-3 border-2">
                 <div class="d-flex align-items-center gap-3">
@@ -12,13 +12,10 @@
                     <span class="company_heading">Shweta Enginners</span>
                 </div>
 
-                <!-- Toggle Button -->
-                <button class="btn btn-sm toggle-btn" (click)="toggleSideNav()">
-                    <i class="bi" [ngClass]="isSideNavOpen ? 'bi-chevron-left' : 'bi-chevron-right'"></i>
-                </button>
+
             </div>
 
-            <div class="d-flex flex-wrap justify-content-between  align-items-center">
+            <div class="flex-wrap justify-content-between  align-items-center userName">
                 <p> <span class="fw-bold"> {{empName}} &nbsp;</span> <span class="text-lowercase">logged in as</span>
                     <span class="fw-bold">&nbsp; {{roleName}} </span>
                 </p>
@@ -30,12 +27,16 @@
                     <path fill-rule="evenodd" d="M2.5 12a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5m0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5m0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5"/>
                   </svg>
             </button> -->
+            <button class="btn btn-sm toggle-btn" (click)="toggleSideNav()">
+                <i class="bi" [ngClass]="isSideNavOpen ? 'bi-chevron-left' : 'bi-chevron-right'"></i>
+            </button>
             <app-sidebar></app-sidebar>
         </div>
 
-        <div class="col col-lg bg-component">
+        <div class="col col-lg box2" #box2>
 
             <router-outlet></router-outlet>
+            <!-- <app-dashboard></app-dashboard> -->
         </div>
     </div>
 </main>

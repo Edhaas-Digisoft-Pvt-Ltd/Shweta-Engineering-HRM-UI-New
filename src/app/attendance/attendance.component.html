@@ -56,7 +56,7 @@
                                         </div>
 
                                         <!-- Accountant-only Buttons -->
-                                        <ng-container *ngIf="role === 'accountant'">
+                                        <ng-container *ngIf="hasAccess('Attendance', 'import')">
                                             <button class="btn btn-primary text-white rounded-3 ExcelBtn"
                                                 (click)="downloadTemplate()"><i
                                                     class="bi bi-download"></i>&nbsp;Template</button>

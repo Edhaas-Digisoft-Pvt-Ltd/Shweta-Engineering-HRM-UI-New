@@ -75,7 +75,7 @@ export class PayrollProcessComponent {
 
     this.getPagination();
 
-    if (sessionStorage.getItem('roleName') == 'accountant') {
+    if (sessionStorage.getItem('roleName') == 'Accountant') {
       this.router.navigate(['/authPanal/payrollProcess']);
       return;
     } else {

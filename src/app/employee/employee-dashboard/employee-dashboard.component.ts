@@ -89,15 +89,11 @@ export class EmployeeDashboardComponent {
       }
     }
 
-    if (sessionStorage.getItem('roleName') == 'admin') {
+    if (sessionStorage.getItem('roleName') == 'Admin') {
       this.route.queryParams.subscribe(params => {
         this.employee_id = params['id'];
-        // console.log('Received employee code:', params['id']);
       });
     }
-
-    console.log(this.employee_id);
-
 
     this.editForm = this.fb.group({
       email: ['', [Validators.required, Validators.email, Validators.pattern(/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/)]],
@@ -122,6 +118,8 @@ export class EmployeeDashboardComponent {
 
     this.advanceSalaryForm.valueChanges.subscribe(() => this.calculateInstallment());
     this.fetchEmployee(this.employee_id);
+    console.log(this.employee_id);
+    
 
     this.isLoading = false;
 
@@ -137,6 +135,10 @@ export class EmployeeDashboardComponent {
     //   this.router.navigate(['']);
     //   return;
     // }
+  }
+
+  hasAccess(module: string, permission: string): boolean {
+    return this.service.hasPermission(module, permission);
   }
 
   ngAfterViewInit(): void {
@@ -202,6 +204,8 @@ export class EmployeeDashboardComponent {
   }
 
   fetchEmployee(id: any) {
+    console.log(id);
+    
     this.service.post(`single/employee`, { "employe_id": id }).subscribe((res: any) => {
       this.Employee_Data = res.data;
       this.company_id = res.data.employee.company_id;

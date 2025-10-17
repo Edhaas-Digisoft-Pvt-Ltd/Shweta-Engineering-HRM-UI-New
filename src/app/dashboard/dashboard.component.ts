@@ -57,16 +57,6 @@ export class DashboardComponent {
     // this.selectedYear = this.financialYears[0]; // default selected
     this.selectedYear = currentYear.toString(); // default selected
     this.getCompanyNames();
-
-    if (sessionStorage.getItem('roleName') == 'admin') {
-      this.router.navigate(['/authPanal/Dashboard']);
-      return;
-    } else {
-      alert('Please Login To Proceed');
-      sessionStorage.clear();
-      this.router.navigate(['']);
-      return;
-    }
   }
 
   selectCompany(company: any) {

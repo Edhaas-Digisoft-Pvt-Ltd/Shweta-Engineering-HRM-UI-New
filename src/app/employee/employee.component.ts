@@ -42,16 +42,10 @@ export class EmployeeComponent {
     // this.getEmployee();
     this.getPagination();
     this.getCompanyNames();
+  }
 
-    if (sessionStorage.getItem('roleName') == 'admin') {
-      this.router.navigate(['/authPanal/Employee']);
-      return;
-    } else {
-      alert('Please Login To Proceed');
-      sessionStorage.clear();
-      this.router.navigate(['']);
-      return;
-    }
+  hasAccess(module: string, permission: string): boolean {
+    return this.service.hasPermission(module, permission);
   }
 
   openImportModal(): void {

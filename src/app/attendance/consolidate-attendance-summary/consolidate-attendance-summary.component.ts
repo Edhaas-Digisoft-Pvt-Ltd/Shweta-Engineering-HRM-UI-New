@@ -27,7 +27,13 @@ export class ConsolidateAttendanceSummaryComponent {
 
   fromDate: string = '';
   toDate: string = '';
+  attendanceData: any;
 
+  totalRows: number = 0;
+  currentPage: number = 1;
+  lastPage: number = 1;
+  pagesToShow: (number | string)[] = [];
+  paginationvalue: any;
 
   constructor(private service: HrmserviceService) { }
 
@@ -65,7 +71,8 @@ export class ConsolidateAttendanceSummaryComponent {
 
   ngOnInit() {
     this.loadData();
-    this.fetchConsolidateSummary();
+    // this.fetchConsolidateSummary();
+    this.getPaginationValueAndFetchAttendance();
   }
 
   onMonthYearChange() {
@@ -139,62 +146,19 @@ export class ConsolidateAttendanceSummaryComponent {
               </div>`;
   }
 
-  // fetchConsolidateSummary() {
-  //   this.isLoading = true;
-  //   this.service.post('fetch/ConsolidatedSummary', {}).subscribe((res: any) => {
-  //     if (res.status === 'success') {
-  //       const result = res.data;
-  //       const employeeMap = new Map();
-
-  //       Object.keys(result).forEach((monthKey) => {
-  //         const monthIndex = parseInt(monthKey.split('-')[1]) - 1; // e.g., '2025-06' -> 5
-
-  //         result[monthKey].forEach((item: any) => {
-  //           const empId = item.employee_code;
-
-  //           if (!employeeMap.has(empId)) {
-  //             employeeMap.set(empId, {
-  //               id: empId,
-  //               employeeName: item.emp_name,
-  //             });
-  //           }
-
-  //           const row = employeeMap.get(empId);
-
-  //           row[`month-${monthIndex}-P`] = item.present_days || '';
-  //           row[`month-${monthIndex}-A`] = item.absent_days || '';
-  //           row[`month-${monthIndex}-W`] = item.weekend || '';
-  //           row[`month-${monthIndex}-W/od`] = item.weekend_od || '';
-  //           row[`month-${monthIndex}-H`] = item.holiday_days || '';
-  //           row[`month-${monthIndex}-WFH/2`] = item.work_from_home_half_day || '';
-  //           row[`month-${monthIndex}-HD`] = item.half_day || '';
-  //           row[`month-${monthIndex}-LT`] = item.late || '';
-  //           row[`month-${monthIndex}-HR`] = ''; // Add logic if needed
-  //           row[`month-${monthIndex}-OT`] = item.total_overtime || '';
-  //           row[`month-${monthIndex}-Th`] = ''; // Add logic if needed
-
-  //           employeeMap.set(empId, row);
-  //         });
-  //       });
-
-  //       this.rowData = Array.from(employeeMap.values());
-  //       setTimeout(() => this.scrollToSelectedMonth(), 200);
-  //     } else {
-  //       this.rowData = [];
-  //       console.error(res.error);
-  //     }
-  //   });
-  //   this.isLoading = false;
-  // }
-
-  fetchConsolidateSummary() {
+  fetchConsolidateSummary(page: number = 1): void {
     if (!this.fromDate || !this.toDate) return;
 
     this.isLoading = true;
-    this.service.post('fetch/ConsolidatedSummary', { from_date: this.fromDate, to_date: this.toDate })
+    this.service.post('fetch/ConsolidatedSummary', { from_date: this.fromDate, to_date: this.toDate, page: page })
       .subscribe((res: any) => {
         if (res.status === 'success') {
           const result = res.data;
+            this.totalRows = res.pagination.total;
+        this.currentPage = res.pagination.page;
+        this.lastPage = res.pagination.last_page;
+        this.generatePageNumbers(this.paginationvalue);
+          this.attendanceData = res.data;
           const employeeMap = new Map<string, any>();
 
           Object.keys(result).forEach((monthKey) => {
@@ -307,57 +271,147 @@ export class ConsolidateAttendanceSummaryComponent {
   }
 
   exportToExcel() {
-    const wsData: any[][] = [];
-    const monthLabels = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-    const statuses = ['P', 'A', 'W', 'W/Od', 'H', 'WFH/2', 'HD', 'HR', 'OT', 'LT'];
-
-    const year = this.selectedYear;
-    const startMonth = 0;
-    const endMonth = 11;
-
-    const headerRow1 = ['ID', 'Employee Name'];
-    for (let m = startMonth; m <= endMonth; m++) {    
-      const cleanLabel = monthLabels[m].split('(')[0].trim();
-      headerRow1.push(`${cleanLabel} ${year}`, ...Array(statuses.length - 1).fill(''));
+    if (!this.rowData?.length) {
+      alert('No data to export');
+      return;
     }
 
-    const headerRow2 = ['', ''];
-    for (let m = startMonth; m <= endMonth; m++) {
-      headerRow2.push(...statuses);
-    }
+    const statuses = ['P', 'A', 'W', 'WOD', 'H', 'WFH2', 'HD', 'HR', 'OT', 'LT'];
 
-    wsData.push(headerRow1);
-    wsData.push(headerRow2);
-
-    this.rowData.forEach((row: any) => {
-      const dataRow = [row.id, row.employeeName];
-      for (let m = startMonth; m <= endMonth; m++) {
-        statuses.forEach(status => {
-          dataRow.push(row[`month-${m}-${status}`] || '');
-        });
-      }
-      wsData.push(dataRow);
+    // Collect all months dynamically from rowData
+    const monthKeys = new Set<string>();
+    this.rowData.forEach(emp => {
+      Object.keys(emp).forEach(key => {
+        const match = key.match(/^(\d{4}-\d{2})-/); // matches YYYY-MM-STATUS
+        if (match) monthKeys.add(match[1]);
+      });
     });
 
-    const merges: XLSX.Range[] = [
-      { s: { r: 0, c: 0 }, e: { r: 1, c: 0 } },
-      { s: { r: 0, c: 1 }, e: { r: 1, c: 1 } },
-    ];
+    const months = Array.from(monthKeys).sort(); // sorted months
 
-    for (let i = 0, col = 2; i <= endMonth - startMonth; i++) {
-      merges.push({ s: { r: 0, c: col }, e: { r: 0, c: col + statuses.length - 1 } });
-      col += statuses.length;
+    // Build headers
+    const header1 = ['EmployeeCode', 'EmployeeName'];
+    const header2 = ['', ''];
+
+    months.forEach(month => {
+      // Add merged cell for month spanning statuses
+      header1.push(...Array(statuses.length).fill(month));
+      // Second row: statuses
+      header2.push(...statuses);
+    });
+
+    // Prepare sheet data
+    const sheetData: any[][] = [];
+    sheetData.push(header1);
+    sheetData.push(header2);
+
+    this.rowData.forEach(emp => {
+      const row = [emp.employeeCode, emp.employeeName];
+      months.forEach(month => {
+        statuses.forEach(status => {
+          const field = `${month}-${status}`;
+          row.push(emp[field] !== undefined ? emp[field] : 0);
+        });
+      });
+      sheetData.push(row);
+    });
+
+    const ws: XLSX.WorkSheet = XLSX.utils.aoa_to_sheet(sheetData);
+
+    // Merge first row for month labels
+    let colIndex = 2;
+    months.forEach(() => {
+      if (!ws['!merges']) ws['!merges'] = [];
+      ws['!merges'].push({ s: { r: 0, c: colIndex }, e: { r: 0, c: colIndex + statuses.length - 1 } });
+      colIndex += statuses.length;
+    });
+
+    const wb: XLSX.WorkBook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Attendance');
+
+    XLSX.writeFile(wb, `Attendance_${this.fromDate}_to_${this.toDate}.xlsx`);
+  }
+
+  getPaginationValueAndFetchAttendance() {
+    this.service.post('get-pagination', {}).subscribe((res: any) => {
+      if (res.status === 'success') {
+        this.paginationvalue = res.data;
+
+        this.fetchConsolidateSummary();
+      } else {
+        this.paginationvalue = 10;
+        this.fetchConsolidateSummary();
+      }
+    });
+  }
+
+  getpaginationvalue() {
+    this.service.post('get-pagination', {}).subscribe((res: any) => {
+      if (res.status === 'success') {
+        this.paginationvalue = res.data
+        this.generatePageNumbers(this.paginationvalue)
+      }
+    });
+  }
+
+  generatePageNumbers(pageWindow: number) {
+    const total = this.lastPage;
+    const current = this.currentPage;
+
+    let startPage = current;
+    let endPage = current + pageWindow - 1;
+
+    if (endPage >= total) {
+      endPage = total - 1; 
+      startPage = Math.max(2, total - pageWindow); 
     }
 
-    const worksheet = XLSX.utils.aoa_to_sheet(wsData);
-    worksheet['!merges'] = merges;
+    if (current === 1) {
+      startPage = 2;
+      endPage = Math.min(total - 1, pageWindow);
+    }
 
-    const workbook: XLSX.WorkBook = {
-      Sheets: { 'Attendance Summary': worksheet },
-      SheetNames: ['Attendance Summary'],
-    };
+    const pages: (number | string)[] = [];
+    pages.push(1); 
 
-    XLSX.writeFile(workbook, `Attendance_Summary_${year}.xlsx`);
+    if (startPage > 2) {
+      pages.push('...');
+    }
+
+    for (let i = startPage; i <= endPage; i++) {
+      pages.push(i);
+    }
+
+    if (endPage < total - 1) {
+      pages.push('...');
+    }
+
+    if (total > 1) pages.push(total);
+
+    this.pagesToShow = pages;
+  }
+
+
+  goToPage(page: number | string) {
+    if (page === '...') return;
+    if (page !== this.currentPage) {
+      this.currentPage = page as number;
+      this.fetchConsolidateSummary(this.currentPage);
+    }
+  }
+
+  prevPage() {
+    if (this.currentPage > 1) {
+      this.currentPage--;
+      this.fetchConsolidateSummary(this.currentPage);
+    }
+  }
+
+  nextPage() {
+    if (this.currentPage < this.lastPage) {
+      this.currentPage++;
+      this.fetchConsolidateSummary(this.currentPage);
+    }
   }
 
 }

@@ -23,19 +23,19 @@ export class LoginComponent {
     private service: HrmserviceService
   ) {
     this.loginForm = new FormGroup({
-      email: new FormControl('sm1982@gmail.com', [
+      email: new FormControl('', [
         Validators.required,
         Validators.email,
         Validators.pattern(
           /^[a-zA-Z0-9._%+-]+@[a-zA-Z]+\.[a-zA-Z]{2,}(?:\.[a-zA-Z]{2,})?$/
         ),
       ]), // Email validation
-      password: new FormControl('9423369362', [
+      password: new FormControl('', [
         Validators.required,
         Validators.minLength(6),
         Validators.pattern(this.NoWhitespaceRegExp),
       ]), // Min length validation
-      role: new FormControl('1', [
+      role: new FormControl('', [
         Validators.required,]), // Required field
     });
   }
@@ -49,6 +49,7 @@ export class LoginComponent {
       try {
         if (res.status == "success") {
           this.roles = res.data
+          console.log(this.roles)
         }
       } catch (error) {
         console.log(error);
@@ -58,50 +59,81 @@ export class LoginComponent {
   }
 
   //--------------------------------------------------------------------------------------
+
   login() {
+    this.service.setRole('');
+    this.service.clearPermissions();
+
     const body = {
       username: this.loginForm.get('email')?.value,
       password: this.loginForm.get('password')?.value,
       role_id: Number(this.loginForm.get('role')?.value)
     };
 
-    this.service.post('login', body).subscribe((res: any) => {
-      if (res.status == 'success') {
-        this.toastr.success('Login successful !!!');
-        this.logindata = res.data
-        console.log( this.logindata);
-        
-        sessionStorage.setItem('roleName', this.logindata.employe_role)
-        sessionStorage.setItem('employeeId', this.logindata.employe_id)
-        sessionStorage.setItem('employeeName', this.logindata.employee_name)
-        let roleId = this.loginForm.value.role;
-        let role = roleId == 1 ? 'admin' : roleId == 2 ? 'accountant' : 'employee';
-        
-        sessionStorage.setItem("AUTH", res.token); // Session storage for Auth
-        this.service.setRole(role); // Session storage for role
+    this.service.post('login', body).subscribe(
+      (res: any) => {
+        if (res.status === 'success') {
+          this.toastr.success('Login successful !!!');
+          this.logindata = res.data;
 
-        if (role === 'employee') {
-          // this.router.navigate(['/authPanal/EmployeeInDetail'], {
-          //   queryParams: { id: this.logindata.employe_id }
-          // });
-          this.service.setEmployeeId(this.logindata.employe_id);
-          console.log('login page', this.logindata.employe_id);
-          this.router.navigate(['/authPanal/EmployeeInDetail']);
+          // Store basic info in session
+          sessionStorage.setItem('roleName', this.logindata.employe_role);
+          sessionStorage.setItem('employeeId', this.logindata.employe_id);
+          sessionStorage.setItem('employeeName', this.logindata.employee_name);
+          sessionStorage.setItem('AUTH', res.token);
+
+          // Fetch permissions first
+          this.service.fetchEmployeePermissions(this.logindata.employe_id).subscribe(
+            (permRes: any) => {
+              if (permRes.status === 'success') {
+                //  Save permissions
+                this.service.setPermissions(permRes.data);
+                
+                // sessionStorage.setItem('permissions', JSON.stringify(permRes.data));
+                // Now set role
+                const selectedRoleId = Number(this.loginForm.value.role);
+                const selectedRole = this.roles.find((r: any) => r.role_id === selectedRoleId);
+                const roleName = selectedRole ? selectedRole.role_name.toLowerCase() : '';
+                this.service.setRole(roleName);
+
+                // Navigate only after permissions are set
+                switch (roleName) {
+                  case 'employee':
+                    this.service.setEmployeeId(this.logindata.employe_id);
+                    this.router.navigate(['/authPanal/EmployeeInDetail']);
+                    break;
+
+                  case 'accountant':
+                    this.router.navigate(['/authPanal/payrollProcess']);
+                    break;
+
+                  case 'admin':
+                    this.router.navigate(['/authPanal/Dashboard']);
+                    break;
+
+                  default:
+                    this.toastr.error('Unknown role. Please contact admin.');
+                    break;
+                }
+              } else {
+                this.toastr.error('Failed to fetch permissions');
+              }
+            },
+            (error) => {
+              console.error('Error fetching employee permissions', error);
+              this.toastr.error('Failed to fetch permissions');
+            }
+          );
+        } else {
+          this.toastr.error(res.message || 'Login failed');
         }
-        if (role === 'accountant') {
-          this.router.navigate(['/authPanal/payrollProcess']);
-        }
-        else if (role === 'admin') {
-          this.router.navigate(['/authPanal/Dashboard']);
-        }
-      } else {
-        this.toastr.error(res.message || 'Login failed');
+      },
+      (err) => {
+        this.toastr.error(err.error?.message || 'Something went wrong');
       }
-
-    }, (err) => {
-      this.toastr.error(err.error?.message || 'Something went wrong');
-    });
+    );
   }
+
   //--------------------------------------------------------------------------------------
   onSubmit() {
     if (this.loginForm.valid) {
@@ -114,12 +146,12 @@ export class LoginComponent {
   //--------------------------------------------------------------------------------------
 
   demoAccounts = [
-    { role: 'Admin', email: 'sm1982@gmail.com', password: '9423369362' },
+    { role: 'Admin', email: 'abc@gmail.com', password: '1212121212' },
     { role: 'Emp', email: 'pravin.j@gmail.com', password: '9823012345' },
-    { role: 'Accountant', email: 'sunil15@gmail.com', password: '987545632' }
+    { role: 'Accountant', email: 'accountant@gmail.com', password: '9265897412' }
   ];
 
-  selectedRole: string = ''; 
+  selectedRole: string = '';
 
   selectCredentials(role: string) {
     this.selectedRole = role;
