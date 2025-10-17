@@ -78,7 +78,7 @@ export class EmployeeDashboardComponent {
     //   console.log('Received employee code:', params['id']);
     // });
 
-    if (sessionStorage.getItem('roleName') == 'employee') {
+    if (sessionStorage.getItem('roleName') == 'Operator') {
       const signalEmpId = this.service.EmployeeId();
       if (signalEmpId != null) {
         this.employee_id = this.service.EmployeeId();

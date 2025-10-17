@@ -43,7 +43,7 @@
                             <span class="input-group-text"><i class="bi bi-envelope"></i></span>
                             <input type="email" class="form-control" formControlName="email" placeholder="Enter Email">
                         </div>
-                        <small class="text-danger "
+                        <small class="text-danger"
                             *ngIf="loginForm.get('email')?.invalid && loginForm.get('email')?.touched">
                             * This Field is Required
                         </small>
@@ -69,13 +69,13 @@
                                 {{ cat.role_name }}
                             </option>
                         </select>
-                        <small class=" text-danger my-4"
+                        <small class="text-danger mt-1 d-block"
                             *ngIf="loginForm.get('role')?.invalid && loginForm.get('role')?.touched">
                             * This Field is required
                         </small>
 
                         <!-- Login Button -->
-                        <input class="btn btn-primary w-50 login-btn mt-5 " type="submit" value="Log In">
+                        <input class="btn btn-primary w-50 login-btn mt-5" type="submit" value="Log In">
                         <!-- <button class="btn btn-primary w-50 login-btn mt-5" [disabled]="loginForm.invalid">
                             <i class="fa-solid fa-sign-in-alt"></i> LOG IN
                         </button> -->

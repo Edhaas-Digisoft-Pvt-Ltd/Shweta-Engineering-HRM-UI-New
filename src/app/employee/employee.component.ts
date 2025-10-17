@@ -184,7 +184,7 @@ export class EmployeeComponent {
   getEmployee(page: number = 1): void {
     this.isLoading = true;
     let company_id = this.selectedCompanyId;
-    this.service.post("company/employee", { company_id, page:page }).subscribe((res: any) => {
+    this.service.post("company/employee", { company_id, page: page, isexport: false, }).subscribe((res: any) => {
       if (res.status == 'success') {
         this.rowData = res.data.map((item: any) => ({
           employee_id: item.employe_id,
@@ -264,23 +264,61 @@ export class EmployeeComponent {
   }
 
   exportExcel() {
-    this.gridApiActive.exportDataAsCsv({
-      fileName: 'Employee_List.csv',
-      columnKeys: [
-        'employee_code',
-        'emp_name',
-        'emp_contact',
-        'doj',
-        'department_name',
-        'designation_name',
-        'status'
-      ],
-      allColumns: false,
-      onlySelected: false,
+    this.isLoading = true;
+    let company_id = this.selectedCompanyId;
+    this.service.post('company/employee', { company_id, isexport: true, }).subscribe({
+      next: (res: any) => {
+        if (res.status === 'success' && res.data.length) {
+          const rows = res.data.map((r: any) => [
+            r.employee_code,
+            r.emp_name,
+            r.emp_email,
+            r.role_id,
+            r.bank_name,
+            r.account_num,
+            r.ifsc_code,
+            r.doj,
+            r.basic_salary,
+            r.house_rent_allowances,
+            r.conveyance_allowances,
+            r.special_allowances,
+            r.annual_gross_salary,
+            r.monthly_gross_salary,
+          ]);
+
+          const csvArray: string[][] = [
+            ['Employee Code', 'Employee Name', 'Employee Email', 'Role Id', 'Bank Name', 'Account Number', 'IFSC Code',
+              'Doj', 'Basic Salary', 'House Rent Allowances', 'Conveyance Allowances', 'Special Allowances', 'Annual Gross Salary', 'Monthly Gross Salary'],
+            ...rows
+          ];
+
+          const csv = csvArray
+            .map((row: string[]) => row.map((v: string | number | null) => `"${v ?? ''}"`).join(','))
+            .join('\n');
+
+          const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+          const link = Object.assign(document.createElement('a'), {
+            href: URL.createObjectURL(blob),
+            download: 'Employee.csv'
+          });
+          link.click();
+
+          this.toastr.success('Data exported successfully!');
+        }
+        this.isLoading = false;
+      },
+      error: (err) => {
+        if (err.status === 400) {
+          this.toastr.warning('No data found to export');
+        } else {
+          this.toastr.error('Error while exporting data');
+        }
+        this.isLoading = false;
+      }
     });
   }
 
-   getPagination() {
+  getPagination() {
     this.service.post('get-pagination', {}).subscribe((res: any) => {
       if (res.status === 'success') {
         this.paginationvalue = res.data;
@@ -310,8 +348,8 @@ export class EmployeeComponent {
     let endPage = current + pageWindow - 1;
 
     if (endPage >= total) {
-      endPage = total - 1; 
-      startPage = Math.max(2, total - pageWindow); 
+      endPage = total - 1;
+      startPage = Math.max(2, total - pageWindow);
     }
 
     if (current === 1) {

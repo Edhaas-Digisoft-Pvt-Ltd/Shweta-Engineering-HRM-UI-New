@@ -129,6 +129,7 @@ export class PayrollProcessComponent {
       year: this.selectedYear,
       month: this.selectedMonth,
       page: page,
+      isexport: false,
     }).subscribe((res: any) => {
       if (res.status === 'success') {
         this.rowData = res.data.map((item: any) => ({
@@ -342,15 +343,80 @@ export class PayrollProcessComponent {
   }
 
   exportExcel() {
-    const gridApiToUse = this.isProcess ? this.gridApiTemp : this.gridApiActive;
+    this.isLoading = true;
 
-    if (gridApiToUse) {
-      gridApiToUse.exportDataAsCsv({
-        fileName: this.isProcess ? 'Processed_Payroll.csv' : 'generate_payroll.csv'
-      });
-    } else {
-      this.toastr.warning('Grid not ready.');
-    }
+    const apiUrl = this.isProcess ? 'fetch/temp/payroll' : 'fetch/payroll';
+    const payload = {
+      company_id: this.selectedCompanyId,
+      year: this.selectedYear,
+      month: this.selectedMonth,
+      isexport: true
+    };
+
+    this.service.post(apiUrl, payload).subscribe({
+      next: (res: any) => {
+        if (res.status === 'success' && res.data.length) {
+
+          const rows = this.isProcess
+            ? res.data.map((r: any) => [
+              r.employee_code,
+              r.emp_name,
+              r.department_name,
+              r.designation_name,
+              r.role_name,
+              r.present_days,
+              r.absent_days,
+              r.total_hours,
+              r.total_overtime,
+              r.bonus_amount ?? 0,
+              r.adv_deduction ?? 0,
+              r.net_salary ?? 0
+            ])
+            : res.data.map((r: any) => [
+              r.employee_code,
+              r.emp_name,
+              r.department_name,
+              r.designation_name,
+              r.role_name,
+              r.present_days,
+              r.absent_days,
+              r.total_hours,
+              r.total_overtime
+            ]);
+
+          const headers = this.isProcess
+            ? ['Employee Code', 'Employee Name', 'Department', 'Designation', 'Role', 'Present Days', 'Absent Days', 'Total Hours', 'Overtime', 'Bonus', 'Advance Deduction', 'Net Salary']
+            : ['Employee Code', 'Employee Name', 'Department', 'Designation', 'Role', 'Present Days', 'Absent Days', 'Total Hours', 'Overtime'];
+
+          const csvArray: string[][] = [headers, ...rows];
+          const csv = csvArray
+            .map(row => row.map(v => `"${v ?? ''}"`).join(','))
+            .join('\n');
+
+          const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+          const link = Object.assign(document.createElement('a'), {
+            href: URL.createObjectURL(blob),
+            download: this.isProcess
+              ? 'Processed_Payroll.csv'
+              : 'Generated_Payroll.csv'
+          });
+          link.click();
+
+          this.toastr.success('Payroll data exported successfully!');
+        } else {
+          this.toastr.warning('No data found to export.');
+        }
+        this.isLoading = false;
+      },
+      error: (err) => {
+        if (err.status === 404) {
+          this.toastr.warning('No data found to export');
+        } else {
+          this.toastr.error('Error while exporting data');
+        }
+        this.isLoading = false;
+      }
+    });
   }
 
   onFileChange(event: any) {

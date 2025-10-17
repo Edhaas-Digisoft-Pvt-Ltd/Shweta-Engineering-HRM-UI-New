@@ -141,7 +141,8 @@ export class ApprovedAdvancePaymentComponent {
       company_id: this.selectedCompanyId,
       year: this.selectedYear,
       month: this.selectedMonth,
-      page:page
+      page: page,
+      isexport: false,
     }).subscribe((res: any) => {
       try {
         if (res.status === 'success') {
@@ -449,9 +450,54 @@ export class ApprovedAdvancePaymentComponent {
 
 
   exportExcel() {
-    if (this.gridApiActive) {
-      this.gridApiActive.exportDataAsCsv();
-    }
+    this.isLoading = true;
+    this.service.post('all/companyapprovedrequest', {
+      company_id: this.selectedCompanyId,
+      year: this.selectedYear,
+      month: this.selectedMonth,
+      isexport: true,
+    }).subscribe({
+      next: (res: any) => {
+        if (res.status === 'success' && res.data.length) {
+          const rows = res.data.map((r: any) => [
+            r.employee_code,
+            r.emp_name,
+            r.apply_date,
+            r.advance_amount,
+            r.tenure,
+            r.emi,
+            r.status
+          ]);
+
+          const csvArray: string[][] = [
+            ['Employee Code', 'Employee Name', 'Apply Date', 'Advance Amount', 'Tenure', 'Emi', 'Status'],
+            ...rows
+          ];
+
+          const csv = csvArray
+            .map((row: string[]) => row.map((v: string | number | null) => `"${v ?? ''}"`).join(','))
+            .join('\n');
+
+          const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+          const link = Object.assign(document.createElement('a'), {
+            href: URL.createObjectURL(blob),
+            download: 'ApprovedAdvPayment.csv'
+          });
+          link.click();
+
+          this.toastr.success('Data exported successfully!');
+        }
+        this.isLoading = false;
+      },
+      error: (err) => {
+        if (err.status === 400) {
+          this.toastr.warning('No data found to export');
+        } else {
+          this.toastr.error('Error while exporting data');
+        }
+        this.isLoading = false;
+      }
+    });
   }
 
   getPagination() {

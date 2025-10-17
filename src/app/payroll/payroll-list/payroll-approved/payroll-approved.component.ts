@@ -101,6 +101,7 @@ export class PayrollApprovedComponent {
       year: this.selectedYear,
       month: this.selectedMonth,
       page:page,
+      isexport: false
     }).subscribe(
       (res: any) => {
         try {

@@ -104,7 +104,8 @@ export class AdvancePaymentComponent {
       company_id: this.selectedCompanyId,
       year: this.selectedYear,
       month: this.selectedMonth,
-      page: page
+      page: page,
+      isexport: false,
     }).subscribe((res: any) => {
       try {
         if (res.status === 'success' && res.data.length > 0) {
@@ -216,22 +217,14 @@ export class AdvancePaymentComponent {
   initializeColumns() {
     this.columnDefs = [
       { headerName: 'Emp Code', field: 'employee_code', sortable: true, filter: true, maxWidth: 150, },
-      { headerName: 'Apply Date', field: 'apply_date', sortable: true, filter: true, maxWidth: 150, },
       {
         headerName: 'Employee Name',
         field: 'emp_name',
         sortable: true,
         filter: true,
       },
-      {
-        headerName: 'Department',
-        field: 'department_name',
-        sortable: true,
-        filter: true,
-        maxWidth: 150,
-      },
-      { headerName: 'Role', field: 'designation_name', maxWidth: 130, sortable: true, filter: true },
-      { headerName: 'Amount', field: 'advance_amount', maxWidth: 110, sortable: true, filter: true },
+      { headerName: 'Apply Date', field: 'apply_date', sortable: true, filter: true },
+      { headerName: 'Amount', field: 'advance_amount', minWidth: 110, sortable: true, filter: true },
       { headerName: 'Tenure', field: 'tenure', sortable: true, filter: true, maxWidth: 110 },
       {
         headerName: 'Status',
@@ -245,7 +238,6 @@ export class AdvancePaymentComponent {
     if (this.hasAccess('Advance Payment', 'ApproveOrReject')) {
       this.columnDefs.push({
         headerName: 'Actions',
-        maxWidth: 120,
         cellStyle: { border: '1px solid #ddd' },
         cellRenderer: (params: any) => {
           return `<button type="button" class="btn btn-sm mb-1" data-bs-toggle="modal" data-bs-target="#advanceRequestModal" style="background-color:#C8E3FF">
@@ -352,9 +344,54 @@ export class AdvancePaymentComponent {
   }
 
   exportExcel() {
-    if (this.gridApiActive) {
-      this.gridApiActive.exportDataAsCsv();
-    }
+    this.isLoading = true;
+    this.service.post('fetch/allcompanyrequest', {
+      company_id: this.selectedCompanyId,
+      year: this.selectedYear,
+      month: this.selectedMonth,
+      isexport: true,
+    }).subscribe({
+      next: (res: any) => {
+        if (res.status === 'success' && res.data.length) {
+          const rows = res.data.map((r: any) => [
+            r.employee_code,
+            r.emp_name,
+            r.apply_date,
+            r.advance_amount,
+            r.tenure,
+            r.emi,
+            r.status
+          ]);
+
+          const csvArray: string[][] = [
+            ['Employee Code', 'Employee Name', 'Apply Date', 'Advance Amount', 'Tenure', 'Emi', 'Status'],
+            ...rows
+          ];
+
+          const csv = csvArray
+            .map((row: string[]) => row.map((v: string | number | null) => `"${v ?? ''}"`).join(','))
+            .join('\n');
+
+          const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+          const link = Object.assign(document.createElement('a'), {
+            href: URL.createObjectURL(blob),
+            download: 'AdvPayment.csv'
+          });
+          link.click();
+
+          this.toastr.success('Data exported successfully!');
+        } 
+        this.isLoading = false;
+      },
+      error: (err) => {
+        if (err.status === 404) {
+          this.toastr.warning('No data found to export');
+        } else {
+          this.toastr.error('Error while exporting data');
+        }
+        this.isLoading = false;
+      }
+    });
   }
 
   generatePageNumbers() {

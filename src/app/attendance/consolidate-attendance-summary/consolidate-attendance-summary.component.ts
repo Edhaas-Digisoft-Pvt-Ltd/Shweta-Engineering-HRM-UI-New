@@ -3,6 +3,7 @@ import { AgGridAngular } from 'ag-grid-angular';
 import { ColDef, GridApi, ColumnApi, ColGroupDef } from 'ag-grid-community';
 import { HrmserviceService } from 'src/app/hrmservice.service';
 import * as XLSX from 'xlsx';
+import { ToastrService } from 'ngx-toastr';
 
 @Component({
   selector: 'app-consolidate-attendance-summary',
@@ -35,7 +36,7 @@ export class ConsolidateAttendanceSummaryComponent {
   pagesToShow: (number | string)[] = [];
   paginationvalue: any;
 
-  constructor(private service: HrmserviceService) { }
+  constructor(private toastr: ToastrService, private service: HrmserviceService) { }
 
   months = [
     { name: 'Jan', value: 0 },
@@ -151,54 +152,70 @@ export class ConsolidateAttendanceSummaryComponent {
 
     this.isLoading = true;
     this.service.post('fetch/ConsolidatedSummary', { from_date: this.fromDate, to_date: this.toDate, page: page })
-      .subscribe((res: any) => {
-        if (res.status === 'success') {
-          const result = res.data;
+      .subscribe({
+        next: (res: any) => {
+          this.isLoading = false;
+
+          if (res.status === 'success' && (!res.data || Object.keys(res.data).length === 0)) {
+            this.rowData = [];
+            this.toastr.warning(res.message || 'No employees found for the selected date range.');
+            return;
+          }
+
+          if (res.status === 'success') {
+            const result = res.data;
             this.totalRows = res.pagination.total;
-        this.currentPage = res.pagination.page;
-        this.lastPage = res.pagination.last_page;
-        this.generatePageNumbers(this.paginationvalue);
-          this.attendanceData = res.data;
-          const employeeMap = new Map<string, any>();
+            this.currentPage = res.pagination.page;
+            this.lastPage = res.pagination.last_page;
+            this.generatePageNumbers(this.paginationvalue);
+            this.attendanceData = res.data;
+            const employeeMap = new Map<string, any>();
 
-          Object.keys(result).forEach((monthKey) => {
-            result[monthKey].forEach((item: any) => {
-              const empId = item.employee_code;
+            Object.keys(result).forEach((monthKey) => {
+              result[monthKey].forEach((item: any) => {
+                const empId = item.employee_code;
 
-              if (!employeeMap.has(empId)) {
-                employeeMap.set(empId, {
-                  employeeCode: empId,
-                  employeeName: item.emp_name
-                });
-              }
+                if (!employeeMap.has(empId)) {
+                  employeeMap.set(empId, {
+                    employeeCode: empId,
+                    employeeName: item.emp_name
+                  });
+                }
 
-              const row = employeeMap.get(empId);
+                const row = employeeMap.get(empId);
 
-              // safe field names
-              row[`${monthKey}-P`] = item.present_days || '';
-              row[`${monthKey}-A`] = item.absent_days || '';
-              row[`${monthKey}-W`] = item.weekend || '';
-              row[`${monthKey}-WOD`] = item.weekend_od || '';
-              row[`${monthKey}-H`] = item.holiday_days || '';
-              row[`${monthKey}-WFH2`] = item.work_from_home_half_day || '';
-              row[`${monthKey}-HD`] = item.half_day || '';
-              row[`${monthKey}-LT`] = item.late || '';
-              row[`${monthKey}-OT`] = item.total_overtime || '';
-              row[`${monthKey}-Period`] = `${item.period_start} - ${item.period_end}`;
+                // safe field names
+                row[`${monthKey}-P`] = item.present_days || '';
+                row[`${monthKey}-A`] = item.absent_days || '';
+                row[`${monthKey}-W`] = item.weekend || '';
+                row[`${monthKey}-WOD`] = item.weekend_od || '';
+                row[`${monthKey}-H`] = item.holiday_days || '';
+                row[`${monthKey}-WFH2`] = item.work_from_home_half_day || '';
+                row[`${monthKey}-HD`] = item.half_day || '';
+                row[`${monthKey}-LT`] = item.late || '';
+                row[`${monthKey}-OT`] = item.total_overtime || '';
+                row[`${monthKey}-Period`] = `${item.period_start} - ${item.period_end}`;
 
-              employeeMap.set(empId, row);
+                employeeMap.set(empId, row);
+              });
             });
-          });
 
-          this.rowData = Array.from(employeeMap.values());
-
-          // rebuild columns to match safe field names
-          this.loadDynamicMonthColumns(result);
-
-        } else {
+            this.rowData = Array.from(employeeMap.values());
+            this.loadDynamicMonthColumns(result);
+          } else {
+            this.rowData = [];
+            this.toastr.warning(res.message || 'Error fetching consolidated summary.');
+          }
+        },
+        error: (err) => {
+          this.isLoading = false;
           this.rowData = [];
+
+          // Laravel validation error comes in err.error.message
+          const msg = err?.error?.message || 'Error fetching consolidated summary.';
+          this.toastr.warning(msg);
+          console.error('Error:', err);
         }
-        this.isLoading = false;
       });
   }
 
@@ -272,7 +289,7 @@ export class ConsolidateAttendanceSummaryComponent {
 
   exportToExcel() {
     if (!this.rowData?.length) {
-      alert('No data to export');
+      this.toastr.warning('No data to export');
       return;
     }
 
@@ -362,8 +379,8 @@ export class ConsolidateAttendanceSummaryComponent {
     let endPage = current + pageWindow - 1;
 
     if (endPage >= total) {
-      endPage = total - 1; 
-      startPage = Math.max(2, total - pageWindow); 
+      endPage = total - 1;
+      startPage = Math.max(2, total - pageWindow);
     }
 
     if (current === 1) {
@@ -372,7 +389,7 @@ export class ConsolidateAttendanceSummaryComponent {
     }
 
     const pages: (number | string)[] = [];
-    pages.push(1); 
+    pages.push(1);
 
     if (startPage > 2) {
       pages.push('...');

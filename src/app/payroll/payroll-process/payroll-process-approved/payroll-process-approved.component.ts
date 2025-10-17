@@ -43,6 +43,7 @@ export class PayrollProcessApprovedComponent {
     resizable: true,
   };
 
+  years = [2023, 2024, 2025];
   months = [
     { id: 1, value: 'January' },
     { id: 2, value: 'February' },
@@ -103,43 +104,57 @@ export class PayrollProcessApprovedComponent {
   onGridReady(params: { api: any }) {
     this.gridApiActive = params.api;
   }
-
+  
   getApprovedPayroll(page: number = 1): void {
     this.isLoading = true;
-    this.rowData = [];
     this.service.post('fetch/approved/payroll', {
       company_id: this.selectedCompanyId,
       year: this.selectedYear,
       month: this.selectedMonth,
       page:page,
-    }).subscribe((res: any) => {
-      try {
-        if (res.status === 'success') {
-          this.rowData = res.data.map((item: any) => ({
-            employee_code: item.employee_code,
-            emp_name: item.emp_name,
-            department: item.department_name,
-            role: item.role_name,
-            presentDays: item.present_days,
-            absentDays: item.absent_days,
-            hours: item.total_hours,
-            overTime: item.total_overtime + ' hrs',
-            employe_id: item.employe_id,
-            bonus_incentive_amount: item.bonus_incentive_amount ? `₹ ${item.bonus_incentive_amount}` : 'NA',
-            advance_salary: item.advance_salary ? `₹ ${item.advance_salary}` : 'NA',
-            net_salary: item.net_salary ? `₹ ${item.net_salary}` : 'NA',
-          }));
-          this.totalRows = res.pagination.total;
-          this.currentPage = res.pagination.page;
-          this.lastPage = res.pagination.last_page;
-          this.generatePageNumbers(this.paginationvalue);
+      isexport: false
+    }).subscribe(
+      (res: any) => {
+        try {
+          if (res.status === 'success' && res.data && res.data.length > 0) {
+            this.rowData = res.data.map((item: any) => ({
+              employee_code: item.employee_code,
+              department: item.department_name,
+              role: item.role_name,
+              presentDays: item.present_days,
+              absentDays: item.absent_days,
+              hours: item.total_hours,
+              overTime: item.total_overtime + ' hrs',
+              employe_id: item.employe_id,
+              bonus_amount: item.bonus_amount ? `₹ ${item.bonus_amount}` : 'NA',
+              advance_salary: item.advance_salary ? `₹ ${item.advance_salary}` : 'NA',
+              net_salary: item.net_salary ? `₹ ${item.net_salary}` : 'NA',
+            }));
+            this.totalRows = res.pagination.total;
+            this.currentPage = res.pagination.page;
+            this.lastPage = res.pagination.last_page;
+            this.generatePageNumbers(this.paginationvalue);
+          } else {
+            this.rowData = [];
+            this.toastr.warning('Data Not Found');
+          }
+        } catch (error) {
+          console.log(error);
+          this.rowData = [];
         }
         this.isLoading = false;
-      } catch (error) {
-        console.log(error);
-        this.isLoading = false;
+      },
+      (error) => {
+        this.rowData = [];
+        if (error.status === 404) {
+          this.toastr.warning('Data Not Found');
+          this.isLoading = false;
+        } else {
+          console.error(error);
+          this.isLoading = false;
+        }
       }
-    })
+    );
   }
 
   initializeColumns() {

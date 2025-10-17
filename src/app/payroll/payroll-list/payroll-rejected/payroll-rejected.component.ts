@@ -101,7 +101,8 @@ export class PayrollRejectedComponent {
       company_id: this.selectedCompanyId,
       year: this.selectedYear,
       month: this.selectedMonth,
-      page:page,
+      page: page,
+      isexport: false,
     }).subscribe(
       (res: any) => {
         try {
@@ -263,9 +264,60 @@ export class PayrollRejectedComponent {
 
 
   exportExcel() {
-    if (this.gridApiActive) {
-      this.gridApiActive.exportDataAsCsv();
-    }
+    this.isLoading = true;
+    this.service.post('fetch/rejected/payroll', {
+      company_id: this.selectedCompanyId,
+      year: this.selectedYear,
+      month: this.selectedMonth,
+      isexport: true,
+    }).subscribe({
+      next: (res: any) => {
+        if (res.status === 'success' && res.data.length) {
+          const rows = res.data.map((r: any) => [
+            r.employee_code,
+            r.emp_name,
+            r.role_name,
+            r.present_days,
+            r.absent_days,
+            r.total_overtime,
+            r.total_hours,
+            r.bonus_amount,
+            r.adv_deduction,
+            r.net_salary,
+            r.payroll_status
+          ]);
+
+          const csvArray: string[][] = [
+            ['Employee Code', 'Employee Name', 'Role Name', 'Present Days', 'Absent Days', 'Total Overtime', 'Total HOurs', 'Bonus Amount', 'Adv Deduction', 'Net Salary', 'Payroll Status'],
+            ...rows
+          ];
+
+          const csv = csvArray
+            .map((row: string[]) => row.map((v: string | number | null) => `"${v ?? ''}"`).join(','))
+            .join('\n');
+
+          const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+          const link = Object.assign(document.createElement('a'), {
+            href: URL.createObjectURL(blob),
+            download: 'RejectedPayroll.csv'
+          });
+          link.click();
+
+          this.toastr.success('Data exported successfully!');
+        } else {
+          this.toastr.warning('No data found to export');
+        }
+        this.isLoading = false;
+      },
+      error: (err) => {
+        if (err.status === 404) {
+          this.toastr.warning('No data found to export');
+        } else {
+          this.toastr.error('Error while exporting data');
+        }
+        this.isLoading = false;
+      }
+    });
   }
 
   getPagination() {
@@ -299,14 +351,14 @@ export class PayrollRejectedComponent {
 
     if (endPage >= total) {
       endPage = total - 1;
-      startPage = Math.max(2, total - pageWindow); 
+      startPage = Math.max(2, total - pageWindow);
     }
     if (current === 1) {
       startPage = 2;
       endPage = Math.min(total - 1, pageWindow);
     }
     const pages: (number | string)[] = [];
-    pages.push(1); 
+    pages.push(1);
     if (startPage > 2) {
       pages.push('...');
     }

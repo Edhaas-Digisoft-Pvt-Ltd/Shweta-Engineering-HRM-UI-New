@@ -98,7 +98,7 @@ export class LoginComponent {
 
                 // Navigate only after permissions are set
                 switch (roleName) {
-                  case 'employee':
+                  case 'operator':
                     this.service.setEmployeeId(this.logindata.employe_id);
                     this.router.navigate(['/authPanal/EmployeeInDetail']);
                     break;
@@ -147,7 +147,7 @@ export class LoginComponent {
 
   demoAccounts = [
     { role: 'Admin', email: 'abc@gmail.com', password: '1212121212' },
-    { role: 'Emp', email: 'pravin.j@gmail.com', password: '9823012345' },
+    { role: 'Emp', email: 'ani@gmail.com', password: '9875698422' },
     { role: 'Accountant', email: 'accountant@gmail.com', password: '9265897412' }
   ];
 

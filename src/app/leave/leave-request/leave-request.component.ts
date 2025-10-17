@@ -293,8 +293,12 @@ export class LeaveRequestComponent {
         }
         this.isLoading = false;
       },
-      error: () => {
-        this.toastr.error('Error while exporting data');
+      error: (err) => {
+        if (err.status === 400) {
+          this.toastr.warning('No data found to export');
+        } else {
+          this.toastr.error('Error while exporting data');
+        }
         this.isLoading = false;
       }
     });

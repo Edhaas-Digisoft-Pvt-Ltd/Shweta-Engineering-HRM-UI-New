@@ -138,6 +138,12 @@ export class AttendanceSummaryComponent {
         this.isLoading = false;
 
         if (res.status === 'success') {
+          if (!res.data?.length) {
+            this.rowData = [];
+            this.toastr.warning(res.message || 'No data found for selected month/year');
+            return;
+          }
+
           const rawData = res.data;
           const pagination = res.pagination || {};
 

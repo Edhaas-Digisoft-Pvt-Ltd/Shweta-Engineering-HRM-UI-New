@@ -353,9 +353,12 @@ export class PayrollListComponent {
         this.toastr.warning('No data to export');
       }
     }, (error) => {
-      console.error(error);
       this.isLoading = false;
-      this.toastr.error('Failed to fetch payroll data for export');
+      if (error.status === 404) {
+        this.toastr.warning('No data to export');
+      } else {
+        this.toastr.error('Failed to fetch payroll data for export');
+      }
     });
   }
 
