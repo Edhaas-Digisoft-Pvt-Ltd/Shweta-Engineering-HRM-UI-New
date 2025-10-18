@@ -32,6 +32,7 @@ export class DashboardComponent {
   lastMonthSalaryExpense: any = 0;
   pendingPayrollApprovals: any = 0;
   pendingLeaves: any = 0;
+  activeRequests = 0;
 
   constructor(private router: Router, private service: HrmserviceService) {
   }
@@ -57,6 +58,18 @@ export class DashboardComponent {
     // this.selectedYear = this.financialYears[0]; // default selected
     this.selectedYear = currentYear.toString(); // default selected
     this.getCompanyNames();
+  }
+
+  startRequest() {
+    this.activeRequests++;
+    this.isLoading = true; // show loader
+  }
+
+  finishRequest() {
+    this.activeRequests--;
+    if (this.activeRequests <= 0) {
+      this.isLoading = false; // hide loader when all requests finished
+    }
   }
 
   selectCompany(company: any) {
@@ -87,103 +100,90 @@ export class DashboardComponent {
   }
 
   payrollStatistics() {
-    this.isLoading = true;
     if (!this.selectedCompanyId || !this.selectedYear) return;
+
+    this.startRequest();
 
     this.service.post('payroll-statistics', {
       company_id: this.selectedCompanyId,
       year: this.selectedYear
-    }).subscribe((res: any) => {
-      if (res.status === 'success') {
-        this.barChartData.labels = res.data.months;
-        this.barChartData.datasets[0].data = res.data.values;
-
-        this.barChartData = { ...this.barChartData };
+    }).subscribe({
+      next: (res: any) => {
+        if (res.status === 'success') {
+          this.barChartData.labels = res.data.months;
+          this.barChartData.datasets[0].data = res.data.values;
+          this.barChartData = { ...this.barChartData };
+        }
+        this.finishRequest();
+      },
+      error: (err) => {
+        console.error(err);
+        this.finishRequest();
       }
-      this.isLoading = false;
-    }, err => {
-      console.error("Failed to fetch payroll statistics:", err);
     });
   }
 
   loadLeaveCards() {
-    this.isLoading = true;
     if (!this.selectedCompanyId) return;
 
-    this.service.post('leave-statistics', {
-      company_id: this.selectedCompanyId,
-    }).subscribe((res: any) => {
-      if (res.status === 'success') {
-        this.leaveCards = [
-          { title: 'Total Leave Request', count: res.data.total, icon: 'bi-calendar-event', bgColor: '#3674B5' },
-          { title: 'Approved Leaves', count: res.data.approved, icon: 'bi-calendar2-check', bgColor: '#006D42' },
-          { title: 'Pending Leaves', count: res.data.pending, icon: 'bi-calendar2-week', bgColor: '#C8B100' },
-          { title: 'Rejected Leaves', count: res.data.rejected, icon: 'bi-calendar-x', bgColor: '#880021' },
-        ];
-        this.isLoading = false;
-      }
-      else {
-        this.leaveCards = [
-          { title: 'Total Leave Request', icon: 'bi-calendar-event', bgColor: '#3674B5' },
-          { title: 'Approved Leaves', icon: 'bi-calendar2-check', bgColor: '#006D42' },
-          { title: 'Pending Leaves', icon: 'bi-calendar2-week', bgColor: '#C8B100' },
-          { title: 'Rejected Leaves', icon: 'bi-calendar-x', bgColor: '#880021' },
-        ]
-      }
-    });
+    this.startRequest();
+
+    this.service.post('leave-statistics', { company_id: this.selectedCompanyId })
+      .subscribe({
+        next: (res: any) => {
+          if (res.status === 'success') {
+            this.leaveCards = [
+              { title: 'Total Leave Request', count: res.data.total, icon: 'bi-calendar-event', bgColor: '#3674B5' },
+              { title: 'Approved Leaves', count: res.data.approved, icon: 'bi-calendar2-check', bgColor: '#006D42' },
+              { title: 'Pending Leaves', count: res.data.pending, icon: 'bi-calendar2-week', bgColor: '#C8B100' },
+              { title: 'Rejected Leaves', count: res.data.rejected, icon: 'bi-calendar-x', bgColor: '#880021' },
+            ];
+          }
+          this.finishRequest();
+        },
+        error: (err) => {
+          console.error(err);
+          this.finishRequest();
+        }
+      });
   }
 
   public doughnutChartData!: ChartData<'doughnut'>;
   public doughnutChartOptions!: ChartOptions<'doughnut'>;
 
   loadAttendanceSummary() {
-    this.isLoading = true;
     if (!this.selectedCompanyId) return;
 
-    this.service.post('attendance-summary', {
-      company_id: this.selectedCompanyId
-    }).subscribe((res: any) => {
-      if (res.status === 'success') {
-        const attendancePercentages = res.data.percentages;
+    this.startRequest();
 
-        const present = Number(attendancePercentages.present);
-        const absent = Number(attendancePercentages.absent);
-        const lateMarks = Number(attendancePercentages.late_marks);
+    this.service.post('attendance-summary', { company_id: this.selectedCompanyId })
+      .subscribe({
+        next: (res: any) => {
+          if (res.status === 'success') {
+            const attendancePercentages = res.data.percentages;
 
-        this.doughnutChartData = {
-          labels: ['Present days', 'Absent days', 'Late Marks'],
-          datasets: [
-            {
-              data: [present, absent, lateMarks],
-              backgroundColor: ['#3A79D1', '#7C0A02', '#FFC107'],
-              hoverOffset: 10,
-            }
-          ]
-        };
+            const present = Number(attendancePercentages.present);
+            const absent = Number(attendancePercentages.absent);
+            const lateMarks = Number(attendancePercentages.late_marks);
 
-        this.doughnutChartOptions = {
-          responsive: true,
-          cutout: '70%',
-          plugins: {
-            legend: {
-              position: 'bottom',
-              labels: {
-                boxWidth: 12,
-                font: {
-                  size: 12,
+            this.doughnutChartData = {
+              labels: ['Present days', 'Absent days', 'Late Marks'],
+              datasets: [
+                {
+                  data: [present, absent, lateMarks],
+                  backgroundColor: ['#3A79D1', '#7C0A02', '#FFC107'],
+                  hoverOffset: 10,
                 }
-              }
-            },
-            datalabels: {
-              display: false
-            }
+              ]
+            };
           }
-        };
-
-        // this.totalAttendanceValue = total;
-        this.isLoading = false;
-      }
-    });
+          this.finishRequest();
+        },
+        error: (err) => {
+          console.error(err);
+          this.finishRequest();
+        }
+      });
   }
 
   leaveRequest() {
@@ -321,21 +321,27 @@ export class DashboardComponent {
   };
 
   getDashboardSummary() {
-    this.isLoading = true;
     if (!this.selectedCompanyId) return;
 
-    this.service.post('dashboard-summary', {
-      company_id: this.selectedCompanyId
-    }).subscribe((res: any) => {
-      if (res.status === 'success') {
-        const summary = res.data;
-        this.totalEmployee = summary.total_active_employees;
-        this.lastMonthSalaryExpense = Number(summary.last_month_salary_expense).toLocaleString('en-IN');
-        this.pendingPayrollApprovals = summary.pending_payroll_approvals;
-        this.pendingLeaves = summary.pending_leaves;
-      }
-    });
-  }
+    this.startRequest(); // start loader
 
+    this.service.post('dashboard-summary', { company_id: this.selectedCompanyId })
+      .subscribe({
+        next: (res: any) => {
+          if (res.status === 'success') {
+            const summary = res.data;
+            this.totalEmployee = summary.total_active_employees;
+            this.lastMonthSalaryExpense = Number(summary.last_month_salary_expense).toLocaleString('en-IN');
+            this.pendingPayrollApprovals = summary.pending_payroll_approvals;
+            this.pendingLeaves = summary.pending_leaves;
+          }
+          this.finishRequest(); // finish loader
+        },
+        error: (err) => {
+          console.error(err);
+          this.finishRequest(); // finish loader
+        }
+      });
+  }
 
 }

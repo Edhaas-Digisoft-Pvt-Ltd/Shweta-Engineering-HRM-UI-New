@@ -313,9 +313,11 @@
                     <div class="col-12">
                         <div class="d-flex justify-content-center flex-column flex-sm-row gap-3">
                             <div>
-                                <button class="btn comBtn w-100  text-white"><i
-                                        class="bi bi-file-earmark-text me-2"></i>Download Payslip</button>
+                                <button class="btn comBtn w-100 text-white" (click)="downloadPayslip()">
+                                    <i class="bi bi-file-earmark-text me-2"></i>Download Payslip
+                                </button>
                             </div>
+
                             <!-- <div>
                         <button class="btn preVieBtn w-100 "><i class="bi bi-file-earmark-text me-2"></i>Email
                             Payslip</button>
@@ -503,4 +505,55 @@
             </div>
         </div>
     </div>
+</div>
+
+<!-- download Payslip -->
+ <div id="payslip-template" style="visibility:hidden; position:absolute; top:-9999px;">
+  <h4>{{ payrollDetails.get('companyName')?.value }}</h4>
+  <p><strong>Employee Name:</strong> {{ payrollDetails.get('employeeName')?.value }}</p>
+  <p><strong>Pay Period:</strong> {{ getMonthName(selectedMonth) }} {{ selectedYear }}</p>
+  <p><strong>Worked Days:</strong> {{ attendanceDetails[0]?.P }}</p>
+  
+  <table border="1" cellspacing="0" cellpadding="6" style="width:100%; text-align:left;">
+    <thead>
+      <tr>
+        <th>Earnings</th>
+        <th>Amount</th>
+        <th>Deductions</th>
+        <th>Amount</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Basic Pay</td>
+        <td>{{ calculationData?.basic_salary }}</td>
+        <td>Provident Fund</td>
+        <td>{{ calculationData?.pf_employee_deduction }}</td>
+      </tr>
+      <tr>
+        <td>Overtime</td>
+        <td>{{ calculationData?.overtime_amount }}</td>
+        <td>Professional Tax</td>
+        <td>{{ calculationData?.total_tax_deduction }}</td>
+      </tr>
+      <tr>
+        <td>Bonus</td>
+        <td>{{ calculationData?.bonus_amount }}</td>
+        <td>Advance Salary</td>
+        <td>{{ calculationData?.advance_amount }}</td>
+      </tr>
+      <tr style="font-weight:bold;">
+        <td>Total Earnings</td>
+        <td>{{ calculationData?.gross_salary }}</td>
+        <td>Total Deductions</td>
+        <td>{{ calculationData?.total_tax_deduction }}</td>
+      </tr>
+      <tr style="font-weight:bold; background:#efefef;">
+        <td colspan="2">Net Pay (₹)</td>
+        <td colspan="2">{{ calculationData?.net_salary }}</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <p style="margin-top:30px;">This is a system-generated payslip.</p>
 </div>
