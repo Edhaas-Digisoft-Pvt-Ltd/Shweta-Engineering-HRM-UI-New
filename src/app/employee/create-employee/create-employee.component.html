@@ -298,7 +298,7 @@
                                     <label>Bank Name <span class="text-danger">*</span></label>
                                     <input type="text" formControlName="bankName" class="form-control"
                                         [ngClass]="{'input-error': nextCheck && multiStepForm.get('bankName')?.invalid}"
-                                        placeholder="Enter Bank Name" (keypress)="allowOnlyLetters($event)"
+                                        placeholder="Enter Bank Name" (keypress)="allowOnlyLettersAndSpace($event)"
                                         (paste)="blockPaste($event)">
                                     <!--
                                     <small class="text-danger mb-4"

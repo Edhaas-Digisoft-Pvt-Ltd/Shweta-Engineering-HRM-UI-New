@@ -10,7 +10,7 @@
                     <div class="col text-end p-0">
                         <!-- Button trigger modal -->
                         <button type="button" class="btn text-white  add_company  mb-3"
-                            style="background-color: #3674B5;" data-bs-toggle="modal" data-bs-target="#exampleModal">
+                            style="background-color: #3674B5;" (click)="openModal()">
                             <i class="bi bi-plus-lg me-2"></i> Add Company
                         </button>
 
@@ -191,7 +191,7 @@
 
 
 
-                <div class="row row-cols-1  gx-4 gy-4 cardWrapper">
+                <div *ngIf="false" class="row row-cols-1  gx-4 gy-4 cardWrapper">
                     <div class="col-6 p-0  company_cards">
                         <div class="card p-3 row m-0 mx-3 shadow-sm border position-relative">
                             <div class="d-flex gap-3 mt-2 ">

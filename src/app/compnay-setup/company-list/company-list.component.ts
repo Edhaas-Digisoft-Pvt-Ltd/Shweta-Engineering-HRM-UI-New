@@ -3,6 +3,7 @@ import { AbstractControl, FormBuilder, FormGroup, Validators } from '@angular/fo
 import { Router } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
 import { HrmserviceService } from 'src/app/hrmservice.service';
+import { ModalServiceService } from 'src/app/modal-service.service';
 declare var bootstrap: any;
 @Component({
   selector: 'app-company-list',
@@ -30,7 +31,7 @@ export class CompanyListComponent {
   selectedId: any;
   textInputControl: any;
 
-  constructor(private router: Router, private fb: FormBuilder, private service: HrmserviceService, private toastr: ToastrService) {
+  constructor(private router: Router, private fb: FormBuilder, private service: HrmserviceService, private modalService: ModalServiceService, private toastr: ToastrService) {
     this.companyForm = this.fb.group({
       companyName: ['', [Validators.required, Validators.pattern(/^[A-Za-z\s]+$/)]],
       companyLogo: ['', Validators.required],
@@ -97,6 +98,10 @@ export class CompanyListComponent {
     this.today = currentDate.toISOString().split('T')[0]; // Format YYYY-MM-DD
     this.getCompanyData();
     this.getCompanyNames();
+  }
+
+  openModal() {
+    this.modalService.openModal('exampleModal')
   }
 
   onMasterCompanyChange(event: Event): void {
@@ -213,9 +218,9 @@ export class CompanyListComponent {
         this.service.post("create/company", current_data).subscribe({
           next: (res) => {
             this.toastr.success('Form Submitted Successfully!');
-            this.closeAllModals();
+            this.modalService.closeModal();
             this.getCompanyData();
-            this.companyForm.reset();
+            this.resetCompanyForm();
             this.isSubmitted = false;
             this.selectedLogoFile = null;
           },
@@ -249,9 +254,9 @@ export class CompanyListComponent {
         this.service.post("create/master-companie", current_data).subscribe({
           next: (res) => {
             this.toastr.success('Form Submitted Successfully!');
-            this.closeAllModals();
+            this.modalService.closeModal();
             this.getCompanyData();
-            this.companyForm.reset();
+            this.resetCompanyForm();
             this.isSubmitted = false;
             this.selectedLogoFile = null;
           },
@@ -266,6 +271,19 @@ export class CompanyListComponent {
 
     }
 
+  }
+
+  resetCompanyForm() {
+    this.companyForm.reset({
+      companyName: '',
+      companyLogo: '',
+      radioChoice: 'yes',
+      masterCompanyList: { value: '', disabled: true },
+      IncorporationDate: '',
+      companyDescription: '',
+      companyAddress: ''
+    });
+    this.companyForm.get('masterCompanyList')?.disable();
   }
 
   allowOnlyLetters(event: KeyboardEvent) {
