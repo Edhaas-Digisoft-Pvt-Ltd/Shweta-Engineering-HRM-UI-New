@@ -284,7 +284,7 @@
                                     <label>Account Holder Name <span class="text-danger">*</span></label>
                                     <input type="text" formControlName="accountHolderName" class="form-control"
                                         [ngClass]="{'input-error': nextCheck && multiStepForm.get('accountHolderName')?.invalid}"
-                                        placeholder="Enter Account Holder Name" (keypress)="allowOnlyLetters($event)"
+                                        placeholder="Enter Account Holder Name" (keypress)="allowOnlyLettersAndSpace($event)"
                                         (paste)="blockPaste($event)">
                                     <!--
                                     <small class="text-danger mb-4"

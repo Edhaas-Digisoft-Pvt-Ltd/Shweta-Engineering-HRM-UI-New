@@ -152,9 +152,9 @@ export class EmployeeComponent {
   downloadTemplate(): void {
     const userConfirmed = confirm("Do you want to download the employee template?");
     if (userConfirmed) {
-      const headers = ['role_id', 'emp_title', 'emp_name', 'emp_email', 'emp_gender', 'department_id', 'designation_id', 'statutory_list', 'bank_name', 'account_num', 'ifsc_code', 'doj', 'emp_contact', 'emp_address', 'basic_salary', 'house_rent_allowances', 'conveyance_allowances', 'medical_allowances', 'special_allowances'];
+      const headers = ['role_id', 'emp_title', 'emp_name', 'emp_email', 'emp_gender', 'department_id', 'designation_id', 'bank_name', 'account_num', 'ifsc_code', 'doj', 'emp_contact', 'emp_address', 'basic_salary', 'house_rent_allowances', 'conveyance_allowances', 'medical_allowances', 'special_allowances'];
       const exampleRow = [
-        '3', 'mr', 'abc', 'abc@gmail.com', 'male', '1', '2', 'xyz', 'SBI', '458438236526', 'SBIN0005088', '2/1/2022', '9999999999', 'Pune', '200000', '18000', '1000', '1000', '1000'
+        '3', 'mr', 'abc', 'abc@gmail.com', 'male', '1', '2', 'SBI', '458438236526', 'SBIN0005088', '2/1/2022', '9999999999', 'Pune', '200000', '18000', '1000', '1000', '1000'
       ];
 
       const worksheet: XLSX.WorkSheet = XLSX.utils.aoa_to_sheet([headers, exampleRow]);

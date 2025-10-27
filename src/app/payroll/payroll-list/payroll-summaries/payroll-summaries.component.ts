@@ -409,54 +409,56 @@ export class PayrollSummariesComponent {
     if (!payslipElement) return;
 
     const clone = payslipElement.cloneNode(true) as HTMLElement;
-    clone.style.position = 'absolute';
-    clone.style.top = '0';
-    clone.style.left = '0';
+
+    clone.style.position = 'fixed';
+    clone.style.top = '-9999px';
+    clone.style.left = '-9999px';
     clone.style.width = '210mm';
     clone.style.background = '#fff';
-    clone.style.zIndex = '9999';
-    clone.style.visibility = 'visible';
-    clone.style.display = 'block';
+    clone.style.zIndex = '-1';
+    clone.style.opacity = '1';       
+    clone.style.visibility = 'visible'; 
+
     document.body.appendChild(clone);
 
     setTimeout(() => {
-      html2canvas(clone, { scale: 2, backgroundColor: '#ffffff' }).then((canvas: any) => {
+      html2canvas(clone, {
+        scale: 2,
+        backgroundColor: '#ffffff',
+        useCORS: true
+      }).then((canvas: any) => {
         const imgData = canvas.toDataURL('image/png');
         const pdf = new jspdf.jsPDF('p', 'mm', 'a4');
 
-        const pageWidth = 210;  // A4 width in mm
-        const pageHeight = 295; // A4 height in mm
-        const margin = 15;      // equal margin left, right, top
+        const pageWidth = 210;
+        const pageHeight = 295;
+        const margin = 15;
         const contentWidth = pageWidth - margin * 2;
-
         const imgHeight = (canvas.height * contentWidth) / canvas.width;
 
-        // Use same margin from top as left
         const yOffset = margin;
 
         pdf.addImage(imgData, 'PNG', margin, yOffset, contentWidth, imgHeight);
 
-        // Add signature labels below content
-        const signatureGap = 12; // space between content and signature label
-        const lineOffset = 6;    // space between label and line
-
+        const signatureGap = 12;
+        const lineOffset = 6;
         const signatureY = yOffset + imgHeight + signatureGap;
 
         pdf.setFontSize(12);
         pdf.text('Employer Signature:', margin, signatureY);
         pdf.text('Employee Signature:', pageWidth / 2 + 10, signatureY);
 
-        // Draw lines below labels
         pdf.setLineWidth(0.5);
-        pdf.line(margin, signatureY + lineOffset, margin + 60, signatureY + lineOffset); // Employer line
-        pdf.line(pageWidth / 2 + 10, signatureY + lineOffset, pageWidth / 2 + 70, signatureY + lineOffset); // Employee line
+        pdf.line(margin, signatureY + lineOffset, margin + 60, signatureY + lineOffset);
+        pdf.line(pageWidth / 2 + 10, signatureY + lineOffset, pageWidth / 2 + 70, signatureY + lineOffset);
 
         const employeeName = this.payrollDetails.get('employeeName')?.value || 'Employee';
         pdf.save(`${employeeName}_Payslip.pdf`);
 
         document.body.removeChild(clone);
       });
-    }, 400);
+    }, 300);
   }
+
 
 }

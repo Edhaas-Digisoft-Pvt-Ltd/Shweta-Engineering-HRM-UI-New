@@ -387,7 +387,6 @@ export class CreateEmployeeComponent {
         "emp_gender": this.multiStepForm.value.gender,
         "department_id": this.multiStepForm.value.department,
         "designation_id": this.multiStepForm.value.designation,
-        "statutory_list": JSON.stringify(this.statutoryInfo),
         "bank_name": this.multiStepForm.value.bankName,
         "account_num": this.multiStepForm.value.accountNumber,
         "ifsc_code": this.multiStepForm.value.ifsc,
@@ -482,6 +481,15 @@ export class CreateEmployeeComponent {
   allowOnlyLetters(event: KeyboardEvent) {
     const char = String.fromCharCode(event.keyCode);
     const pattern = /^[A-Za-z]+$/;
+
+    if (!pattern.test(char)) {
+      event.preventDefault();
+    }
+  }
+
+  allowOnlyLettersAndSpace(event: KeyboardEvent) {
+    const char = String.fromCharCode(event.keyCode);
+    const pattern = /^[A-Za-z\s]+$/;
 
     if (!pattern.test(char)) {
       event.preventDefault();
