@@ -26,6 +26,7 @@ export class AttendanceComponent {
   lastPage: number = 1;
   pagesToShow: (number | string)[] = [];
   paginationvalue: any;
+  currentFilter: string = '';
 
   constructor(private toastr: ToastrService, private service: HrmserviceService, private router: Router,) { }
 
@@ -105,23 +106,40 @@ export class AttendanceComponent {
     });
   }
 
-  fetchAttendance(page: number = 1, status: string = ''): void {
-    this.isLoading = true;
-    const body: any = { page };
-    if (status) body.status = status;
-    this.service.post('fetch/attendance', body ).subscribe((res: any) => {
+  applyFilter(status: string) {
+    this.currentFilter = status;
+    this.currentPage = 1;
+    this.fetchAttendance();
+  }
+
+  clearFilter() {
+    this.currentFilter = '';
+    this.currentPage = 1;
+    this.fetchAttendance();
+  }
+
+  fetchAttendance() {
+    const body: any = {
+      page: this.currentPage,
+      limit: this.paginationvalue,
+    };
+
+    if (this.currentFilter) {
+      body.status = this.currentFilter;
+    }
+
+    this.service.post('fetch/attendance', body).subscribe((res: any) => {
       if (res.status === 'success') {
         this.rowData = res.data;
         this.totalRows = res.pagination.total;
         this.currentPage = res.pagination.page;
         this.lastPage = res.pagination.last_page;
+
         this.generatePageNumbers(this.paginationvalue);
-      } else {
-        console.log(res.error);
       }
-      this.isLoading = false;
     });
   }
+
 
   downloadTemplate(): void {
     const userConfirmed = confirm("Do you want to download the daily attendance template?");
@@ -401,22 +419,23 @@ export class AttendanceComponent {
     if (page === '...') return;
     if (page !== this.currentPage) {
       this.currentPage = page as number;
-      this.fetchAttendance(this.currentPage);
-    }
-  }
-
-  prevPage() {
-    if (this.currentPage > 1) {
-      this.currentPage--;
-      this.fetchAttendance(this.currentPage);
+      this.fetchAttendance();
     }
   }
 
   nextPage() {
     if (this.currentPage < this.lastPage) {
       this.currentPage++;
-      this.fetchAttendance(this.currentPage);
+      this.fetchAttendance(); 
     }
   }
+
+  prevPage() {
+    if (this.currentPage > 1) {
+      this.currentPage--;
+      this.fetchAttendance();
+    }
+  }
+
 
 }
