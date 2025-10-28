@@ -65,93 +65,106 @@
         </div>
 
         <!-- Payment Statistics  -->
-        <div class="row gx-5 flex-wrap justify-content-between mb-2">
-          
-          <!-- Left: Payroll Statistics -->
+        <div class="row gx-4 mb-2">
+          <!-- Payroll Statistics (Left Side) -->
           <div class="col-lg-8">
-            <div class="row border align-items-center p-3" style="border-radius: 10px;">
-              <div class="col-12">
-                <div class="row">
-                  <div class="col-md-9">
-                    <h5><span class="pe-2"><i class="bi bi-currency-rupee"></i></span> Payroll Statistics</h5>
-                  </div>
-                  <div class="col-md-3">
-                    <div class="mb-3 d-flex gap-2">
-                      <select class="form-select" [(ngModel)]="selectedYear" (change)="onYearChange()" id="financialYear">
-                        <option *ngFor="let year of financialYears" [value]="year">{{ year }}</option>
-                      </select>
-                      <!-- <button class="btn " style="border-radius:5px;background-color: #578FCA;color:white"
-                    (click)="paymentStatistics()">
-                    <i class="bi bi-eye-fill"></i>
-                  </button> -->
-                    </div>
+            <div class="border align-items-center p-3" style="border-radius: 10px;">
+              <div class="row">
+                <div class="col-md-9">
+                  <h5>
+                    <span class="pe-2"><i class="bi bi-currency-rupee"></i></span>
+                    Payroll Statistics
+                  </h5>
+                </div>
+                <div class="col-md-3">
+                  <div class="mb-3 d-flex gap-2">
+                    <select class="form-select" [(ngModel)]="selectedYear" (change)="onYearChange()" id="financialYear">
+                      <option *ngFor="let year of financialYears" [value]="year">
+                        {{ year }}
+                      </option>
+                    </select>
                   </div>
                 </div>
               </div>
-              <div class="col-12 border-top border-2 border-primary m-2 pt-3">
+              <div class="border-top border-2 border-primary m-2 pt-3">
                 <div style="display: block;">
-                  <canvas baseChart [data]="barChartData" [options]="barChartOptions" [type]="'bar'"></canvas>
+                  <canvas baseChart [data]="barChartData" [options]="barChartOptions" [type]="'bar'">
+                  </canvas>
                 </div>
               </div>
             </div>
           </div>
 
-          <!-- Right: Leave Request + Last Week Attendances -->
-          <div class="col-lg-4 d-flex flex-column gap-3">
-
+          <!-- Leave Request + Attendance (Right Side) -->
+          <div class="col-lg-4">
             <!-- Leave Request -->
-            <div class="border p-3" style="border-radius: 10px;">
+            <div class="border p-3 mb-3" style="border-radius: 10px;">
               <div class="row align-items-center">
                 <div class="col-8">
-                  <h5><span class="ps-2"><i class="bi bi-calendar-event ps-2 pe-2"></i></span> Leave Request</h5>
+                  <h5>
+                    <span class="ps-2"><i class="bi bi-calendar-event ps-2 pe-2"></i></span>
+                    Leave Request
+                  </h5>
                 </div>
                 <div class="col-4 text-end pe-4">
-                  <button class="btn " style="border-radius:5px;background-color: #578FCA;color:white" (click)="leaveRequest()">
+                  <button class="btn" style="border-radius:5px;background-color:#578FCA;color:white"
+                    (click)="leaveRequest()">
                     <i class="bi bi-eye-fill"></i>
                   </button>
                 </div>
               </div>
+
               <div class="row border-top border-2 border-primary m-2 pt-3">
                 <div class="col-12 mb-2 d-flex leaveDetails border align-items-center justify-content-between p-0"
                   *ngFor="let card of leaveCards" style="border-radius: 10px;">
                   <div>
-                    <button class="btn px-3 py-2 me-2" style="border-radius:10px;height: 50px;width:50px" [ngStyle]="{ 'background-color': card.bgColor, color: 'white' }">
+                    <button class="btn px-3 py-2 me-2" style="border-radius:10px;height: 50px;width:50px"
+                      [ngStyle]="{ 'background-color': card.bgColor, color: 'white' }">
                       <i class="bi" [ngClass]="card.icon"></i>
                     </button>
                     {{ card.title }}
                   </div>
                   <div class="pe-3">
-                    <h5 class="mb-0"> {{ card.count }}</h5>
+                    <h5 class="mb-0">{{ card.count }}</h5>
                   </div>
                 </div>
               </div>
             </div>
 
-            <!-- Last Week Attendances -->
+            <!-- Attendance Block -->
             <div class="border p-3" style="border-radius: 10px;">
-              <div class="row align-items-center ">
+              <div class="row align-items-center">
                 <div class="col-9">
-                  <h5><span class="ps-2"><i class="bi bi-person-fill-check ps-2 pe-3"></i></span> Last Week Attendances</h5>
+                  <h5>
+                    <span class="ps-2"><i class="bi bi-person-fill-check ps-2 pe-3"></i></span>
+                    Last Week Attendances
+                  </h5>
                 </div>
                 <div class="col-3 text-end pe-4">
-                  <button class="btn " style="border-radius:5px;background-color: #578FCA;color:white" (click)="totalAttendance()">
+                  <button class="btn" style="border-radius:5px;background-color:#578FCA;color:white"
+                    (click)="totalAttendance()">
                     <i class="bi bi-eye-fill"></i>
                   </button>
                 </div>
               </div>
+
               <div class="row border-top border-2 border-primary m-2 pt-3">
                 <div class="col">
                   <div style="position: relative; width: 250px; margin: auto;">
-                    <canvas baseChart [data]="doughnutChartData" [type]="'doughnut'" [options]="doughnutChartOptions"></canvas>
-                    <div style="position:absolute;top:42%;left:50%;transform:translate(-50%,-50%);font-size:20px;font-weight:bold;text-align:center">
+                    <canvas baseChart [data]="doughnutChartData" [options]="doughnutChartOptions" [type]="'doughnut'">
+                    </canvas>
+
+                    <!-- Centered Text -->
+                    <div style="position:absolute;top:42%;left:50%;transform:translate(-50%,-50%);
+              font-size:20px;font-weight:bold;text-align:center">
                       <div>Total Attendance</div>
                       <div>{{ totalAttendanceValue }}</div>
                     </div>
                   </div>
+
                 </div>
               </div>
             </div>
-
           </div>
         </div>
 

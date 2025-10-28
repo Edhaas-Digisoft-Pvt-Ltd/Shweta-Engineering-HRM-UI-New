@@ -105,9 +105,11 @@ export class AttendanceComponent {
     });
   }
 
-  fetchAttendance(page: number = 1): void {
+  fetchAttendance(page: number = 1, status: string = ''): void {
     this.isLoading = true;
-    this.service.post('fetch/attendance', { page }).subscribe((res: any) => {
+    const body: any = { page };
+    if (status) body.status = status;
+    this.service.post('fetch/attendance', body ).subscribe((res: any) => {
       if (res.status === 'success') {
         this.rowData = res.data;
         this.totalRows = res.pagination.total;

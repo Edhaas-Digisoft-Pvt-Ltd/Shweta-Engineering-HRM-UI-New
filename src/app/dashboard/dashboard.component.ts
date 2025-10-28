@@ -149,7 +149,23 @@ export class DashboardComponent {
   }
 
   public doughnutChartData!: ChartData<'doughnut'>;
-  public doughnutChartOptions!: ChartOptions<'doughnut'>;
+  public doughnutChartOptions: ChartOptions<'doughnut'> = {
+    responsive: true,
+    cutout: '70%',
+    plugins: {
+      legend: {
+        position: 'bottom',
+        labels: {
+          boxWidth: 12,
+          font: { size: 12 }
+        }
+      },
+      datalabels: {
+        display: false
+      }
+    }
+  };
+
 
   loadAttendanceSummary() {
     if (!this.selectedCompanyId) return;
@@ -176,6 +192,9 @@ export class DashboardComponent {
                 }
               ]
             };
+
+            // Calculate total attendance value for center text
+            this.totalAttendanceValue = present + absent + lateMarks;
           }
           this.finishRequest();
         },

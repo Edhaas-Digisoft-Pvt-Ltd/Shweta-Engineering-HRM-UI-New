@@ -16,6 +16,7 @@ import {
 import { PayrollSummariesBtnComponent } from './Payroll-summaries-btn/Payroll-summaries-btn.component';
 import { ToastrService } from 'ngx-toastr';
 import { HrmserviceService } from 'src/app/hrmservice.service';
+import { ModalServiceService } from 'src/app/modal-service.service';
 declare var bootstrap: any;
 declare const html2canvas: any;
 declare const jspdf: any;
@@ -54,7 +55,7 @@ export class PayrollSummariesComponent {
   showOtherReasonError: boolean = false;
   isLoading: boolean = false;
 
-  constructor(private route: ActivatedRoute, private router: Router, private formBuilder: FormBuilder, private service: HrmserviceService, private toastr: ToastrService) {
+  constructor(private route: ActivatedRoute, private router: Router, private formBuilder: FormBuilder, private modalService: ModalServiceService, private service: HrmserviceService, private toastr: ToastrService) {
     this.payrollDetails = this.formBuilder.group({
       id: ['', [Validators.required]],
       employeeName: ['', [Validators.required]],
@@ -104,6 +105,11 @@ export class PayrollSummariesComponent {
     this.getSinglePayroll()
     this.setMonthGroupHeader();
     // this.columnDefs2= this.generateColumns(['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep','oct','nov','dec']);
+  }
+
+  openModal() {
+    this.modalService.openModal('RejectPayrollModal')
+    this.getRejectReasons();
   }
 
   getMonthName(monthId: number): string {
@@ -379,7 +385,7 @@ export class PayrollSummariesComponent {
     this.service.post('rejected/payroll', { temp_payroll_id: this.tempPayrollId, rejection_id: this.selectedRejectedReason }).subscribe((res: any) => {
       if (res.status == 'success') {
         this.toastr.success('Payroll rejected successfully');
-        this.closeAllModals();
+        this.modalService.closeModal();
         this.router.navigate(['/authPanal/payrollList']);
       }
       else {
@@ -416,8 +422,8 @@ export class PayrollSummariesComponent {
     clone.style.width = '210mm';
     clone.style.background = '#fff';
     clone.style.zIndex = '-1';
-    clone.style.opacity = '1';       
-    clone.style.visibility = 'visible'; 
+    clone.style.opacity = '1';
+    clone.style.visibility = 'visible';
 
     document.body.appendChild(clone);
 
