@@ -160,6 +160,11 @@ export class DashboardComponent {
           font: { size: 12 }
         }
       },
+      tooltip: {
+        callbacks: {
+          label: (context) => `${context.parsed}%`
+        }
+      },
       datalabels: {
         display: false
       }
@@ -175,50 +180,93 @@ export class DashboardComponent {
     this.service.post('attendance-summary', { company_id: this.selectedCompanyId })
       .subscribe({
         next: (res: any) => {
-          if (res.status === 'success') {
+          if (res.status === 'success' && res.data) {
             const attendancePercentages = res.data.percentages;
 
-            const present = Number(attendancePercentages.present);
-            const absent = Number(attendancePercentages.absent);
-            const lateMarks = Number(attendancePercentages.late_marks);
+            if (
+              !attendancePercentages ||
+              (attendancePercentages.present == 0 &&
+                attendancePercentages.absent == 0 &&
+                attendancePercentages.late_marks == 0)
+            ) {
+              this.doughnutChartData = {
+                labels: ['No Attendance Data'],
+                datasets: [
+                  {
+                    data: [100],
+                    backgroundColor: ['#D3D3D3'],
+                    hoverOffset: 10,
+                  },
+                ],
+              };
+              this.totalAttendanceValue = 0;
+            } else {
+              const present = Number(attendancePercentages.present);
+              const absent = Number(attendancePercentages.absent);
+              const lateMarks = Number(attendancePercentages.late_marks);
 
+              this.doughnutChartData = {
+                labels: ['Present days', 'Absent days', 'Late Marks'],
+                datasets: [
+                  {
+                    data: [present, absent, lateMarks],
+                    backgroundColor: ['#3A79D1', '#7C0A02', '#FFC107'],
+                    hoverOffset: 10,
+                  },
+                ],
+              };
+
+              this.totalAttendanceValue = present + absent + lateMarks;
+            }
+          } else {
             this.doughnutChartData = {
-              labels: ['Present days', 'Absent days', 'Late Marks'],
+              labels: ['No Attendance Data'],
               datasets: [
                 {
-                  data: [present, absent, lateMarks],
-                  backgroundColor: ['#3A79D1', '#7C0A02', '#FFC107'],
+                  data: [100],
+                  backgroundColor: ['#D3D3D3'],
                   hoverOffset: 10,
-                }
-              ]
+                },
+              ],
             };
-
-            // Calculate total attendance value for center text
-            this.totalAttendanceValue = present + absent + lateMarks;
+            this.totalAttendanceValue = 0;
           }
+
           this.finishRequest();
         },
         error: (err) => {
           console.error(err);
+          this.doughnutChartData = {
+            labels: ['No Attendance Data'],
+            datasets: [
+              {
+                data: [100],
+                backgroundColor: ['#D3D3D3'],
+                hoverOffset: 10,
+              },
+            ],
+          };
+          this.totalAttendanceValue = 0;
+
           this.finishRequest();
         }
       });
   }
 
   leaveRequest() {
-    this.router.navigate(['/authPanal/Leave']); // replace with your actual route
+    this.router.navigate(['/authPanal/Leave']);
   }
 
   totalAttendance() {
-    this.router.navigate(['/authPanal/Attendance']); // replace with your actual route
+    this.router.navigate(['/authPanal/Attendance']);
   }
 
   paymentStatistics() {
-    this.router.navigate(['/authPanal/payrollList']); // replace with your actual route
+    this.router.navigate(['/authPanal/payrollList']);
   }
 
   viewEmployee() {
-    this.router.navigate(['/authPanal/Employee']); // replace with your actual route
+    this.router.navigate(['/authPanal/Employee']);
   }
 
   public defaultColDef: ColDef = {

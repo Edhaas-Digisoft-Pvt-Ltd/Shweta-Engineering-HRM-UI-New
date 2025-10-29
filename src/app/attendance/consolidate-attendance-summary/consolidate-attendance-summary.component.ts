@@ -35,6 +35,8 @@ export class ConsolidateAttendanceSummaryComponent {
   lastPage: number = 1;
   pagesToShow: (number | string)[] = [];
   paginationvalue: any;
+  columnApi!: ColumnApi;
+
 
   constructor(private toastr: ToastrService, private service: HrmserviceService) { }
 
@@ -84,6 +86,7 @@ export class ConsolidateAttendanceSummaryComponent {
 
   onGridReady(params: any) {
     this.gridApi = params.api;
+    this.columnApi = params.columnApi;
     setTimeout(() => this.scrollToSelectedMonth(), 200);
   }
 
@@ -202,6 +205,21 @@ export class ConsolidateAttendanceSummaryComponent {
 
             this.rowData = Array.from(employeeMap.values());
             this.loadDynamicMonthColumns(result);
+            setTimeout(() => {
+              if (this.gridApi && this.columnApi) {
+                const totalColumns = this.columnApi.getAllDisplayedColumns().length;
+
+                // one month
+                if (totalColumns <= 15) {
+                  this.gridApi.sizeColumnsToFit();
+                }
+                // multiple months
+                else {
+                  this.columnApi.resetColumnState();
+                  this.columnApi.autoSizeAllColumns();
+                }
+              }
+            }, 100);
           } else {
             this.rowData = [];
             this.toastr.warning(res.message || 'Error fetching consolidated summary.');
