@@ -221,39 +221,6 @@ export class PayrollSummariesComponent {
   backtoPayroll() {
     this.router.navigate(['/authPanal/payrollList']);
   }
-  // deduct = [
-  //   {
-  //     Compound: 'provident found (PF)',
-  //     deduction: 'lorem',
-  //     amount: 'Rs. 1000',
-  //   },
-  //   {
-  //     Compound: 'Professional Tax (PT)',
-  //     deduction: 'lorem',
-  //     amount: 'Rs. 1000',
-  //   },
-
-  //   {
-  //     Compound: 'ESIC Employee 0.75%',
-  //     deduction: 'lorem',
-  //     amount: 'Rs.0',
-  //   },
-  //   {
-  //     Compound: 'Provident Fund(Employer) (EPF)',
-  //     deduction: 'lorem',
-  //     amount: 'Rs. 1000',
-  //   },
-  //   {
-  //     Compound: 'Advance Salary',
-  //     deduction: 'lorem',
-  //     amount: 'Rs. 0',
-  //   },
-  //   {
-  //     Compound: 'Other',
-  //     deduction: 'lorem',
-  //     amount: 'Rs. 0',
-  //   },
-  // ];
 
   columnDefs: ColDef[] = [
     {
@@ -411,60 +378,118 @@ export class PayrollSummariesComponent {
   };
 
   downloadPayslip() {
-    const payslipElement = document.getElementById('payslip-template');
-    if (!payslipElement) return;
+    if (!this.employeeDetails || !this.calculationData || !this.attendanceDetails) {
+      this.toastr.error('Missing payslip data.');
+      return;
+    }
 
-    const clone = payslipElement.cloneNode(true) as HTMLElement;
+    const temp = document.createElement('div');
+    temp.style.position = 'fixed';
+    temp.style.top = '-9999px';
+    temp.style.left = '-9999px';
+    temp.style.width = '210mm';
+    temp.style.background = '#fff';
+    temp.style.padding = '20px';
+    temp.style.fontFamily = 'Arial, sans-serif';
 
-    clone.style.position = 'fixed';
-    clone.style.top = '-9999px';
-    clone.style.left = '-9999px';
-    clone.style.width = '210mm';
-    clone.style.background = '#fff';
-    clone.style.zIndex = '-1';
-    clone.style.opacity = '1';
-    clone.style.visibility = 'visible';
+    temp.innerHTML = `
+    <div style="font-family: Arial, sans-serif; width: 100%; padding: 20px;">
+      <h3 style="text-align:center; margin-bottom: 10px;">
+        ${this.employeeDetails.company_name || ''}
+      </h3>
+      <p style="text-align:center; margin-top: -5px;">
+        <strong>Payslip for ${this.getMonthName(this.selectedMonth)} ${this.selectedYear}</strong>
+      </p>
+      <hr />
 
-    document.body.appendChild(clone);
+      <p><strong>Employee Name:</strong> ${this.employeeDetails.emp_name}</p>
+      <p><strong>Employee Code:</strong> ${this.employeeDetails.employee_code}</p>
+      <p><strong>Worked Days:</strong> ${this.attendanceDetails[0]?.P ?? 0}</p>
+      <p><strong>Absent Days:</strong> ${this.attendanceDetails[0]?.A ?? 0}</p>
 
-    setTimeout(() => {
-      html2canvas(clone, {
-        scale: 2,
-        backgroundColor: '#ffffff',
-        useCORS: true
-      }).then((canvas: any) => {
+      <table border="1" cellspacing="0" cellpadding="6" style="width:100%; margin-top:15px; text-align:left; border-collapse:collapse;">
+        <thead style="background:#efefef;">
+          <tr>
+            <th style="width:25%;">Earnings</th>
+            <th style="width:25%;">Amount</th>
+            <th style="width:25%;">Deductions</th>
+            <th style="width:25%;">Amount</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Basic Pay</td>
+            <td>${this.calculationData?.basic_salary ?? 0}</td>
+            <td>Tax</td>
+            <td>${this.calculationData?.total_tax_deduction ?? 0}</td>
+          </tr>
+          <tr>
+           <td>Present Day Hours Salary</td>
+            <td>${this.calculationData?.present_day_hrs_salary ?? 0}</td>
+            <td>PF Employee</td>
+            <td>${this.calculationData?.pf_employee_deduction ?? 0}</td>
+          </tr>
+          <tr>
+            <td>Overtime</td>
+            <td>${this.calculationData?.overtime_amount ?? 0}</td>
+            <td>ESIC</td>
+            <td>${this.calculationData?.esic_deduction ?? 0}</td>
+          </tr>
+          <tr>
+            <td>Bonus</td>
+            <td>${this.calculationData?.bonus_amount ?? 0}</td>
+            <td>Advance EMI</td>
+            <td>${this.calculationData?.advance_emi ?? 0}</td>
+          </tr>
+          <tr style="font-weight:bold;">
+            <td>Total Earnings</td>
+            <td>${this.calculationData?.total_salary ?? 0}</td>
+            <td>Total Deductions</td>
+            <td>${this.calculationData?.total_tax_deduction ?? 0}</td>
+          </tr>
+          <tr style="font-weight:bold; background:#f5f5f5;">
+            <td colspan="2">Net Salary</td>
+            <td colspan="2">₹${this.calculationData?.net_salary ?? 0}</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <p style="margin-top: 20px;">This is a system-generated payslip.</p>
+    </div>
+  `;
+
+    document.body.appendChild(temp);
+
+    html2canvas(temp, { scale: 2, backgroundColor: '#ffffff', useCORS: true })
+      .then((canvas: any) => {
         const imgData = canvas.toDataURL('image/png');
         const pdf = new jspdf.jsPDF('p', 'mm', 'a4');
 
         const pageWidth = 210;
-        const pageHeight = 295;
         const margin = 15;
         const contentWidth = pageWidth - margin * 2;
         const imgHeight = (canvas.height * contentWidth) / canvas.width;
 
-        const yOffset = margin;
+        pdf.addImage(imgData, 'PNG', margin, margin, contentWidth, imgHeight);
 
-        pdf.addImage(imgData, 'PNG', margin, yOffset, contentWidth, imgHeight);
-
-        const signatureGap = 12;
-        const lineOffset = 6;
-        const signatureY = yOffset + imgHeight + signatureGap;
-
+        const signatureY = margin + imgHeight + 12;
         pdf.setFontSize(12);
         pdf.text('Employer Signature:', margin, signatureY);
         pdf.text('Employee Signature:', pageWidth / 2 + 10, signatureY);
 
         pdf.setLineWidth(0.5);
-        pdf.line(margin, signatureY + lineOffset, margin + 60, signatureY + lineOffset);
-        pdf.line(pageWidth / 2 + 10, signatureY + lineOffset, pageWidth / 2 + 70, signatureY + lineOffset);
+        pdf.line(margin, signatureY + 6, margin + 60, signatureY + 6);
+        pdf.line(pageWidth / 2 + 10, signatureY + 6, pageWidth / 2 + 70, signatureY + 6);
 
-        const employeeName = this.payrollDetails.get('employeeName')?.value || 'Employee';
+        const employeeName = this.employeeDetails.emp_name || 'Employee';
         pdf.save(`${employeeName}_Payslip.pdf`);
 
-        document.body.removeChild(clone);
+        document.body.removeChild(temp);
+      })
+      .catch((err: any) => {
+        console.error('Error generating payslip:', err);
+        document.body.removeChild(temp);
       });
-    }, 300);
   }
-
 
 }

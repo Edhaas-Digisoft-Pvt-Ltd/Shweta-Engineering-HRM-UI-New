@@ -6,6 +6,8 @@ import { ToastrService } from 'ngx-toastr';
 import { HrmserviceService } from 'src/app/hrmservice.service';
 import { ModalServiceService } from 'src/app/modal-service.service';
 declare var bootstrap: any;
+declare const html2canvas: any;
+declare const jspdf: any;
 @Component({
   selector: 'app-employee-dashboard',
   templateUrl: './employee-dashboard.component.html',
@@ -42,6 +44,10 @@ export class EmployeeDashboardComponent {
   role: string = '';
   leaveTypes: any;
   isLoading: boolean = false;
+  employeeDetails: any;
+  calculationData: any;
+  attendanceDetails: any;
+  totalAttendanceValue: number = 0;
 
   constructor(private route: ActivatedRoute, private fb: FormBuilder, private router: Router, private toastr: ToastrService, private service: HrmserviceService, private modalService: ModalServiceService,) {
     // Generate last 20 years dynamically
@@ -118,8 +124,6 @@ export class EmployeeDashboardComponent {
 
     this.advanceSalaryForm.valueChanges.subscribe(() => this.calculateInstallment());
     this.fetchEmployee(this.employee_id);
-    console.log(this.employee_id);
-    
 
     this.isLoading = false;
 
@@ -205,13 +209,154 @@ export class EmployeeDashboardComponent {
 
   fetchEmployee(id: any) {
     console.log(id);
-    
+
     this.service.post(`single/employee`, { "employe_id": id }).subscribe((res: any) => {
       this.Employee_Data = res.data;
       this.company_id = res.data.employee.company_id;
 
-      this.getLeaveTypes()
+      this.getLeaveTypes();
+      this.updateAttendanceChart();
     });
+  }
+
+  getPayrollData() {
+    this.isLoading = true;
+    this.service.post('fetch/payrolldata/payslip', {
+      employee_id: this.employee_id,
+      year: this.selectedYear,
+      month: this.selectedMonth
+    }).subscribe({
+      next: (res: any) => {
+        this.isLoading = false;
+
+        if (res.status === 'success' && res.data) {
+          this.generatePayslip(res.data);
+        } else {
+          this.toastr.error(res.message || 'Payslip data not found');
+        }
+      },
+      error: (err) => {
+        this.isLoading = false;
+        this.toastr.error('Error fetching payslip data');
+        console.error(err);
+      }
+    });
+  }
+
+  generatePayslip(data: any) {
+    this.employeeDetails = data.employee_details;
+    this.calculationData = data.payroll_details;
+    this.attendanceDetails = [data.attendance];
+    this.selectedYear = data.period.year;
+    this.selectedMonth = data.period.month;
+
+    const temp = document.createElement('div');
+    temp.style.position = 'fixed';
+    temp.style.top = '-9999px';
+    temp.style.left = '-9999px';
+    temp.style.width = '210mm';
+    temp.style.background = '#fff';
+    temp.style.padding = '20px';
+    temp.style.fontFamily = 'Arial, sans-serif';
+
+    temp.innerHTML = `
+    <div style="font-family: Arial, sans-serif; width: 100%; padding: 20px;">
+      <h3 style="text-align:center; margin-bottom: 10px;">
+        ${this.employeeDetails.company_name || ''}
+      </h3>
+      <p style="text-align:center; margin-top: -5px;">
+        <strong>Payslip for ${this.selectedMonth} ${this.selectedYear}</strong>
+      </p>
+      <hr />
+
+      <p><strong>Employee Name:</strong> ${this.employeeDetails.emp_name}</p>
+      <p><strong>Employee Code:</strong> ${this.employeeDetails.employee_code}</p>
+      <p><strong>Worked Days:</strong> ${this.attendanceDetails[0]?.present_days ?? 0}</p>
+      <p><strong>Absent Days:</strong> ${this.attendanceDetails[0]?.absent_days ?? 0}</p>
+
+      <table border="1" cellspacing="0" cellpadding="6" style="width:100%; margin-top:15px; text-align:left; border-collapse:collapse;">
+        <thead style="background:#efefef;">
+          <tr>
+            <th style="width:25%;">Earnings</th>
+            <th style="width:25%;">Amount</th>
+            <th style="width:25%;">Deductions</th>
+            <th style="width:25%;">Amount</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Basic Pay</td>
+            <td>${this.calculationData?.basic_salary ?? 0}</td>
+            <td>Tax</td>
+            <td>${this.calculationData?.total_tax_deduction ?? 0}</td>
+          </tr>
+          <tr>
+            <td>Present Day Hours Salary</td>
+            <td>${this.calculationData?.present_day_hrs_salary ?? 0}</td>
+            <td>PF Employee</td>
+            <td>${this.calculationData?.pf_employee_deduction ?? 0}</td>
+          </tr>
+          <tr>
+            <td>Overtime</td>
+            <td>${this.calculationData?.overtime_amount ?? 0}</td>
+            <td>ESIC</td>
+            <td>${this.calculationData?.esic_deduction ?? 0}</td>
+          </tr>
+          <tr>
+           <td>Bonus</td>
+            <td>${this.calculationData?.bonus_amount ?? 0}</td>
+            <td>Advance EMI</td>
+            <td>${this.calculationData?.advance_emi ?? 0}</td>
+          </tr>
+          <tr style="font-weight:bold;">
+            <td>Total Earnings</td>
+            <td>${this.calculationData?.total_salary ?? 0}</td>
+            <td>Total Deductions</td>
+            <td>${this.calculationData?.total_tax_deduction ?? 0}</td>
+          </tr>
+          <tr style="font-weight:bold; background:#f5f5f5;">
+            <td colspan="2">Net Salary</td>
+            <td colspan="2">₹${this.calculationData?.net_salary ?? 0}</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <p style="margin-top: 20px;">This is a system-generated payslip.</p>
+    </div>
+  `;
+
+    document.body.appendChild(temp);
+
+    html2canvas(temp, { scale: 2, backgroundColor: '#ffffff', useCORS: true })
+      .then((canvas: any) => {
+        const imgData = canvas.toDataURL('image/png');
+        const pdf = new jspdf.jsPDF('p', 'mm', 'a4');
+
+        const pageWidth = 210;
+        const margin = 15;
+        const contentWidth = pageWidth - margin * 2;
+        const imgHeight = (canvas.height * contentWidth) / canvas.width;
+
+        pdf.addImage(imgData, 'PNG', margin, margin, contentWidth, imgHeight);
+
+        const signatureY = margin + imgHeight + 12;
+        pdf.setFontSize(12);
+        pdf.text('Employer Signature:', margin, signatureY);
+        pdf.text('Employee Signature:', pageWidth / 2 + 10, signatureY);
+
+        pdf.setLineWidth(0.5);
+        pdf.line(margin, signatureY + 6, margin + 60, signatureY + 6);
+        pdf.line(pageWidth / 2 + 10, signatureY + 6, pageWidth / 2 + 70, signatureY + 6);
+
+        const employeeName = this.employeeDetails.emp_name || 'Employee';
+        pdf.save(`${employeeName}_Payslip.pdf`);
+
+        document.body.removeChild(temp);
+      })
+      .catch((err: any) => {
+        console.error('Error generating payslip:', err);
+        document.body.removeChild(temp);
+      });
   }
 
   getLeaveTypes() {
@@ -220,20 +365,17 @@ export class EmployeeDashboardComponent {
     });
   }
 
-  // No spaces only, no leading/trailing spaces
   NoWhitespaceValidator(control: AbstractControl) {
     const isWhitespace = (control.value || '').trim().length === 0;
     return isWhitespace ? { whitespace: true } : null;
   }
 
-  // for installment calculation : 
   calculateInstallment() {
     const amount = this.advanceSalaryForm.get('advance_amount')?.value;
     const tenureString = this.advanceSalaryForm.get('tenure')?.value;
     const months = parseInt(tenureString?.split(' ')[0] || '1', 10);
 
     if (amount > 0 && months > 0) {
-      // this.installmentAmount = +(amount / months).toFixed(2);
       this.installmentAmount = Math.round(amount / months);
     } else {
       this.installmentAmount = 0;
@@ -246,19 +388,39 @@ export class EmployeeDashboardComponent {
     }
   }
 
-  // chart for the attendance system :
-  public doughnutChartLabels: string[] = ['Present', 'Absent', 'Sick Leave', 'Casual Leave'];
+  public doughnutChartLabels: string[] = ['Present Days', 'Absent Days', 'Late Marks'];
 
   public doughnutChartData: ChartData<'doughnut'> = {
     labels: this.doughnutChartLabels,
     datasets: [
       {
-        data: [300, 40, 20, 5],
-        backgroundColor: ['#3A79D1', '#7C0A02', '#016A43', '#02DBA9'],
+        data: [0, 0, 0],
+        backgroundColor: ['#3A79D1', '#7C0A02', '#F5A623'],
         hoverOffset: 10,
-      }
-    ]
+      },
+    ],
   };
+
+  updateAttendanceChart(): void {
+    const attendance = this.Employee_Data?.lastMonthAttendance;
+
+    if (!attendance) return;
+
+    const present = Number(attendance.present_days) || 0;
+    const absent = Number(attendance.absent_days) || 0;
+    const late = Number(attendance.late_marks) || 0;
+
+    this.doughnutChartData = {
+      labels: this.doughnutChartLabels,
+      datasets: [
+        {
+          data: [present, absent, late],
+          backgroundColor: ['#3A79D1', '#7C0A02', '#F5A623'],
+          hoverOffset: 10,
+        },
+      ],
+    };
+  }
 
   public doughnutChartOptions: ChartOptions<'doughnut'> = {
     responsive: true,
@@ -270,14 +432,20 @@ export class EmployeeDashboardComponent {
           boxWidth: 12,
           font: {
             size: 12,
-          }
-        }
+          },
+        },
       },
       datalabels: {
-        display: false
-      }
-    }
+        display: false,
+      },
+    },
   };
+
+  // ✅ Total attendance getter
+  get totalAttendance(): number {
+    const a = this.Employee_Data?.lastMonthAttendance;
+    return (Number(a?.present_days) || 0) + (Number(a?.absent_days) || 0) + (Number(a?.late_marks) || 0);
+  }
 
   updateData() {
     this.modalService.openModal('editProfileModal')

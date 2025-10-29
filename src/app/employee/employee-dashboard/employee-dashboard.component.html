@@ -9,9 +9,11 @@
                 <div class="row gx-3  align-items-center" style="border-radius: 10px;">
                     <div class="col-12 ps-3 d-flex flex-column">
                         <!-- <img src="assets/img/Animation - 1743094888648.gif" alt=""> -->
-                    
-                        <h2> <i class="bi bi-currency-rupee me-2"></i> Employee</h2>
-                        <p class="ms-3 mb-1 fw-bold" style="color: #3674B5;" *ngIf="role === 'admin'"><span (click)="backtoEmployeeList()" style="cursor: pointer;"><i class="bi bi-arrow-left-circle"></i>
+
+                        <h2> <i class="bi bi-person me-2"></i> Employee</h2>
+                        <p class="ms-3 mb-1 fw-bold" style="color: #3674B5;" *ngIf="role === 'admin'"><span
+                                (click)="backtoEmployeeList()" style="cursor: pointer;"><i
+                                    class="bi bi-arrow-left-circle"></i>
                                 Employees</span> </p>
                     </div>
                     <div class="col-md-4 text-end p-0">
@@ -131,8 +133,8 @@
                                     <!-- <div class="btn w-100 dashboard-btn">
                                 Edit
                             </div> -->
-                                    <button *ngIf="hasAccess('Employee', 'update')" type="button" class="btn dashboard-btn w-100"
-                                        (click)="updateData()">
+                                    <button *ngIf="hasAccess('Employee', 'update')" type="button"
+                                        class="btn dashboard-btn w-100" (click)="updateData()">
                                         Edit
                                     </button>
                                 </div>
@@ -147,50 +149,25 @@
                                 </div>
                             </div>
                             <!-- leave details -->
-                            <div class="row mt-3  ">
-                                <div class="col leaveWrapper">
-                                    <div class=" border-right-dashed pe-2">
-                                        <div class="d-flex justify-content-center ">
-                                            <div class=""><i class="bi bi-clock me-2"></i></div>
-                                            <div class="">
-                                                <h6 class="mb-1">Total</h6>
-
-                                            </div>
-                                        </div>
-                                        <h2 class="mb-0 text-center">{{Employee_Data.total_leave_count}}</h2>
+                            <div class="row mt-3 text-center mb-3">
+                                <div class="col-6 border-end border-dashed">
+                                    <div class="d-flex justify-content-center align-items-center mb-1">
+                                        <i class="bi bi-clock me-2 text-primary"></i>
+                                        <h6 class="mb-0">Total Leaves</h6>
                                     </div>
-                                    <div class=" border-right-dashed pe-2">
-                                        <div class="d-flex justify-content-center">
-                                            <div class=""><i class="bi bi-clock me-2"></i></div>
-                                            <div class="">
-                                                <h6 class="mb-1">Taken</h6>
-                                            </div>
-                                        </div>
-                                        <h2 class="mb-0 text-center">10</h2>
+                                    <h2 class="mb-0 fw-semibold text-dark">
+                                        {{ Employee_Data.leave_data.total_leave_count }}
+                                    </h2>
+                                </div>
 
+                                <div class="col-6">
+                                    <div class="d-flex justify-content-center align-items-center mb-1">
+                                        <i class="bi bi-check-circle me-2 text-success"></i>
+                                        <h6 class="mb-0">Available Leaves</h6>
                                     </div>
-
-                                    <div class=" border-right-dashed pe-2 gx-2 gap-2">
-                                        <div class="d-flex justify-content-center">
-                                            <div class=""><i class="bi bi-clock me-2"></i></div>
-                                            <div class="">
-                                                <h6 class="mb-1">Available</h6>
-
-                                            </div>
-                                        </div>
-                                        <h2 class="mb-0 text-center">10</h2>
-
-                                    </div>
-                                    <div class="  gx-2 rounded-1 gap-2">
-                                        <div class="d-flex justify-content-center">
-                                            <div class=""><i class="bi bi-clock me-2"></i></div>
-                                            <div class="">
-                                                <h6 class="mb-1">Request</h6>
-                                            </div>
-                                        </div>
-                                        <h2 class="mb-0 text-center">{{Employee_Data.total_request}}</h2>
-
-                                    </div>
+                                    <h2 class="mb-0 fw-semibold text-dark">
+                                        {{ Employee_Data.leave_data.available }}
+                                    </h2>
                                 </div>
                             </div>
 
@@ -204,20 +181,20 @@
                                     <div class="d-flex justify-content-around py-2 text-center">
                                         <!-- Accept -->
                                         <div>
-                                            <div class="fw-bold text-success">Accept</div>
-                                            <div class="fs-3">{{ leaveStatus.accept }}</div>
+                                            <div class="fw-bold text-success">Approved</div>
+                                            <div class="fs-3">{{Employee_Data.leave_data.total_accept}}</div>
+                                        </div>
+
+                                        <!-- Reject -->
+                                        <div>
+                                            <div class="fw-bold text-danger" style="color: #70002a;">Rejected</div>
+                                            <div class="fs-3">{{Employee_Data.leave_data.total_reject}}</div>
                                         </div>
 
                                         <!-- Pending -->
                                         <div>
                                             <div class="fw-bold" style="color: #806000;">Pending</div>
-                                            <div class="fs-3">{{ leaveStatus.pending }}</div>
-                                        </div>
-
-                                        <!-- Reject -->
-                                        <div>
-                                            <div class="fw-bold text-danger" style="color: #70002a;">Reject</div>
-                                            <div class="fs-3">{{ leaveStatus.reject }}</div>
+                                            <div class="fs-3">{{Employee_Data.leave_data.total_pending}}</div>
                                         </div>
                                     </div>
                                 </div>
@@ -228,7 +205,8 @@
                                 <div class="col-lg-12  gx-2 mt-4 rounded-1 gap-2">
                                     <div class="" *ngIf="hasAccess('Leave', 'insert')">
 
-                                        <button type="button" class="btn dashboard-btn w-100" (click)="openLeaveModal()">
+                                        <button type="button" class="btn dashboard-btn w-100"
+                                            (click)="openLeaveModal()">
                                             Apply For Leave
                                         </button>
                                     </div>
@@ -248,8 +226,8 @@
                                             <!-- Select Year -->
                                             <div class="col-6"> <label for="yearSelect" class="form-label">Select
                                                     Year</label>
-                                                <select id="yearSelect" class="form-select" name="selectedYear" [(ngModel)]="selectedYear"
-                                                    (change)="checkSelection()">
+                                                <select id="yearSelect" class="form-select" name="selectedYear"
+                                                    [(ngModel)]="selectedYear" (change)="checkSelection()">
                                                     <option *ngFor="let year of years" [value]="year">{{ year }}
                                                     </option>
                                                 </select>
@@ -267,14 +245,15 @@
                                             </div>
 
                                         </div>
-                                        <button
-                                            class="btn dashboard-btn w-100 mt-5 text-center btn-center">Download</button>
+                                        <button class="btn dashboard-btn w-100 mt-5 text-center btn-center"
+                                            type="button" (click)="getPayrollData()">Download</button>
                                     </form>
                                 </div>
                             </div>
 
                             <div class="col d-flex align-items-center border px-4 mt-4"
-                                style="border-radius: 10px; height: 122px;" *ngIf="hasAccess('Advance Payment', 'insert')">
+                                style="border-radius: 10px; height: 122px;"
+                                *ngIf="hasAccess('Advance Payment', 'insert')">
                                 <button class="btn dashboard-btn w-100" (click)="openAdvanceSalaryModal()">
                                     Apply for Advance Salary
                                 </button>
@@ -289,20 +268,20 @@
                     <div class="col attendaceWrapper">
                         <div class=" attendenceCard p-3 border text-center" style="border-radius: 10px;">
 
-                            <h6> <i class="bi bi-clock me-2 " style="color:#3674B5"></i> Total Hours Today</h6>
-                            <h5 class="pb-0 text-center">5.5/6</h5>
+                            <h6> <i class="bi bi-clock me-2 " style="color:#3674B5"></i>Last Week Total Hours</h6>
+                            <h5 class="pb-0 text-center">{{Employee_Data.last_hours_data.lastWeekTotalHours}}</h5>
                         </div>
                         <div class=" attendenceCard p-3 border text-center" style="border-radius: 10px;">
-                            <h6> <i class="bi bi-clock me-2" style="color:#3674B5"></i> Total Hours Week</h6>
-                            <h5 class="pb-0 text-center">10/40</h5>
+                            <h6> <i class="bi bi-clock me-2" style="color:#3674B5"></i>Last Month Total Hours</h6>
+                            <h5 class="pb-0 text-center">{{Employee_Data.last_hours_data.lastMonthTotalHours}}</h5>
                         </div>
                         <div class=" attendenceCard p-3 border text-center" style="border-radius: 10px;">
-                            <h6> <i class="bi bi-clock me-2" style="color:#3674B5"></i> Total Hours Month</h6>
-                            <h5 class="pb-0 text-center">75/98</h5>
+                            <h6> <i class="bi bi-clock me-2" style="color:#3674B5"></i>Last Week Overtime</h6>
+                            <h5 class="pb-0 text-center">{{Employee_Data.last_hours_data.lastWeekOvertimeHour}}</h5>
                         </div>
                         <div class=" attendenceCard p-3 border text-center" style="border-radius: 10px;">
-                            <h6> <i class="bi bi-clock me-2" style="color:#3674B5"></i> Total Overtime</h6>
-                            <h5 class="pb-0 text-center">16(Hours)</h5>
+                            <h6> <i class="bi bi-clock me-2" style="color:#3674B5"></i>Last Month Overtime</h6>
+                            <h5 class="pb-0 text-center">{{Employee_Data.last_hours_data.lastMonthOvertimeHour}}</h5>
                         </div>
                     </div>
                 </div>
@@ -315,52 +294,18 @@
 
                             <div class="row gx-0">
                                 <div class="col-12  border-bottom border-primary-light mb-2">
-                                    <h5 class="pb-2"> <i class="bi bi-calendar-check me-2 text-primary "></i> Attendance
+                                    <h5 class="pb-2"> <i class="bi bi-calendar-check me-2 text-primary "></i>Last Month Attendance
                                     </h5>
                                 </div>
-                                <div class="d-flex ">
-                                    <div class="col col-md-7 ">
-                                        <div class="chart-container p-0">
-                                            <h6 class="text-center"> {{ currentDateTime | date:
-                                                'HH:mm' }} , {{ currentDateTime | date: 'dd-MM-yyyy' }} </h6>
-
-                                            <!-- attendance chart  -->
-                                            <div class="chart">
-                                                <div style="position: relative; width: 200px; margin: auto;">
-                                                    <canvas baseChart [data]="doughnutChartData" [type]="'doughnut'"
-                                                        [options]="doughnutChartOptions">
-                                                    </canvas>
-                                                    <!-- Centered Text -->
-                                                    <div
-                                                        style="position:absolute;top:36%;left:51%;transform:translate(-50%,-50%);font-size:20px;font-weight:bold;text-align:center">
-                                                        <div>Total Attendance</div>
-                                                        <div>500</div>
-                                                    </div>
-                                                </div>
-                                            </div>
-
-                                        </div>
-                                    </div>
-                                    <div class="col col-md-5 mt-3 d-flex flex-column justify-content-between w-50">
-                                        <div class="text-center"><i class="bi bi-box-arrow-in-right text-primary"></i>
-                                            Punch In
-                                            At
-                                            <br>
-                                            <span style="font-size: 18px; font-weight: bold;">
-                                                10 AM
-                                            </span>
-                                        </div>
-                                        <div class="text-center"><i class="bi bi-box-arrow-in-left  text-primary"></i>
-                                            Punch Out
-                                            At
-                                            <br><span style="font-size: 18px; font-weight: bold;">
-                                                Not Yet
-                                            </span>
-                                        </div>
+                                <div style="position: relative; width: 250px; margin: auto;">
+                                    <canvas baseChart [data]="doughnutChartData" [options]="doughnutChartOptions" [type]="'doughnut'">
+                                    </canvas>
+                                    <div  style="position:absolute;top:42%;left:50%;transform:translate(-50%,-50%);
+                                            font-size:20px;font-weight:bold;text-align:center">
+                                        <div>Total Days</div>
+                                        <div>{{ totalAttendance }}</div>
                                     </div>
                                 </div>
-
-
                             </div>
                         </div>
                         <div class=" p-3 border advanceSalaryTracking" style="border-radius: 10px;">
@@ -640,9 +585,10 @@
                                 <div class="col-md-3">
                                     <label class="form-label">Amount (in ₹)<span class="text-danger">*</span></label>
                                     <input type="text" class="form-control" formControlName="advance_amount"
-                                        (input)="calculateInstallment()" [ngClass]="{'input-error': isAdvanceSalary && advanceSalaryForm.get('advance_amount')?.invalid,
+                                        (input)="calculateInstallment()"
+                                        [ngClass]="{'input-error': isAdvanceSalary && advanceSalaryForm.get('advance_amount')?.invalid,
                                         'is-invalid': isAdvanceSalary && advanceSalaryForm.get('advance_amount')?.invalid }"
-                                        placeholder="Enter Amount"/>
+                                        placeholder="Enter Amount" />
                                     <div *ngIf="isAdvanceSalary && advanceSalaryForm.get('advance_amount')?.errors?.['leadingZero']"
                                         class="text-danger">
                                         Amount should not start with 0.
