@@ -76,16 +76,43 @@ export class LeaveRequestComponent {
   columnDefs: ColDef[] = [
     { headerName: 'Employee Code', field: 'employee_code', sortable: true, filter: true },
     { headerName: 'Employee Name', field: 'emp_name', sortable: true, filter: true },
-    { headerName: 'Department', field: 'department_name', sortable: true, filter: true },
+    { headerName: 'Start Date', field: 'start_date', sortable: true, filter: true },
+    { headerName: 'End Date', field: 'end_date', sortable: true, filter: true },
     {
       headerName: 'Actions',
       cellStyle: { border: '1px solid #ddd' },
       cellRenderer: EditLeaveRequestComponent,
       cellRendererParams: {
         editCallback: (leaveId: any) => this.getSingleLeaveRequest(leaveId),
+        approveRequest: (leaveId: any) => this.approveRejectleave(leaveId, 'Approved'),
+        rejectRequest: (leaveId: any) => this.approveRejectleave(leaveId, 'Rejected'),
       }
     }
   ];
+
+  approveRejectleave(leaveId: any, status: string) {
+    const payload = {
+      tbl_emp_leave_id: leaveId,
+      leave_status: status
+    };
+
+    if (confirm(`Are you sure you want to ${status} this leave?`)) {
+      this.service.post('update/leave/request', payload).subscribe({
+        next: (res: any) => {
+          if (res.status === 'success') {
+            this.toastr.success(`Leave ${status} successfully!`);
+            this.getLeaveRequests();
+          } else {
+            this.toastr.warning('Something went wrong!');
+          }
+        },
+        error: (err) => {
+          console.error('Error updating leave request:', err);
+          this.toastr.error('Failed to update leave status!');
+        }
+      });
+    }
+  }
 
   getSingleLeaveRequest(params: any) {
     this.empLeaveId = params;

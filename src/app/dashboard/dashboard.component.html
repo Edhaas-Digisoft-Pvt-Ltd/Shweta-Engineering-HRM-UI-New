@@ -8,8 +8,16 @@
       <div class="container-fluid ">
         <!-- Dashboard heading -->
         <div class="row gx-3 mb-3 align-items-center ">
-          <div class="col-md-8">
+          <div class="col-md-10">
             <h2><span><i class="bi bi-house-door me-3"></i></span>Dashboard</h2>
+          </div>
+          <div class="col-md-2">
+            <i class="bi bi-bell-fill float-end me-2 fs-4 position-relative">
+              <span *ngIf="notificationCount > 0"
+                class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                {{ notificationCount }}
+              </span>
+            </i>
           </div>
         </div>
 

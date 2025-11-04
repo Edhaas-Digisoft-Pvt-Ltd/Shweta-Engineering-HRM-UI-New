@@ -48,7 +48,7 @@ export class PayrollSummariesComponent {
   //   {value:1, name:'leaves'},
   //   {value:2, name:'OverTime'},
   // ];
-  selectedRejectedReason: string = '';
+  selectedRejectedReason: any = '';
   otherReason: string = '';
 
   showReasonError: boolean = false;
@@ -339,17 +339,26 @@ export class PayrollSummariesComponent {
     this.showReasonError = false;
     this.showOtherReasonError = false;
 
-    if (!this.selectedRejectedReason) {
+    if (!this.selectedRejectedReason?.rejection_id) {
       this.showReasonError = true;
       return;
     }
 
-    if (this.selectedRejectedReason === 'Other' && (!this.otherReason || this.otherReason.trim() === '')) {
+    if (this.selectedRejectedReason?.rejection_reason === 'Other' && (!this.otherReason || this.otherReason.trim() === '')) {
       this.showOtherReasonError = true;
       return;
     }
 
-    this.service.post('rejected/payroll', { temp_payroll_id: this.tempPayrollId, rejection_id: this.selectedRejectedReason }).subscribe((res: any) => {
+    const payload: any = {
+      temp_payroll_id: this.tempPayrollId,
+      rejection_id: this.selectedRejectedReason?.rejection_id,
+    };
+
+    if (this.selectedRejectedReason?.rejection_reason === 'Other') {
+      payload.other_reason = this.otherReason.trim();
+    }
+
+    this.service.post('rejected/payroll', payload).subscribe((res: any) => {
       if (res.status == 'success') {
         this.toastr.success('Payroll rejected successfully');
         this.modalService.closeModal();
@@ -436,8 +445,8 @@ export class PayrollSummariesComponent {
             <td>${this.calculationData?.esic_deduction ?? 0}</td>
           </tr>
           <tr>
-            <td>Bonus</td>
-            <td>${this.calculationData?.bonus_amount ?? 0}</td>
+            <td></td>
+            <td></td>
             <td>Advance EMI</td>
             <td>${this.calculationData?.advance_emi ?? 0}</td>
           </tr>

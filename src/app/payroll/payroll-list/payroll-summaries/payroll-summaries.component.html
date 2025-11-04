@@ -481,13 +481,13 @@
                                     <select class="form-select" [(ngModel)]="selectedRejectedReason" name="rejectReason"
                                         [ngClass]="{ 'is-invalid': showReasonError }">
                                         <option value="" disabled selected>-- Choose reason --</option>
-                                        <option *ngFor="let item of rejectreasons" [value]="item.rejection_id">{{
+                                        <option *ngFor="let item of rejectreasons" [ngValue]="item">{{
                                             item.rejection_reason }}</option>
                                     </select>
                                 </div>
                             </div>
 
-                            <div class="row mb-3" *ngIf="selectedRejectedReason === 'Other'">
+                            <div class="row mb-3" *ngIf="selectedRejectedReason?.rejection_reason === 'Other'">
                                 <div class="col-md-7">
                                     <label class="form-label">Enter Reason</label>
                                     <input type="text" class="form-control" [(ngModel)]="otherReason" name="otherReason"

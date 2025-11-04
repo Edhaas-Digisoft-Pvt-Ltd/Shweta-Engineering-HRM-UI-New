@@ -244,9 +244,16 @@ export class CompanyListComponent {
     }
     else {
       if (this.companyForm.valid && this.selectedLogoFile) {
+        const companyName = this.companyForm.value.companyName?.trim() || '';
+        const companyInitials = companyName
+          .split(' ')                    
+          .filter((word: string) => word.length > 0)
+          .map((word: string) => word[0].toUpperCase())
+          .join('');
+
         const current_data = {
           master_company_name: this.companyForm.value.companyName,
-          company_initials: "xyz",
+          company_initials: companyInitials,
         };
 
         console.log("Company Data to Submit:", current_data);

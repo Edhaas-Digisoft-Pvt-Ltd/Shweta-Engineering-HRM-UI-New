@@ -33,6 +33,7 @@ export class DashboardComponent {
   pendingPayrollApprovals: any = 0;
   pendingLeaves: any = 0;
   activeRequests = 0;
+  notificationCount = 0;
 
   constructor(private router: Router, private service: HrmserviceService) {
   }
@@ -58,6 +59,7 @@ export class DashboardComponent {
     // this.selectedYear = this.financialYears[0]; // default selected
     this.selectedYear = currentYear.toString(); // default selected
     this.getCompanyNames();
+    this.getNotifications();
   }
 
   startRequest() {
@@ -118,6 +120,24 @@ export class DashboardComponent {
       },
       error: (err) => {
         console.error(err);
+        this.finishRequest();
+      }
+    });
+  }
+
+  getNotifications() {
+    this.startRequest();
+    this.service.post('dashboard-notifications', {
+      company_id: this.selectedCompanyId,
+    }).subscribe({
+      next: (res: any) => {
+        if (res.status === 'success') {
+          this.notificationCount = res.data.Count || 0;
+        }
+        this.finishRequest();
+      },
+      error: (err) => {
+        this.notificationCount = 0;
         this.finishRequest();
       }
     });

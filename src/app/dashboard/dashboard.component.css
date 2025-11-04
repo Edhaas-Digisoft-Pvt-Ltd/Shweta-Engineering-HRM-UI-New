@@ -115,3 +115,8 @@ canvas {
     grid-template-columns: repeat(4, 1fr);
     gap: 20px; 
 }
+
+.badge {
+  font-size: 0.65rem;
+  padding: 0.25em 0.45em;
+}

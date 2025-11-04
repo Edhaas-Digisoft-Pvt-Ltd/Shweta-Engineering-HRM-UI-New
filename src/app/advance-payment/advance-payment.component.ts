@@ -72,6 +72,10 @@ export class AdvancePaymentComponent {
     })
   }
 
+  openModel() {
+    this.modalService.openModal('advanceRequestModal')
+  }
+
   hasAccess(module: string, permission: string): boolean {
     return this.service.hasPermission(module, permission);
   }
@@ -240,14 +244,13 @@ export class AdvancePaymentComponent {
         headerName: 'Actions',
         cellStyle: { border: '1px solid #ddd' },
         cellRenderer: (params: any) => {
-          return `<button type="button" class="btn btn-sm mb-1" data-bs-toggle="modal" data-bs-target="#advanceRequestModal" style="background-color:#C8E3FF">
+          return `<button type="button" class="btn btn-sm mb-1" style="background-color:#C8E3FF">
               <i class="bi bi-pencil"></i>
             </button>`;
         },
         onCellClicked: (event: any) => {
           this.getSingleAdvanceSalary(event.data.adv_pay_id);
-          console.log(event);
-
+          this.openModel();
         },
       });
     }

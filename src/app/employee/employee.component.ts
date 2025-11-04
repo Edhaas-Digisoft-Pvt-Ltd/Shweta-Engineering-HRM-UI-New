@@ -81,7 +81,7 @@ export class EmployeeComponent {
     { headerName: 'Emp Code', field: 'employee_code', sortable: true, filter: true, minWidth: 160, },
     { headerName: 'Employee Name', field: 'emp_name', sortable: true, filter: true, minWidth: 180, },
     { headerName: 'Department', field: 'department_name', sortable: true, filter: true },
-    { headerName: 'Role', field: 'designation_name', sortable: true, filter: true },
+    { headerName: 'Designation', field: 'designation_name', sortable: true, filter: true },
     { headerName: 'Contact', field: 'emp_contact', sortable: true, filter: true },
     { headerName: 'Joining Date', field: 'doj', sortable: true, filter: true },
     // { headerName: 'Status', field: 'status', sortable: true, filter: true, cellRenderer: (params: { value: any; }) => {

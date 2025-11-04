@@ -101,7 +101,10 @@ export class AttendanceComponent {
         this.toastr.success(res.data);
         this.fetchAttendance();
       } else {
-        console.log(res.error);
+        if (res.duplicates > 0)
+          this.toastr.error('Duplicates record found')
+        else
+          this.toastr.error(res.data)
       }
     });
   }
@@ -426,7 +429,7 @@ export class AttendanceComponent {
   nextPage() {
     if (this.currentPage < this.lastPage) {
       this.currentPage++;
-      this.fetchAttendance(); 
+      this.fetchAttendance();
     }
   }
 
