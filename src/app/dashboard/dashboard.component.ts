@@ -1,7 +1,7 @@
 import { EmployeeActionComponent } from '../employee/employee-action/employee-action.component';
 import { ColDef } from 'ag-grid-community';
 import { Chart, ChartConfiguration, ChartData, ChartOptions, ChartType } from 'chart.js';
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, HostListener } from '@angular/core';
 import DataLabelsPlugin from 'chartjs-plugin-datalabels';
 import { Router } from '@angular/router';
 import { HrmserviceService } from '../hrmservice.service';
@@ -34,6 +34,9 @@ export class DashboardComponent {
   pendingLeaves: any = 0;
   activeRequests = 0;
   notificationCount = 0;
+  showNotifications = false;
+  leavesNotification: any[] = [];
+  advSalaryNotification: any[] = [];
 
   constructor(private router: Router, private service: HrmserviceService) {
   }
@@ -59,7 +62,6 @@ export class DashboardComponent {
     // this.selectedYear = this.financialYears[0]; // default selected
     this.selectedYear = currentYear.toString(); // default selected
     this.getCompanyNames();
-    this.getNotifications();
   }
 
   startRequest() {
@@ -83,6 +85,7 @@ export class DashboardComponent {
     this.loadLeaveCards();
     this.loadAttendanceSummary();
     this.getDashboardSummary();
+    this.getNotifications();
   }
 
   onYearChange() {
@@ -125,6 +128,19 @@ export class DashboardComponent {
     });
   }
 
+  toggleNotificationDropdown() {
+    this.showNotifications = !this.showNotifications;
+  }
+
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: MouseEvent) {
+    const target = event.target as HTMLElement;
+    // Close dropdown when clicking outside
+    if (!target.closest('.position-relative.d-inline-block')) {
+      this.showNotifications = false;
+    }
+  }
+
   getNotifications() {
     this.startRequest();
     this.service.post('dashboard-notifications', {
@@ -133,6 +149,8 @@ export class DashboardComponent {
       next: (res: any) => {
         if (res.status === 'success') {
           this.notificationCount = res.data.Count || 0;
+          this.leavesNotification = res.data.leavesNotification || [];
+          this.advSalaryNotification = res.data.advSalaryNotification || [];
         }
         this.finishRequest();
       },
@@ -141,6 +159,10 @@ export class DashboardComponent {
         this.finishRequest();
       }
     });
+  }
+
+  viewAdvanceRequests() {
+    this.router.navigate(['authPanal/AdvancePayment']);
   }
 
   loadLeaveCards() {

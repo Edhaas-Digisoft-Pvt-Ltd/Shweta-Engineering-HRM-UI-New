@@ -11,13 +11,60 @@
           <div class="col-md-10">
             <h2><span><i class="bi bi-house-door me-3"></i></span>Dashboard</h2>
           </div>
-          <div class="col-md-2">
-            <i class="bi bi-bell-fill float-end me-2 fs-4 position-relative">
-              <span *ngIf="notificationCount > 0"
-                class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-                {{ notificationCount }}
-              </span>
-            </i>
+          <!-- Bell Icon + Dropdown -->
+          <div class="col-md-2 position-relative">
+            <div class="position-relative d-inline-block float-end me-2">
+              <!-- Bell Icon -->
+              <i class="bi bi-bell-fill fs-4 position-relative" (click)="toggleNotificationDropdown()"
+                style="cursor: pointer;">
+                <span *ngIf="notificationCount > 0"
+                  class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                  {{ notificationCount }}
+                </span>
+              </i>
+
+              <!-- Notification Dropdown -->
+              <div *ngIf="showNotifications"
+                class="notification-dropdown shadow-lg p-3 bg-white rounded position-absolute end-0 mt-2"
+                style="width: 320px; z-index: 1050;">
+                <h6 class="border-bottom pb-2 mb-2">Notifications</h6>
+
+                <!-- Leave Requests -->
+                <div *ngIf="leavesNotification.length > 0" class="mb-3">
+                  <div class="d-flex justify-content-between align-items-center mb-2">
+                    <strong>Leave Requests</strong>
+                    <button class="btn btn-sm btn-outline-primary py-0 px-2" (click)="leaveRequest()">View</button>
+                  </div>
+                  <ul class="list-unstyled mb-0">
+                    <li *ngFor="let leave of leavesNotification" class="small mb-1">
+                      <i class="bi bi-person-circle text-primary me-1"></i>
+                      {{ leave.employee_name }} sent a leave request
+                    </li>
+                  </ul>
+                </div>
+
+                <!-- Advance Salary Requests -->
+                <div *ngIf="advSalaryNotification.length > 0">
+                  <div class="d-flex justify-content-between align-items-center mb-2">
+                    <strong>Advance Salary Requests</strong>
+                    <button class="btn btn-sm btn-outline-primary py-0 px-2"
+                      (click)="viewAdvanceRequests()">View</button>
+                  </div>
+                  <ul class="list-unstyled mb-0">
+                    <li *ngFor="let adv of advSalaryNotification" class="small mb-1">
+                      <i class="bi bi-person-circle text-success me-1"></i>
+                      {{ adv.employee_name }} requested advance salary
+                    </li>
+                  </ul>
+                </div>
+
+                <!-- No Notifications -->
+                <div *ngIf="leavesNotification.length === 0 && advSalaryNotification.length === 0"
+                  class="text-center text-muted small">
+                  No new notifications
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -187,5 +234,21 @@
 
       </div>
     </div>
+  </div>
+</div>
+
+<!-- notification modal -->
+<div class="row gx-3 mb-3 align-items-center">
+  <div class="col-md-10">
+    <h2><span><i class="bi bi-house-door me-3"></i></span>Dashboard</h2>
+  </div>
+  <div class="col-md-2 position-relative">
+    <i class="bi bi-bell-fill float-end me-2 fs-4 position-relative" role="button" data-bs-toggle="modal"
+      data-bs-target="#notificationModal">
+      <span *ngIf="notificationCount > 0"
+        class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+        {{ notificationCount }}
+      </span>
+    </i>
   </div>
 </div>
