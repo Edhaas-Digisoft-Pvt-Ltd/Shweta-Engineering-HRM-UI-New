@@ -12,8 +12,8 @@ import * as bootstrap from 'bootstrap';
 })
 export class BonusConfigComponent {
   addBonusForm!: FormGroup;
-  CompanyNames: any = [];
-  selectedCompanyId: any = 1;
+  CompanyNames: any[] = [];
+  selectedCompanyId: any;
   rowData: any = [];
   columnDefs: ColDef[] = [];
   bonus_id: any;
@@ -107,12 +107,26 @@ export class BonusConfigComponent {
   }
 
   getCompanyNames() {
-    this.service.post('fetch/company', {}).subscribe((res: any) => {
-      if (res.status === "success") {
-        this.CompanyNames = res.data;
+    this.service.post('fetch/company', {}).subscribe({
+      next: (res: any) => {
+        if (res.status === "success" && res.data.length > 0) {
+          this.CompanyNames = res.data;
+
+          // auto-select first company
+          this.selectedCompanyId = this.CompanyNames[0].company_id;
+
+          // set default in form (if form is ready)
+          if (this.addBonusForm) {
+            this.addBonusForm.patchValue({ company_id: this.selectedCompanyId });
+          }
+
+          // load bonus list for selected company
+          this.getBonusList();
+        }
+      },
+      error: (err) => {
+        console.error('Error fetching companies:', err);
       }
-    }, error => {
-      console.error('Error fetching companies:', error);
     });
   }
 
@@ -179,7 +193,7 @@ export class BonusConfigComponent {
           bonus_rate: bonus_data.bonus_rate,
           bonus_month: bonus_data.bonus_month,
           bonus_flag: bonus_data.bonus_flag,
-          bonus_rate_display : bonus_data.bonus_rate,
+          bonus_rate_display: bonus_data.bonus_rate,
         });
         this.active_company_id = Number(bonus_data.company_id);
 
@@ -189,7 +203,7 @@ export class BonusConfigComponent {
           this.addBonusForm.get('to_date')?.disable();
         }
 
-         this.getPresentDays();
+        this.getPresentDays();
       }
     }, error => {
       console.error('Error fetching active bonus:', error);
@@ -325,21 +339,21 @@ export class BonusConfigComponent {
     this.service.post("add/bonus", payload).subscribe({
       next: (res: any) => {
         if (res.status === 'success') {
-            this.toastr.success("Bonus Submitted Successfully!");
-            const modalElement = document.getElementById('SubmitConfirmModal');
-            if (modalElement) {
-              const modalInstance = bootstrap.Modal.getInstance(modalElement);
-              modalInstance?.hide();
-            }
+          this.toastr.success("Bonus Submitted Successfully!");
+          const modalElement = document.getElementById('SubmitConfirmModal');
+          if (modalElement) {
+            const modalInstance = bootstrap.Modal.getInstance(modalElement);
+            modalInstance?.hide();
+          }
 
-            this.isSaveClicked = false;
-            this.isSubmitClicked = false;
-            this.getActiveBonus();
-            this.getBonusList();
+          this.isSaveClicked = false;
+          this.isSubmitClicked = false;
+          this.getActiveBonus();
+          this.getBonusList();
 
-            if (payload.bonus_flag) {
-              this.resetBonusForm();
-            }
+          if (payload.bonus_flag) {
+            this.resetBonusForm();
+          }
         }
       },
       error: (err) => {

@@ -130,7 +130,7 @@ export class AdvancePaymentComponent {
 
           this.generatePageNumbers();
         } else {
-          this.toastr.warning('Data Not Found');
+          // this.toastr.warning('Data Not Found');
         }
       } catch (error) {
         console.log(error);
@@ -139,7 +139,7 @@ export class AdvancePaymentComponent {
     },
       (error) => {
         if (error.status === 404) {
-          this.toastr.warning('Data Not Found');
+          // this.toastr.warning('Data Not Found');
         } else {
           console.error(error);
         }
@@ -235,7 +235,6 @@ export class AdvancePaymentComponent {
         field: 'status',
         sortable: true,
         filter: true,
-        maxWidth: 140,
         cellRenderer: this.statusButtonRenderer,
       },
     ];

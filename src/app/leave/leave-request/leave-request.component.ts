@@ -181,7 +181,7 @@ export class LeaveRequestComponent {
       },
       (error) => {
         if (error.status === 400) {
-          this.toastr.warning('Data Not Found');
+          // this.toastr.warning('Data Not Found');
         } else {
           console.error(error);
         }

@@ -43,11 +43,6 @@ export class PayrollSummariesComponent {
   deduct: any[] = [];
   today: string = new Date().toISOString().split('T')[0];
   rejectreasons: any;
-
-  // rejectreasons=[
-  //   {value:1, name:'leaves'},
-  //   {value:2, name:'OverTime'},
-  // ];
   selectedRejectedReason: any = '';
   otherReason: string = '';
 
@@ -350,7 +345,9 @@ export class PayrollSummariesComponent {
     }
 
     const payload: any = {
-      temp_payroll_id: this.tempPayrollId,
+      temp_payroll_id: Array.isArray(this.tempPayrollId)
+        ? this.tempPayrollId
+        : [this.tempPayrollId],
       rejection_id: this.selectedRejectedReason?.rejection_id,
     };
 
@@ -416,49 +413,50 @@ export class PayrollSummariesComponent {
       <p><strong>Worked Days:</strong> ${this.attendanceDetails[0]?.P ?? 0}</p>
       <p><strong>Absent Days:</strong> ${this.attendanceDetails[0]?.A ?? 0}</p>
 
-      <table border="1" cellspacing="0" cellpadding="6" style="width:100%; margin-top:15px; text-align:left; border-collapse:collapse;">
+      <table border="1" cellspacing="0" cellpadding="6"
+        style="width:100%; margin-top:15px; text-align:left; border-collapse:collapse;">
         <thead style="background:#efefef;">
           <tr>
-            <th style="width:25%;">Earnings</th>
-            <th style="width:25%;">Amount</th>
-            <th style="width:25%;">Deductions</th>
-            <th style="width:25%;">Amount</th>
+            <th style="width:25%; border-right:none;">Earnings</th>
+            <th style="width:25%; border-left:none; border-right:none;">Amount</th>
+            <th style="width:25%; border-left:none; border-right:none;">Deductions</th>
+            <th style="width:25%; border-left:none;">Amount</th>
           </tr>
         </thead>
         <tbody>
           <tr>
-            <td>Basic Pay</td>
-            <td>${this.calculationData?.basic_salary ?? 0}</td>
-            <td>Tax</td>
-            <td>${this.calculationData?.total_tax_deduction ?? 0}</td>
+            <td style="border-right:none;">Basic Pay</td>
+            <td style="border-left:none; border-right:none;">${this.calculationData?.basic_salary ?? 0}</td>
+            <td style="border-left:1px solid #000; border-right:none;">Tax</td>
+            <td style="border-left:none;">${this.calculationData?.total_tax_deduction ?? 0}</td>
           </tr>
           <tr>
-           <td>Present Day Hours Salary</td>
-            <td>${this.calculationData?.present_day_hrs_salary ?? 0}</td>
-            <td>PF Employee</td>
-            <td>${this.calculationData?.pf_employee_deduction ?? 0}</td>
+            <td style="border-right:none;">Present Day Hours Salary</td>
+            <td style="border-left:none; border-right:none;">${this.calculationData?.present_day_hrs_salary ?? 0}</td>
+            <td style="border-left:1px solid #000; border-right:none;">PF Employee</td>
+            <td style="border-left:none;">${this.calculationData?.pf_employee_deduction ?? 0}</td>
           </tr>
           <tr>
-            <td>Overtime</td>
-            <td>${this.calculationData?.overtime_amount ?? 0}</td>
-            <td>ESIC</td>
-            <td>${this.calculationData?.esic_deduction ?? 0}</td>
+            <td style="border-right:none;">Overtime</td>
+            <td style="border-left:none; border-right:none;">${this.calculationData?.overtime_amount ?? 0}</td>
+            <td style="border-left:1px solid #000; border-right:none;">ESIC</td>
+            <td style="border-left:none;">${this.calculationData?.esic_deduction ?? 0}</td>
           </tr>
           <tr>
-            <td></td>
-            <td></td>
-            <td>Advance EMI</td>
-            <td>${this.calculationData?.advance_emi ?? 0}</td>
+            <td style="border-right:none;"></td>
+            <td style="border-left:none; border-right:none;"></td>
+            <td style="border-left:1px solid #000; border-right:none;">Advance EMI</td>
+            <td style="border-left:none;">${this.calculationData?.advance_emi ?? 0}</td>
           </tr>
           <tr style="font-weight:bold;">
-            <td>Total Earnings</td>
-            <td>${this.calculationData?.total_salary ?? 0}</td>
-            <td>Total Deductions</td>
-            <td>${this.calculationData?.total_tax_deduction ?? 0}</td>
+            <td style="border-right:none;">Total Earnings</td>
+            <td style="border-left:none; border-right:none;">${this.calculationData?.total_salary ?? 0}</td>
+            <td style="border-left:1px solid #000; border-right:none;">Total Deductions</td>
+            <td style="border-left:none;">${this.calculationData?.total_tax_deduction ?? 0}</td>
           </tr>
           <tr style="font-weight:bold; background:#f5f5f5;">
-            <td colspan="2">Net Salary</td>
-            <td colspan="2">₹${this.calculationData?.net_salary ?? 0}</td>
+            <td colspan="2" style="border-right:none;">Net Salary</td>
+            <td colspan="2" style="border-left:none;">₹${this.calculationData?.net_salary ?? 0}</td>
           </tr>
         </tbody>
       </table>

@@ -187,7 +187,7 @@ export class LeaveConfigComponent {
       (error) => {
         this.isLoading = false;
         if (error.status === 400) {
-          this.toastr.warning('Data Not Found');
+          // this.toastr.warning('Data Not Found');
           this.isLoading = false;
         } else {
           console.error(error);

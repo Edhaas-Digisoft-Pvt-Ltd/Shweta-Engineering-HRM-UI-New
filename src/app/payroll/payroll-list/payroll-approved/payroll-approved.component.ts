@@ -125,7 +125,7 @@ export class PayrollApprovedComponent {
             this.generatePageNumbers(this.paginationvalue);
           } else {
             this.rowData = [];
-            this.toastr.warning('Data Not Found');
+            // this.toastr.warning('Data Not Found');
           }
         } catch (error) {
           console.log(error);
@@ -136,7 +136,7 @@ export class PayrollApprovedComponent {
       (error) => {
         this.rowData = [];
         if (error.status === 404) {
-          this.toastr.warning('Data Not Found');
+          // this.toastr.warning('Data Not Found');
           this.isLoading = false;
         } else {
           console.error(error);

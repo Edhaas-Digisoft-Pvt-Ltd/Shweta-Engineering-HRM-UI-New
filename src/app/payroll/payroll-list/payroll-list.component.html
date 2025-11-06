@@ -48,6 +48,13 @@
                                     </div>
 
                                     <div class="col-auto d-flex align-items-end">
+                                        <button class="btn comBtn text-white"
+                                            (click)="approvePayrollList()">Approve</button>
+                                        <button class="btn btn-danger text-white rejectBtn ms-2" (click)="openModal()">Reject
+                                            </button>
+                                    </div>
+
+                                    <div class="col-auto d-flex align-items-end">
                                         <button class="btn btn-primary exportExcelBtn me-1" (click)="exportExcel()">
                                             <i class="bi bi-file-earmark-text-fill"></i>
                                         </button>
@@ -59,8 +66,8 @@
 
                         <div class="row">
                             <div class="col-12 mt-4">
-                                <ag-grid-angular style="width: 100%; height: 60vh;" class="ag-theme-alpine"
-                                    [rowData]="rowData" [columnDefs]="columnDefs" [pagination]="false"
+                                <ag-grid-angular class="ag-theme-alpine" [rowData]="rowData" [columnDefs]="columnDefs"
+                                    [pagination]="false" [domLayout]="'autoHeight'"
                                     (selectionChanged)="onSelectionChanged($event)" rowSelection="multiple"
                                     [rowMultiSelectWithClick]="true" [defaultColDef]="defaultColDef"
                                     (gridReady)="onGridReady($event)">
@@ -85,11 +92,11 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="text-center">
+                        <!-- <div class="text-center">
                             <button class="btn comBtn text-white" (click)="approvePayrollList()">Approve</button>
                             <button *ngIf="false" class="btn btn-danger text-white rejectBtn ms-2" data-bs-toggle="modal"
                                 data-bs-target="#RejectAllModal" (click)="onRejectAllClick()">Reject All</button>
-                        </div>
+                        </div> -->
                     </div>
                 </div>
             </div>
@@ -151,5 +158,54 @@
             </div>
         </div>
 
+    </div>
+</div>
+
+<!-- reject modal -->
+<div class="modal fade" id="RejectPayrollModal" tabindex="-1" aria-labelledby="applyLeaveLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content rounded-4">
+
+            <div class="modal-header text-white rounded-top-4">
+                <h5 class="modal-title" id="applyLeaveLabel">Reject Payroll</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                    aria-label="Close"></button>
+            </div>
+
+            <form>
+                <div class="modal-body">
+
+                    <div class="row mb-3">
+                        <div class="col-md-7">
+                            <label class="form-label">Reject Reason</label>
+                            <select class="form-select" [(ngModel)]="selectedRejectedReason" name="rejectReason"
+                                [ngClass]="{ 'is-invalid': showReasonError }">
+                                <option value="" disabled selected>-- Choose reason --</option>
+                                <option *ngFor="let item of rejectreasons" [ngValue]="item">{{
+                                    item.rejection_reason }}</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3" *ngIf="selectedRejectedReason?.rejection_reason === 'Other'">
+                        <div class="col-md-7">
+                            <label class="form-label">Enter Reason</label>
+                            <input type="text" class="form-control" [(ngModel)]="otherReason" name="otherReason"
+                                [ngClass]="{ 'is-invalid': showOtherReasonError }" placeholder="Enter reason" />
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-12 d-flex justify-content-end">
+                            <button type="button" class="btn BtnColor" (click)="rejectPayroll()">
+                                Reject
+                            </button>
+                        </div>
+                    </div>
+
+                </div>
+            </form>
+
+        </div>
     </div>
 </div>

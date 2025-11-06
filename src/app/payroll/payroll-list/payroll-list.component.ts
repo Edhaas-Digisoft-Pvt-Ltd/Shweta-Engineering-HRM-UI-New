@@ -7,6 +7,7 @@ import { HrmserviceService } from 'src/app/hrmservice.service';
 import { ToastrService } from 'ngx-toastr';
 import * as ExcelJS from 'exceljs';
 import * as FileSaver from 'file-saver';
+import { ModalServiceService } from 'src/app/modal-service.service';
 
 @Component({
   selector: 'app-payroll-list',
@@ -35,9 +36,15 @@ export class PayrollListComponent {
   lastPage: number = 1;
   pagesToShow: (number | string)[] = [];
   paginationvalue: any;
+  rejectreasons: any;
+  selectedRejectedReason: any = '';
+  otherReason: string = '';
+
+  showReasonError: boolean = false;
+  showOtherReasonError: boolean = false;
 
   today: string = new Date().toISOString().split('T')[0];
-  constructor(private router: Router, private service: HrmserviceService, private toastr: ToastrService) { }
+  constructor(private router: Router, private service: HrmserviceService, private modalService: ModalServiceService, private toastr: ToastrService) { }
 
   rowSelection: string = 'multiple';
   public defaultColDef: ColDef = {
@@ -77,6 +84,19 @@ export class PayrollListComponent {
     // this.getpayrollList();
 
     this.getPagination();
+  }
+
+  openModal() {
+    this.modalService.openModal('RejectPayrollModal')
+    this.getRejectReasons();
+  }
+
+  getRejectReasons() {
+    this.service.post('fetch/rejection/reason', { }).subscribe((res: any) => {
+      if (res.status == 'success') {
+        this.rejectreasons = res.data
+      }
+    });
   }
 
   getMonthName(monthId: number): string {
@@ -136,7 +156,7 @@ export class PayrollListComponent {
           this.generatePageNumbers(this.paginationvalue);
         } else {
           this.rowData = [];
-          this.toastr.warning('Data Not Found');
+          // this.toastr.warning('Data Not Found');
         }
       } catch (error) {
         console.log(error);
@@ -147,7 +167,7 @@ export class PayrollListComponent {
       (error) => {
         this.rowData = [];
         if (error.status === 404) {
-          this.toastr.warning('Data Not Found');
+          // this.toastr.warning('Data Not Found');
           this.isLoading = false;
         } else {
           console.error(error);
@@ -274,6 +294,55 @@ export class PayrollListComponent {
       error: (err) => {
         console.error(err);
         this.toastr.error('Failed to update status.');
+      }
+    });
+  }
+
+  rejectPayroll() {
+    this.showReasonError = false;
+    this.showOtherReasonError = false;
+
+    if (this.selectedRowData.length === 0) {
+      this.toastr.warning('Please select at least one employee.');
+      return;
+    }
+
+    if (!this.selectedRejectedReason?.rejection_id) {
+      this.showReasonError = true;
+      return;
+    }
+
+    if (
+      this.selectedRejectedReason?.rejection_reason === 'Other' &&
+      (!this.otherReason || this.otherReason.trim() === '')
+    ) {
+      this.showOtherReasonError = true;
+      return;
+    }
+
+    const tempPayrollIds = this.selectedRowData.map((emp: any) => emp.temp_payroll_id);
+
+    const payload: any = {
+      temp_payroll_id: tempPayrollIds, 
+      rejection_id: this.selectedRejectedReason.rejection_id,
+    };
+
+    if (this.selectedRejectedReason.rejection_reason === 'Other') {
+      payload.other_reason = this.otherReason.trim();
+    }
+
+    console.log('Reject Payroll Payload:', payload);
+
+    this.service.post('rejected/payroll', payload).subscribe((res: any) => {
+      if (res.status == 'success') {
+        this.toastr.success('Payroll rejected successfully');
+        this.modalService.closeModal();
+        this.selectedRejectedReason = '',
+        this.otherReason = '';
+        this.getpayrollList(); 
+      }
+      else {
+        this.toastr.error('Something went wrong');
       }
     });
   }

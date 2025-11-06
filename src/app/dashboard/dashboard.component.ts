@@ -96,7 +96,23 @@ export class DashboardComponent {
     this.service.post('fetch/company', {}).subscribe((res: any) => {
       if (res.status === 'success') {
         this.CompanyNames = res.data;
-        const defaultCompany = this.CompanyNames.find((comp: any) => comp.company_id === this.selectedCompanyId);
+
+        // Check if there's a saved company ID
+        const savedCompanyId = this.service.selectedCompanyId();
+
+        // Find saved company if it exists in the new list
+        let defaultCompany = null;
+        if (savedCompanyId) {
+          defaultCompany = this.CompanyNames.find((comp: any) => comp.company_id === savedCompanyId);
+        }
+
+        // If no saved or valid company, pick the first one dynamically
+        if (!defaultCompany && this.CompanyNames.length > 0) {
+          defaultCompany = this.CompanyNames[0];
+          this.service.setCompanyId(defaultCompany.company_id);
+        }
+
+        // Now select that company
         if (defaultCompany) {
           this.selectCompany(defaultCompany);
         }

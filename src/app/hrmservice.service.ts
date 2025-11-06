@@ -26,6 +26,7 @@ export class HrmserviceService {
   constructor(private router: Router, private httpClient: HttpClient) {
     this.loadRoleFromStorage();
     this.loadPermissionsFromStorage();
+    this.loadCompanyIdFromStorage();
    }
 
   get(endpoint: string, params?: any, reqOpts?: any) {
@@ -132,13 +133,21 @@ export class HrmserviceService {
   }
 
   //signal =========================================================================================
-  private _selectedCompanyId = signal<number>(1); //storing company id 
+  private _selectedCompanyId = signal<number | null>(null); //storing company id 
 
   setCompanyId(id: number) {
     this._selectedCompanyId.set(id);   //temp store company id
+    sessionStorage.setItem('selectedCompanyId', id.toString());
   }
 
   selectedCompanyId = this._selectedCompanyId.asReadonly(); //display company id
+
+  loadCompanyIdFromStorage() {
+    const storedId = sessionStorage.getItem('selectedCompanyId');
+    if (storedId) {
+      this._selectedCompanyId.set(Number(storedId));
+    }
+  }
 
   //signal - store employee id =====================================================================
   private _EmployeeId = signal<number | null>(null);

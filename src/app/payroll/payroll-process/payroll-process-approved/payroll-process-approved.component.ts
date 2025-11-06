@@ -119,6 +119,7 @@ export class PayrollProcessApprovedComponent {
           if (res.status === 'success' && res.data && res.data.length > 0) {
             this.rowData = res.data.map((item: any) => ({
               employee_code: item.employee_code,
+              emp_name: item.emp_name,
               department: item.department_name,
               role: item.role_name,
               presentDays: item.present_days,
@@ -136,7 +137,7 @@ export class PayrollProcessApprovedComponent {
             this.generatePageNumbers(this.paginationvalue);
           } else {
             this.rowData = [];
-            this.toastr.warning('Data Not Found');
+            // this.toastr.warning('Data Not Found');
           }
         } catch (error) {
           console.log(error);
@@ -147,7 +148,7 @@ export class PayrollProcessApprovedComponent {
       (error) => {
         this.rowData = [];
         if (error.status === 404) {
-          this.toastr.warning('Data Not Found');
+          // this.toastr.warning('Data Not Found');
           this.isLoading = false;
         } else {
           console.error(error);
@@ -173,18 +174,11 @@ export class PayrollProcessApprovedComponent {
         minWidth: 150,
       },
       {
-        headerName: 'Department',
-        field: 'department',
+        headerName: 'Emp Name',
+        field: 'emp_name',
         sortable: true,
         filter: true,
-        minWidth: 140,
       },
-      // {
-      //   headerName: 'Role',
-      //   field: 'role',
-      //   sortable: true,
-      //   filter: true,
-      // },
       {
         headerName: 'P',
         field: 'presentDays',
@@ -214,11 +208,11 @@ export class PayrollProcessApprovedComponent {
         minWidth: 100,
       },
       {
-        headerName: 'B & I',
-        field: 'bonus_incentive_amount',
+        headerName: 'Bonus',
+        field: 'bonus_amount',
         sortable: true,
         filter: true,
-        minWidth: 120,
+        minWidth: 100,
       },
       {
         headerName: 'Adv Salary',

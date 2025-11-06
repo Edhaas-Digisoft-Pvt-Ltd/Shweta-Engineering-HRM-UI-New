@@ -164,7 +164,7 @@ export class ApprovedAdvancePaymentComponent {
           this.lastPage = res.pagination.last_page;
           this.generatePageNumbers(this.paginationvalue);
         } else {
-          this.toastr.warning('Data Not Found');
+          // this.toastr.warning('Data Not Found');
         }
       } catch (error) {
         console.log(error);
@@ -172,7 +172,7 @@ export class ApprovedAdvancePaymentComponent {
       this.isLoading = false;
     }, (error) => {
       if (error.status === 400) {
-        this.toastr.warning('Data Not Found');
+        // this.toastr.warning('Data Not Found');
       } else {
         console.error(error);
       }

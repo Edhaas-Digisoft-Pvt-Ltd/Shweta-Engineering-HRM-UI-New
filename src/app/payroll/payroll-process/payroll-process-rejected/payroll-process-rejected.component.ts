@@ -125,6 +125,7 @@ export class PayrollProcessRejectedComponent {
           if (res.status === 'success' && res.data && res.data.length > 0) {
             this.rowData = res.data.map((item: any) => ({
               employee_code: item.employee_code,
+              emp_name: item.emp_name,
               department: item.department_name,
               role: item.role_name,
               presentDays: item.present_days,
@@ -133,7 +134,7 @@ export class PayrollProcessRejectedComponent {
               overTime: item.total_overtime,
               employe_id: item.employe_id,
               bonus_amount: item.bonus_amount ? `₹${item.bonus_amount}` : 'NA',
-              advance_salary: item.advance_salary ? `₹${item.advance_salary}` : 'NA',
+              adv_deduction: item.adv_deduction ? `₹${item.adv_deduction}` : 'NA',
               net_salary: item.net_salary ? `₹${item.net_salary}` : 'NA',
             }));
             this.totalRows = res.pagination.total;
@@ -142,7 +143,7 @@ export class PayrollProcessRejectedComponent {
             this.generatePageNumbers(this.paginationvalue);
           } else {
             this.rowData = [];
-            this.toastr.warning('Data Not Found');
+            // this.toastr.warning('Data Not Found');
           }
         } catch (error) {
           console.error(error);
@@ -154,7 +155,7 @@ export class PayrollProcessRejectedComponent {
         this.isLoading = false;
         this.rowData = [];
         if (error.status === 404) {
-          this.toastr.warning('Data Not Found');
+          // this.toastr.warning('Data Not Found');
           this.isLoading = false;
         } else {
           console.error(error);
@@ -191,12 +192,12 @@ export class PayrollProcessRejectedComponent {
 
   initializeColumns() {
     this.columnDefs = [
-      {
-        headerName: '',
-        maxWidth: 50,
-        checkboxSelection: true,
-        headerCheckboxSelection: true,
-      },
+      // {
+      //   headerName: '',
+      //   maxWidth: 50,
+      //   checkboxSelection: true,
+      //   headerCheckboxSelection: true,
+      // },
       {
         headerName: 'Emp Code',
         field: 'employee_code',
@@ -205,25 +206,24 @@ export class PayrollProcessRejectedComponent {
         minWidth: 150,
       },
       {
-        headerName: 'Department',
-        field: 'department',
+        headerName: 'Emp Name',
+        field: 'emp_name',
         sortable: true,
         filter: true,
-        minWidth: 140,
       },
       {
         headerName: 'P',
         field: 'presentDays',
         sortable: true,
         filter: true,
-        minWidth: 80,
+        maxWidth: 70,
       },
       {
         headerName: 'A',
         field: 'absentDays',
         sortable: true,
         filter: true,
-        minWidth: 80,
+        maxWidth: 70,
       },
       {
         headerName: 'OT(hrs)',
@@ -301,13 +301,19 @@ export class PayrollProcessRejectedComponent {
 
     // console.log('Importing Excel for:', this.selectedEmployee);
 
-    this.service.post('import/attendance', formData).subscribe((res: any) => {
-      if (res.status === 'success') {
-        this.toastr.success(res.data);
-        this.getRejectedPayroll();
-        this.closeAllModals();
-      } else {
-        console.log(res.error);
+    this.service.post('import/attendance', formData).subscribe({
+      next: (res: any) => {
+        if (res.status === 'success') {
+          this.toastr.success(res.data);
+          this.getRejectedPayroll();
+          this.closeAllModals();
+        } else {
+          this.toastr.error(res.data || 'Invalid Excel format');
+        }
+      },
+      error: (err: any) => {
+        const errorMsg = err?.error?.data || err?.message || 'Something went wrong';
+        this.toastr.error(errorMsg);
       }
     });
 

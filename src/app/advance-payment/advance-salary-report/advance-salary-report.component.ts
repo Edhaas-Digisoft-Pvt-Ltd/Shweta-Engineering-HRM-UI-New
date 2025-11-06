@@ -102,13 +102,13 @@ export class AdvanceSalaryReportComponent {
           this.rowData = transformedData;
         } else {
           this.rowData = [];
-          this.toastr.warning('Data Not Found');
+          // this.toastr.warning('Data Not Found');
         }
       },
       (error) => {
         this.rowData = [];
         if (error.status === 404) {
-          this.toastr.warning('Data Not Found');
+          // this.toastr.warning('Data Not Found');
         } else {
           this.toastr.error(error);
         }

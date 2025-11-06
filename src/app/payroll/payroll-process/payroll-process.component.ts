@@ -13,7 +13,8 @@ export class PayrollProcessComponent {
   @ViewChild('fileInput') fileInput!: ElementRef<HTMLInputElement>;
 
   CompanyNames: any = [];
-  selectedCompanyId: any = 1;
+  selectedCompany: string = '';
+  selectedCompanyId: any
   selectedYear: any;
   selectedMonth: any;
   rowData: any = [];
@@ -91,15 +92,31 @@ export class PayrollProcessComponent {
     return month ? month.value : '';
   }
 
+  selectCompany(company: any) {
+    this.selectedCompany = company.company_name;
+    this.selectedCompanyId = company.company_id;
+    this.service.setCompanyId(this.selectedCompanyId);
+  }
+
   getCompanyNames() {
     this.service.post('fetch/company', {}).subscribe((res: any) => {
-      if (res.status == "success") {
+      if (res.status === 'success') {
         this.CompanyNames = res.data;
+
+        // Always pick first company for accountant
+        if (this.CompanyNames.length > 0) {
+          const defaultCompany = this.CompanyNames[0];
+          this.service.setCompanyId(defaultCompany.company_id);
+          this.selectCompany(defaultCompany);
+        } else {
+          this.toastr.warning('No companies found for this account.');
+        }
+      } else {
+        this.toastr.error('Failed to load company list.');
       }
-    }, (error) => {
-      console.error('Error fetching companies:', error);
     });
   }
+
 
   onCompanyChange(event: Event): void {
     this.selectedCompanyId = (event.target as HTMLSelectElement).value;
@@ -114,6 +131,8 @@ export class PayrollProcessComponent {
 
   onGridReady(params: { api: any }) {
     this.gridApiActive = params.api;
+    this.getPayrollProcess();
+    this.getTempPayroll();
   }
 
   onTempGridReady(params: { api: any }) {
@@ -134,6 +153,7 @@ export class PayrollProcessComponent {
       if (res.status === 'success') {
         this.rowData = res.data.map((item: any) => ({
           employee_code: item.employee_code,
+          emp_name: item.emp_name,
           department: item.department_name,
           role: item.role_name,
           presentDays: item.present_days,
@@ -151,7 +171,7 @@ export class PayrollProcessComponent {
     }, (error) => {
       this.isLoading = false;
       if (error.status === 404) {
-        this.toastr.warning('Data Not Found');
+        // this.toastr.warning('Data Not Found');
         this.isLoading = false;
       } else {
         console.error(error);
@@ -176,6 +196,7 @@ export class PayrollProcessComponent {
           this.isProcess = true;
           this.tempRowData = res.data.map((item: any) => ({
             employee_code: item.employee_code,
+            emp_name: item.emp_name,
             department_name: item.department_name,
             present_days: item.present_days,
             absent_days: item.absent_days,
@@ -221,11 +242,11 @@ export class PayrollProcessComponent {
       next: () => {
         this.toastr.success('Temporary payroll created.');
         this.getTempPayroll();
-        this.isLoading = true;
+        this.isLoading = false;
       },
       error: () => {
-        this.toastr.error('Failed to create temp payroll.');
-        this.isLoading = true;
+        this.toastr.error('Invalid or empty payroll data submitted.');
+        this.isLoading = false;
       }
     });
   }
@@ -268,10 +289,10 @@ export class PayrollProcessComponent {
       if (res.status == 'success') {
         this.toastr.success('Payroll processed successfully.');
         this.getTempPayroll();
-        this.isLoading = true;
+        this.isLoading = false;
       } else {
         this.toastr.error('Something went wrong');
-        this.isLoading = true;
+        this.isLoading = false;
       }
     })
   }
@@ -280,7 +301,7 @@ export class PayrollProcessComponent {
   initializeColumns() {
     this.columnDefs = [
       { headerName: 'Emp Code', field: 'employee_code', sortable: true, filter: true },
-      { headerName: 'Department', field: 'department', sortable: true, filter: true },
+      { headerName: 'Emp Name', field: 'emp_name', sortable: true, filter: true },
       { headerName: 'Role', field: 'role', sortable: true, filter: true },
       { headerName: 'Present Days', field: 'presentDays', sortable: true, filter: true },
       { headerName: 'Absent', field: 'absentDays', sortable: true, filter: true, },
@@ -292,7 +313,7 @@ export class PayrollProcessComponent {
   initializeColumnsforProcess() {
     this.tempColumnDefs = [
       { headerName: 'Emp Code', field: 'employee_code', sortable: true, filter: true, minWidth: 160 },
-      { headerName: 'Department', field: 'department_name', sortable: true, filter: true, minWidth: 140 },
+      { headerName: 'Emp Name', field: 'emp_name', sortable: true, filter: true, minWidth: 140 },
       { headerName: 'P', field: 'present_days', sortable: true, filter: true },
       { headerName: 'A', field: 'absent_days', sortable: true, filter: true },
       { headerName: 'OT(hrs)', field: 'total_overtime', sortable: true, filter: true },

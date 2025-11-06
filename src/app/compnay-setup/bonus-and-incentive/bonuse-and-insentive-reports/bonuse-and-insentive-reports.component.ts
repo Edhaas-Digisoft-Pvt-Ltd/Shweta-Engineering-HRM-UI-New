@@ -72,7 +72,7 @@ export class BonuseAndInsentiveReportsComponent {
       (error) => {
         this.rowData = [];
         if (error.status === 404) {
-          this.toastr.warning('Data Not Found');
+          // this.toastr.warning('Data Not Found');
         } else {
           console.error(error);
         }
