@@ -34,6 +34,7 @@ import { ConfigurationComponent } from './configuration/configuration.component'
 
 import { PermissionGuard } from './permission.guard';
 import { PermissionsResolver } from './permissions.resolver';
+import { EmpLeaveAdvsalaryReportComponent } from './emp-leave-advsalary-report/emp-leave-advsalary-report.component';
 
 const routes: Routes = [
   {
@@ -192,6 +193,13 @@ const routes: Routes = [
         canActivate: [PermissionGuard],
         resolve: { permissions: PermissionsResolver },
         data: { module: 'Configuration', permission: 'view' }
+      },
+      {
+        path: 'employee-report',
+        component: EmpLeaveAdvsalaryReportComponent,
+        canActivate: [PermissionGuard],
+        resolve: { permissions: PermissionsResolver },
+        data: { module: 'Employee Dashboard', permission: 'view' }
       },
     ]
   },

@@ -108,6 +108,7 @@ export class PayrollApprovedComponent {
           if (res.status === 'success' && res.data && res.data.length > 0) {
             this.rowData = res.data.map((item: any) => ({
               employee_code: item.employee_code,
+              emp_name: item.emp_name,
               department: item.department_name,
               role: item.role_name,
               presentDays: item.present_days,
@@ -161,11 +162,10 @@ export class PayrollApprovedComponent {
       minWidth: 150,
     },
     {
-      headerName: 'Department',
-      field: 'department',
+      headerName: 'Emp name',
+      field: 'emp_name',
       sortable: true,
       filter: true,
-      minWidth: 140,
     },
     {
       headerName: 'P',

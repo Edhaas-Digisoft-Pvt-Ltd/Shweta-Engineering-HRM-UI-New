@@ -143,7 +143,6 @@ export class AttendanceComponent {
     });
   }
 
-
   downloadTemplate(): void {
     const userConfirmed = confirm("Do you want to download the daily attendance template?");
     if (userConfirmed) {

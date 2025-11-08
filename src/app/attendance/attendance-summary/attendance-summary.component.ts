@@ -86,7 +86,7 @@ export class AttendanceSummaryComponent {
     const daysInMonth = new Date(this.selectedYear, this.selectedMonth + 1, 0).getDate();
 
     this.columnDefs = [
-      { headerName: 'Employee Code', field: 'id', pinned: 'left', width: 150 },
+      { headerName: 'Employee Code', field: 'id', pinned: 'left', width: 150,  editable: true, },
       { headerName: 'Employee Name', field: 'name', pinned: 'left', width: 200 },
     ];
 

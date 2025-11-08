@@ -101,9 +101,25 @@ export class BonusConfigComponent {
       { headerName: 'From Date', field: 'from_date', sortable: true, filter: true, maxWidth: 140, },
       { headerName: 'To Date', field: 'to_date', sortable: true, filter: true, maxWidth: 140, },
       { headerName: 'Rate', field: 'bonus_rate', sortable: true, filter: true, maxWidth: 120, },
-      { headerName: 'Bonus-Month', field: 'bonus_month', sortable: true, filter: true },
+      {
+        headerName: 'Bonus-Month', field: 'bonus_month', sortable: true, filter: true,
+        valueGetter: (params) => this.formatBonusMonth(params.data.bonus_month)
+      },
       { headerName: 'Status', field: 'bonus_status', sortable: true, filter: true, maxWidth: 100, },
     ];
+  }
+
+  formatBonusMonth(bonusMonth: string): string {
+    if (!bonusMonth) return '-';
+
+    const [year, month] = bonusMonth.split('-').map(Number);
+    if (!year || !month) return bonusMonth;
+
+    const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const monthName = monthNames[month - 1];
+
+    return `${monthName} - ${year}`;
   }
 
   getCompanyNames() {

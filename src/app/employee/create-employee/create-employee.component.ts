@@ -107,6 +107,10 @@ export class CreateEmployeeComponent {
         '',
         [Validators.required, Validators.pattern(/^[A-Z]{4}0[A-Z0-9]{6}$/)],
       ],
+      transfer_type: [
+        '',
+        [Validators.required],
+      ],
       // Enable_PF_Employee: [''],
       // Opt_for_EPS_entitled: [''],
       // Enable_ESIC_for_employee: [''],
@@ -328,7 +332,8 @@ export class CreateEmployeeComponent {
           this.multiStepForm.controls['accountHolderName'].valid &&
           this.multiStepForm.controls['bankName'].valid &&
           this.multiStepForm.controls['accountNumber'].valid &&
-          this.multiStepForm.controls['ifsc'].valid
+          this.multiStepForm.controls['ifsc'].valid &&
+          this.multiStepForm.controls['transfer_type'].valid
         );
 
       case 4:
@@ -389,6 +394,7 @@ export class CreateEmployeeComponent {
         "designation_id": this.multiStepForm.value.designation,
         "bank_name": this.multiStepForm.value.bankName,
         "account_num": this.multiStepForm.value.accountNumber,
+        "transfer_type": this.multiStepForm.value.transfer_type,
         "ifsc_code": this.multiStepForm.value.ifsc,
         "doj": this.multiStepForm.value.join_date,
         "emp_contact": this.multiStepForm.value.contact,
@@ -408,6 +414,8 @@ export class CreateEmployeeComponent {
         "pf_employee_applicable": this.multiStepForm.value.pf_employee_applicable || false,
         "pf_employer_applicable": this.multiStepForm.value.pf_employer_applicable || false,
         "esic_employee_applicable": this.multiStepForm.value.esic_employee_applicable || false,
+
+
 
         // "department_name": this.multiStepForm.value.department,
         // "designation_name": this.multiStepForm.value.designation

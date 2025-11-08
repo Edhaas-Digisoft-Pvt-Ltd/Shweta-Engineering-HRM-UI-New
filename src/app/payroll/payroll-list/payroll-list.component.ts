@@ -233,7 +233,6 @@ export class PayrollListComponent {
       headerName: 'Actions',
       // field: 'inquiry_id',
       cellStyle: { border: '1px solid #ddd' },
-      maxWidth: 100,
       cellRenderer: PayrollActionBtnComponent,
       cellRendererParams: {
         viewEmployee: (field: any) => this.editApp(field),

@@ -48,14 +48,20 @@
                                     </div>
 
                                     <div class="col-auto d-flex align-items-end">
-                                        <button class="btn comBtn text-white"
+                                        <button class="btn btn-success text-white"
                                             (click)="approvePayrollList()">Approve</button>
-                                        <button class="btn btn-danger text-white rejectBtn ms-2" (click)="openModal()">Reject
+                                        <button class="btn btn-danger text-white rejectBtn ms-3" (click)="openModal()">Reject
                                             </button>
                                     </div>
 
                                     <div class="col-auto d-flex align-items-end">
-                                        <button class="btn btn-primary exportExcelBtn me-1" (click)="exportExcel()">
+                                        <button class="btn exportExcelBtn">
+                                            Generate CMS
+                                        </button>
+                                    </div>
+
+                                    <div class="col-auto d-flex align-items-end">
+                                        <button class="btn exportExcelBtn me-1" (click)="exportExcel()">
                                             <i class="bi bi-file-earmark-text-fill"></i>
                                         </button>
                                     </div>

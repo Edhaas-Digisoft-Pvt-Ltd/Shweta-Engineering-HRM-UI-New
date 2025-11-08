@@ -14,8 +14,8 @@
 
           <!-- Dashboard -->
           <li class="nav-item" *ngIf="hasAccess('Dashboard','view')">
-            <a routerLink="Dashboard" routerLinkActive="active-link"
-              class="nav-link btn-like d-flex align-items-center" (click)="closeAllAccordions()">
+            <a routerLink="Dashboard" routerLinkActive="active-link" class="nav-link btn-like d-flex align-items-center"
+              (click)="closeAllAccordions()">
               <i class="bi bi-house ms-2 me-2"></i> <span class="nav-name"> Dashboard</span>
             </a>
           </li>
@@ -24,14 +24,15 @@
           <li class="nav-item" *ngIf="hasAccess('Attendance','view')">
             <a routerLink="Attendance" routerLinkActive="active-link"
               class="nav-link btn-like d-flex align-items-center" (click)="closeAllAccordions()">
-              <i class="bi bi-alarm ms-2 me-2"></i> <span class="nav-name">Attendance</span> 
+              <i class="bi bi-alarm ms-2 me-2"></i> <span class="nav-name">Attendance</span>
             </a>
           </li>
 
           <!-- Leave -->
           <li class="nav-item" *ngIf="hasAccess('Leave','view')">
-            <a routerLink="Leave" routerLinkActive="active-link" class="nav-link btn-like d-flex align-items-center" (click)="closeAllAccordions()">
-              <i class="bi bi-calendar-week ms-2 me-2"></i><span class="nav-name"> Leave</span> 
+            <a routerLink="Leave" routerLinkActive="active-link" class="nav-link btn-like d-flex align-items-center"
+              (click)="closeAllAccordions()">
+              <i class="bi bi-calendar-week ms-2 me-2"></i><span class="nav-name"> Leave</span>
             </a>
           </li>
 
@@ -39,13 +40,14 @@
           <li class="nav-item" *ngIf="hasAccess('Advance Payment','view')">
             <a routerLink="AdvancePayment" routerLinkActive="active-link"
               class="nav-link btn-like d-flex align-items-center" (click)="closeAllAccordions()">
-              <i class="bi bi-currency-rupee ms-1 me-0" style="font-size:1.3rem;"></i><span class="nav-name"> Advance Salary</span> 
+              <i class="bi bi-currency-rupee ms-1 me-0" style="font-size:1.3rem;"></i><span class="nav-name"> Advance
+                Salary</span>
             </a>
           </li>
 
           <!-- Payroll Accordion -->
 
-          <li class="nav-item collapsIcons" *ngIf="hasAccess('Payroll','view')">
+          <!-- <li class="nav-item collapsIcons" *ngIf="hasAccess('Payroll','view')">
             <a (click)="togglePayrole($event)" class="nav-link btn-like d-flex align-items-center">
               <i class="bi bi-currency-rupee ms-1 me-0" style="font-size:1.3rem;"></i> <span
                 class="nav-name">Payroll</span>
@@ -58,6 +60,20 @@
                   routerLinkActive="active-link">Payroll
                   List</a></li>
             </ul>
+          </li> -->
+
+          <li class="nav-item" *ngIf="hasAccess('Payroll Manage','view') || hasAccess('Payroll Manage','insert')">
+            <a routerLink="payrollProcess" routerLinkActive="active-link"
+              class="nav-link btn-like d-flex align-items-center" (click)="closeAllAccordions()">
+              <i class="bi bi-currency-rupee ms-1 me-0" style="font-size:1.3rem;"></i><span class="nav-name">Manage Payroll</span>
+            </a>
+          </li>
+
+          <li class="nav-item" *ngIf="hasAccess('Payroll List','view')">
+            <a routerLink="payrollList" routerLinkActive="active-link"
+              class="nav-link btn-like d-flex align-items-center" (click)="closeAllAccordions()">
+              <i class="bi bi-currency-rupee ms-1 me-0" style="font-size:1.3rem;"></i><span class="nav-name">Manage Payroll</span>
+            </a>
           </li>
 
           <li>
@@ -85,25 +101,28 @@
 
           <!-- Calendar -->
           <li class="nav-item" *ngIf="hasAccess('calender','view')">
-            <a routerLink="Calender" routerLinkActive="active-link" class="nav-link btn-like d-flex align-items-center" (click)="closeAllAccordions()">
-              <i class="bi bi-calendar-event ms-2 me-2"></i> <span class="nav-name"> Calendar</span>  
+            <a routerLink="Calender" routerLinkActive="active-link" class="nav-link btn-like d-flex align-items-center"
+              (click)="closeAllAccordions()">
+              <i class="bi bi-calendar-event ms-2 me-2"></i> <span class="nav-name"> Calendar</span>
             </a>
           </li>
 
           <!-- Employee -->
           <li class="nav-item"
             *ngIf="hasAccess('Employee','view') || hasAccess('Employee','insert') || hasAccess('Employee','update') || hasAccess('Employee','import')">
-            <a routerLink="Employee" routerLinkActive="active-link" class="nav-link btn-like d-flex align-items-center" (click)="closeAllAccordions()">
-              <i class="bi bi-people-fill ms-2 me-2"></i> <span class="nav-name">Employee</span> 
+            <a routerLink="Employee" routerLinkActive="active-link" class="nav-link btn-like d-flex align-items-center"
+              (click)="closeAllAccordions()">
+              <i class="bi bi-people-fill ms-2 me-2"></i> <span class="nav-name">Employee</span>
             </a>
           </li>
+
           <!-- Company Settings Accordion -->
 
           <li class="nav-item collapsIcons" *ngIf="hasAccess('Company Settings','view')">
             <a (click)="toggleCompany($event)" class="nav-link btn-like d-flex align-items-center">
               <i class="bi bi-gear ms-1 me-2"></i> <span class="nav-name">Company Settings</span>
             </a>
- 
+
             <ul class="sideList2 com-side gap-3 p-2 d-flex flex-column" *ngIf="companyToggle"
               (click)="onBoxClick($event)">
               <li *ngIf="hasAccess('Company List','view')"><a routerLink="companyList"
@@ -139,7 +158,23 @@
           <li class="nav-item" *ngIf="hasAccess('Configuration','view')">
             <a routerLink="configuration" routerLinkActive="active-link"
               class="nav-link btn-like d-flex align-items-center" (click)="closeAllAccordions()">
-              <i class="bi bi-calendar-week ms-2 me-2"></i> <span class="nav-name"> Configuration</span> 
+              <i class="bi bi-calendar-week ms-2 me-2"></i> <span class="nav-name"> Configuration</span>
+            </a>
+          </li>
+
+          <!-- operator -->
+          <li class="nav-item" *ngIf="hasAccess('Employee Dashboard','view') && roleName !== 'Admin'">
+            <a routerLink="EmployeeInDetail" routerLinkActive="active-link"
+              class="nav-link btn-like d-flex align-items-center" (click)="closeAllAccordions()">
+              <i class="bi bi-people-fill ms-2 me-2"></i> <span class="nav-name">Employee Dashboard</span>
+            </a>
+          </li>
+
+          <li class="nav-item" *ngIf="hasAccess('Employee Dashboard','view') && roleName !== 'Admin'">
+            <a routerLink="employee-report" routerLinkActive="active-link"
+              class="nav-link btn-like d-flex align-items-center" (click)="closeAllAccordions()">
+              <i class="bi bi-currency-rupee ms-1 me-2" style="font-size:1.3rem;"></i><span
+                class="nav-name">Report</span>
             </a>
           </li>
 

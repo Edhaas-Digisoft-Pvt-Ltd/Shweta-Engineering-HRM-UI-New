@@ -5,12 +5,12 @@ import { HrmserviceService } from 'src/app/hrmservice.service';
 import { ToastrService } from 'ngx-toastr';
 
 @Component({
-  selector: 'app-advance-salary-report',
-  templateUrl: './advance-salary-report.component.html',
-  styleUrls: ['./advance-salary-report.component.css']
+  selector: 'app-emp-leave-advsalary-report',
+  templateUrl: './emp-leave-advsalary-report.component.html',
+  styleUrls: ['./emp-leave-advsalary-report.component.css']
 })
-export class AdvanceSalaryReportComponent {
-  searchValue: string = '';
+export class EmpLeaveAdvsalaryReportComponent {
+  activeTab: string = 'tab1';
   selectedYear = new Date().getFullYear();
   selectedMonth = new Date().getMonth() + 1;
   today: string = new Date().toISOString().split('T')[0];
@@ -26,6 +26,7 @@ export class AdvanceSalaryReportComponent {
   CompanyNames: any = [];
   selectedAdvpayid: number = 0;
   tabledata: any = [];
+  employee_id!: any;
 
   years = [2023, 2024, 2025];
   months = [
@@ -46,7 +47,16 @@ export class AdvanceSalaryReportComponent {
   constructor(private fb: FormBuilder, private service: HrmserviceService, private toastr: ToastrService) { }
 
   ngOnInit() {
-    this.getCompanyNames();
+    if (sessionStorage.getItem('roleName') == 'Operator') {
+      const signalEmpId = this.service.EmployeeId();
+      if (signalEmpId != null) {
+        this.employee_id = this.service.EmployeeId();
+        console.log('from signal', this.employee_id);
+      } else {
+        this.employee_id = sessionStorage.getItem('employeeId');
+        console.log('session storage', this.employee_id);
+      }
+    }
     this.initializeColumns()
     const currentDate = new Date();
     this.today = currentDate.toISOString().split('T')[0];
@@ -65,6 +75,11 @@ export class AdvanceSalaryReportComponent {
       installmentAmount: [{ value: '', disabled: true }],
       remainingBalance: [{ value: '', disabled: true }],
     })
+    this.searchEmployeeAdvanceSalary();
+  }
+
+  selectTab(tab: string) {
+    this.activeTab = tab;
   }
 
   onYearMonthChange() {
@@ -78,28 +93,20 @@ export class AdvanceSalaryReportComponent {
 
   searchEmployeeAdvanceSalary() {
     this.rowData = [];
-    const code = this.searchValue?.trim();
-    if (!code) {
-      this.rowData = [];
-      this.toastr.error('Please Enter Employee Code');
-      return;
-    }
+    console.log('called');
+    console.log('empid', this.employee_id);
+    
+    
 
     const payload = {
-      employee_code: code,
+      employee_id: this.employee_id,
       year: this.selectedYear,
-      // month: this.selectedMonth,
     };
 
     this.service.post('emp/advancesaraly/report', payload).subscribe(
       (res: any) => {
         if (res.status === 'success' && res.data.length > 0) {
-          const transformedData = res.data.map((item: any) => ({
-            ...item,
-            emi_status: item.emi_status ?? 'Ongoing',
-          }));
-
-          this.rowData = transformedData;
+          this.rowData = res.data;
         } else {
           this.rowData = [];
           // this.toastr.warning('Data Not Found');
@@ -118,24 +125,6 @@ export class AdvanceSalaryReportComponent {
 
   onGridReady(params: any) {
     this.gridApi = params.api;
-  }
-
-  // getemployees () {
-  //    this.service.post('all/employee', {}).subscribe((res: any) => {
-  //     console.log(res)
-  //     if (res.status == "success") {
-  //       this.employees = res.data
-  //     }
-  //   },
-  //     (error) => {
-  //       console.error('Error fetching companies:', error);
-  //     }
-  //   );
-  // }
-
-  emptyInput() {
-    this.searchValue = '';
-    window.location.reload();
   }
 
   public defaultColDef: ColDef = {
