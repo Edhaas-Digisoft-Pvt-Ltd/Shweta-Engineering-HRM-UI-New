@@ -27,7 +27,7 @@ export class LeaveRequestComponent {
   leaveBalance: any = {};
   previousLeaves: any;
   isLoading: boolean = false;
-
+  activeTab: string = 'tab1';
   totalRows: number = 0;
   currentPage: number = 1;
   lastPage: number = 1;
@@ -62,6 +62,9 @@ export class LeaveRequestComponent {
     this.params = params;
   }
 
+  selectTab(tab: string) {
+    this.activeTab = tab;
+  }
 
   public defaultColDef: ColDef = {
     editable: true,

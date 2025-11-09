@@ -64,6 +64,7 @@ import { BonusConfigComponent } from './configuration/bonus-config/bonus-config.
 import { IncentiveConfigComponent } from './configuration/incentive-config/incentive-config.component';
 import { SettingsConfigComponent } from './configuration/settings-config/settings-config.component';
 import { EmpLeaveAdvsalaryReportComponent } from './emp-leave-advsalary-report/emp-leave-advsalary-report.component';
+import { LeaveApprovedRejectedComponent } from './leave/leave-approved-rejected/leave-approved-rejected.component';
 
 // FullCalendarModule.registerPlugins([dayGridPlugin]);
 
@@ -122,6 +123,7 @@ import { EmpLeaveAdvsalaryReportComponent } from './emp-leave-advsalary-report/e
     IncentiveConfigComponent,
     SettingsConfigComponent,
     EmpLeaveAdvsalaryReportComponent,
+    LeaveApprovedRejectedComponent,
 
   ],
   imports: [

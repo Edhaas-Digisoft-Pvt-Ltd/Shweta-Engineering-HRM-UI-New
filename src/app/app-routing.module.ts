@@ -35,6 +35,7 @@ import { ConfigurationComponent } from './configuration/configuration.component'
 import { PermissionGuard } from './permission.guard';
 import { PermissionsResolver } from './permissions.resolver';
 import { EmpLeaveAdvsalaryReportComponent } from './emp-leave-advsalary-report/emp-leave-advsalary-report.component';
+import { LeaveRequestComponent } from './leave/leave-request/leave-request.component';
 
 const routes: Routes = [
   {
@@ -124,7 +125,7 @@ const routes: Routes = [
       },
       {
         path: 'Leave',
-        component: LeaveComponent,
+        component: LeaveRequestComponent,
         canActivate: [PermissionGuard],
         resolve: { permissions: PermissionsResolver },
         data: { module: 'Leave', permission: 'view' }
