@@ -13,13 +13,16 @@
       <div class="tabs-container m-2">
         <ul class="nav nav-tabs">
           <li class="nav-item" (click)="selectTab('tab1')">
-            <a class="nav-link fw-bold" [ngClass]="{'active': activeTab === 'tab1'}">Advance Salary Request</a>
+            <a class="nav-link fw-bold" [ngClass]="{'active': activeTab === 'tab1'}">Requests</a>
           </li>
           <li class="nav-item" (click)="selectTab('tab2')">
-            <a class="nav-link fw-bold" [ngClass]="{'active': activeTab === 'tab2'}">Advance Salary Approved</a>
+            <a class="nav-link fw-bold" [ngClass]="{'active': activeTab === 'tab2'}">Approved</a>
           </li>
           <li class="nav-item" (click)="selectTab('tab3')">
-            <a class="nav-link fw-bold" [ngClass]="{'active': activeTab === 'tab3'}">Advance Salary Report</a>
+            <a class="nav-link fw-bold" [ngClass]="{'active': activeTab === 'tab3'}">Details</a>
+          </li>
+          <li class="nav-item" (click)="selectTab('tab4')">
+            <a class="nav-link fw-bold" [ngClass]="{'active': activeTab === 'tab4'}">Report</a>
           </li>
         </ul>
         <div class="tab-content mt-3">
@@ -118,6 +121,11 @@
       </div>
     </div>
 
+    <div *ngIf="activeTab === 'tab4'">
+      <div class="container ">
+        <app-advance-salary-allemp-report></app-advance-salary-allemp-report>
+      </div>
+    </div>
 
     <div class="modal fade" id="advanceRequestModal" tabindex="-1" aria-labelledby="advanceRequestModalLabel"
       aria-hidden="true">

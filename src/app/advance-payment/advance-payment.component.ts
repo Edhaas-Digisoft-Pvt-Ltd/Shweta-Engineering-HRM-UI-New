@@ -228,7 +228,7 @@ export class AdvancePaymentComponent {
         filter: true,
       },
       { headerName: 'Apply Date', field: 'apply_date', sortable: true, filter: true },
-      { headerName: 'Amount', field: 'advance_amount', minWidth: 110, sortable: true, filter: true },
+      { headerName: 'Amount', field: 'advance_amount', sortable: true, filter: true },
       { headerName: 'Tenure', field: 'tenure', sortable: true, filter: true, maxWidth: 110 },
       {
         headerName: 'Status',
@@ -241,6 +241,7 @@ export class AdvancePaymentComponent {
     if (this.hasAccess('Advance Payment', 'ApproveOrReject')) {
       this.columnDefs.push({
         headerName: 'Actions',
+        maxWidth: 160,
         cellStyle: { border: '1px solid #ddd' },
         cellRenderer: (params: any) => {
           return `<button type="button" class="btn btn-sm mb-1" style="background-color:#C8E3FF">

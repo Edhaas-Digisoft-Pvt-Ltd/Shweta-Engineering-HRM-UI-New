@@ -446,7 +446,7 @@ export class PayrollSummariesComponent {
             <td style="border-right:none;"></td>
             <td style="border-left:none; border-right:none;"></td>
             <td style="border-left:1px solid #000; border-right:none;">Advance EMI</td>
-            <td style="border-left:none;">${this.calculationData?.advance_emi ?? 0}</td>
+            <td style="border-left:none;">${this.calculationData?.advance_amount ?? 0}</td>
           </tr>
           <tr style="font-weight:bold;">
             <td style="border-right:none;">Total Earnings</td>

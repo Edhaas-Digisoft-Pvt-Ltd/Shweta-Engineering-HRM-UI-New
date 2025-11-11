@@ -246,6 +246,7 @@ export class EmployeeDashboardComponent {
   generatePayslip(data: any) {
     this.employeeDetails = data.employee_details;
     this.calculationData = data.payroll_details;
+    
     this.attendanceDetails = [data.attendance];
     this.selectedYear = data.period.year;
     this.selectedMonth = data.period.month;
@@ -306,7 +307,7 @@ export class EmployeeDashboardComponent {
            <td>Bonus</td>
             <td>${this.calculationData?.bonus_amount ?? 0}</td>
             <td>Advance EMI</td>
-            <td>${this.calculationData?.advance_emi ?? 0}</td>
+            <td>${this.calculationData?.advance_amount ?? 0}</td>
           </tr>
           <tr style="font-weight:bold;">
             <td>Total Earnings</td>
