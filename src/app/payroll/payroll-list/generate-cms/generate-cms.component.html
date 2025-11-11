@@ -1,0 +1,82 @@
+<div class="form-border p-4 rounded shadow-sm bg-white">
+    <form [formGroup]="cmsForm" (ngSubmit)="generateCMS()">
+        <div class="row">
+
+            <div class="col-md-4 mb-3">
+                <label for="companyId">Select Company <span class="text-danger">*</span></label>
+                <div class="position-relative">
+                    <select id="companyId" class="form-control" formControlName="companyId"
+                        [ngClass]="{'is-invalid': isSubmitted && cmsForm.get('companyId')?.invalid}">
+                        <option value="">-- Select Company --</option>
+                        <option *ngFor="let company of companyList" [value]="company.company_id">
+                            {{ company.company_name }}
+                        </option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="col-md-4 mb-3">
+                <label for="yearMonth">Select Year & Month <span class="text-danger">*</span></label>
+                <div class="position-relative">
+                    <input type="month" id="yearMonth" class="form-control" formControlName="yearMonth"
+                        [attr.max]="maxMonth" placeholder="Select Month"
+                        [ngClass]="{'is-invalid': isSubmitted && cmsForm.get('yearMonth')?.invalid}" />
+                </div>
+            </div>
+
+            <div class="col-md-4 mb-3">
+                <label for="companyCode">Company Code <span class="text-danger">*</span></label>
+                <div class="position-relative">
+                    <input type="text" id="companyCode" class="form-control" formControlName="companyCode"
+                        placeholder="Enter Company Code" (keypress)="allowAlphanumeric($event)"
+                        [ngClass]="{'is-invalid': isSubmitted && cmsForm.get('companyCode')?.invalid}">
+                </div>
+            </div>
+
+            <div class="col-md-4 mb-3">
+                <label for="paymentType">Payment Type<span class="text-danger">*</span></label>
+                <div class="position-relative">
+                    <input type="text" id="paymentType" class="form-control" formControlName="paymentType"
+                        placeholder="Enter Company Code" (keypress)="allowAlphanumeric($event)"
+                        [ngClass]="{'is-invalid': isSubmitted && cmsForm.get('paymentType')?.invalid}">
+                </div>
+            </div>
+
+            <div class="col-md-4 mb-3">
+                <label for="paymentDate">Payment Date <span class="text-danger">*</span></label>
+                <div class="position-relative">
+                    <input type="date" id="paymentDate" class="form-control" formControlName="paymentDate" [max]="today"
+                        [ngClass]="{'is-invalid': isSubmitted && cmsForm.get('paymentDate')?.invalid}">
+                </div>
+            </div>
+
+            <div class="col-md-4 mb-3">
+                <label for="accountNumber">Account Number <span class="text-danger">*</span></label>
+                <div class="position-relative">
+                    <input type="text" id="accountNumber" class="form-control" formControlName="accountNumber"
+                        placeholder="Enter Account Number" maxlength="20" (keypress)="allowOnlyNumbers($event)"
+                        [ngClass]="{'is-invalid': isSubmitted && cmsForm.get('accountNumber')?.invalid}">
+                </div>
+            </div>
+
+        </div>
+
+        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+            <button type="submit" class="btn btnColor mt-3 ml-auto btn-end submit-btn">
+                Generate CMS
+            </button>
+        </div>
+    </form>
+</div>
+<!-- <div class="col-md-3 mb-3">
+            <label for="paymentType">Payment Type <span class="text-danger">*</span></label>
+            <div class="position-relative">
+                <select id="paymentType" class="form-control" formControlName="paymentType"
+                    [ngClass]="{'is-invalid': isSubmitted && cmsForm.get('paymentType')?.invalid}">
+                    <option value="">-- Select Payment Type --</option>
+                    <option value="RPAY">RPAY</option>
+                    <option value="SAL">SAL</option>
+                    <option value="OTH">OTH</option>
+                </select>
+            </div>
+        </div> -->

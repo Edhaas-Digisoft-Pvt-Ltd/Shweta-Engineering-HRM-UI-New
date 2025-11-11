@@ -21,6 +21,9 @@
         <li class="nav-item" (click)="selectTab('tab3')">
           <a class="nav-link fw-bold" [ngClass]="{ 'active': activeTab === 'tab3' }">Approved</a>
         </li>
+        <li class="nav-item" (click)="selectTab('tab4')">
+          <a class="nav-link fw-bold" [ngClass]="{ 'active': activeTab === 'tab4' }">Generate CMS</a>
+        </li>
       </ul>
 
       <div class="tab-content mt-3">
@@ -135,8 +138,13 @@
         <div *ngIf="activeTab === 'tab2'">
           <app-payroll-process-rejected></app-payroll-process-rejected>
         </div>
+
         <div *ngIf="activeTab === 'tab3'">
           <app-payroll-process-approved></app-payroll-process-approved>
+        </div>
+
+         <div *ngIf="activeTab === 'tab4'">
+          <app-generate-cms></app-generate-cms>
         </div>
       </div>
     </div>
