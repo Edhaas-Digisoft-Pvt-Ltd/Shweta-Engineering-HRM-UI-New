@@ -200,85 +200,59 @@ export class CompanyListComponent {
 
   addCompany() {
     this.isSubmitted = true;
-    if (this.companyForm.value.radioChoice == 'no') {
-      if (this.companyForm.valid && this.selectedLogoFile) {
-        const current_data = {
-          master_id: this.selectedId,
-          company_name: this.companyForm.value.companyName,
-          tax_id: this.selectedId,
-          payroll_id: this.selectedId,
-          company_desc: this.companyForm.value.companyDescription,
-          company_location: this.companyForm.value.companyAddress,
-          company_logo: this.selectedLogoFile.name,
-          company_founded: this.companyForm.value.IncorporationDate,
-        };
 
-        console.log("Company Data to Submit:", current_data);
+    // Check if it's a master or sub-company
+    const isMaster = this.companyForm.value.radioChoice === 'yes';
 
-        this.service.post("create/company", current_data).subscribe({
-          next: (res) => {
-            this.toastr.success('Form Submitted Successfully!');
-            this.modalService.closeModal();
-            this.getCompanyData();
-            this.resetCompanyForm();
-            this.isSubmitted = false;
-            this.selectedLogoFile = null;
-          },
-          error: (err) => {
-            console.error("API Error:", err);
-            this.toastr.error('Failed to add company.');
-          }
-        });
-      } else {
-        if (!this.selectedLogoFile) {
-          this.toastr.error('Please select a company logo!');
+    // Validate required fields
+    if (this.companyForm.invalid || !this.selectedLogoFile) {
+      this.toastr.error('Please fill all required fields correctly!');
+      return;
+    }
+
+    // Prepare FormData (for file upload)
+    const formData = new FormData();
+
+    if (isMaster) {
+      // master company payload
+      formData.append('master_id', '1'); // use appropriate value if needed
+      formData.append('tax_id', '1');
+      formData.append('payroll_id', '1');
+    } else {
+      // sub company payload
+      formData.append('master_id', this.selectedId || '1');
+      formData.append('tax_id', this.selectedId || '1');
+      formData.append('payroll_id', this.selectedId || '1');
+    }
+
+    formData.append('company_name', this.companyForm.value.companyName);
+    formData.append('company_desc', this.companyForm.value.companyDescription);
+    formData.append('company_location', this.companyForm.value.companyAddress);
+    formData.append('company_founded', this.companyForm.value.IncorporationDate);
+    formData.append('company_logo', this.selectedLogoFile); // actual file
+
+    // console.log("Submitting company data:", [...formData.entries()]);
+
+    this.service.post('create/company', formData).subscribe({
+      next: (res: any) => {
+        if (res.status === 'success') {
+          this.toastr.success('Company added successfully!');
+          this.modalService.closeModal();
+          this.getCompanyData();
+          this.resetCompanyForm();
+          this.isSubmitted = false;
+          this.selectedLogoFile = null;
+        } else {
+          this.toastr.error(res.message || 'Failed to add company.');
         }
-
-        const invalidControls = Object.keys(this.companyForm.controls).filter(control =>
-          this.companyForm.get(control)?.invalid
-        );
-
-        console.warn("Invalid Fields:", invalidControls);
-        this.toastr.error('Please fill all required fields correctly!');
+      },
+      error: (err) => {
+        console.error("API Error:", err);
+        this.toastr.error('Something went wrong while adding company.');
       }
-    }
-    else {
-      if (this.companyForm.valid && this.selectedLogoFile) {
-        const companyName = this.companyForm.value.companyName?.trim() || '';
-        const companyInitials = companyName
-          .split(' ')                    
-          .filter((word: string) => word.length > 0)
-          .map((word: string) => word[0].toUpperCase())
-          .join('');
-
-        const current_data = {
-          master_company_name: this.companyForm.value.companyName,
-          company_initials: companyInitials,
-        };
-
-        console.log("Company Data to Submit:", current_data);
-
-        this.service.post("create/master-companie", current_data).subscribe({
-          next: (res) => {
-            this.toastr.success('Form Submitted Successfully!');
-            this.modalService.closeModal();
-            this.getCompanyData();
-            this.resetCompanyForm();
-            this.isSubmitted = false;
-            this.selectedLogoFile = null;
-          },
-          error: (err) => {
-            console.error("API Error:", err);
-            this.toastr.error('Failed to add company.');
-          }
-        });
-      }
-      console.log("Form Values on Submit Attempt:", this.companyForm.value);
-
-
-    }
-
+    });
   }
+
 
   resetCompanyForm() {
     this.companyForm.reset({

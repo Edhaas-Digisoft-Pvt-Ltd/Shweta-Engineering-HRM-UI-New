@@ -70,14 +70,15 @@
 
         <div class="row justify-content-between gap-3 mb-3 ">
           <div class="col border p-3 companyCard" *ngFor="let stat of CompanyNames"
-            [ngClass]="{'highlighted': selectedCompanyId === stat.company_id }"
-            style="border-radius: 10px; cursor: pointer;" (click)="selectCompany(stat)">
-            <div class="d-flex justify-content-center gap-3">
-              <div>
-                <i class="bi" [ngClass]="stat.icon + ' text-primary'" style="font-size: 22px;"></i>
+            [ngClass]="{'highlighted': selectedCompanyId === stat.company_id }" style="border-radius: 10px; cursor: pointer;"
+            (click)="selectCompany(stat)">
+            <div class="d-flex align-items-center gap-3">
+              <div class="logo-container">
+                <img [src]="stat.company_logo_url || 'assets/images/default-logo.png'" alt="Company Logo" class="company-logo"
+                  onerror="this.src='assets/images/default-logo.png'" />
               </div>
               <div>
-                <h6 class="companyTitle">{{ stat.company_name }}</h6>
+                <h6 class="companyTitle mb-1">{{ stat.company_name }}</h6>
                 <p class="mb-0 companyCount">{{ stat.company_desc }}</p>
               </div>
             </div>

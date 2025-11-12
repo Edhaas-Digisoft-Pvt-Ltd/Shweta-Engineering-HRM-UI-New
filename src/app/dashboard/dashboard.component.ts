@@ -21,8 +21,6 @@ export class DashboardComponent {
   selectedCompany: string = '';
   CompanyNames: any = [];
   selectedCompanyId: any;
-  optionsArray: string[] = ['Company A', 'Company B', 'Company C'];
-  selectedValue: string = 'Company A';
   searchValue: string = '';
   gridApiActive: any;
   leaveCards: any = [];
@@ -377,10 +375,6 @@ export class DashboardComponent {
   emptyInput() {
     this.searchValue = '';
     window.location.reload();
-  }
-  // company selection
-  onOptionSelected() {
-    console.log('Selected option:', this.selectedValue);
   }
 
   // Chart for payroll statistics

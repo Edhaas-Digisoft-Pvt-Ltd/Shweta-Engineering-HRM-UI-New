@@ -73,12 +73,12 @@
           <div *ngIf="!isProcess" class="row mt-3">
             <div class="col-12">
               <!-- style="width: 100%; height: 50vh;" -->
-              <ag-grid-angular class="ag-theme-alpine" [rowData]="rowData"
-                [columnDefs]="columnDefs" [gridOptions]="gridOptions" [pagination]="false" [domLayout]="'autoHeight'"
+              <ag-grid-angular class="ag-theme-alpine" style="width: 100%; height: 60vh;" [rowData]="rowData"
+                [columnDefs]="columnDefs"  [pagination]="true"
                 (gridReady)="onGridReady($event)" rowSelection="multiple" [defaultColDef]="defaultColDef">
               </ag-grid-angular>
 
-              <div class="d-flex align-items-center justify-content-end flex-wrap mt-3 gap-2">
+              <!-- <div class="d-flex align-items-center justify-content-end flex-wrap mt-3 gap-2">
                 <button class="btn btn-sm btn-primary rounded" (click)="prevPage()"
                   [disabled]="currentPage === 1">Prev</button>
                 <button class="btn btn-sm btn-primary rounded" (click)="nextPage()"
@@ -94,19 +94,19 @@
                   </span>
                   <ng-template #ellipsis><span class="mx-1">...</span></ng-template>
                 </ng-container>
-              </div>
+              </div> -->
             </div>
           </div>
-
+          
           <!-- Grid when isProcess is true -->
           <div *ngIf="isProcess" class="row mt-3">
             <div class="col-12">
               <ag-grid-angular style="width: 100%; height: 60vh;" class="ag-theme-alpine" [rowData]="tempRowData"
-                [columnDefs]="tempColumnDefs" [gridOptions]="gridOptions" [pagination]="false"
+                [columnDefs]="tempColumnDefs" [gridOptions]="gridOptions" [pagination]="true"
                 (gridReady)="onTempGridReady($event)" (selectionChanged)="onSelectionChanged($event)"
                 rowSelection="multiple" [defaultColDef]="defaultColDef">
               </ag-grid-angular>
-              <div class="d-flex align-items-center justify-content-end flex-wrap mt-3 gap-2">
+              <!-- <div class="d-flex align-items-center justify-content-end flex-wrap mt-3 gap-2">
                 <button class="btn btn-sm btn-primary rounded" (click)="prevPage()"
                   [disabled]="currentPage === 1">Prev</button>
                 <button class="btn btn-sm btn-primary rounded" (click)="nextPage()"
@@ -122,7 +122,7 @@
                   </span>
                   <ng-template #ellipsis><span class="mx-1">...</span></ng-template>
                 </ng-container>
-              </div>
+              </div> -->
 
             </div>
             <!-- <div class="text-center mt-3">

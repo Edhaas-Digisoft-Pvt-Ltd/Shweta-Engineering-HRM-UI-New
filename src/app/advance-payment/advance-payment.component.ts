@@ -220,28 +220,30 @@ export class AdvancePaymentComponent {
 
   initializeColumns() {
     this.columnDefs = [
-      { headerName: 'Emp Code', field: 'employee_code', sortable: true, filter: true, maxWidth: 150, },
+      { headerName: 'Emp Code', field: 'employee_code', sortable: true, filter: true, flex: 1, },
       {
         headerName: 'Employee Name',
         field: 'emp_name',
         sortable: true,
         filter: true,
+        flex: 1,
       },
       { headerName: 'Apply Date', field: 'apply_date', sortable: true, filter: true },
       { headerName: 'Amount', field: 'advance_amount', sortable: true, filter: true },
-      { headerName: 'Tenure', field: 'tenure', sortable: true, filter: true, maxWidth: 110 },
+      { headerName: 'Tenure', field: 'tenure', sortable: true, filter: true, flex: 1, maxWidth: 120},
       {
         headerName: 'Status',
         field: 'status',
         sortable: true,
         filter: true,
+        flex: 1,
         cellRenderer: this.statusButtonRenderer,
       },
     ];
     if (this.hasAccess('Advance Payment', 'ApproveOrReject')) {
       this.columnDefs.push({
         headerName: 'Actions',
-        maxWidth: 160,
+        flex: 1,
         cellStyle: { border: '1px solid #ddd' },
         cellRenderer: (params: any) => {
           return `<button type="button" class="btn btn-sm mb-1" style="background-color:#C8E3FF">

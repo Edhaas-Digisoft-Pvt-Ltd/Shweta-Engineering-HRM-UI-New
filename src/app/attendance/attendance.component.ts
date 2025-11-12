@@ -86,8 +86,10 @@ export class AttendanceComponent {
   }
 
   selectedFile: File | null = null;
-
+  
+  //import attendance
   onFileChange(event: any) {
+    this.isLoading = true;
     const file = event.target.files[0];
     if (!file) return;
 
@@ -97,6 +99,7 @@ export class AttendanceComponent {
     formData.append('upload_file', file);
 
     this.service.post('import-attendance', formData).subscribe((res: any) => {
+      this.isLoading = false;
       if (res.status === 'success') {
         this.toastr.success(res.data);
         this.fetchAttendance();
@@ -107,6 +110,7 @@ export class AttendanceComponent {
           this.toastr.error(res.data)
       }
     });
+    
   }
 
   applyFilter(status: string) {
@@ -117,6 +121,7 @@ export class AttendanceComponent {
 
   clearFilter() {
     this.currentFilter = '';
+    this.searchInputValue = ''; 
     this.currentPage = 1;
     this.fetchAttendance();
   }
@@ -131,17 +136,34 @@ export class AttendanceComponent {
       body.status = this.currentFilter;
     }
 
-    this.service.post('fetch/attendance', body).subscribe((res: any) => {
-      if (res.status === 'success') {
-        this.rowData = res.data;
-        this.totalRows = res.pagination.total;
-        this.currentPage = res.pagination.page;
-        this.lastPage = res.pagination.last_page;
+    if (this.searchInputValue && this.searchInputValue.trim() !== '') {
+      body.search = this.searchInputValue.trim();
+    }
 
-        this.generatePageNumbers(this.paginationvalue);
+    this.isLoading = true;
+
+    this.service.post('fetch/attendance', body).subscribe({
+      next: (res: any) => {
+        this.isLoading = false;
+        if (res.status === 'success') {
+          this.rowData = res.data;
+          this.totalRows = res.pagination.total;
+          this.currentPage = res.pagination.page;
+          this.lastPage = res.pagination.last_page;
+          this.generatePageNumbers(this.paginationvalue);
+        } else {
+          this.rowData = [];
+          this.totalRows = 0;
+          this.pagesToShow = [];
+        }
+      },
+      error: (err) => {
+        this.isLoading = false;
+        console.error('Fetch Attendance Error:', err);
       }
     });
   }
+
 
   downloadTemplate(): void {
     const userConfirmed = confirm("Do you want to download the daily attendance template?");
@@ -349,6 +371,17 @@ export class AttendanceComponent {
   removeAMPM(timeStr: string | null): string {
     if (!timeStr) return '';
     return timeStr.replace(/\s?(AM|PM)/i, '').trim();
+  }
+
+  searchTimeout: any;
+
+  onSearchChange(): void {
+    // Debounce search to avoid too many API calls
+    clearTimeout(this.searchTimeout);
+    this.searchTimeout = setTimeout(() => {
+      this.currentPage = 1;
+      this.fetchAttendance();
+    }, 500);
   }
 
   getPaginationValueAndFetchAttendance() {

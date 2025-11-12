@@ -74,7 +74,7 @@ export class PayrollProcessComponent {
     this.initializeColumnsforProcess();
     // this.getTempPayroll();
 
-    this.getPagination();
+    // this.getPagination();
 
     if (sessionStorage.getItem('roleName') == 'Accountant') {
       this.router.navigate(['/authPanal/payrollProcess']);
@@ -108,6 +108,9 @@ export class PayrollProcessComponent {
           const defaultCompany = this.CompanyNames[0];
           this.service.setCompanyId(defaultCompany.company_id);
           this.selectCompany(defaultCompany);
+
+          this.getPayrollProcess();
+          this.getTempPayroll();
         } else {
           this.toastr.warning('No companies found for this account.');
         }
@@ -116,7 +119,6 @@ export class PayrollProcessComponent {
       }
     });
   }
-
 
   onCompanyChange(event: Event): void {
     this.selectedCompanyId = (event.target as HTMLSelectElement).value;
@@ -147,7 +149,7 @@ export class PayrollProcessComponent {
       company_id: this.selectedCompanyId,
       year: this.selectedYear,
       month: this.selectedMonth,
-      page: page,
+      // page: page,
       isexport: false,
     }).subscribe((res: any) => {
       if (res.status === 'success') {
@@ -162,10 +164,10 @@ export class PayrollProcessComponent {
           overTime: item.total_overtime,
           employe_id: item.employe_id,
         }));
-        this.totalRows = res.pagination.total;
-        this.currentPage = res.pagination.page;
-        this.lastPage = res.pagination.last_page;
-        this.generatePageNumbers(this.paginationvalue);
+        // this.totalRows = res.pagination.total;
+        // this.currentPage = res.pagination.page;
+        // this.lastPage = res.pagination.last_page;
+        // this.generatePageNumbers(this.paginationvalue);
       }
       this.isLoading = false;
     }, (error) => {
@@ -187,7 +189,6 @@ export class PayrollProcessComponent {
       company_id: this.selectedCompanyId,
       year: this.selectedYear,
       month: this.selectedMonth,
-      page: page,
     };
 
     this.service.post('fetch/temp/payroll', payload).subscribe({
@@ -207,10 +208,10 @@ export class PayrollProcessComponent {
             adv_deduction: item.adv_deduction ? `₹ ${item.adv_deduction}` : 'NA',
             net_salary: item.net_salary ? `₹ ${item.net_salary}` : 'NA',
           }));
-          this.totalRows = res.pagination.total;
-          this.currentPage = res.pagination.page;
-          this.lastPage = res.pagination.last_page;
-          this.generatePageNumbers(this.paginationvalue);
+          // this.totalRows = res.pagination.total;
+          // this.currentPage = res.pagination.page;
+          // this.lastPage = res.pagination.last_page;
+          // this.generatePageNumbers(this.paginationvalue);
         }
         else {
           this.isProcess = false;
@@ -459,91 +460,91 @@ export class PayrollProcessComponent {
     this.fileInput.nativeElement.value = '';
   }
 
-  getPagination() {
-    this.service.post('get-pagination', {}).subscribe((res: any) => {
-      if (res.status === 'success') {
-        this.paginationvalue = res.data;
-        this.getTempPayroll();
-      } else {
-        this.paginationvalue = 10;
-        this.getTempPayroll();
-      }
-    });
-  }
+  // getPagination() {
+  //   this.service.post('get-pagination', {}).subscribe((res: any) => {
+  //     if (res.status === 'success') {
+  //       this.paginationvalue = res.data;
+  //       this.getTempPayroll();
+  //     } else {
+  //       this.paginationvalue = 10;
+  //       this.getTempPayroll();
+  //     }
+  //   });
+  // }
 
-  getpaginationvalue() {
-    this.service.post('get-pagination', {}).subscribe((res: any) => {
-      if (res.status === 'success') {
-        this.paginationvalue = res.data
-        this.generatePageNumbers(this.paginationvalue)
-      }
-    });
-  }
+  // getpaginationvalue() {
+  //   this.service.post('get-pagination', {}).subscribe((res: any) => {
+  //     if (res.status === 'success') {
+  //       this.paginationvalue = res.data
+  //       this.generatePageNumbers(this.paginationvalue)
+  //     }
+  //   });
+  // }
 
-  generatePageNumbers(pageWindow: number) {
-    const total = this.lastPage;
-    const current = this.currentPage;
-    let startPage = current;
-    let endPage = current + pageWindow - 1;
-    if (endPage >= total) {
-      endPage = total - 1;
-      startPage = Math.max(2, total - pageWindow);
-    }
+  // generatePageNumbers(pageWindow: number) {
+  //   const total = this.lastPage;
+  //   const current = this.currentPage;
+  //   let startPage = current;
+  //   let endPage = current + pageWindow - 1;
+  //   if (endPage >= total) {
+  //     endPage = total - 1;
+  //     startPage = Math.max(2, total - pageWindow);
+  //   }
 
-    if (current === 1) {
-      startPage = 2;
-      endPage = Math.min(total - 1, pageWindow);
-    }
-    const pages: (number | string)[] = [];
-    pages.push(1);
-    if (startPage > 2) {
-      pages.push('...');
-    }
-    for (let i = startPage; i <= endPage; i++) {
-      pages.push(i);
-    }
-    if (endPage < total - 1) {
-      pages.push('...');
-    }
-    if (total > 1) pages.push(total);
-    this.pagesToShow = pages;
-  }
+  //   if (current === 1) {
+  //     startPage = 2;
+  //     endPage = Math.min(total - 1, pageWindow);
+  //   }
+  //   const pages: (number | string)[] = [];
+  //   pages.push(1);
+  //   if (startPage > 2) {
+  //     pages.push('...');
+  //   }
+  //   for (let i = startPage; i <= endPage; i++) {
+  //     pages.push(i);
+  //   }
+  //   if (endPage < total - 1) {
+  //     pages.push('...');
+  //   }
+  //   if (total > 1) pages.push(total);
+  //   this.pagesToShow = pages;
+  // }
 
 
-  goToPage(page: number | string) {
-    if (page === '...') return;
-    if (page !== this.currentPage) {
-      this.currentPage = page as number;
-      if (this.isProcess === false) {
-        this.getPayrollProcess(this.currentPage);
-      }
-      if (this.isProcess === true) {
-        this.getTempPayroll(this.currentPage);
-      }
-    }
-  }
+  // goToPage(page: number | string) {
+  //   if (page === '...') return;
+  //   if (page !== this.currentPage) {
+  //     this.currentPage = page as number;
+  //     if (this.isProcess === false) {
+  //       this.getPayrollProcess(this.currentPage);
+  //     }
+  //     if (this.isProcess === true) {
+  //       this.getTempPayroll(this.currentPage);
+  //     }
+  //   }
+  // }
 
-  prevPage() {
-    if (this.currentPage > 1) {
-      this.currentPage--;
-      if (this.isProcess === false) {
-        this.getPayrollProcess(this.currentPage);
-      }
-      if (this.isProcess === true) {
-        this.getTempPayroll(this.currentPage);
-      }
-    }
-  }
+  // prevPage() {
+  //   if (this.currentPage > 1) {
+  //     this.currentPage--;
+  //     if (this.isProcess === false) {
+  //       this.getPayrollProcess(this.currentPage);
+  //     }
+  //     if (this.isProcess === true) {
+  //       this.getTempPayroll(this.currentPage);
+  //     }
+  //   }
+  // }
 
-  nextPage() {
-    if (this.currentPage < this.lastPage) {
-      this.currentPage++;
-      if (this.isProcess === false) {
-        this.getPayrollProcess(this.currentPage);
-      }
-      if (this.isProcess === true) {
-        this.getTempPayroll(this.currentPage);
-      }
-    }
-  }
+  // nextPage() {
+  //   if (this.currentPage < this.lastPage) {
+  //     this.currentPage++;
+  //     if (this.isProcess === false) {
+  //       this.getPayrollProcess(this.currentPage);
+  //     }
+  //     if (this.isProcess === true) {
+  //       this.getTempPayroll(this.currentPage);
+  //     }
+  //   }
+  // }
 }
