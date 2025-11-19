@@ -10,7 +10,7 @@
         <!-- Search -->
         <div class="d-flex flex-column">
           <label class="form-label mb-1">Search</label>
-          <input class="form-control" type="text" placeholder="Search here" [(ngModel)]="searchValue"
+          <input type="text" class="form-control" placeholder="Search here" [(ngModel)]="searchValue"
             (ngModelChange)="onFilterBoxChange()" />
         </div>
 
@@ -51,10 +51,10 @@
             <!--  -->
 
             <!-- Month View Grid -->
-             <!-- style="width: 100%; height: 600px;" -->
-            <ag-grid-angular class="ag-theme-alpine" id="specualGrid2"
-              [gridOptions]="gridOptions" [pagination]="false" [columnDefs]="columnDefs" [defaultColDef]="defaultColDef"
-              [rowData]="rowData" [domLayout]="'autoHeight'" (gridReady)="onGridReady($event)">
+            <!-- style="width: 100%; height: 600px;" -->
+            <ag-grid-angular class="ag-theme-alpine" id="specualGrid2" [gridOptions]="gridOptions" [pagination]="false"
+              [columnDefs]="columnDefs" [defaultColDef]="defaultColDef" [rowData]="rowData" [domLayout]="'autoHeight'"
+              (gridReady)="onGridReady($event)">
             </ag-grid-angular>
 
             <div class="d-flex align-items-center justify-content-end flex-wrap mt-3 gap-2">

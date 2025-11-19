@@ -4,7 +4,7 @@ import { HrmserviceService } from './hrmservice.service';
 
 @Injectable({ providedIn: 'root' })
 export class PermissionGuard implements CanActivate {
-  private alertShown = false; // 👈 prevent repeated alerts
+  private alertShown = false; // prevent repeated alerts
 
   constructor(private service: HrmserviceService) {}
 
@@ -26,7 +26,7 @@ export class PermissionGuard implements CanActivate {
         this.alertShown = false;
       }
 
-      // 👇 Do NOT navigate anywhere. Just block access.
+      // Do NOT navigate anywhere. Just block access.
       return false;
     }
 

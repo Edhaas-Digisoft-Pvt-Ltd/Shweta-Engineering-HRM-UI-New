@@ -74,8 +74,7 @@
             (click)="selectCompany(stat)">
             <div class="d-flex align-items-center gap-3">
               <div class="logo-container">
-                <img [src]="stat.company_logo_url || 'assets/images/default-logo.png'" alt="Company Logo" class="company-logo"
-                  onerror="this.src='assets/images/default-logo.png'" />
+                <img [src]="stat.company_logo_url" alt="Company Logo" class="company-logo"/>
               </div>
               <div>
                 <h6 class="companyTitle mb-1">{{ stat.company_name }}</h6>

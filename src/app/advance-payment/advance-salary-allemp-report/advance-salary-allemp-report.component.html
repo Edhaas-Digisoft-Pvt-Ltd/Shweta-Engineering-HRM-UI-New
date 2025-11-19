@@ -4,33 +4,32 @@
     </div>
     <div class="main-content" [class.loading]="isLoading">
 
-        <div class="row gx-3  align-items-center rounded-2">
-            <div class="col-12">
-                <div class="row justify-content-end">
-                    <div class="col-3">
-                        <label for="">Select Company</label>
-                        <select class="form-select" [(ngModel)]="selectedCompanyId" (change)="onCompanyChange($event)">
-                            <option *ngFor="let item of CompanyNames" [value]="item.company_id">{{ item.company_name }}
-                            </option>
-                        </select>
-                    </div>
+        <div class="d-flex flex-wrap align-items-end justify-content-end gap-3 mb-3 rounded-2">
+            <input type="text" class="form-control w-auto" style="min-width: 200px;"
+                placeholder="Search" [(ngModel)]="searchValue"
+                (ngModelChange)="onSearchChange()" />
 
-                    <div class="col-2 dotted-line">
-                        <label for="">Select Year</label>
-                        <select class="form-select" [(ngModel)]="selectedYear" (change)="onYearMonthChange()">
-                            <option *ngFor="let year of financialYears">{{ year }}</option>
-                        </select>
-                    </div>
-
-                    <div class="col-auto d-flex align-items-end">
-                        <button class="btn btn-primary BtnColor me-2" (click)="exportExcel()">
-                            <i class="bi bi-file-earmark-text-fill"></i>
-                        </button>
-                    </div>
-
-                </div>
+            <div>
+                <label class="form-label mb-1">Select Company</label>
+                <select class="form-select" style="min-width: 180px;" [(ngModel)]="selectedCompanyId"
+                    (change)="onCompanyChange($event)">
+                    <option *ngFor="let item of CompanyNames" [value]="item.company_id">{{ item.company_name }}</option>
+                </select>
             </div>
+
+            <div>
+                <label class="form-label mb-1">Select Year</label>
+                <select class="form-select" style="min-width: 120px;" [(ngModel)]="selectedYear"
+                    (change)="onYearMonthChange()">
+                    <option *ngFor="let year of financialYears">{{ year }}</option>
+                </select>
+            </div>
+
+            <button class="btn btn-primary BtnColor d-flex align-items-center" (click)="exportExcel()">
+                <i class="bi bi-file-earmark-text-fill"></i>
+            </button>
         </div>
+
 
         <div class="row gap-4 row-wrap my-3 ">
             <div class="container  ">

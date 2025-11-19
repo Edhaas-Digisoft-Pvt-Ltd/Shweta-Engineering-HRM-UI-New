@@ -27,6 +27,8 @@ export class AdvanceSalaryAllempReportComponent {
   isLoading: boolean = false;
   selectedAdvpayid: number = 0;
   tabledata: any = [];
+  searchValue: string = '';
+  searchTimeout: any;
 
   totalRows: number = 0;
   currentPage: number = 1;
@@ -126,6 +128,7 @@ export class AdvanceSalaryAllempReportComponent {
       year: this.selectedYear,
       page: page,
       isexport: false,
+      search: this.searchValue || ''
     }).subscribe((res: any) => {
       try {
         if (res.status === 'success') {
@@ -183,13 +186,13 @@ export class AdvanceSalaryAllempReportComponent {
   days = Array.from({ length: 31 }, (_, i) => i + 1);
 
   viewMode: 'Day' | 'Month' = 'Day';
-  searchValue: string = '';
 
-  generateMonthlySummary() {
-    throw new Error('Method not implemented.');
-  }
-  generateDayColumns() {
-    throw new Error('Method not implemented.');
+  onSearchChange() {
+    clearTimeout(this.searchTimeout);
+    this.searchTimeout = setTimeout(() => {
+      this.currentPage = 1;
+      this.getAllEmpAdvanceSalary();
+    }, 500);
   }
 
   onGridReady(params: { api: any }) {

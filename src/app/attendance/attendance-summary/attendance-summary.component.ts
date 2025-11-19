@@ -131,7 +131,12 @@ export class AttendanceSummaryComponent {
       year: this.selectedYear,
       page: page,
       isexport: false,
+      search: this.searchValue.trim() || '',
     };
+
+    if (this.searchValue && this.searchValue.trim() !== '') {
+      payload['search'] = this.searchValue.trim();
+    }
 
     this.service.post('fetch/DailySummary', payload).subscribe({
       next: (res: any) => {
@@ -229,10 +234,14 @@ export class AttendanceSummaryComponent {
     this.gridApiActive = params.api;
   }
 
+  searchTimeout: any;
+
   onFilterBoxChange() {
-    if (this.gridApiActive) {
-      this.gridApiActive.setQuickFilter(this.searchValue);
-    }
+    clearTimeout(this.searchTimeout);
+    this.searchTimeout = setTimeout(() => {
+      this.currentPage = 1;
+      this.fetchDailySummary();
+    }, 500);
   }
 
   buildExportRowMap(data: any[]) {

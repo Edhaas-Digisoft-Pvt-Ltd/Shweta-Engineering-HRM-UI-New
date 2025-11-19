@@ -87,7 +87,11 @@ export class PayrollListComponent {
   }
 
   openModal() {
-    this.modalService.openModal('RejectPayrollModal')
+    this.modalService.openModal('RejectPayrollModal');
+    this.selectedRejectedReason = null;
+    this.otherReason = '';
+    this.showReasonError = false;
+    this.showOtherReasonError = false;
     this.getRejectReasons();
   }
 
@@ -118,7 +122,7 @@ export class PayrollListComponent {
 
   onCompanyChange(event: Event): void {
     this.selectedCompanyId = (event.target as HTMLSelectElement).value;
-    console.log('Selected Company ID:', this.selectedCompanyId);
+    this.service.setCompanyId(this.selectedCompanyId);
     this.getpayrollList();
   }
 
@@ -288,6 +292,8 @@ export class PayrollListComponent {
       next: (res) => {
         console.log(res);
         this.toastr.success('Payrolls approved successfully.');
+        this.selectedRowData = [];
+        this.gridApi?.deselectAll();
         this.getpayrollList();
       },
       error: (err) => {
@@ -335,6 +341,8 @@ export class PayrollListComponent {
     this.service.post('rejected/payroll', payload).subscribe((res: any) => {
       if (res.status == 'success') {
         this.toastr.success('Payroll rejected successfully');
+        this.selectedRowData = [];
+        this.gridApi?.deselectAll();
         this.modalService.closeModal();
         this.selectedRejectedReason = '',
         this.otherReason = '';
@@ -416,7 +424,7 @@ export class PayrollListComponent {
         this.dataToExportExcel = res.data;
         this.dataToExportExcel_totals = res.totals;
 
-        // this.generateExcel();
+        this.generateExcel();
       } else {
         this.toastr.warning('No data to export');
       }
@@ -430,169 +438,167 @@ export class PayrollListComponent {
     });
   }
 
-  // generateExcel() {
-  //   if (!this.dataToExportExcel || this.dataToExportExcel.length === 0) {
-  //     this.toastr.warning('No data to export');
-  //     return;
-  //   }
+  generateExcel() {
+    if (!this.dataToExportExcel || this.dataToExportExcel.length === 0) {
+      this.toastr.warning('No data to export');
+      return;
+    }
 
-  //   const workbook = new ExcelJS.Workbook();
-  //   const worksheet = workbook.addWorksheet('Payroll');
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet('Payroll');
 
-  //   const year = this.selectedYear;
-  //   const month = this.selectedMonth;
-  //   const daysInMonth = new Date(year, month, 0).getDate();
-  //   const monthName = new Date(year, month - 1).toLocaleString('en-US', { month: 'long' });
+    const year = this.selectedYear;
+    const month = this.selectedMonth;
+    const daysInMonth = new Date(year, month, 0).getDate();
+    const monthName = new Date(year, month - 1).toLocaleString('en-US', { month: 'long' });
 
-  //   // Header row 1
-  //   const headerRow1: any[] = ['Employee Code', 'Employee Name'];
-  //   for (let d = 1; d <= daysInMonth; d++) headerRow1.push('');
-  //   headerRow1.push(
-  //     'Absent Days',
-  //     'Present Days',
-  //     'Hours',
-  //     'OT Hours',
-  //     'Late In',
-  //     'Every 4 late mark 4hrs deduction',
-  //     'Total Hours',
-  //     'Gross Salary',
-  //     'Hours of Month',
-  //     'Per Hours Salary',
-  //     'Overtime Salary',
-  //     'Present Day Hrs salary',
-  //     'Deduction',
-  //     'Total_Salary',
-  //     'Professional Tax',
-  //     'Employee contri. PF',
-  //     'Employer contri. PF',
-  //     'ESIC Employee 0.75%',
-  //     'Advance Salary',
-  //     'Salary Payable',
-  //   );
-  //   worksheet.addRow(headerRow1);
+    // Header row 1
+    const headerRow1: any[] = ['Employee Code', 'Employee Name'];
+    for (let d = 1; d <= daysInMonth; d++) headerRow1.push('');
+    headerRow1.push(
+      'Absent Days',
+      'Present Days',
+      'Hours',
+      'OT Hours',
+      'Late In',
+      'Every 4 late mark 4hrs deduction',
+      'Total Hours',
+      'Gross Salary',
+      'Hours of Month',
+      'Per Hours Salary',
+      'Overtime Salary',
+      'Present Day Hrs salary',
+      'Deduction',
+      'Total_Salary',
+      'Professional Tax',
+      'Employee contri. PF',
+      'Employer contri. PF',
+      'ESIC Employee 0.75%',
+      'Advance Salary',
+      'Salary Payable',
+    );
+    worksheet.addRow(headerRow1);
 
-  //   // Merge headers
-  //   worksheet.mergeCells(1, 1, 2, 1);
-  //   worksheet.mergeCells(1, 2, 2, 2);
-  //   worksheet.mergeCells(1, 3, 1, 2 + daysInMonth);
-  //   worksheet.mergeCells(1, 3 + daysInMonth, 2, 3 + daysInMonth);
-  //   worksheet.mergeCells(1, 4 + daysInMonth, 2, 4 + daysInMonth);
-  //   worksheet.mergeCells(1, 5 + daysInMonth, 2, 5 + daysInMonth);
-  //   worksheet.mergeCells(1, 6 + daysInMonth, 2, 6 + daysInMonth);
-  //   worksheet.mergeCells(1, 7 + daysInMonth, 2, 7 + daysInMonth); // Present
-  //   worksheet.mergeCells(1, 8 + daysInMonth, 2, 8 + daysInMonth); // Absent
-  //   worksheet.mergeCells(1, 9 + daysInMonth, 2, 9 + daysInMonth); // Hours
-  //   worksheet.mergeCells(1, 10 + daysInMonth, 2, 10 + daysInMonth); // OT Hours
-  //   worksheet.mergeCells(1, 11 + daysInMonth, 2, 11 + daysInMonth); // Late
-  //   worksheet.mergeCells(1, 12 + daysInMonth, 2, 12 + daysInMonth); // Early leave
-  //   worksheet.mergeCells(1, 13 + daysInMonth, 2, 13 + daysInMonth); // Early leave
+    // Merge headers
+    worksheet.mergeCells(1, 1, 2, 1);
+    worksheet.mergeCells(1, 2, 2, 2);
+    worksheet.mergeCells(1, 3, 1, 2 + daysInMonth);
+    worksheet.mergeCells(1, 3 + daysInMonth, 2, 3 + daysInMonth);
+    worksheet.mergeCells(1, 4 + daysInMonth, 2, 4 + daysInMonth);
+    worksheet.mergeCells(1, 5 + daysInMonth, 2, 5 + daysInMonth);
+    worksheet.mergeCells(1, 6 + daysInMonth, 2, 6 + daysInMonth);
+    worksheet.mergeCells(1, 7 + daysInMonth, 2, 7 + daysInMonth); // Present
+    worksheet.mergeCells(1, 8 + daysInMonth, 2, 8 + daysInMonth); // Absent
+    worksheet.mergeCells(1, 9 + daysInMonth, 2, 9 + daysInMonth); // Hours
+    worksheet.mergeCells(1, 10 + daysInMonth, 2, 10 + daysInMonth); // OT Hours
+    worksheet.mergeCells(1, 11 + daysInMonth, 2, 11 + daysInMonth); // Late
+    worksheet.mergeCells(1, 12 + daysInMonth, 2, 12 + daysInMonth); // Early leave
+    worksheet.mergeCells(1, 13 + daysInMonth, 2, 13 + daysInMonth); // Early leave
 
-  //   worksheet.getCell('C1').value = monthName;
+    worksheet.getCell('C1').value = monthName;
 
-  //   // Header row 2 - attendance dates
-  //   const headerRow2: any[] = ['', ''];
-  //   for (let d = 1; d <= daysInMonth; d++) {
-  //     headerRow2.push(`${d} ${monthName.slice(0, 3)}`);
-  //   }
-  //   headerRow2.push('', '', '', '', '', '', '', '', '', '');
-  //   worksheet.addRow(headerRow2);
+    // Header row 2 - attendance dates
+    const headerRow2: any[] = ['', ''];
+    for (let d = 1; d <= daysInMonth; d++) {
+      headerRow2.push(`${d} ${monthName.slice(0, 3)}`);
+    }
+    headerRow2.push('', '', '', '', '', '', '', '', '', '');
+    worksheet.addRow(headerRow2);
 
-  //   worksheet.getRow(1).font = { bold: true };
-  //   worksheet.getRow(2).font = { bold: true };
+    worksheet.getRow(1).font = { bold: true };
+    worksheet.getRow(2).font = { bold: true };
 
-  //   // ✅ Fill employee data (only ONE loop)
-  //   this.dataToExportExcel.forEach(emp => {
-  //     // -------- Row 1: Attendance Status --------
-  //     const rowStatus: any[] = [emp.employee_code, emp.emp_name];
-  //     for (let d = 1; d <= daysInMonth; d++) {
-  //       const attObj = emp.attendance.find((a: any) => {
-  //         const date = new Date(a.attendance_date);
-  //         return date.getDate() === d;
-  //       });
-  //       rowStatus.push(attObj ? attObj.status : '');
-  //     }
-  //     rowStatus.push(
-  //       emp.absent_days,
-  //       emp.present_days,
-  //       emp.hours,
-  //       emp.total_overtime,
-  //       emp.late_in,
-  //       emp.every_4_late_mark_4_hrs_deduction,
-  //       emp.total_hours,
-  //       emp.basic_salary,
-  //       emp.total_month_hours,
-  //       emp.per_hours_amount,
-  //       emp.overtime_amount,
-  //       emp.present_day_hrs_salary,
-  //       emp.deduction,
-  //       emp.total_salary,
-  //       emp.total_tax_deduction,
-  //       emp.pf_employee_deduction,
-  //       emp.pf_employer_contribution,
-  //       emp.esic_deduction,
-  //       emp.adv_deduction,
-  //       emp.net_salary,
-  //     );
-  //     worksheet.addRow(rowStatus);
+    // Fill employee data (only ONE loop)
+    this.dataToExportExcel.forEach(emp => {
+      // -------- Row 1: Attendance Status --------
+      const rowStatus: any[] = [emp.employee_code, emp.emp_name];
+      for (let d = 1; d <= daysInMonth; d++) {
+        const attObj = emp.attendance.find((a: any) => {
+          const date = new Date(a.attendance_date);
+          return date.getDate() === d;
+        });
+        rowStatus.push(attObj ? attObj.status : '');
+      }
+      rowStatus.push(
+        emp.absent_days,
+        emp.present_days,
+        emp.hours,
+        emp.total_overtime,
+        emp.late_in,
+        emp.every_4_late_mark_4_hrs_deduction,
+        emp.total_hours,
+        emp.basic_salary,
+        emp.total_month_hours,
+        emp.per_hours_amount,
+        emp.overtime_amount,
+        emp.present_day_hrs_salary,
+        emp.deduction,
+        emp.total_salary,
+        emp.total_tax_deduction,
+        emp.pf_employee_deduction,
+        emp.pf_employer_contribution,
+        emp.esic_deduction,
+        emp.adv_deduction,
+        emp.net_salary,
+      );
+      worksheet.addRow(rowStatus);
 
-  //     // -------- Row 2: Overtime Hours --------
-  //     const rowOvertime: any[] = ['', ''];
-  //     for (let d = 1; d <= daysInMonth; d++) {
-  //       const attObj = emp.attendance.find((a: any) => {
-  //         const date = new Date(a.attendance_date);
-  //         return date.getDate() === d;
-  //       });
+      // -------- Row 2: Overtime Hours --------
+      const rowOvertime: any[] = ['', ''];
+      for (let d = 1; d <= daysInMonth; d++) {
+        const attObj = emp.attendance.find((a: any) => {
+          const date = new Date(a.attendance_date);
+          return date.getDate() === d;
+        });
 
-  //       let overtimeVal = attObj && attObj.over_time_hr != null ? Number(attObj.over_time_hr) : 0;
+        // overtime
+        const overtimeVal = attObj && attObj.over_time_hr != null 
+          ? attObj.over_time_hr 
+          : '';
 
-  //       // ✅ Remove ".0" if decimal part is 0
-  //       if (Number.isInteger(overtimeVal)) {
-  //         overtimeVal = Math.floor(overtimeVal);
-  //       }
+        rowOvertime.push(overtimeVal);
+      }
+      rowOvertime.push('', '', '', '', '', '', '', '', '', '');
+      worksheet.addRow(rowOvertime);
+    });
 
-  //       rowOvertime.push(overtimeVal);
-  //     }
-  //     rowOvertime.push('', '', '', '', '', '', '', '', '', '');
-  //     worksheet.addRow(rowOvertime);
-  //   });
+    //Add Totals Row BELOW ALL EMPLOYEES
+    const totals = this.dataToExportExcel_totals;
 
-  //   //Add Totals Row BELOW ALL EMPLOYEES
-  //   const totals = this.dataToExportExcel_totals;
+    const totalsRow: any[] = ['TOTAL', ''];
+    for (let d = 1; d <= daysInMonth; d++) totalsRow.push(''); // leave attendance blank
 
-  //   const totalsRow: any[] = ['TOTAL', ''];
-  //   for (let d = 1; d <= daysInMonth; d++) totalsRow.push(''); // leave attendance blank
+    totalsRow.push(
+      '', '', '', '', '', '', '', '', '', '',
+      totals.total_overtime_salary, // Overtime Salary
+      '',                            // Present Day Hrs salary
+      '',                            // Deduction
+      totals.total_salary,           // Total Salary
+      totals.total_tax,              // Professional Tax
+      totals.total_pf_employee,      // Employee PF
+      totals.total_pf_employer,      // Employer PF
+      totals.total_esic,             // ESIC
+      totals.total_adv_salary,       // Advance Salary
+      totals.total_net_salary        // Net Salary (Salary Payable)
+    );
 
-  //   totalsRow.push(
-  //     '', '', '', '', '', '', '', '', '', '',
-  //     totals.total_overtime_salary, // Overtime Salary
-  //     '',                            // Present Day Hrs salary
-  //     '',                            // Deduction
-  //     totals.total_salary,           // Total Salary
-  //     totals.total_tax,              // Professional Tax
-  //     totals.total_pf_employee,      // Employee PF
-  //     totals.total_pf_employer,      // Employer PF
-  //     totals.total_esic,             // ESIC
-  //     totals.total_adv_salary,       // Advance Salary
-  //     totals.total_net_salary        // Net Salary (Salary Payable)
-  //   );
+    worksheet.addRow(totalsRow);
+    const lastRow = worksheet.lastRow;
+    if (lastRow) lastRow.font = { bold: true };
 
-  //   worksheet.addRow(totalsRow);
-  //   const lastRow = worksheet.lastRow;
-  //   if (lastRow) lastRow.font = { bold: true };
+    // Optional column widths
+    worksheet.columns.forEach((col, i) => {
+      if (i < 2) col.width = 20;
+      else if (i < 2 + daysInMonth) col.width = 5;
+      else col.width = 15;
+    });
 
-  //   // Optional column widths
-  //   worksheet.columns.forEach((col, i) => {
-  //     if (i < 2) col.width = 20;
-  //     else if (i < 2 + daysInMonth) col.width = 5;
-  //     else col.width = 15;
-  //   });
-
-  //   // Export file
-  //   workbook.xlsx.writeBuffer().then(buffer => {
-  //     const blob = new Blob([buffer], { type: 'application/octet-stream' });
-  //     FileSaver.saveAs(blob, 'Payroll.xlsx');
-  //   });
-  // }
+    // Export file
+    workbook.xlsx.writeBuffer().then(buffer => {
+      const blob = new Blob([buffer], { type: 'application/octet-stream' });
+      FileSaver.saveAs(blob, 'Payroll.xlsx');
+    });
+  }
 
   // getPagination() {
   //   this.service.post('get-pagination', {}).subscribe((res: any) => {

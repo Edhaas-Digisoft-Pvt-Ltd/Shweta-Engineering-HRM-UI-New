@@ -280,7 +280,7 @@
                     <div *ngIf="currentStep === 3">
                         <div class="content border" style="border-radius: 10px;padding: 30px;">
                             <div class="row">
-                                <div class="col-lg-6">
+                                <div class="col-lg-4">
                                     <label>Account Holder Name <span class="text-danger">*</span></label>
                                     <input type="text" formControlName="accountHolderName" class="form-control"
                                         [ngClass]="{'input-error': nextCheck && multiStepForm.get('accountHolderName')?.invalid}"
@@ -294,7 +294,7 @@
                                     -->
                                 </div>
 
-                                <div class="col-lg-6">
+                                <div class="col-lg-4">
                                     <label>Bank Name <span class="text-danger">*</span></label>
                                     <input type="text" formControlName="bankName" class="form-control"
                                         [ngClass]="{'input-error': nextCheck && multiStepForm.get('bankName')?.invalid}"
@@ -307,32 +307,63 @@
                                     </small>
                                     -->
                                 </div>
-                            </div>
 
-                            <div class="row my-3">
                                 <div class="col-lg-4">
                                     <label>Account Number <span class="text-danger">*</span></label>
-                                    <input type="text" formControlName="accountNumber" maxlength="12"
-                                        class="form-control"
+                                    <input type="text" formControlName="accountNumber"
+                                        class="form-control" maxlength="18"
                                         [ngClass]="{'input-error': nextCheck && multiStepForm.get('accountNumber')?.invalid}"
                                         placeholder="Enter Account Number" (keypress)="allowOnlyNumbers($event)">
 
                                     <div *ngIf="multiStepForm.get('accountNumber')?.invalid && multiStepForm.get('accountNumber')"
                                         style="color: red; text-transform: none;">
                                         <small *ngIf="multiStepForm.get('accountNumber')?.errors?.['pattern']">
-                                            please only numbers only
+                                            please enter numbers only
                                         </small>
-                                        <small *ngIf="multiStepForm.get('accountNumber')?.errors?.['minlength']">
-                                            maximum length is 12 digits
-                                        </small>
+                                    <small *ngIf="
+                                      multiStepForm.get('accountNumber')?.errors?.['minlength'] ||
+                                      multiStepForm.get('accountNumber')?.errors?.['maxlength']
+                                    ">
+                                        Account number must be between 9 and 18 digits.
+                                    </small>
                                     </div>
                                 </div>
+                            </div>
 
-                                <div class="col-lg-4">
+                            <div class="row my-3">
+                                <div class="col-lg-3">
+                                    <label>Aadhaar Number <span class="text-danger">*</span></label>
+                                    <input type="text" formControlName="aadhaarNumber" class="form-control"
+                                        [ngClass]="{'input-error': nextCheck && multiStepForm.get('aadhaarNumber')?.invalid}"
+                                        placeholder="Enter Aadhaar Number" (input)="formatAadhaar($event)" (keypress)="allowOnlyNumbersAndSpace($event)">
+                                
+                                    <small class="text-danger mb-4"
+                                        *ngIf="multiStepForm.get('aadhaarNumber')?.touched && multiStepForm.get('aadhaarNumber')?.invalid">
+                                        <span *ngIf="multiStepForm.get('aadhaarNumber')?.errors?.['pattern']">
+                                            Enter a valid Aadhaar number.
+                                        </span>
+                                    </small>
+                                </div>
+
+                                <div class="col-lg-3 ">
+                                    <label>Pan Number <span class="text-danger">*</span></label>
+                                    <input type="text" formControlName="panNumber" class="form-control"
+                                        [ngClass]="{'input-error': nextCheck && multiStepForm.get('panNumber')?.invalid}"
+                                        placeholder="Enter Pan Number" (input)="formatPAN($event)"
+                                        (keypress)="allowNumbersCharacters($event)">
+                                    <small class="text-danger mb-4"
+                                        *ngIf="multiStepForm.get('panNumber')?.touched && multiStepForm.get('panNumber')?.invalid">
+                                        <span *ngIf="multiStepForm.get('panNumber')?.errors?.['pattern']">
+                                            Enter a valid PAN number.
+                                        </span>
+                                    </small>
+                                </div>
+
+                                <div class="col-lg-3">
                                     <label>IFSC <span class="text-danger">*</span></label>
                                     <input type="text" formControlName="ifsc" class="form-control"
                                         [ngClass]="{'input-error': nextCheck && multiStepForm.get('ifsc')?.invalid}"
-                                        placeholder="Enter IFSC Code" (input)="removeSpaces()"
+                                        placeholder="Enter IFSC Code" (input)="formatIFSC($event)"
                                         (keypress)="allowNumbersCharacters($event)">
                                     <!--
                                     <small class="text-danger mb-4"
@@ -342,7 +373,7 @@
                                     -->
                                 </div>
 
-                                <div class="col-lg-4">
+                                <div class="col-lg-3">
                                     <label>Transfer Type <span class="text-danger">*</span></label><br>
                                     <div class="form-check form-check-inline">
                                         <input class="form-check-input" type="radio" formControlName="transfer_type" id="radioDefault1" value="NEFT">
@@ -353,6 +384,8 @@
                                         <label class="form-check-label" for="radioDefault2">IFT</label>
                                     </div>
                                 </div>
+
+                                
                             </div>
                         </div>
 

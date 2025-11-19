@@ -99,9 +99,18 @@ export class CreateEmployeeComponent {
         '',
         [
           Validators.required,
-          Validators.pattern('^[0-9]*$'),
-          Validators.minLength(12),
+           Validators.pattern(/^[0-9]+$/),
+          Validators.minLength(9),
+          Validators.maxLength(18),
         ],
+      ],
+      aadhaarNumber: [
+        '',
+        [Validators.required, Validators.pattern(/^[2-9]\d{3}\s?\d{4}\s?\d{4}\s*$/)],
+      ],
+      panNumber: [
+        '',
+        [Validators.required, Validators.pattern(/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/)],
       ],
       ifsc: [
         '',
@@ -332,6 +341,8 @@ export class CreateEmployeeComponent {
           this.multiStepForm.controls['accountHolderName'].valid &&
           this.multiStepForm.controls['bankName'].valid &&
           this.multiStepForm.controls['accountNumber'].valid &&
+          this.multiStepForm.controls['aadhaarNumber'].valid &&
+          this.multiStepForm.controls['panNumber'].valid &&
           this.multiStepForm.controls['ifsc'].valid &&
           this.multiStepForm.controls['transfer_type'].valid
         );
@@ -395,6 +406,8 @@ export class CreateEmployeeComponent {
         "bank_name": this.multiStepForm.value.bankName,
         "account_num": this.multiStepForm.value.accountNumber,
         "transfer_type": this.multiStepForm.value.transfer_type,
+        "aadhaar_number": this.multiStepForm.value.aadhaarNumber.replace(/\s/g, ''),
+        "pan_number": this.multiStepForm.value.panNumber,
         "ifsc_code": this.multiStepForm.value.ifsc,
         "doj": this.multiStepForm.value.join_date,
         "emp_contact": this.multiStepForm.value.contact,
@@ -513,6 +526,15 @@ export class CreateEmployeeComponent {
     }
   }
 
+  allowOnlyNumbersAndSpace(event: KeyboardEvent) {
+    const char = String.fromCharCode(event.keyCode);
+    const pattern = /^[0-9 ]*$/;
+
+    if (!pattern.test(char)) {
+      event.preventDefault();
+    }
+  }
+
   allowNumbersCharacters(event: KeyboardEvent) {
     const char = event.key;
     const pattern = /^[A-Za-z0-9]$/; 
@@ -527,6 +549,60 @@ export class CreateEmployeeComponent {
     if (!/^[A-Za-z]+$/.test(pasteData)) {
       event.preventDefault();
     }
+  }
+
+  formatAadhaar(event: any) {
+    let input = event.target.value;
+
+    let digits = input.replace(/\D/g, '');
+
+    if (digits.length > 12) {
+      digits = digits.substring(0, 12);
+    }
+
+    if (digits.length > 8) {
+      digits = digits.replace(/(\d{4})(\d{4})(\d+)/, '$1 $2 $3');
+    } else if (digits.length > 4) {
+      digits = digits.replace(/(\d{4})(\d+)/, '$1 $2');
+    }
+
+    this.multiStepForm.get('aadhaarNumber')?.setValue(digits, { emitEvent: false });
+  }
+
+  formatPAN(event: any) {
+    let value = event.target.value;
+
+    value = value.replace(/[^a-zA-Z0-9]/g, '');
+
+    value = value.toUpperCase();
+
+    if (value.length > 10) {
+      value = value.substring(0, 10);
+    }
+
+    this.multiStepForm.get('panNumber')?.setValue(value, { emitEvent: false });
+  }
+
+  formatIFSC(event: any) {
+    let value = event.target.value;
+
+    value = value.replace(/[^a-zA-Z0-9]/g, '');
+
+    value = value.toUpperCase();
+
+    if (value.length > 11) {
+      value = value.substring(0, 11);
+    }
+
+    if (value.length >= 4) {
+      const first4 = value.substring(0, 4);
+
+      if (value.length === 5 && value.charAt(4) !== '0') {
+        value = first4 + '0' + value.substring(4);
+      }
+    }
+
+    this.multiStepForm.get('ifsc')?.setValue(value, { emitEvent: false });
   }
 
 }

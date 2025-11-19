@@ -201,58 +201,55 @@ export class CompanyListComponent {
   addCompany() {
     this.isSubmitted = true;
 
-    // Check if it's a master or sub-company
     const isMaster = this.companyForm.value.radioChoice === 'yes';
 
-    // Validate required fields
-    if (this.companyForm.invalid || !this.selectedLogoFile) {
+    if (this.companyForm.invalid) {
       this.toastr.error('Please fill all required fields correctly!');
       return;
     }
 
-    // Prepare FormData (for file upload)
-    const formData = new FormData();
-
-    if (isMaster) {
-      // master company payload
-      formData.append('master_id', '1'); // use appropriate value if needed
-      formData.append('tax_id', '1');
-      formData.append('payroll_id', '1');
-    } else {
-      // sub company payload
-      formData.append('master_id', this.selectedId || '1');
-      formData.append('tax_id', this.selectedId || '1');
-      formData.append('payroll_id', this.selectedId || '1');
+    if (!this.selectedLogoFile) {
+      this.toastr.error('Please select a company logo!');
+      return;
     }
 
-    formData.append('company_name', this.companyForm.value.companyName);
-    formData.append('company_desc', this.companyForm.value.companyDescription);
-    formData.append('company_location', this.companyForm.value.companyAddress);
-    formData.append('company_founded', this.companyForm.value.IncorporationDate);
-    formData.append('company_logo', this.selectedLogoFile); // actual file
+    const formData = new FormData();
 
-    // console.log("Submitting company data:", [...formData.entries()]);
+    if (!isMaster) {
+      formData.append('master_id', this.selectedId);
+      formData.append('tax_id', this.selectedId);
+      formData.append('payroll_id', this.selectedId);
+      formData.append('company_name', this.companyForm.value.companyName);
+      formData.append('company_desc', this.companyForm.value.companyDescription);
+      formData.append('company_location', this.companyForm.value.companyAddress);
+      formData.append('company_founded', this.companyForm.value.IncorporationDate);
+      formData.append('company_logo', this.selectedLogoFile); 
+    } else {
+      formData.append('master_company_name', this.companyForm.value.companyName);
+      const initials = this.generateCompanyInitials(this.companyForm.value.companyName);
+      formData.append('company_initials', initials);
+      formData.append('company_logo', this.selectedLogoFile); 
+    }
 
-    this.service.post('create/company', formData).subscribe({
-      next: (res: any) => {
-        if (res.status === 'success') {
-          this.toastr.success('Company added successfully!');
-          this.modalService.closeModal();
-          this.getCompanyData();
-          this.resetCompanyForm();
-          this.isSubmitted = false;
-          this.selectedLogoFile = null;
-        } else {
-          this.toastr.error(res.message || 'Failed to add company.');
-        }
+    const url = isMaster ? "create/master-companie" : "create/company";
+
+    this.service.post(url, formData).subscribe({
+      next: (res) => {
+        this.toastr.success('Form Submitted Successfully!');
+        this.modalService.closeModal();
+        this.getCompanyData();
+        this.getCompanyNames();
+        this.companyForm.reset();
+        this.isSubmitted = false;
+        this.selectedLogoFile = null;
       },
       error: (err) => {
         console.error("API Error:", err);
-        this.toastr.error('Something went wrong while adding company.');
+        this.toastr.error('Failed to add company.');
       }
     });
-  }
 
+  }
 
   resetCompanyForm() {
     this.companyForm.reset({
@@ -265,6 +262,20 @@ export class CompanyListComponent {
       companyAddress: ''
     });
     this.companyForm.get('masterCompanyList')?.disable();
+  }
+
+  generateCompanyInitials(name: string): string {
+    if (!name) return '';
+
+    const words = name.trim().split(/\s+/);
+
+    const initials = words
+      .map(word => word[0])
+      .filter(char => /[A-Za-z]/.test(char))
+      .join('')
+      .toUpperCase();
+
+    return initials;
   }
 
   allowOnlyLetters(event: KeyboardEvent) {

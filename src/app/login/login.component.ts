@@ -146,9 +146,9 @@ export class LoginComponent {
   //--------------------------------------------------------------------------------------
 
   demoAccounts = [
-    { role: 'Admin', email: 'abc@gmail.com', password: '1212121212' },
-    { role: 'Emp', email: 'ani@gmail.com', password: '9875698422' },
-    { role: 'Accountant', email: 'accountant@gmail.com', password: '9265897412' }
+    { role: 'Admin', email: 'sepl@gmail.com', password: '9552113579' },
+    { role: 'Emp', email: 'sepl@gmail.com', password: '9881238675' },
+    { role: 'Accountant', email: 'accountant@gmail.com', password: '9999999999' }
   ];
 
   selectedRole: string = '';

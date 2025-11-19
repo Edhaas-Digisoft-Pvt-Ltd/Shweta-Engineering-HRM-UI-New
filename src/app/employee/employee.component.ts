@@ -26,6 +26,7 @@ export class EmployeeComponent {
   rowData: any = [];
   importExcelCompanyId: string = '';
   isLoading: boolean = false;
+  searchTimeout: any;
 
   totalRows: number = 0;
   currentPage: number = 1;
@@ -67,7 +68,7 @@ export class EmployeeComponent {
 
   onCompanyChange(event: Event): void {
     this.selectedCompanyId = (event.target as HTMLSelectElement).value;
-    console.log('Selected Company ID:', this.selectedCompanyId);
+    this.service.setCompanyId(this.selectedCompanyId);
     this.getEmployee();
   }
 
@@ -80,8 +81,9 @@ export class EmployeeComponent {
   columnDefs: ColDef[] = [
     { headerName: 'Emp Code', field: 'employee_code', sortable: true, filter: true, minWidth: 160, },
     { headerName: 'Employee Name', field: 'emp_name', sortable: true, filter: true, minWidth: 180, },
-    { headerName: 'Department', field: 'department_name', sortable: true, filter: true },
-    { headerName: 'Designation', field: 'designation_name', sortable: true, filter: true },
+    // { headerName: 'Department', field: 'department_name', sortable: true, filter: true },
+    // { headerName: 'Designation', field: 'designation_name', sortable: true, filter: true },
+    { headerName: 'Role', field: 'role_name', sortable: true, filter: true },
     { headerName: 'Contact', field: 'emp_contact', sortable: true, filter: true },
     { headerName: 'Joining Date', field: 'doj', sortable: true, filter: true },
     // { headerName: 'Status', field: 'status', sortable: true, filter: true, cellRenderer: (params: { value: any; }) => {
@@ -152,9 +154,13 @@ export class EmployeeComponent {
   downloadTemplate(): void {
     const userConfirmed = confirm("Do you want to download the employee template?");
     if (userConfirmed) {
-      const headers = ['role_id', 'emp_title', 'emp_name', 'emp_email', 'emp_gender', 'department_id', 'designation_id', 'bank_name', 'account_num', 'ifsc_code', 'doj', 'emp_contact', 'emp_address', 'basic_salary', 'house_rent_allowances', 'conveyance_allowances', 'medical_allowances', 'special_allowances'];
+      const headers = ['role_id', 'emp_title', 'emp_name', 'emp_email', 'emp_gender', 'department_id', 
+        'designation_id', 'bank_name', 'account_num', 'ifsc_code', 'doj', 'emp_contact', 'emp_address', 
+        'basic_salary', 'house_rent_allowances', 'conveyance_allowances', 'medical_allowances', 
+        'special_allowances', 'PF Employee Applicable', 'PF Employer Applicable', 'ESIC Employee APPlicable', 'Transfer Type'];
       const exampleRow = [
-        '3', 'mr', 'abc', 'abc@gmail.com', 'male', '1', '2', 'SBI', '458438236526', 'SBIN0005088', '2/1/2022', '9999999999', 'Pune', '200000', '18000', '1000', '1000', '1000'
+        '3', 'mr', 'abc', 'abc@gmail.com', 'male', '1', '2', 'SBI', '458438236526', 'SBIN0005088', '2/1/2022', '9999999999',
+         'Pune', '200000', '18000', '1000', '1000', '1000', 'Yes/No', 'Yes/No', 'Yes/No', 'NEFT/ IFT'
       ];
 
       const worksheet: XLSX.WorkSheet = XLSX.utils.aoa_to_sheet([headers, exampleRow]);
@@ -171,9 +177,12 @@ export class EmployeeComponent {
     this.gridApiActive = params.api;
   }
 
-
-  onFilterBoxChange() {
-    this.gridApiActive.setQuickFilter(this.searchValue);
+  onSearchChange() {
+    clearTimeout(this.searchTimeout);
+    this.searchTimeout = setTimeout(() => {
+      this.currentPage = 1;
+      this.getEmployee();
+    }, 500);
   }
 
   create_user() {
@@ -184,7 +193,7 @@ export class EmployeeComponent {
   getEmployee(page: number = 1): void {
     this.isLoading = true;
     let company_id = this.selectedCompanyId;
-    this.service.post("company/employee", { company_id, page: page, isexport: false, }).subscribe((res: any) => {
+    this.service.post("company/employee", { company_id, page: page, isexport: false, search: this.searchValue || '' }).subscribe((res: any) => {
       if (res.status == 'success') {
         this.rowData = res.data.map((item: any) => ({
           employee_id: item.employe_id,
@@ -194,6 +203,7 @@ export class EmployeeComponent {
           doj: item.doj,
           department_name: item.department_name,
           designation_name: item.designation_name,
+          role_name: item.role_name,
           status: item.status === "Active" ? "active" : "Inactive",
         }))
         this.totalRows = res.pagination.total;
@@ -243,7 +253,6 @@ export class EmployeeComponent {
       fileInput.value = '';
     });
   }
-
 
   // const skippedInfo = res.skipped?.map((row: any) => `Row ${row.row}: ${row.reason}`).join('\n');
   // this.toastr.warning(`${message}\n${skippedInfo}`, 'Upload Notice');

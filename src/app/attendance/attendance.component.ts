@@ -291,11 +291,13 @@ export class AttendanceComponent {
 
     this.service.post('export-attendance', { from_date, to_date }).subscribe((res: any) => {
       if (res.status === 'success') {
+        console.log(res);
+        
         const data = res.data.map((i: any) => ({
           employee_code: i.employee_code,
           attendance_date: this.formatToDDMMYYYY(i.currentdate),
-          check_in: this.removeAMPM(i.logged_in_time),
-          check_out: this.removeAMPM(i.logged_out_time),
+          check_in: i.logged_in_time,
+          check_out: i.logged_out_time,
           shift_id: i.shift_details
         }));
 
@@ -312,6 +314,9 @@ export class AttendanceComponent {
       }
     });
   }
+
+  // check_in: this.removeAMPM(i.logged_in_time),
+  // check_out: this.removeAMPM(i.logged_out_time),
 
   // Convert date (yyyy-mm-dd) → mm-dd-yyyy
   formatToDDMMYYYY(dateStr: string): string {

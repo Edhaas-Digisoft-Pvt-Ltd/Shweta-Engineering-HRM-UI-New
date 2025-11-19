@@ -18,8 +18,8 @@
                     <div class="col-md-1"></div>
                     <div class="col-md-11  d-flex justify-content-end gap-2  align-items-end">
                         <div class="">
-                            <input class="py-1 px-3 form-control" type="text" #searchBox placeholder="Search Here"
-                                [(ngModel)]="searchValue" (ngModelChange)="onFilterBoxChange()" />
+                            <input type="text" class="form-control w-auto" placeholder="Search"
+                                [(ngModel)]="searchValue" (ngModelChange)="onSearchChange()" />
                         </div>
                         <div class=" text-start select-company ">
                             <label class="fw-bold">Select Company </label>

@@ -160,7 +160,7 @@ export class PayrollProcessComponent {
           role: item.role_name,
           presentDays: item.present_days,
           absentDays: item.absent_days,
-          hours: item.total_hours,
+          total_hours: item.total_hours,
           overTime: item.total_overtime,
           employe_id: item.employe_id,
         }));
@@ -306,7 +306,7 @@ export class PayrollProcessComponent {
       { headerName: 'Role', field: 'role', sortable: true, filter: true },
       { headerName: 'Present Days', field: 'presentDays', sortable: true, filter: true },
       { headerName: 'Absent', field: 'absentDays', sortable: true, filter: true, },
-      { headerName: 'hours', field: 'hours', sortable: true, filter: true, },
+      { headerName: 'Total hrs', field: 'total_hours', sortable: true, filter: true, },
       { headerName: 'OT(hrs)', field: 'overTime', sortable: true, filter: true, },
     ];
   }
@@ -353,8 +353,6 @@ export class PayrollProcessComponent {
     paginationPageSize: 10,
     paginationPageSizeSelector: [10, 50, 100],
   };
-
-
 
   onSelectionChanged(event: any): void {
     this.selectedRowData = event.api.getSelectedRows();

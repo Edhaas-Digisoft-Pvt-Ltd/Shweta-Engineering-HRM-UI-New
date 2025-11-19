@@ -90,10 +90,14 @@ export class ConsolidateAttendanceSummaryComponent {
     setTimeout(() => this.scrollToSelectedMonth(), 200);
   }
 
+  searchTimeout: any;
+
   onFilterBoxChange() {
-    if (this.gridApi) {
-      this.gridApi.setQuickFilter(this.searchValue);
-    }
+    clearTimeout(this.searchTimeout);
+    this.searchTimeout = setTimeout(() => {
+      this.currentPage = 1;
+      this.fetchConsolidateSummary();
+    }, 500);
   }
 
   onSelectionChange() {
@@ -152,9 +156,15 @@ export class ConsolidateAttendanceSummaryComponent {
 
   fetchConsolidateSummary(page: number = 1): void {
     if (!this.fromDate || !this.toDate) return;
+    const payload = {
+      from_date: this.fromDate,
+      to_date: this.toDate,
+      page: this.currentPage,
+      search: this.searchValue.trim() || '',
+    };
 
     this.isLoading = true;
-    this.service.post('fetch/ConsolidatedSummary', { from_date: this.fromDate, to_date: this.toDate, page: page })
+    this.service.post('fetch/ConsolidatedSummary', payload)
       .subscribe({
         next: (res: any) => {
           this.isLoading = false;
