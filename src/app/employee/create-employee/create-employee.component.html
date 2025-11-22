@@ -41,7 +41,7 @@
             </div>
 
             <div class="card-body  border-1 mt-3">
-                <div class="row">
+                <div class="row" *ngIf="currentStep !== 4">
                     <div class="col mb-3">
                         <span class="text-danger ">* </span>
                         Please Fill All Required Fields.
@@ -346,7 +346,7 @@
                                 </div>
 
                                 <div class="col-lg-3 ">
-                                    <label>Pan Number <span class="text-danger">*</span></label>
+                                    <label>PAN Number <span class="text-danger">*</span></label>
                                     <input type="text" formControlName="panNumber" class="form-control"
                                         [ngClass]="{'input-error': nextCheck && multiStepForm.get('panNumber')?.invalid}"
                                         placeholder="Enter Pan Number" (input)="formatPAN($event)"

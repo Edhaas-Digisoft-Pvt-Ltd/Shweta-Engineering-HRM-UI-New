@@ -45,6 +45,9 @@ export class PayrollSummariesComponent {
   rejectreasons: any;
   selectedRejectedReason: any = '';
   otherReason: string = '';
+  expenseForm: FormGroup;
+  isSubmitted: boolean = false;
+  expensesList: any[] = [];
 
   showReasonError: boolean = false;
   showOtherReasonError: boolean = false;
@@ -56,6 +59,11 @@ export class PayrollSummariesComponent {
       employeeName: ['', [Validators.required]],
       companyName: ['', [Validators.required]],
       date: ['', [Validators.required]],
+    });
+
+    this.expenseForm = this.formBuilder.group({
+      expenseDescription: ['', [Validators.required, Validators.pattern(/^[A-Za-z0-9\s]+$/)]],
+      expenseAmount: ['', [Validators.required, Validators.pattern(/^[0-9]+$/)]]
     });
   }
 
@@ -102,6 +110,10 @@ export class PayrollSummariesComponent {
     // this.columnDefs2= this.generateColumns(['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep','oct','nov','dec']);
   }
 
+  hasAccess(module: string, permission: string): boolean {
+    return this.service.hasPermission(module, permission);
+  }
+
   openModal() {
     this.modalService.openModal('RejectPayrollModal')
     this.getRejectReasons();
@@ -129,6 +141,7 @@ export class PayrollSummariesComponent {
         this.AdvanceSalaryDetails = res.data.advance_salary || [];;
         this.hasAdvanceSalary = this.AdvanceSalaryDetails.length > 0;;
         this.calculationData = res.data.calculation;
+        this.expensesList = res.data.expenses || [];
         console.log(this.calculationData);
 
 
@@ -167,34 +180,60 @@ export class PayrollSummariesComponent {
           {
             Compound: 'Provident Fund (PF)',
             deduction: 'PF',
-            amount: `₹. ${this.calculationData.pf_employee_deduction ?? 0}`
+            amount: `₹ ${this.calculationData.pf_employee_deduction ?? 0}`
           },
-
           {
             Compound: 'Professional Tax (PT)',
             deduction: 'Tax Deduction',
-            amount: `₹. ${this.calculationData.total_tax_deduction ?? 0}`
+            amount: `₹ ${this.calculationData.total_tax_deduction ?? 0}`
           },
-
           {
             Compound: 'ESIC',
             deduction: 'ESIC',
-            amount: `₹. ${this.calculationData.esic_deduction ?? 0}`
+            amount: `₹ ${this.calculationData.esic_deduction ?? 0}`
           },
           {
             Compound: 'Advance Salary',
             deduction: 'Advance Deduction',
-            amount: `₹. ${this.calculationData.advance_amount ?? 0}`
+            amount: `₹ ${this.calculationData.advance_amount ?? 0}`
           },
           {
             Compound: 'Other',
             deduction: '-',
-            amount: '₹. 0',
+            amount: '₹ 0',
           },
         ];
         this.isLoading = false;
       }
     })
+  }
+
+  addExpenseInSalary() {
+    this.isLoading = true;
+    this.isSubmitted = true;
+    if (this.expenseForm.invalid) {
+      this.toastr.error("Please enter valid description and amount");
+      return;
+    }
+    const payload = {
+      employee_id: this.employee_id,
+      year_month: `${this.selectedYear}-${(this.selectedMonth)
+        .toString().padStart(2, '0')}`,
+      expense_description: this.expenseForm.value.expenseDescription,
+      expense_amount: this.expenseForm.value.expenseAmount
+    };
+    this.service.post('add/expense-in-salary', payload).subscribe((res: any) => {
+      if (res.status === 'success') {
+        this.toastr.success("Expense added successfully");
+        this.getSinglePayroll();
+        this.expenseForm.reset();
+        this.isSubmitted = false;
+        this.isLoading = true;
+      } else {
+        this.toastr.error("Something went wrong");
+        this.isLoading = true;
+      }
+    });
   }
 
   formatted(value: number): string {

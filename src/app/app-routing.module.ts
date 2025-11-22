@@ -149,7 +149,7 @@ const routes: Routes = [
         component: PayrollSummariesComponent,
         canActivate: [PermissionGuard],
         resolve: { permissions: PermissionsResolver },
-        data: { module: 'Payroll List', permission: 'view' }
+        data: { module: 'Payroll', permission: 'view' }
       },
       {
         path: 'salaryRevision',

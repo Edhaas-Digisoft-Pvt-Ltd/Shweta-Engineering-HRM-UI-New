@@ -263,11 +263,6 @@ export class PayrollListComponent {
     console.log('Selected rows:', this.selectedRowData);
   }
 
-  create_user() {
-    // alert("Create User");
-    this.router.navigate(['/authPanal/CreateEmployee']);
-  }
-
   gridOptions = {
     rowHeight: 45,
     rowClass: 'custom-row-class',

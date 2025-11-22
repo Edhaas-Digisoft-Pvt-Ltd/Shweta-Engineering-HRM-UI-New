@@ -3,6 +3,7 @@ import { ColDef, GridApi } from 'ag-grid-community';
 import { Router } from '@angular/router';
 import { HrmserviceService } from 'src/app/hrmservice.service';
 import { ToastrService } from 'ngx-toastr';
+import { PayrollActionBtnComponent } from '../payroll-list/payroll-action-btn/payroll-action-btn.component';
 
 @Component({
   selector: 'app-payroll-process',
@@ -322,21 +323,36 @@ export class PayrollProcessComponent {
       { headerName: 'Bonus', field: 'bonus_amount', sortable: true, filter: true },
       { headerName: 'Adv Salary', field: 'adv_deduction', sortable: true, filter: true },
       { headerName: 'Net Salary', field: 'net_salary', sortable: true, filter: true },
+      // {
+      //   headerName: 'Actions',
+      //   minWidth: 100,
+      //   cellStyle: { border: '1px solid #ddd' },
+      //   cellRenderer: () => {
+      //     return `<button type="button" class="btn btn-sm mb-1 import-btn" style="background-color:#C8E3FF">
+      //               <i class="bi bi-pencil"></i>
+      //             </button>`;
+      //   },
+      //   onCellClicked: (params: any) => {
+      //     this.selectedEmployee = params.data;
+      //     this.fileInput.nativeElement.click();
+      //   }
+      // }
       {
-        headerName: 'Action',
-        minWidth: 100,
+        headerName: 'Actions',
+        // field: 'inquiry_id',
         cellStyle: { border: '1px solid #ddd' },
-        cellRenderer: () => {
-          return `<button type="button" class="btn btn-sm mb-1 import-btn" style="background-color:#C8E3FF">
-                    <i class="bi bi-pencil"></i>
-                  </button>`;
+        cellRenderer: PayrollActionBtnComponent,
+        cellRendererParams: {
+          viewEmployee: (field: any) => this.editApp(field),
         },
-        onCellClicked: (params: any) => {
-          this.selectedEmployee = params.data;
-          this.fileInput.nativeElement.click();
-        }
-      }
+        flex: 1
+
+      },
     ];
+  }
+  
+  editApp(params: any) {
+    console.log("editApp", params);
   }
 
   gridOptions = {

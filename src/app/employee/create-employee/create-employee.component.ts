@@ -246,8 +246,6 @@ export class CreateEmployeeComponent {
       },
       (error) => {
         console.error('Error fetching department:', error);
-
-        // ✅ Check for 400 status code
         if (error.status == 400) {
           this.toastr.error('Department Not Available !');
           this.departmentNames = [];
@@ -382,16 +380,15 @@ export class CreateEmployeeComponent {
       console.log('Invalid controls:', this.multiStepForm.controls);
       Object.keys(this.multiStepForm.controls).forEach(key => {
         if (this.multiStepForm.controls[key].invalid) {
+           this.toastr.error(`${key.replace(/_/g, ' ')} is invalid or required`);
           console.log('Invalid:', key, this.multiStepForm.controls[key].errors);
         }
       });
-      this.toastr.error('Please fill all required fields.');
+      this.multiStepForm.markAllAsTouched();
       return;
     }
 
-    if (this.multiStepForm.valid) {
-
-
+    // if (this.multiStepForm.valid) {
       let company_id_value: any = this.selectedCompanyId;
 
       let current_data: any = {
@@ -428,8 +425,6 @@ export class CreateEmployeeComponent {
         "pf_employer_applicable": this.multiStepForm.value.pf_employer_applicable || false,
         "esic_employee_applicable": this.multiStepForm.value.esic_employee_applicable || false,
 
-
-
         // "department_name": this.multiStepForm.value.department,
         // "designation_name": this.multiStepForm.value.designation
       }
@@ -440,25 +435,33 @@ export class CreateEmployeeComponent {
         next: (res: any) => {
           if (res.status === 'success') {
             this.toastr.success('Successfully Submitted!');
+            this.multiStepForm.reset();
+            this.multiStepForm.patchValue({
+              department: null,
+              designation: null
+            });
+            this.currentStep = 1;
+            this.salaryAmount = 0;
+            this.annual_gross_salary = 0;
           } else {
             this.toastr.error('Submission failed!');
           }
         },
         error: (err) => {
-          this.toastr.error(err.error?.message || 'Something went wrong!');
+           this.toastr.error(err.error?.data || err.error?.message || 'Something went wrong!');
         }
       });
 
-      this.multiStepForm.reset();
-      this.currentStep = 1;
-      this.salaryAmount = 0;
-      this.annual_gross_salary = 0;
+    //   this.multiStepForm.reset();
+    //   this.currentStep = 1;
+    //   this.salaryAmount = 0;
+    //   this.annual_gross_salary = 0;
 
-    } else {
-      this.toastr.error('Please fill all required fields.');
-      this.multiStepForm.markAllAsTouched();
-      console.log(this.multiStepForm.value);
-    }
+    // } else {
+    //   this.toastr.error('Please fill all required fields.');
+    //   this.multiStepForm.markAllAsTouched();
+    //   console.log(this.multiStepForm.value);
+    // }
   }
 
   calculateGrossSalary(values: any) {

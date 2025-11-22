@@ -35,9 +35,9 @@ export class PayrollActionBtnComponent implements ICellRendererAngularComp {
     });
   }
 
-  printEmployee() {
-    alert('Employee In details');
-    console.log('Employee In details:', this.params.data);
-    this.router.navigate(['/authPanal/EditEmployee']);
-  }
+  // printEmployee() {
+  //   alert('Employee In details');
+  //   console.log('Employee In details:', this.params.data);
+  //   this.router.navigate(['/authPanal/EditEmployee']);
+  // }
 }

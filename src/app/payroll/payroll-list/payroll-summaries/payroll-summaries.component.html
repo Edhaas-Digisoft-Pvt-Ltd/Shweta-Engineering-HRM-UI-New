@@ -22,59 +22,56 @@
                         </p>
                     </div>
 
-                    <div class="col-12 mb-2">
+                    <!-- <div class="col-12 mb-2">
                         <div class="col-md-2 float-end me-3">
                             <button class="btn comBtn text-white float-end" (click)="openModal()">Reject Payroll
                             </button>
                         </div>
-                    </div>
+                    </div> -->
 
-                    <div class="col-12  mt-2">
+                    <div class="col-12 mt-2">
                         <div>
-                            <form class="row m-0 p-0" action="" [formGroup]="payrollDetails">
-                                <div class="col-12 col-sm-2">
-                                    <div class="payrollSummaryDetails">
-                                        <label for="payrollId"><i class="bi bi-hash me-2"></i>ID</label>
-                                        <input class="form-control readOnlyInput" formControlName="id" type="text"
-                                            name="" id="">
-                                    </div>
-                                </div>
-                                <div class="col-12 col-sm-4">
-                                    <div class="payrollSummaryDetails">
-                                        <label for="payrollId"><i class="bi bi-people me-2"></i>Employee Name</label>
-                                        <input class="form-control readOnlyInput" formControlName="employeeName"
-                                            type="text" name="" id="">
-                                    </div>
-                                </div>
-                                <div class="col-12 col-sm-3">
-                                    <div class="payrollSummaryDetails">
-                                        <label for="payrollId"><i class="bi bi-buildings me-2"></i>Company Name</label>
-                                        <input class="form-control readOnlyInput" formControlName="companyName"
-                                            type="text" name="" id="">
-                                    </div>
-                                </div>
-                                <div class="col-12 col-sm-1">
-                                    <div class="payrollSummaryDetails">
-                                        <label for="">Year</label>
-                                        <input class="form-control readOnlyInput" [value]="selectedYear" />
-                                    </div>
+                            <form class="row m-0 p-0 align-items-end g-3" action="" [formGroup]="payrollDetails">
 
-                                    <!-- <div class="payrollSummaryDetails">
-                                <label for="payrollId"><i class="bi bi-calendar3 me-2"></i>Date</label>
-                                <input class="form-control readOnlyInput" formControlName="date" type="text" name=""
-                                    id="">
-                            </div> -->
+                                <div class="col-12 col-md-2">
+                                    <label><i class="bi bi-hash me-2"></i>ID</label>
+                                    <input class="form-control readOnlyInput" formControlName="id" type="text">
                                 </div>
-                                <div class="col-12 col-sm-2">
-                                    <div class="payrollSummaryDetails">
-                                        <label for="">Month</label>
-                                        <input class="form-control readOnlyInput"
-                                            [value]="getMonthName(selectedMonth)" />
+
+                                <div class="col-12 col-md-3">
+                                    <label><i class="bi bi-people me-2"></i>Employee Name</label>
+                                    <input class="form-control readOnlyInput" formControlName="employeeName"
+                                        type="text">
+                                </div>
+
+                                <div class="col-12 col-md-3">
+                                    <label><i class="bi bi-buildings me-2"></i>Company Name</label>
+                                    <input class="form-control readOnlyInput" formControlName="companyName" type="text">
+                                </div>
+
+                                <div class="col-12 col-md-4">
+                                    <div class="row g-2 align-items-end">
+
+                                        <div class="col-md-4">
+                                            <label>Month</label>
+                                            <input class="form-control readOnlyInput"
+                                                [value]="getMonthName(selectedMonth)">
+                                        </div>
+
+                                        <div class="col-md-4">
+                                            <label>Year</label>
+                                            <input class="form-control readOnlyInput" [value]="selectedYear">
+                                        </div>
+
+                                        <div *ngIf="hasAccess('Payroll List', 'view')" class="col-md-4">
+                                            <button class="btn btn-danger text-white" (click)="openModal()">Reject
+                                                Payroll</button>
+                                        </div>
+
                                     </div>
                                 </div>
                             </form>
                         </div>
-                        <!-- <input type="text" name="" class="form-control" placeholder="Search Employee" id=""> -->
                     </div>
 
                     <div class="col-12 row m-0 p-0 mt-4">
@@ -119,6 +116,65 @@
                             </div>
 
                             <div class="row m-0 p-0 px-2 mt-3">
+                                <div class="add-advance-salary-wrapper mb-3 p-3 border rounded">
+                                    <div class="row m-0 p-0">
+                                        <h5 class="pb-2 border-bottom border-primary-light">
+                                            <i class="bi bi-wallet2 me-2 text-primary "></i>
+                                            Add Expenses
+                                        </h5>
+                                        <form [formGroup]="expenseForm" (ngSubmit)="addExpenseInSalary()">
+                                            <div class="row m-0 p-0 px-2 mt-2">
+                                                <div class="col-md-6 mb-3">
+                                                    <label>Description <span class="text-danger">*</span></label>
+                                                    <input type="text" class="form-control"
+                                                        formControlName="expenseDescription"
+                                                        placeholder="Enter description"
+                                                        [ngClass]="{'is-invalid': isSubmitted && expenseForm.get('expenseDescription')?.invalid}">
+                                                    <div class="invalid-feedback"
+                                                        *ngIf="isSubmitted && expenseForm.get('expenseDescription')?.invalid">
+                                                        Please enter a valid description.
+                                                    </div>
+                                                </div>
+
+                                                <div class="col-md-4 mb-3">
+                                                    <label>Amount <span class="text-danger">*</span></label>
+                                                    <input type="text" class="form-control"
+                                                        formControlName="expenseAmount" placeholder="Enter amount"
+                                                        [ngClass]="{'is-invalid': isSubmitted && expenseForm.get('expenseAmount')?.invalid}">
+                                                    <div class="invalid-feedback"
+                                                        *ngIf="isSubmitted && expenseForm.get('expenseAmount')?.invalid">
+                                                        Amount must contain only numbers.
+                                                    </div>
+                                                </div>
+
+                                                <div class="col-md-2 d-flex align-items-end mb-3">
+                                                    <button class="btn comBtn w-100 text-white" type="submit">
+                                                        Add
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </form>
+
+                                        <table class="table table-bordered table-striped mt-2">
+                                            <thead>
+                                                <tr>
+                                                    <th>Description</th>
+                                                    <th>Amount (₹)</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr *ngFor="let item of expensesList">
+                                                    <td>{{ item.expense_description }}</td>
+                                                    <td>{{ item.expense_amount }}</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row m-0 p-0 px-2 mt-1">
                                 <div class="card p-0">
                                     <div class="card-header"> Advance Salary </div>
                                     <div class="card-body">
@@ -237,7 +293,7 @@
                                                 <td data-label="Amount (in ₹)">₹ {{
                                                     formatted(calculationData?.monthly_gross_salary) }}</td>
                                             </tr>
-                                             <tr>
+                                            <tr>
                                                 <td data-label="Compound">Present Day Hrs Salary</td>
                                                 <td data-label="Calculation">-</td>
                                                 <td data-label="Amount (in ₹)">₹ {{
@@ -245,9 +301,16 @@
                                             </tr>
                                             <tr>
                                                 <td data-label="Compound">Over Time Salary</td>
-                                                <td data-label="Calculation">Over Time * per hour</td>
+                                                <td data-label="Calculation">(OT-LT) * per hr</td>
                                                 <td data-label="Amount (in ₹)">₹ {{
                                                     formatted(calculationData?.overtime_amount)}}
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td data-label="Compound">Extra Expenses</td>
+                                                <td data-label="Calculation">expenses</td>
+                                                <td data-label="Amount (in ₹)">₹ {{
+                                                    formatted(calculationData?.total_expense)}}
                                                 </td>
                                             </tr>
                                             <tr>
@@ -299,13 +362,14 @@
                                             <tr class="insentive">
                                                 <td data-label="Compound">Incentive</td>
                                                 <td data-label="Calculation">-</td>
-                                                <td data-label="Amount (in ₹)">₹  {{ formatted(calculationData?.incentive_amount) }}</td>
+                                                <td data-label="Amount (in ₹)">₹ {{
+                                                    formatted(calculationData?.incentive_amount) }}</td>
                                             </tr>
                                             <tr class="total">
                                                 <td data-label="Compound">Total Final Salary</td>
                                                 <td></td>
                                                 <!-- <td data-label="Amount (in ₹)">Rs.0</td> -->
-                                                <td data-label="Amount (in ₹)">Rs. {{
+                                                <td data-label="Amount (in ₹)">₹ {{
                                                     formatted(calculationData?.net_salary)}}
                                                 </td>
                                             </tr>
