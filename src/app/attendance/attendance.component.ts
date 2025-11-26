@@ -172,8 +172,8 @@ export class AttendanceComponent {
       const exampleRow = [
         'SEE20250501',
         'dd-mm-yyyy',
-        '7:00',
-        '19:00',
+        '7:00:00 AM',
+        '7:00:00 PM',
         '1',
       ];
 
@@ -295,6 +295,7 @@ export class AttendanceComponent {
         
         const data = res.data.map((i: any) => ({
           employee_code: i.employee_code,
+          emp_name: i.emp_name,
           attendance_date: this.formatToDDMMYYYY(i.currentdate),
           check_in: i.logged_in_time,
           check_out: i.logged_out_time,

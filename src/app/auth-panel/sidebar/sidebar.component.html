@@ -99,8 +99,8 @@
             </div>
           </li> -->
 
-          <!-- Calendar -->
-          <li class="nav-item" *ngIf="hasAccess('calender','view')">
+          <!-- Calendar  *ngIf="hasAccess('calender','view')"-->
+          <li class="nav-item" *ngIf="false">
             <a routerLink="Calender" routerLinkActive="active-link" class="nav-link btn-like d-flex align-items-center"
               (click)="closeAllAccordions()">
               <i class="bi bi-calendar-event ms-2 me-2"></i> <span class="nav-name"> Calendar</span>

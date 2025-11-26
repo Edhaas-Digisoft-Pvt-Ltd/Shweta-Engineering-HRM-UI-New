@@ -32,6 +32,9 @@ export class AdvancePaymentComponent {
   monthlyRowData: any[] = [];
   EditAdvancePaymentData!: any;
   isLoading: boolean = false;
+  salaryTrackerForm!: FormGroup;
+  isSubmitted = false;
+  hideSubmitButton: boolean = false;
 
   // Pagination & grid APIs
   gridApi!: GridApi;
@@ -69,11 +72,24 @@ export class AdvancePaymentComponent {
       reason: [{ value: '', disabled: true }, Validators.required],
       EMIStartDate: [{ value: '', disabled: true }, Validators.required],
       installmentAmount: [{ value: '', disabled: true }, Validators.required],
-    })
+    });
+
+    this.salaryTrackerForm = this.fb.group({
+      emp_name: [{ value: '', disabled: true }],
+      amount: [{ value: '', disabled: true }],
+      tenure: [{ value: '', disabled: true }],
+
+      payment_mode: ['', Validators.required],
+      transfer_data: ['', Validators.required]
+    });
   }
 
   openModel() {
     this.modalService.openModal('advanceRequestModal')
+  }
+
+  openSalaryTrackerModel() {
+    this.modalService.openModal('advanceSalaryTrackerModal')
   }
 
   hasAccess(module: string, permission: string): boolean {
@@ -122,7 +138,10 @@ export class AdvancePaymentComponent {
             advance_amount: item.advance_amount,
             tenure: item.tenure,
             status: item.status,
-            adv_pay_id: item.adv_pay_id
+            adv_pay_id: item.adv_pay_id,
+            accountant_confirmation: item.accountant_confirmation,
+            transfer_data: item.transfer_data,
+            payment_mode: item.payment_mode,
           }))
           this.totalRows = res.pagination.total;
           this.currentPage = res.pagination.page;
@@ -230,7 +249,7 @@ export class AdvancePaymentComponent {
       },
       { headerName: 'Apply Date', field: 'apply_date', sortable: true, filter: true },
       { headerName: 'Amount', field: 'advance_amount', sortable: true, filter: true },
-      { headerName: 'Tenure', field: 'tenure', sortable: true, filter: true, flex: 1, maxWidth: 120},
+      { headerName: 'Tenure', field: 'tenure', sortable: true, filter: true, flex: 1, maxWidth: 120 },
       {
         headerName: 'Status',
         field: 'status',
@@ -253,6 +272,35 @@ export class AdvancePaymentComponent {
         onCellClicked: (event: any) => {
           this.getSingleAdvanceSalary(event.data.adv_pay_id);
           this.openModel();
+        },
+      });
+    }
+    if (this.hasAccess('Advance Payment', 'SalaryTracker')) {
+      this.columnDefs.push({
+        headerName: 'Actions',
+        flex: 1,
+        cellStyle: { border: '1px solid #ddd' },
+        cellRenderer: (params: any) => {
+          if (params.data.status === 'Approved') {
+            return `
+        <button type="button" class="btn btn-sm mb-1 st-btn" style="background-color:#C8E3FF">
+          <i class="bi bi-pencil"></i>
+        </button>
+      `;
+          }
+          return '';
+        },
+        onCellClicked: (event: any) => {
+          if (!event.event.target.closest('.st-btn')) {
+            return;
+          }
+
+          if (event.data.status !== 'Approved') {
+            return;
+          }
+
+          this.setSalaryTrackerData(event.data);
+          this.openSalaryTrackerModel();
         },
       });
     }
@@ -280,9 +328,76 @@ export class AdvancePaymentComponent {
           installmentAmount: singleAdvanceSalary?.emi,
         }
         this.EditAdvancePayment.patchValue(this.EditAdvancePaymentData);
+        this.isLoading = false;
       }
+      this.isLoading = false;
     })
-    this.isLoading = false;
+  }
+
+  setSalaryTrackerData(data: any) {
+    console.log(data)
+    this.advPayId = data.adv_pay_id;
+
+    this.salaryTrackerForm.patchValue({
+      emp_name: data.emp_name,
+      amount: data.advance_amount,
+      tenure: data.tenure,
+      payment_mode: data.payment_mode ?? '',
+      transfer_data: data.transfer_data ?? ''
+    });
+
+    if (data.accountant_confirmation === 'Confirmed') {
+      this.salaryTrackerForm.disable();
+      this.hideSubmitButton = true;
+    } else {
+      this.salaryTrackerForm.enable();
+      this.salaryTrackerForm.get('emp_name')?.disable();
+      this.salaryTrackerForm.get('amount')?.disable();
+      this.salaryTrackerForm.get('tenure')?.disable();
+      this.hideSubmitButton = false;
+    }
+  }
+
+  accountantConfiramationAdvSalary() {
+    this.isSubmitted = true;
+
+    if (this.salaryTrackerForm.invalid) {
+      this.toastr.error("Please select payment mode and enter transfer data");
+      return;
+    }
+
+    this.isLoading = true;
+
+    const payload = {
+      adv_pay_id: this.advPayId,
+      payment_mode: this.salaryTrackerForm.get('payment_mode')?.value,
+      transfer_data: this.salaryTrackerForm.get('transfer_data')?.value
+    };
+
+    this.service.post('accountant/confirm-advance-salary', payload)
+      .subscribe({
+        next: (res: any) => {
+          if (res.status === 'success') {
+            this.toastr.success("Accountant confirmation saved successfully");
+
+            this.getAllAdvSalary(this.currentPage);
+
+            this.salaryTrackerForm.reset();
+            this.isSubmitted = false;
+            this.modalService.closeModal();
+          } else {
+            this.toastr.error("Something went wrong");
+          }
+
+          this.isLoading = false;
+        },
+
+        error: (err) => {
+          this.toastr.error("Server error");
+          console.error(err);
+          this.isLoading = false;
+        }
+      });
   }
 
   statusButtonRenderer(params: any) {
@@ -295,7 +410,7 @@ export class AdvancePaymentComponent {
     button.style.padding = '6px 12px';
     button.style.borderRadius = '20px';
     button.style.cursor = 'default';
-    button.style.height = '30px'; // ✅ Match AG Grid row height
+    button.style.height = '30px'; //Match AG Grid row height
     button.style.lineHeight = '20px';
     button.style.fontSize = '14px';
     button.style.display = 'flex';
@@ -385,7 +500,7 @@ export class AdvancePaymentComponent {
           link.click();
 
           this.toastr.success('Data exported successfully!');
-        } 
+        }
         this.isLoading = false;
       },
       error: (err) => {

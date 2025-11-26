@@ -237,8 +237,8 @@ export class EmployeeDashboardComponent {
       },
       error: (err) => {
         this.isLoading = false;
-        this.toastr.error('Error fetching payslip data');
-        console.error(err);
+        const errorMessage = err?.error?.message || 'Error fetching payslip data';
+        this.toastr.error(errorMessage);
       }
     });
   }
@@ -246,10 +246,11 @@ export class EmployeeDashboardComponent {
   generatePayslip(data: any) {
     this.employeeDetails = data.employee_details;
     this.calculationData = data.payroll_details;
-    
+
     this.attendanceDetails = [data.attendance];
     this.selectedYear = data.period.year;
-    this.selectedMonth = data.period.month;
+    // this.selectedMonth = data.period.month;
+    let payslipMonthName = data.period.month; 
 
     const temp = document.createElement('div');
     temp.style.position = 'fixed';
@@ -266,7 +267,7 @@ export class EmployeeDashboardComponent {
         ${this.employeeDetails.company_name || ''}
       </h3>
       <p style="text-align:center; margin-top: -5px;">
-        <strong>Payslip for ${this.selectedMonth} ${this.selectedYear}</strong>
+        <strong>Payslip for ${payslipMonthName} ${this.selectedYear}</strong>
       </p>
       <hr />
 
@@ -298,16 +299,22 @@ export class EmployeeDashboardComponent {
             <td>${this.calculationData?.pf_employee_deduction ?? 0}</td>
           </tr>
           <tr>
-            <td>Overtime</td>
+            <td>Overtime amount</td>
             <td>${this.calculationData?.overtime_amount ?? 0}</td>
             <td>ESIC</td>
             <td>${this.calculationData?.esic_deduction ?? 0}</td>
           </tr>
           <tr>
-           <td>Bonus</td>
-            <td>${this.calculationData?.bonus_amount ?? 0}</td>
+           <td>Incentive amount</td>
+            <td>${this.calculationData?.incentive_amount ?? 0}</td>
             <td>Advance EMI</td>
             <td>${this.calculationData?.advance_amount ?? 0}</td>
+          </tr>
+          <tr>
+           <td>Extra Expense</td>
+            <td>${this.calculationData?.total_expense ?? 0}</td>
+            <td></td>
+            <td></td>
           </tr>
           <tr style="font-weight:bold;">
             <td>Total Earnings</td>
@@ -523,6 +530,7 @@ export class EmployeeDashboardComponent {
           // this.router.navigate(['/authPanal/EmployeeInDetail'], {
           //   queryParams: { id: this.employee_id }
           // });
+          this.fetchEmployee(this.employee_id);
           this.router.navigate(['/authPanal/EmployeeInDetail']);
         } else {
           this.toastr.error(res.data || 'Failed to apply leave.');
@@ -577,6 +585,7 @@ export class EmployeeDashboardComponent {
           // this.router.navigate(['/authPanal/EmployeeInDetail'], {
           //   queryParams: { id: this.employee_id }
           // });
+          this.fetchEmployee(this.employee_id);
           this.router.navigate(['/authPanal/EmployeeInDetail']);
         } else {
           this.toastr.error(res.data || 'Request failed.');

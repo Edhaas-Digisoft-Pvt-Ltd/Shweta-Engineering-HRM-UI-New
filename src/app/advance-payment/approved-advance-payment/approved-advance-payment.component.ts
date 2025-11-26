@@ -433,6 +433,8 @@ export class ApprovedAdvancePaymentComponent {
               this.toastr.error(err.error.message);
             } else if (err.status === 409) {
               this.toastr.error(err.error.message);
+            } else if (err.status === 403) {
+              this.toastr.error(err.error.message);
             } else {
               this.toastr.error("Something went wrong!");
             }

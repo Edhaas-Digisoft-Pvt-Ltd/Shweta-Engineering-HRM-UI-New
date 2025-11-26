@@ -214,3 +214,71 @@
 
   </div>
 </div>
+
+<!-- Salary Tracker Modal -->
+<div class="modal fade" id="advanceSalaryTrackerModal" tabindex="-1">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content">
+
+      <div class="modal-header">
+        <h5 class="modal-title">Salary Tracker</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+
+      <div class="modal-body">
+
+        <form [formGroup]="salaryTrackerForm">
+
+          <div class="row">
+
+            <div class="col-md-4 mb-3">
+              <label>Employee Name</label>
+              <input type="text" class="form-control" formControlName="emp_name" readonly>
+            </div>
+
+            <div class="col-md-4 mb-3">
+              <label>Advance Amount</label>
+              <input type="text" class="form-control" formControlName="amount" readonly>
+            </div>
+
+            <div class="col-md-4 mb-3">
+              <label>Tenure</label>
+              <input type="text" class="form-control" formControlName="tenure" readonly>
+            </div>
+
+          </div>
+
+          <div class="row">
+
+            <div class="col-md-6 mb-3">
+              <label>Payment Mode <span class="text-danger">*</span></label>
+              <select class="form-control" formControlName="payment_mode"
+                [ngClass]="{'is-invalid': isSubmitted && salaryTrackerForm.get('payment_mode')?.invalid}">
+                <option value="">-- Select Payment Mode --</option>
+                <option value="Cash">Cash</option>
+                <option value="Bank Transfer">Bank Transfer</option>
+                <option value="UPI">UPI</option>
+                <option value="Cheque">Cheque</option>
+              </select>
+            </div>
+
+            <div class="col-md-6 mb-3">
+              <label>Transfer Data <span class="text-danger">*</span></label>
+              <input type="text" class="form-control" placeholder="Enter reference / UTR / Cheque No."
+                formControlName="transfer_data"
+                [ngClass]="{'is-invalid': isSubmitted && salaryTrackerForm.get('transfer_data')?.invalid}">
+            </div>
+
+          </div>
+
+        </form>
+
+      </div>
+
+      <div class="modal-footer">
+        <button  *ngIf="!hideSubmitButton" class="btn text-white exportExcelBtn" (click)="accountantConfiramationAdvSalary()">Submit</button>
+      </div>
+
+    </div>
+  </div>
+</div>

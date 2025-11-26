@@ -118,6 +118,7 @@ export class LeaveRequestComponent {
   }
 
   getSingleLeaveRequest(params: any) {
+    this.isLoading = true;
     this.empLeaveId = params;
     this.service.post(`single/leave/request`, { "tbl_emp_leave_id": this.empLeaveId }).subscribe((res: any) => {
       if (res.status === 'success') {
@@ -135,7 +136,9 @@ export class LeaveRequestComponent {
         this.leaveRequestForm.patchValue(this.leaveRequestData);
         this.leaveBalance = res.leavebalnce[0];
         this.previousLeaves = res.previous_leaves;
+        this.isLoading = false;
       }
+      this.isLoading = false;
     });
   }
 

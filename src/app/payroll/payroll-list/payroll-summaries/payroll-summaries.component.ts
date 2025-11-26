@@ -63,7 +63,7 @@ export class PayrollSummariesComponent {
 
     this.expenseForm = this.formBuilder.group({
       expenseDescription: ['', [Validators.required, Validators.pattern(/^[A-Za-z0-9\s]+$/)]],
-      expenseAmount: ['', [Validators.required, Validators.pattern(/^[0-9]+$/)]]
+      expenseAmount: ['', [Validators.required, Validators.pattern(/^[0-9]+$/), Validators.min(1)]]
     });
   }
 
@@ -81,7 +81,6 @@ export class PayrollSummariesComponent {
     { id: 11, value: 'November' },
     { id: 12, value: 'December' }
   ];
-
 
   closeAllModals(): void {
     const modals = document.querySelectorAll('.modal.show');
@@ -102,8 +101,8 @@ export class PayrollSummariesComponent {
     this.route.queryParams.subscribe(params => {
       this.employee_id = params['id'];
       this.tempPayrollId = params['temp_payroll_id']
-      console.log('Received employee  payroll:', this.employee_id);
-      console.log('tempPayrollId:', this.tempPayrollId);
+      // console.log('Received employee  payroll:', this.employee_id);
+      // console.log('tempPayrollId:', this.tempPayrollId);
     });
     this.getSinglePayroll()
     this.setMonthGroupHeader();
@@ -180,28 +179,28 @@ export class PayrollSummariesComponent {
           {
             Compound: 'Provident Fund (PF)',
             deduction: 'PF',
-            amount: `₹ ${this.calculationData.pf_employee_deduction ?? 0}`
+            amount: this.calculationData.pf_employee_deduction ?? 0
           },
           {
             Compound: 'Professional Tax (PT)',
             deduction: 'Tax Deduction',
-            amount: `₹ ${this.calculationData.total_tax_deduction ?? 0}`
+            amount: this.calculationData.total_tax_deduction ?? 0
           },
           {
             Compound: 'ESIC',
             deduction: 'ESIC',
-            amount: `₹ ${this.calculationData.esic_deduction ?? 0}`
+            amount: this.calculationData.esic_deduction ?? 0
           },
           {
             Compound: 'Advance Salary',
             deduction: 'Advance Deduction',
-            amount: `₹ ${this.calculationData.advance_amount ?? 0}`
+            amount: this.calculationData.advance_amount ?? 0
           },
-          {
-            Compound: 'Other',
-            deduction: '-',
-            amount: '₹ 0',
-          },
+          // {
+          //   Compound: 'Other',
+          //   deduction: '-',
+          //   amount:0,
+          // },
         ];
         this.isLoading = false;
       }
@@ -209,12 +208,12 @@ export class PayrollSummariesComponent {
   }
 
   addExpenseInSalary() {
-    this.isLoading = true;
     this.isSubmitted = true;
     if (this.expenseForm.invalid) {
-      this.toastr.error("Please enter valid description and amount");
+      this.toastr.error("Please enter required fields");
       return;
     }
+    this.isLoading = true;
     const payload = {
       employee_id: this.employee_id,
       year_month: `${this.selectedYear}-${(this.selectedMonth)
@@ -228,16 +227,42 @@ export class PayrollSummariesComponent {
         this.getSinglePayroll();
         this.expenseForm.reset();
         this.isSubmitted = false;
-        this.isLoading = true;
+        this.isLoading = false;
       } else {
         this.toastr.error("Something went wrong");
-        this.isLoading = true;
+        this.isLoading = false;
       }
     });
   }
 
-  formatted(value: number): string {
-    return value.toLocaleString('en-IN');
+  deleteExpense(expense_id: number) {
+    if (!confirm("Are you sure you want to delete this expense?")) {
+      return;
+    }
+    this.isLoading = true;
+    const payload = {
+      expense_id: expense_id
+    };
+    this.service.post('delete/expense', payload).subscribe((res: any) => {
+      if (res.status === 'success') {
+        this.toastr.success("Expense deleted successfully");
+        this.getSinglePayroll();
+        this.isLoading = false;
+      } else {
+        this.toastr.error("Something went wrong");
+        this.isLoading = false;
+      }
+    });
+  }
+
+  formatted(value: number | null | undefined): string {
+    if (value == null) return '0';
+
+    const parts = value.toString().split('.');
+    const intPart = Number(parts[0]).toLocaleString('en-IN');
+    const decPart = parts[1] ? '.' + parts[1] : '';
+
+    return intPart + decPart;
   }
 
   // calculateProgress(): number {
@@ -253,6 +278,15 @@ export class PayrollSummariesComponent {
   }
 
   backtoPayroll() {
+    if (this.hasAccess('Payroll List', 'view')) {
+      this.router.navigate(['/authPanal/payrollList']);
+      return;
+    }
+
+    if (this.hasAccess('Payroll Manage', 'view')) {
+      this.router.navigate(['/authPanal/payrollProcess']);
+      return;
+    }
     this.router.navigate(['/authPanal/payrollList']);
   }
 
@@ -481,11 +515,17 @@ export class PayrollSummariesComponent {
             <td style="border-left:1px solid #000; border-right:none;">ESIC</td>
             <td style="border-left:none;">${this.calculationData?.esic_deduction ?? 0}</td>
           </tr>
-          <tr>
-            <td style="border-right:none;"></td>
-            <td style="border-left:none; border-right:none;"></td>
+           <tr>
+            <td style="border-right:none;">Extra Expense</td>
+            <td style="border-left:none; border-right:none;">${this.calculationData?.total_expense ?? 0}</td>
             <td style="border-left:1px solid #000; border-right:none;">Advance EMI</td>
             <td style="border-left:none;">${this.calculationData?.advance_amount ?? 0}</td>
+          </tr>
+           <tr>
+            <td style="border-right:none;">Incentive</td>
+            <td style="border-left:none; border-right:none;">${this.calculationData?.incentive_amount ?? 0}</td>
+            <td style="border-left:1px solid #000; border-right:none;"></td>
+            <td style="border-left:none;"></td>
           </tr>
           <tr style="font-weight:bold;">
             <td style="border-right:none;">Total Earnings</td>
@@ -536,6 +576,15 @@ export class PayrollSummariesComponent {
         console.error('Error generating payslip:', err);
         document.body.removeChild(temp);
       });
+  }
+
+  allowOnlyNumbers(event: KeyboardEvent) {
+    const char = String.fromCharCode(event.keyCode);
+    const pattern = /^[0-9]*$/;
+
+    if (!pattern.test(char)) {
+      event.preventDefault();
+    }
   }
 
 }

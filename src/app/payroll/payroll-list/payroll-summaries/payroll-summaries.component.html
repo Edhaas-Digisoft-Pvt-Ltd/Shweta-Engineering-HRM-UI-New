@@ -140,11 +140,20 @@
                                                     <label>Amount <span class="text-danger">*</span></label>
                                                     <input type="text" class="form-control"
                                                         formControlName="expenseAmount" placeholder="Enter amount"
-                                                        [ngClass]="{'is-invalid': isSubmitted && expenseForm.get('expenseAmount')?.invalid}">
+                                                        [ngClass]="{'is-invalid': isSubmitted && expenseForm.get('expenseAmount')?.invalid}"
+                                                        (keypress)="allowOnlyNumbers($event)">
                                                     <div class="invalid-feedback"
-                                                        *ngIf="isSubmitted && expenseForm.get('expenseAmount')?.invalid">
-                                                        Amount must contain only numbers.
+                                                        *ngIf="isSubmitted && expenseForm.get('expenseAmount')?.errors">
+                                                        <span
+                                                            *ngIf="expenseForm.get('expenseAmount')?.errors?.['pattern']">
+                                                            Only numbers allowed.
+                                                        </span>
+
+                                                        <span *ngIf="expenseForm.get('expenseAmount')?.errors?.['min']">
+                                                            Amount must be greater than 0.
+                                                        </span>
                                                     </div>
+
                                                 </div>
 
                                                 <div class="col-md-2 d-flex align-items-end mb-3">
@@ -160,12 +169,18 @@
                                                 <tr>
                                                     <th>Description</th>
                                                     <th>Amount (₹)</th>
+                                                    <th></th>
                                                 </tr>
                                             </thead>
                                             <tbody>
                                                 <tr *ngFor="let item of expensesList">
                                                     <td>{{ item.expense_description }}</td>
-                                                    <td>{{ item.expense_amount }}</td>
+                                                    <td>{{ item.expense_amount}}</td>
+                                                    <td class="text-center">
+                                                        <i class="bi bi-trash text-danger fs-5 cursor-pointer"
+                                                            (click)="deleteExpense(item.expense_id)">
+                                                        </i>
+                                                    </td>
                                                 </tr>
                                             </tbody>
                                         </table>
@@ -174,7 +189,7 @@
                                 </div>
                             </div>
 
-                            <div class="row m-0 p-0 px-2 mt-1">
+                            <div *ngIf="false" class="row m-0 p-0 px-2 mt-1">
                                 <div class="card p-0">
                                     <div class="card-header"> Advance Salary </div>
                                     <div class="card-body">
@@ -339,10 +354,10 @@
                                                 </td>
                                                 <!-- <td>Otto</td> -->
                                             </tr>
-                                            <tr class="deduction" *ngFor="let deductions of deduct">
-                                                <td data-label="Compound">{{formatted(deductions.Compound)}}</td>
-                                                <td data-label="Calculation">{{formatted(deductions.deduction)}}</td>
-                                                <td data-label="Amount (in ₹)">{{formatted(deductions.amount)}}</td>
+                                            <tr class="deduction" *ngFor="let row of deduct">
+                                                <td data-label="Compound">{{ row.Compound }}</td>
+                                                <td data-label="Calculation">{{ row.deduction }}</td>
+                                                <td data-label="Amount (in ₹)">₹ {{ formatted(row.amount) }}</td>
                                             </tr>
                                             <tr>
                                                 <!-- <th  scope="row">1</th> -->
