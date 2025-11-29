@@ -67,6 +67,7 @@ import { EmpLeaveAdvsalaryReportComponent } from './emp-leave-advsalary-report/e
 import { LeaveApprovedRejectedComponent } from './leave/leave-approved-rejected/leave-approved-rejected.component';
 import { AdvanceSalaryAllempReportComponent } from './advance-payment/advance-salary-allemp-report/advance-salary-allemp-report.component';
 import { GenerateCmsComponent } from './payroll/payroll-list/generate-cms/generate-cms.component';
+import { UpdateEmployeeComponent } from './employee/update-employee/update-employee.component';
 // FullCalendarModule.registerPlugins([dayGridPlugin]);
 
 //onkar
@@ -127,6 +128,7 @@ import { GenerateCmsComponent } from './payroll/payroll-list/generate-cms/genera
     LeaveApprovedRejectedComponent,
     AdvanceSalaryAllempReportComponent,
     GenerateCmsComponent,
+    UpdateEmployeeComponent,
 
   ],
   imports: [

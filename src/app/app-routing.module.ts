@@ -36,6 +36,7 @@ import { PermissionGuard } from './permission.guard';
 import { PermissionsResolver } from './permissions.resolver';
 import { EmpLeaveAdvsalaryReportComponent } from './emp-leave-advsalary-report/emp-leave-advsalary-report.component';
 import { LeaveRequestComponent } from './leave/leave-request/leave-request.component';
+import { UpdateEmployeeComponent } from './employee/update-employee/update-employee.component';
 
 const routes: Routes = [
   {
@@ -94,6 +95,13 @@ const routes: Routes = [
         canActivate: [PermissionGuard],
         resolve: { permissions: PermissionsResolver },
         data: { module: 'Employee', permission: 'view' }
+      },
+      {
+        path: 'UpdateEmployee',
+        component: UpdateEmployeeComponent,
+        canActivate: [PermissionGuard],
+        resolve: { permissions: PermissionsResolver },
+        data: { module: 'Employee', permission: 'update' }
       },
       {
         path: 'EmployeeInDetail',

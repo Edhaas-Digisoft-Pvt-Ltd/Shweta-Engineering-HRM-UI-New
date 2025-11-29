@@ -139,9 +139,15 @@
                                     </div>
                                 </div>
 
-                                <div class="row mt-4">
+                                <!-- <div class="row mt-4">
                                     <button *ngIf="hasAccess('Employee', 'update')" type="button"
                                         class="btn dashboard-btn w-100" (click)="updateData()">
+                                        Edit
+                                    </button>
+                                </div> -->
+                                <div class="row mt-4">
+                                    <button *ngIf="hasAccess('Employee', 'update')" type="button" class="btn dashboard-btn w-100"
+                                        (click)="goToUpdateEmployee()">
                                         Edit
                                     </button>
                                 </div>

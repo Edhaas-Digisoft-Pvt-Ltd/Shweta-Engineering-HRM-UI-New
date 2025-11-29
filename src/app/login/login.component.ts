@@ -145,17 +145,16 @@ export class LoginComponent {
   }
   //--------------------------------------------------------------------------------------
 
-  demoAccounts = [
-    { role: 'Admin', email: 'admin@gmail.com', password: '8569966566' },
-    { role: 'Accountant', email: 'accountant@gmail.com', password: '8586965456' },
-    { role: 'Emp', email: 'robbin@gmail.com', password: '9168645556' }
-  ];
-
   // demoAccounts = [
-  //   { role: 'Admin', email: 'sepl@gmail.com', password: '9552113579' },
-  //   { role: 'Emp', email: 'sepl@gmail.com', password: '9881238675' },
-  //   { role: 'Accountant', email: 'accountant@gmail.com', password: '9999999999' }
+  //   { role: 'Admin', email: 'admin@gmail.com', password: '8569966566' },
+  //   { role: 'Accountant', email: 'accountant@gmail.com', password: '8586965456' },
+  //   { role: 'Emp', email: 'robbin@gmail.com', password: '9168645556' }
   // ];
+
+  demoAccounts = [
+    { role: 'Admin', email: 'sepl1@gmail.com', password: '9552113579' },
+    { role: 'Accountant', email: 'accountant@gmail.com', password: '9999999999' }
+  ];
 
   selectedRole: string = '';
 

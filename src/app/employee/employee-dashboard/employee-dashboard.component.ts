@@ -612,4 +612,10 @@ export class EmployeeDashboardComponent {
     this.router.navigate(['/authPanal/Employee']);
   }
 
+  goToUpdateEmployee() {
+    this.router.navigate(['/authPanal/UpdateEmployee'], {
+      queryParams: { id: this.employee_id }
+    });
+  }
+
 }
