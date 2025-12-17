@@ -470,6 +470,7 @@ export class PayrollListComponent {
       'Employer contri. PF',
       'ESIC Employee 0.75%',
       'Advance Salary',
+      'Incentive Amount',
       'Salary Payable',
     );
     worksheet.addRow(headerRow1);
@@ -534,6 +535,7 @@ export class PayrollListComponent {
         emp.pf_employer_contribution,
         emp.esic_deduction,
         emp.adv_deduction,
+        emp.incentive_amount,
         emp.net_salary,
       );
       worksheet.addRow(rowStatus);

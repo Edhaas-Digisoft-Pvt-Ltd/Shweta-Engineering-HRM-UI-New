@@ -94,6 +94,8 @@ export class SidebarComponent implements OnInit {
     if (cnf) {
       sessionStorage.clear();
       this.router.navigate(['/']);
+
+      sessionStorage.removeItem('permissions');
     }
   }
 

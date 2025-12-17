@@ -307,7 +307,7 @@ export class PayrollProcessComponent {
       { headerName: 'Role', field: 'role', sortable: true, filter: true },
       { headerName: 'Present Days', field: 'presentDays', sortable: true, filter: true },
       { headerName: 'Absent', field: 'absentDays', sortable: true, filter: true, },
-      { headerName: 'Total hrs', field: 'total_hours', sortable: true, filter: true, },
+      // { headerName: 'Total hrs', field: 'total_hours', sortable: true, filter: true, },
       { headerName: 'OT(hrs)', field: 'overTime', sortable: true, filter: true, },
     ];
   }
