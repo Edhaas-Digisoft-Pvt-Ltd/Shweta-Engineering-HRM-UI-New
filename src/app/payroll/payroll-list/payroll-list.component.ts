@@ -78,6 +78,8 @@ export class PayrollListComponent {
 
     this.selectedYear = new Date().getFullYear();
     this.selectedMonth = new Date().getMonth();
+    // this.selectedYear = 2025;
+    // this.selectedMonth = 10;
     const currentDate = new Date();
     this.today = currentDate.toISOString().split('T')[0];
     this.getCompanyNames();
@@ -451,7 +453,7 @@ export class PayrollListComponent {
     const headerRow1: any[] = ['Employee Code', 'Employee Name'];
     for (let d = 1; d <= daysInMonth; d++) headerRow1.push('');
     headerRow1.push(
-      'Absent Days',
+      // 'Absent Days',
       'Present Days',
       'Hours',
       'OT Hours',
@@ -484,12 +486,12 @@ export class PayrollListComponent {
     worksheet.mergeCells(1, 5 + daysInMonth, 2, 5 + daysInMonth);
     worksheet.mergeCells(1, 6 + daysInMonth, 2, 6 + daysInMonth);
     worksheet.mergeCells(1, 7 + daysInMonth, 2, 7 + daysInMonth); // Present
-    worksheet.mergeCells(1, 8 + daysInMonth, 2, 8 + daysInMonth); // Absent
-    worksheet.mergeCells(1, 9 + daysInMonth, 2, 9 + daysInMonth); // Hours
-    worksheet.mergeCells(1, 10 + daysInMonth, 2, 10 + daysInMonth); // OT Hours
-    worksheet.mergeCells(1, 11 + daysInMonth, 2, 11 + daysInMonth); // Late
+    // worksheet.mergeCells(1, 8 + daysInMonth, 2, 8 + daysInMonth); // Absent
+    worksheet.mergeCells(1, 8 + daysInMonth, 2, 8 + daysInMonth); // Hours
+    worksheet.mergeCells(1, 9 + daysInMonth, 2, 9 + daysInMonth); // OT Hours
+    worksheet.mergeCells(1, 10 + daysInMonth, 2, 10 + daysInMonth); // Late
+    worksheet.mergeCells(1, 11 + daysInMonth, 2, 11 + daysInMonth); // Early leave
     worksheet.mergeCells(1, 12 + daysInMonth, 2, 12 + daysInMonth); // Early leave
-    worksheet.mergeCells(1, 13 + daysInMonth, 2, 13 + daysInMonth); // Early leave
 
     worksheet.getCell('C1').value = monthName;
 
@@ -516,7 +518,6 @@ export class PayrollListComponent {
         rowStatus.push(attObj ? attObj.status : '');
       }
       rowStatus.push(
-        emp.absent_days,
         emp.present_days,
         emp.hours,
         emp.total_overtime,
