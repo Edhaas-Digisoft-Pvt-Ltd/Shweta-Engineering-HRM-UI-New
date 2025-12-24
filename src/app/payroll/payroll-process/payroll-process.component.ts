@@ -70,6 +70,9 @@ export class PayrollProcessComponent {
 
     this.selectedYear = new Date().getFullYear();
     this.selectedMonth = new Date().getMonth();
+    // this.selectedYear = 2025;
+    // this.selectedMonth = 10;
+
     this.getCompanyNames();
     this.initializeColumns();
     this.initializeColumnsforProcess();
