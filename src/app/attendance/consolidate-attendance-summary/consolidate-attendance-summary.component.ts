@@ -55,7 +55,7 @@ export class ConsolidateAttendanceSummaryComponent {
     { name: 'Dec', value: 11 },
   ];
 
-  years = [2023, 2024, 2025];
+  // years = [2023, 2024, 2025,2026];
 
   // Header map with dot color
   HEADERS = [

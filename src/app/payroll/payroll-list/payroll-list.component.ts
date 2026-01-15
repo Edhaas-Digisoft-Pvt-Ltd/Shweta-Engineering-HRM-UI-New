@@ -76,12 +76,23 @@ export class PayrollListComponent {
   ngOnInit() {
     this.selectedCompanyId = this.service.selectedCompanyId();
 
-    this.selectedYear = new Date().getFullYear();
-    this.selectedMonth = new Date().getMonth();
-    // this.selectedYear = 2025;
-    // this.selectedMonth = 10;
-    const currentDate = new Date();
-    this.today = currentDate.toISOString().split('T')[0];
+    // this.selectedYear = new Date().getFullYear();
+    // this.selectedMonth = new Date().getMonth();
+    // // this.selectedYear = 2025;
+    // // this.selectedMonth = 12;
+    // const currentDate = new Date();
+    // this.today = currentDate.toISOString().split('T')[0];
+
+    const today = new Date();
+
+    //last month
+    const lastMonthDate = new Date(today.getFullYear(), today.getMonth() - 1, 1);
+
+    this.selectedYear = lastMonthDate.getFullYear();
+    this.selectedMonth = lastMonthDate.getMonth() + 1; 
+
+    this.today = today.toISOString().split('T')[0];
+    
     this.getCompanyNames();
     this.getpayrollList();
 
@@ -268,9 +279,9 @@ export class PayrollListComponent {
   gridOptions = {
     rowHeight: 45,
     rowClass: 'custom-row-class',
-    pagination: false,
+    pagination: true,
     paginationPageSize: 10,
-    paginationPageSizeSelector: [10, 50, 100],
+    // paginationPageSizeSelector: [10, 50, 100],
   };
 
   approvePayrollList() {
@@ -567,7 +578,7 @@ export class PayrollListComponent {
     for (let d = 1; d <= daysInMonth; d++) totalsRow.push(''); // leave attendance blank
 
     totalsRow.push(
-      '', '', '', '', '', '', '', '', '', '',
+      '', '', '', '', '', '', '', '', '',
       totals.total_overtime_salary, // Overtime Salary
       '',                            // Present Day Hrs salary
       '',                            // Deduction
@@ -576,7 +587,8 @@ export class PayrollListComponent {
       totals.total_pf_employee,      // Employee PF
       totals.total_pf_employer,      // Employer PF
       totals.total_esic,             // ESIC
-      totals.total_adv_salary,       // Advance Salary
+      totals.total_adv_salary,    // Advance Salary
+      '',   
       totals.total_net_salary        // Net Salary (Salary Payable)
     );
 

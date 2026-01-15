@@ -32,6 +32,7 @@ export class LeaveApprovedRejectedComponent {
   lastPage: number = 1;
   pagesToShow: (number | string)[] = [];
   paginationvalue: any;
+  financialYears: number[] = [];
 
   CompanyNames: any = [];
   selectedValue: any = 1;
@@ -45,6 +46,7 @@ export class LeaveApprovedRejectedComponent {
     this.selectedMonth = new Date().getMonth() + 1;
     this.today = currentDate.toISOString().split('T')[0]; // Format YYYY-MM-DD
     this.selectedCompanyId = this.service.selectedCompanyId();
+    this.generateFinancialYears();
 
     this.leaveRequestForm = this.fb.group({
       employeeName: [{ value: '', disabled: true }, Validators.required],
@@ -138,7 +140,18 @@ export class LeaveApprovedRejectedComponent {
     );
   }
 
-  financialYears = [2022, 2023, 2024, 2025];
+  // financialYears = [2022, 2023, 2024, 2025];
+  generateFinancialYears() {
+    const startYear = 2024;
+    const currentYear = new Date().getFullYear();
+
+    this.financialYears = [];
+
+    for (let year = startYear; year <= currentYear; year++) {
+      this.financialYears.push(year);
+    }
+  }
+
   months = [
     { id: 1, value: 'January' },
     { id: 2, value: 'February' },

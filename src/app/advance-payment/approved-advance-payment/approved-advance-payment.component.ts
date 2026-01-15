@@ -32,6 +32,7 @@ export class ApprovedAdvancePaymentComponent {
   isSkipConfirmed: boolean = false;
   skipEmiReason: any;
   isSkipFormSubmitted = false;
+  financialYears: number[] = [];
 
   totalRows: number = 0;
   currentPage: number = 1;
@@ -43,6 +44,7 @@ export class ApprovedAdvancePaymentComponent {
 
   ngOnInit() {
     this.selectedCompanyId = this.service.selectedCompanyId();
+    this.generateFinancialYears();
 
     const currentDate = new Date();
     this.selectedYear = new Date().getFullYear();
@@ -195,7 +197,19 @@ export class ApprovedAdvancePaymentComponent {
 
   // gridApiActive: any;
 
-  financialYears = [2022, 2023, 2024, 2025];
+  // financialYears = [2022, 2023, 2024, 2025];
+
+  generateFinancialYears() {
+    const startYear = 2024;
+    const currentYear = new Date().getFullYear();
+
+    this.financialYears = [];
+
+    for (let year = startYear; year <= currentYear; year++) {
+      this.financialYears.push(year);
+    }
+  }
+
   months = [
     { id: 1, value: 'January' },
     { id: 2, value: 'February' },

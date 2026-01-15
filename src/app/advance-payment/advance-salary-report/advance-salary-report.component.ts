@@ -27,7 +27,19 @@ export class AdvanceSalaryReportComponent {
   selectedAdvpayid: number = 0;
   tabledata: any = [];
 
-  years = [2023, 2024, 2025];
+  years: number[] = [];
+
+  generateyears() {
+    const startYear = 2024;
+    const currentYear = new Date().getFullYear();
+
+    this.years = [];
+
+    for (let year = startYear; year <= currentYear; year++) {
+      this.years.push(year);
+    }
+  }
+
   months = [
     { id: 1, value: 'January' },
     { id: 2, value: 'February' },
@@ -65,6 +77,7 @@ export class AdvanceSalaryReportComponent {
       installmentAmount: [{ value: '', disabled: true }],
       remainingBalance: [{ value: '', disabled: true }],
     })
+    this.generateyears();
   }
 
   onYearMonthChange() {

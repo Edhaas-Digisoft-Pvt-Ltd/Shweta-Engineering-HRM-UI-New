@@ -17,7 +17,20 @@ export class AttendanceSummaryComponent {
   searchValue: string = '';
   gridApiActive: GridApi | undefined;
 
-  years = [2023, 2024, 2025];
+  // years = [2023, 2024, 2025, 2026];
+  years: number[] = [];
+
+  generateyears() {
+    const startYear = 2024;
+    const currentYear = new Date().getFullYear();
+
+    this.years = [];
+
+    for (let year = startYear; year <= currentYear; year++) {
+      this.years.push(year);
+    }
+  }
+
   months = [
     { name: 'Jan', value: 0 },
     { name: 'Feb', value: 1 },
@@ -52,6 +65,7 @@ export class AttendanceSummaryComponent {
 
   ngOnInit() {
     this.selectedCompanyId = this.service.selectedCompanyId();
+    this.generateyears();
 
     this.loadData();
     // this.fetchDailySummary();

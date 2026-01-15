@@ -59,10 +59,21 @@ export class PayrollRejectedComponent {
   ngOnInit() {
     this.selectedCompanyId = this.service.selectedCompanyId();
 
-    this.selectedYear = new Date().getFullYear();
-    this.selectedMonth = new Date().getMonth();
-    const currentDate = new Date();
-    this.today = currentDate.toISOString().split('T')[0];
+    // this.selectedYear = new Date().getFullYear();
+    // this.selectedMonth = new Date().getMonth();
+    // const currentDate = new Date();
+    // this.today = currentDate.toISOString().split('T')[0];
+
+    const today = new Date();
+
+    //last month
+    const lastMonthDate = new Date(today.getFullYear(), today.getMonth() - 1, 1);
+
+    this.selectedYear = lastMonthDate.getFullYear();
+    this.selectedMonth = lastMonthDate.getMonth() + 1; 
+
+    this.today = today.toISOString().split('T')[0];
+    
     this.getCompanyNames();
     // this.RejectedPayrollList();
     this.getPagination();

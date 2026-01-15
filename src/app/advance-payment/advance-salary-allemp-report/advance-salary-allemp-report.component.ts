@@ -29,6 +29,7 @@ export class AdvanceSalaryAllempReportComponent {
   tabledata: any = [];
   searchValue: string = '';
   searchTimeout: any;
+  financialYears: number[] = [];
 
   totalRows: number = 0;
   currentPage: number = 1;
@@ -47,6 +48,7 @@ export class AdvanceSalaryAllempReportComponent {
     this.initializeColumns();
     this.getCompanyNames();
     this.getPagination();
+    this.generateFinancialYears();
 
     this.displayApprovedData = this.fb.group({
       id: [{ value: '', disabled: true }],
@@ -182,7 +184,17 @@ export class AdvanceSalaryAllempReportComponent {
     const file = event.target.files[0];
   }
 
-  financialYears = [2022, 2023, 2024, 2025];
+  generateFinancialYears() {
+    const startYear = 2024;
+    const currentYear = new Date().getFullYear();
+
+    this.financialYears = [];
+
+    for (let year = startYear; year <= currentYear; year++) {
+      this.financialYears.push(year);
+    }
+  }
+
   days = Array.from({ length: 31 }, (_, i) => i + 1);
 
   viewMode: 'Day' | 'Month' = 'Day';

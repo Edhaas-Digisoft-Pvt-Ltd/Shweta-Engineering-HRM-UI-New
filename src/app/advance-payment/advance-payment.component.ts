@@ -35,6 +35,7 @@ export class AdvancePaymentComponent {
   salaryTrackerForm!: FormGroup;
   isSubmitted = false;
   hideSubmitButton: boolean = false;
+  financialYears: number[] = [];
 
   // Pagination & grid APIs
   gridApi!: GridApi;
@@ -47,6 +48,7 @@ export class AdvancePaymentComponent {
 
   ngOnInit() {
     this.selectedCompanyId = this.service.selectedCompanyId();
+    this.generateFinancialYears();
 
     this.getCompanyNames();
     this.selectedYear = new Date().getFullYear();
@@ -172,7 +174,18 @@ export class AdvancePaymentComponent {
 
   // gridApiActive: any;
 
-  financialYears = [2022, 2023, 2024, 2025];
+  // financialYears = [2022, 2023, 2024, 2025, 2026];
+  generateFinancialYears() {
+    const startYear = 2024;
+    const currentYear = new Date().getFullYear();
+
+    this.financialYears = [];
+
+    for (let year = startYear; year <= currentYear; year++) {
+      this.financialYears.push(year);
+    }
+  }
+
   months = [
     { id: 1, value: 'January' },
     { id: 2, value: 'February' },
