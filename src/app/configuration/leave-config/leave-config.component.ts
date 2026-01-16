@@ -39,6 +39,8 @@ export class LeaveConfigComponent {
   singleleave: any;
   companyId: any;
   leaveId: any;
+  leaveTypes: any[] = [];
+  currentYear: any;
   isLoading: boolean = false;
 
   public defaultColDef: ColDef = {
@@ -108,49 +110,30 @@ export class LeaveConfigComponent {
     });
 
     this.LeaveRule = this.fb.group({
-      companyid: [null, [
-        Validators.required,
-        // Validators.pattern(/^\d+$/)  // only digits allowed (CompanyID is numeric)
-      ]],
-
+      companyid: [null, Validators.required],
+      leavetype: [null, Validators.required],
+      year: [{ value: this.currentYear, disabled: true }],
       leavenumber: ['', [
         Validators.required,
-        Validators.max(31),
         Validators.min(1),
-        Validators.pattern(/^\d+$/)  // only digits
+        Validators.max(31),
+        Validators.pattern(/^\d+$/)
       ]],
-      leavename: ['', [
-        Validators.required,
-        Validators.minLength(2),
-        Validators.pattern(/^[A-Za-z ]+$/),  // letters and spaces only
-        this.noWhitespaceValidator
-      ]],
-      leavetype: [null, [
-        Validators.required,
-        Validators.pattern(/^[A-Za-z ]+$/),
-        this.noWhitespaceValidator
-      ]]
+      carry_forward: ['FALSE', Validators.required]
     });
 
     this.EditLeaveRule = this.fb.group({
+      leavetype: ['', [Validators.required]],             // leave_type_id
+      year: [{ value: '', disabled: true }],
       leavenumber: ['', [
         Validators.required,
-        Validators.max(31),
         Validators.min(1),
+        Validators.max(31),
         Validators.pattern(/^\d+$/)
       ]],
-      leavename: ['', [
-        Validators.required,
-        Validators.minLength(2),
-        Validators.pattern(/^[A-Za-z ]{2,}$/),
-        this.noWhitespaceValidator
-      ]],
-      leavetype: ['', [
-        Validators.required,
-        Validators.pattern(/^[A-Za-z ]+$/),
-        this.noWhitespaceValidator
-      ]]
+      carry_forward: ['FALSE', Validators.required]
     });
+
   }
 
   ngOnInit() {
@@ -163,10 +146,37 @@ export class LeaveConfigComponent {
     this.getCompanyNames();
     this.getAllLeaves();
     this.initializeColumns();
+    this.getLeaveTypes();
+    this.currentYear = new Date().getFullYear();
   }
 
   openModal() {
     this.modalService.openModal('addLeaveModal')
+  }
+
+  getLeaveTypes() {
+    this.isLoading = true;
+    this.leaveTypes = [];
+
+    this.service.post('fetch/leavetypes', {}).subscribe(
+      (res: any) => {
+        if (res.status === 'success') {
+          this.leaveTypes = res.data.map((item: any) => ({
+            leave_type_id: item.leave_type_id,
+            leave_types: item.leave_types
+          }));
+        }
+        this.isLoading = false;
+      },
+      (error) => {
+        this.isLoading = false;
+        if (error.status === 400) {
+          this.toastr.warning('Data Not Found');
+        } else {
+          console.error(error);
+        }
+      }
+    );
   }
 
   getAllLeaves() {
@@ -297,18 +307,23 @@ export class LeaveConfigComponent {
   addLeaveRule() {
     this.isSubmitted = true;
     this.LeaveRule.markAllAsTouched();
-    if (this.LeaveRule.valid) {
-      let current_data: any = {
-        "company_id": this.LeaveRule.value.companyid,
-        "leave_type": this.LeaveRule.value.leavetype,
-        "leave_name": this.LeaveRule.value.leavename,
-        "leave_count": this.LeaveRule.value.leavenumber,
-      }
 
-      this.service.post("create/leave", current_data).subscribe(
+    if (this.LeaveRule.valid) {
+
+      const formData = this.LeaveRule.value;
+
+      const payload = {
+        company_id: formData.companyid,
+        leave_type: formData.leavetype,
+        leave_count: formData.leavenumber,
+        year: this.currentYear.toString(),
+        leave_carryforwad: formData.carry_forward
+      };
+
+      this.service.post('create/leave', payload).subscribe(
         (res: any) => {
           if (res.status === 'success') {
-            this.toastr.success('Leave Rule Added!');
+            this.toastr.success('Leave Rule Added Successfully!');
             this.LeaveRule.reset();
             this.isSubmitted = false;
             this.modalService.closeModal();
@@ -316,61 +331,70 @@ export class LeaveConfigComponent {
           }
         },
         (error) => {
-          console.error(error);
-          this.toastr.error('Something went wrong!');
+          if (error.status === 409) {
+            this.toastr.warning(error.error.message);
+          } else {
+            this.toastr.error('Something went wrong!');
+          }
         }
       );
-    } else {
-      this.toastr.error('Invalid Credentials!');
-      this.LeaveRule.markAllAsTouched();
     }
   }
 
   openEditModal(id: any) {
-    this.service.post("fetch/leave", { leave_id: id }).subscribe((res: any) => {
-      if (res.status === 'success') {
-        this.leaveId = res.data.leave_id
-        this.companyId = res.data.company_id
-        this.EditLeaveRule.patchValue({
-          leavetype: res.data.leave_type,
-          leavename: res.data.leave_name,
-          leavenumber: res.data.leave_count,
-        })
-      }
-    },
+    this.service.post("fetch/leave", { leave_id: id }).subscribe(
+      (res: any) => {
+        if (res.status === 'success') {
+          const data = res.data;
+
+          this.leaveId = data.leave_id;
+          this.companyId = data.company_id;
+
+          this.EditLeaveRule.patchValue({
+            leavetype: data.leave_type,                 // leave_type_id
+            year: data.year,
+            leavenumber: data.leave_count,
+            carry_forward: data.leave_carryforwad || 'FALSE'
+          });
+        }
+      },
       (error) => {
         console.error('Error fetching leave request:', error);
+        this.toastr.error('Failed to fetch leave details.');
       }
     );
   }
 
   editLeaveData() {
     this.isEditSubmitted = true;
-    if (this.EditLeaveRule.valid) {
 
-      let current_data: any = {
-        "leave_id": this.leaveId,
-        "company_id": this.companyId,
-        "leave_type": this.EditLeaveRule.value.leavetype,
-        "leave_name": this.EditLeaveRule.value.leavename,
-        "leave_count": this.EditLeaveRule.value.leavenumber,
+    if (this.EditLeaveRule.valid) {
+      const payload = {
+        leave_id: this.leaveId,
+        company_id: this.companyId,
+        leave_type: this.EditLeaveRule.value.leavetype,
+        leave_name: this.EditLeaveRule.value.leavename,
+        leave_count: this.EditLeaveRule.value.leavenumber,
+        leave_carryforwad: this.EditLeaveRule.value.carry_forward
       };
 
-      this.service.post("update/leave", current_data).subscribe(
+      this.service.post("update/leave", payload).subscribe(
         (res: any) => {
-          this.toastr.success(res.data);
+          this.toastr.success(res.message);
           this.modalService.closeModal();
-          this.getAllLeaves()
+          this.getAllLeaves();
         },
         (error) => {
-          console.error('Error:', error);
-          this.toastr.error('Something went wrong!');
+          if (error.status === 409) {
+            this.toastr.warning(error.error.message);
+          } else {
+            this.toastr.error('Something went wrong!');
+          }
         }
       );
     } else {
       this.EditLeaveRule.markAllAsTouched();
-      this.toastr.error('Invalid Credentials!');
-      this.isEditSubmitted = false;
+      this.toastr.error('Invalid inputs!');
     }
   }
 
