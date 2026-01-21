@@ -84,7 +84,11 @@ export class EmployeeDashboardComponent {
     //   console.log('Received employee code:', params['id']);
     // });
 
-    if (sessionStorage.getItem('roleName') == 'Operator') {
+    let role_name = sessionStorage.getItem('roleName');
+
+    if (role_name == 'Operator' || role_name == 'Supervisor' || role_name === 'Manager' || role_name === 'Maintenance Manager'
+        || role_name === 'Production Manager' || role_name === 'Quality Manager' || role_name === 'Data-Entry Operator' 
+        || role_name === 'Production Incharge' || role_name === 'Plant Incharge') {
       const signalEmpId = this.service.EmployeeId();
       if (signalEmpId != null) {
         this.employee_id = this.service.EmployeeId();

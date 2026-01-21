@@ -42,6 +42,7 @@ export class LeaveConfigComponent {
   leaveTypes: any[] = [];
   currentYear: any;
   isLoading: boolean = false;
+  lwpForm!: FormGroup;
 
   public defaultColDef: ColDef = {
     editable: true,
@@ -66,7 +67,6 @@ export class LeaveConfigComponent {
       },
     });
   }
-
 
   onGridReady(params: { api: any }) {
     this.gridApiActive = params.api;
@@ -134,6 +134,10 @@ export class LeaveConfigComponent {
       carry_forward: ['FALSE', Validators.required]
     });
 
+    this.lwpForm = this.fb.group({
+      leave_without_pay: [null]
+    });
+
   }
 
   ngOnInit() {
@@ -152,6 +156,11 @@ export class LeaveConfigComponent {
 
   openModal() {
     this.modalService.openModal('addLeaveModal')
+  }
+
+  openModalLWP() {
+    this.modalService.openModal('LWPModal');
+    this.getLeaveWithoutPay();
   }
 
   getLeaveTypes() {
@@ -418,6 +427,50 @@ export class LeaveConfigComponent {
     if (!pattern.test(char)) {
       event.preventDefault();
     }
+  }
+
+  addleaveWithoutPay() {
+    const value = this.lwpForm.value.leave_without_pay;
+
+    if (value === null) {
+      this.toastr.error('Please select Yes or No');
+      return;
+    }
+
+    const payload = {
+      leave_without_pay: value
+    };
+
+    this.service.post('leave/save_lwp', payload).subscribe({
+      next: (res: any) => {
+        if (res.status === 'success') {
+          this.toastr.success('LWP setting saved successfully');
+          this.modalService.closeModal();
+        }
+      }
+    });
+  }
+
+  getLeaveWithoutPay() {
+    this.service.post('leave/get_lwp', {}).subscribe({
+      next: (res: any) => {
+        if (res.status === 'success' && Array.isArray(res.data) && res.data.length > 0) {
+
+          const lwp = res.data.find(
+            (x: any) => x.lwp_type === 'leave_without_pay'
+          );
+
+          if (lwp) {
+            this.lwpForm.patchValue({
+              leave_without_pay: lwp.lwp_value === 1
+            });
+          }
+        }
+      },
+      error: () => {
+        this.toastr.error('Failed to load Leave Without Pay setting');
+      }
+    });
   }
 
 }

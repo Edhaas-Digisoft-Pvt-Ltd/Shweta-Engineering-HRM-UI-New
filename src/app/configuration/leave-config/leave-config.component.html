@@ -18,6 +18,12 @@
                     </div>
 
                     <div class="col-auto">
+                        <button type="button" class="btn text-white mb-1 px-4 BtnColor" (click)="openModalLWP()">
+                            LWP
+                        </button>
+                    </div>
+
+                    <div class="col-auto">
                         <button type="button" class="btn text-white mb-1 px-4 BtnColor" (click)="openModal()">
                             Add New
                         </button>
@@ -167,7 +173,7 @@
                                 <!-- Year (disabled) -->
                                 <div class="col-3">
                                     <label for="year">Year</label>
-                                    <input type="text" id="year" class="form-control" formControlName="year" >
+                                    <input type="text" id="year" class="form-control" formControlName="year">
                                 </div>
 
                                 <!-- No. of Leaves -->
@@ -199,5 +205,54 @@
                 </div>
             </div>
         </div>
+
+        <!-- LWP modal -->
+        <div class="modal fade modal-lg text-left" id="LWPModal" tabindex="-1" aria-labelledby="exampleModalLabel"
+            aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLabel">Leave Without Pay</h5>
+                        <button type="button text-white" class="btn-close" data-bs-dismiss="modal"
+                            aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body text-left">
+                        <form [formGroup]="lwpForm" (ngSubmit)="addleaveWithoutPay()">
+                            <div class="row">
+                                <div class="col-12 mb-3">
+                                    <label class="form-label fw-bold">Should extra leaves be treated as Leave Without
+                                        Pay?</label><br />
+                                    <small class="text-danger">
+                                        (Salary will be deducted annually for leaves taken beyond the allowed limit.)
+                                    </small><br/>
+
+                                    <div class="form-check form-check-inline ms-3 mt-2">
+                                        <input class="form-check-input" type="radio" formControlName="leave_without_pay"
+                                            [value]="true" id="lwpYes" />
+                                        <label class="form-check-label" for="lwpYes">
+                                            Yes
+                                        </label>
+                                    </div>
+
+                                    <div class="form-check form-check-inline ms-3 mt-2">
+                                        <input class="form-check-input" type="radio" formControlName="leave_without_pay"
+                                            [value]="false" id="lwpNo" />
+                                        <label class="form-check-label" for="lwpNo">
+                                            No
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                                <button type="submit"
+                                    class="btn BtnColor mt-3 ml-auto btn-end submit-btn">Submit</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
     </div>
 </div>

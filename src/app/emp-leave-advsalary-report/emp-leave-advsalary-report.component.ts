@@ -27,8 +27,9 @@ export class EmpLeaveAdvsalaryReportComponent {
   selectedAdvpayid: number = 0;
   tabledata: any = [];
   employee_id!: any;
+  years: number[] = [];
 
-  years = [2023, 2024, 2025];
+  // years = [2023, 2024, 2025,2026];
   months = [
     { id: 1, value: 'January' },
     { id: 2, value: 'February' },
@@ -43,11 +44,24 @@ export class EmpLeaveAdvsalaryReportComponent {
     { id: 11, value: 'November' },
     { id: 12, value: 'December' }
   ];
+  generateyears() {
+    const startYear = 2024;
+    const currentYear = new Date().getFullYear();
+
+    this.years = [];
+
+    for (let year = startYear; year <= currentYear; year++) {
+      this.years.push(year);
+    }
+  }
 
   constructor(private fb: FormBuilder, private service: HrmserviceService, private toastr: ToastrService) { }
 
   ngOnInit() {
-    if (sessionStorage.getItem('roleName') == 'Operator') {
+    let role_name = sessionStorage.getItem('roleName') 
+    if (role_name == 'Operator' || role_name == 'Supervisor' || role_name === 'Manager' || role_name === 'Maintenance Manager'
+        || role_name === 'Production Manager' || role_name === 'Quality Manager' || role_name === 'Data-Entry Operator' 
+        || role_name === 'Production Incharge' || role_name === 'Plant Incharge') {
       const signalEmpId = this.service.EmployeeId();
       if (signalEmpId != null) {
         this.employee_id = this.service.EmployeeId();
@@ -76,6 +90,7 @@ export class EmpLeaveAdvsalaryReportComponent {
       remainingBalance: [{ value: '', disabled: true }],
     })
     this.searchEmployeeAdvanceSalary();
+    this.generateyears();
   }
 
   selectTab(tab: string) {
@@ -94,9 +109,7 @@ export class EmpLeaveAdvsalaryReportComponent {
   searchEmployeeAdvanceSalary() {
     this.rowData = [];
     console.log('called');
-    console.log('empid', this.employee_id);
-    
-    
+    console.log('empid', this.employee_id);    
 
     const payload = {
       employee_id: this.employee_id,

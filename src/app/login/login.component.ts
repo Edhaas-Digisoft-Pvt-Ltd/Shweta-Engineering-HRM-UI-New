@@ -97,23 +97,39 @@ export class LoginComponent {
                 this.service.setRole(roleName);
 
                 // Navigate only after permissions are set
-                switch (roleName) {
-                  case 'operator':
-                    this.service.setEmployeeId(this.logindata.employe_id);
-                    this.router.navigate(['/authPanal/EmployeeInDetail']);
-                    break;
+                // switch (roleName) {
+                //   case 'operator':
+                //     this.service.setEmployeeId(this.logindata.employe_id);
+                //     this.router.navigate(['/authPanal/EmployeeInDetail']);
+                //     break;
 
-                  case 'accountant':
-                    this.router.navigate(['/authPanal/payrollProcess']);
-                    break;
+                //   case 'accountant':
+                //     this.router.navigate(['/authPanal/payrollProcess']);
+                //     break;
 
-                  case 'admin':
-                    this.router.navigate(['/authPanal/Dashboard']);
-                    break;
+                //   case 'admin':
+                //     this.router.navigate(['/authPanal/Dashboard']);
+                //     break;
 
-                  default:
-                    this.toastr.error('Unknown role. Please contact admin.');
-                    break;
+                //   default:
+                //     this.toastr.error('Unknown role. Please contact admin.');
+                //     break;
+                // }
+                if(roleName === 'accountant'){
+                  this.router.navigate(['/authPanal/payrollProcess']);
+                }
+                else if(roleName === 'admin'){
+                  this.router.navigate(['/authPanal/Dashboard']);
+                }
+                else if(roleName === 'operator' || roleName === 'supervisor' || roleName === 'manager' || roleName === 'maintenance manager'
+                  || roleName === 'production manager' || roleName === 'quality manager' || roleName === 'data-entry operator' 
+                  || roleName === 'production incharge' || roleName === 'plant incharge'
+                ){
+                  this.service.setEmployeeId(this.logindata.employe_id);
+                  this.router.navigate(['/authPanal/EmployeeInDetail']);
+                }
+                else{
+                  this.toastr.error('Unknown role. Please contact admin.');
                 }
               } else {
                 this.toastr.error('Failed to fetch permissions');

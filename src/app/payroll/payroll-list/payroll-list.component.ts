@@ -412,6 +412,7 @@ export class PayrollListComponent {
     });
   }
 
+  showLwpColumns: boolean = false;
   exportExcel() {
     if (!this.selectedCompanyId || !this.selectedYear || !this.selectedMonth) {
       this.toastr.warning('Select company, year and month first');
@@ -431,6 +432,11 @@ export class PayrollListComponent {
       if (res.status === 'success' && res.data?.length > 0) {
         this.dataToExportExcel = res.data;
         this.dataToExportExcel_totals = res.totals;
+        this.showLwpColumns = this.dataToExportExcel.some(
+          (row: any) =>
+            row.leave_without_pay_days !== null &&
+            Number(row.leave_without_pay_days) > 0
+        );
 
         this.generateExcel();
       } else {
@@ -477,6 +483,9 @@ export class PayrollListComponent {
       'Overtime Salary',
       'Present Day Hrs salary',
       'Deduction',
+      ...(this.showLwpColumns
+      ? ['Leave Without Pay Days', 'Leave Without Pay Amount']
+      : []),
       'Total_Salary',
       'Professional Tax',
       'Employee contri. PF',
@@ -486,6 +495,7 @@ export class PayrollListComponent {
       'Incentive Amount',
       'Salary Payable',
     );
+    
     worksheet.addRow(headerRow1);
 
     // Merge headers
@@ -511,7 +521,14 @@ export class PayrollListComponent {
     for (let d = 1; d <= daysInMonth; d++) {
       headerRow2.push(`${d} ${monthName.slice(0, 3)}`);
     }
-    headerRow2.push('', '', '', '', '', '', '', '', '', '');
+    // headerRow2.push('', '', '', '', '', '', '', '', '', '');
+    const extraCols =
+      10 + (this.showLwpColumns ? 2 : 0);
+
+    for (let i = 0; i < extraCols; i++) {
+      headerRow2.push('');
+    }
+
     worksheet.addRow(headerRow2);
 
     worksheet.getRow(1).font = { bold: true };
@@ -541,6 +558,12 @@ export class PayrollListComponent {
         emp.overtime_amount,
         emp.present_day_hrs_salary,
         emp.deduction,
+        ...(this.showLwpColumns
+        ? [
+            emp.leave_without_pay_days ?? 0,
+            emp.leave_without_pay_amount ?? 0
+          ]
+        : []),
         emp.total_salary,
         emp.total_tax_deduction,
         emp.pf_employee_deduction,
@@ -567,7 +590,13 @@ export class PayrollListComponent {
 
         rowOvertime.push(overtimeVal);
       }
-      rowOvertime.push('', '', '', '', '', '', '', '', '', '');
+      // rowOvertime.push('', '', '', '', '', '', '', '', '', '');
+      const extraCols =
+        10 + (this.showLwpColumns ? 2 : 0);
+
+      for (let i = 0; i < extraCols; i++) {
+        rowOvertime.push('');
+      }
       worksheet.addRow(rowOvertime);
     });
 
@@ -582,6 +611,9 @@ export class PayrollListComponent {
       totals.total_overtime_salary, // Overtime Salary
       '',                            // Present Day Hrs salary
       '',                            // Deduction
+      ...(this.showLwpColumns
+      ? ['', ''] // LWP Days & Amount (no totals)
+      : []),
       totals.total_salary,           // Total Salary
       totals.total_tax,              // Professional Tax
       totals.total_pf_employee,      // Employee PF

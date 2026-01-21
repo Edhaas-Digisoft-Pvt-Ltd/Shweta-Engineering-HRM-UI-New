@@ -93,10 +93,17 @@ export class PayrollSummariesComponent {
   }
 
   ngOnInit() {
-    this.selectedYear = new Date().getFullYear();
-    this.selectedMonth = new Date().getMonth();
-    const currentDate = new Date();
-    this.today = currentDate.toISOString().split('T')[0];
+    // this.selectedYear = new Date().getFullYear();
+    // this.selectedMonth = new Date().getMonth();
+    // const currentDate = new Date();
+    // this.today = currentDate.toISOString().split('T')[0];
+     const today = new Date();
+    const lastMonthDate = new Date(today.getFullYear(), today.getMonth() - 1, 1);
+
+    this.selectedYear = lastMonthDate.getFullYear();
+    this.selectedMonth = lastMonthDate.getMonth() + 1; 
+
+    this.today = today.toISOString().split('T')[0];
 
     this.route.queryParams.subscribe(params => {
       this.employee_id = params['id'];
@@ -202,6 +209,15 @@ export class PayrollSummariesComponent {
           //   amount:0,
           // },
         ];
+        if(this.calculationData.leave_without_pay_days != 'Null' && this.calculationData.leave_without_pay_days >0){
+          this.deduct.push(
+          {
+            Compound: 'Leave w/o Pay',
+            deduction:  this.calculationData.leave_without_pay_days + ' - days',
+            amount:  this.calculationData.leave_without_pay_amount
+          }
+          )
+        }
         this.isLoading = false;
       }
     })
