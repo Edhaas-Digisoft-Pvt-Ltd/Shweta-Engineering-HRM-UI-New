@@ -37,10 +37,13 @@ export class LeaveApprovedRejectedComponent {
   CompanyNames: any = [];
   selectedValue: any = 1;
   exportData: any;
+  loggedInUser: any;
 
   constructor(private route: ActivatedRoute, private router: Router, private fb: FormBuilder, private service: HrmserviceService, private modalService: ModalServiceService, private toastr: ToastrService) { }
 
   ngOnInit(): void {
+    this.loggedInUser = sessionStorage.getItem('employeeId');
+    
     const currentDate = new Date();
     this.selectedYear = new Date().getFullYear();
     this.selectedMonth = new Date().getMonth() + 1;
@@ -112,7 +115,7 @@ export class LeaveApprovedRejectedComponent {
           endDate: singleleaveRequestData?.end_date,
           leaveType: singleleaveRequestData?.leave_name,
           status: singleleaveRequestData?.leave_status, // or 'Approved', 'Rejected'
-          noOfDays: singleleaveRequestData?.apply_leave_count,
+          noOfDays: singleleaveRequestData?.total_leave_days,
           department: singleleaveRequestData?.department_name,
           leavereason: singleleaveRequestData?.leave_reason,
         };
@@ -186,7 +189,7 @@ export class LeaveApprovedRejectedComponent {
             department_name: item.department_name,
             start_date: item.start_date,
             end_date: item.end_date,
-            apply_leave_count: item.apply_leave_count,
+            total_leave_days: item.total_leave_days,
             leave_status: item.leave_status,
             tbl_emp_leave_id: item.tbl_emp_leave_id,
           }));
@@ -280,7 +283,8 @@ export class LeaveApprovedRejectedComponent {
     if (confirm("Do you want to update Status?") == true) {
       const payload = {
         tbl_emp_leave_id: this.empLeaveId,
-        leave_status: data
+        leave_status: data,
+        approved_by: this.loggedInUser,
       }
       this.service.post(`update/leave/request`, payload).subscribe((res: any) => {
         if (res.status === 'success') {
@@ -322,7 +326,7 @@ export class LeaveApprovedRejectedComponent {
             r.department_name,
             r.start_date,
             r.end_date,
-            r.apply_leave_count,
+            r.total_leave_days,
             r.leave_status
           ]);
 

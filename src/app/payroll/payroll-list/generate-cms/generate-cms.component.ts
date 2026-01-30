@@ -33,10 +33,10 @@ export class GenerateCmsComponent {
     this.cmsForm = this.fb.group({
       companyId: ['', Validators.required],
       yearMonth: ['', Validators.required],
-      companyCode: ['', Validators.required],
-      paymentType: ['', Validators.required],
+      companyCode: ['SEPL', Validators.required],
+      paymentType: ['RPAY', Validators.required],
       paymentDate: ['', Validators.required],
-      accountNumber: ['', [Validators.required, Validators.pattern(/^[0-9]+$/)]]
+      accountNumber: ['7748133816', [Validators.required, Validators.pattern(/^[0-9]+$/)]]
     });
 
     this.expenseForm = this.fb.group({
@@ -90,7 +90,7 @@ export class GenerateCmsComponent {
             this.companyList.find((c: any) => c.company_id == formData.companyId)
               ?.company_name?.toUpperCase() || '';
 
-          // 🧾 Employee data
+          //Employee data
           const employeeData = res.data.map((item: any) => ({
             company_code: formData.companyCode.toUpperCase(),
             payment_type: formData.paymentType.toUpperCase(),
@@ -108,7 +108,7 @@ export class GenerateCmsComponent {
             COMPANY_NAME: companyName,
           }));
 
-          // 💰 Append expense data (savedExpenses)
+          //Append expense data (savedExpenses)
           const expenseData = (this.savedExpenses || []).map((exp: any) => ({
             company_code: formData.companyCode.toUpperCase(),
             payment_type: formData.paymentType.toUpperCase(),
@@ -126,10 +126,10 @@ export class GenerateCmsComponent {
             COMPANY_NAME: companyName,
           }));
 
-          // 📊 Combine both
+          //Combine both
           const combinedData = [...employeeData, ...expenseData];
 
-          // 📄 Convert to CSV
+          //Convert to CSV
           const csvContent = combinedData
             .map((obj: any) => Object.values(obj).join(','))
             .join('\n');
@@ -148,7 +148,7 @@ export class GenerateCmsComponent {
           link.click();
           document.body.removeChild(link);
 
-          // ✅ Clear data after download
+          //Clear data after download
           this.cmsData = [];
           this.expenseList = [];
           this.savedExpenses = [];

@@ -236,13 +236,13 @@ export class PayrollProcessRejectedComponent {
         filter: true,
         maxWidth: 70,
       },
-      {
-        headerName: 'OT(hrs)',
-        field: 'overTime',
-        sortable: true,
-        filter: true,
-        minWidth: 100,
-      },
+      // {
+      //   headerName: 'OT(hrs)',
+      //   field: 'overTime',
+      //   sortable: true,
+      //   filter: true,
+      //   minWidth: 100,
+      // },
       {
         headerName: 'hours',
         field: 'hours',

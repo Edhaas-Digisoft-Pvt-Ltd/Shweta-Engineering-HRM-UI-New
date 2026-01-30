@@ -43,7 +43,7 @@
         </div>
 
         <!-- Modal Content -->
-        <div class="modal fade modal-xl text-left" id="addLeaveModal" tabindex="-1" aria-labelledby="exampleModalLabel"
+        <div class="modal fade modal-lg text-left" id="addLeaveModal" tabindex="-1" aria-labelledby="exampleModalLabel"
             aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered">
                 <div class="modal-content">
@@ -57,7 +57,7 @@
                             <div class="row">
 
                                 <!-- Company -->
-                                <div class="col-md-3 text-start select-company">
+                                <div class="col-md-4 text-start select-company">
                                     <label class="fw-bold" disabled selected>Select Company<span
                                             class="text-danger">*</span></label>
                                     <select class="form-select" formControlName="companyid" [ngClass]="{
@@ -76,7 +76,7 @@
                                 </div>
 
                                 <!-- leave type -->
-                                <div class="col-md-3">
+                                <div class="col-md-4">
                                     <label for="leavetype">
                                         Leave Type <span class="text-danger">*</span>
                                     </label>
@@ -100,36 +100,52 @@
                                     </small>
                                 </div>
 
-                                <div class="col-md-2">
-                                    <label for="year">Year</label>
-                                    <input type="text" id="year" class="form-control" [value]="currentYear" disabled />
+                                <div class="col-md-4">
+                                    <label for="year">Financial Year</label>
+                                    <input type="text" id="financial_year" class="form-control" [value]="financialYearCode"
+                                    disabled />
                                 </div>
 
-                                <!-- No. Of Leaves -->
-                                <div class="col-md-2">
-                                    <label for="leavenumber">No. of leaves<span class="text-danger">*</span></label>
-                                    <input type="number" class="form-control" id="leavenumber"
-                                        formControlName="leavenumber" placeholder="Please Enter Leave number" [ngClass]="{
+                                <div class="row mt-3">
+                                    <!-- No. Of Leaves -->
+                                    <div class="col-md-4">
+                                        <label for="leavenumber">No. of leaves<span class="text-danger">*</span></label>
+                                        <input type="number" class="form-control" id="leavenumber"
+                                            formControlName="leavenumber" placeholder="Please Enter Leave number"
+                                            [ngClass]="{
                             'input-error': isSubmitted && LeaveRule.get('leavenumber')?.invalid,
                             'is-invalid': isSubmitted && LeaveRule.get('leavenumber')?.invalid
                             }">
-                                    <small class="text-danger" *ngIf="LeaveRule.get('leavenumber')?.errors?.['min']">
-                                        Number of leaves never less than 0.
-                                    </small>
-                                    <small class="text-danger" *ngIf="LeaveRule.get('leavenumber')?.errors?.['max']">
-                                        Number of leaves cannot exceed 31.
-                                    </small>
-                                </div>
+                                        <small class="text-danger"
+                                            *ngIf="LeaveRule.get('leavenumber')?.errors?.['min']">
+                                            Number of leaves never less than 0.
+                                        </small>
+                                        <small class="text-danger"
+                                            *ngIf="LeaveRule.get('leavenumber')?.errors?.['max']">
+                                            Number of leaves cannot exceed 31.
+                                        </small>
+                                    </div>
 
-                                <div class="col-md-2">
-                                    <label for="carryForward">Carry Forward</label>
+                                    <div class="col-md-4">
+                                        <label for="carryForward">Carry Forward</label>
 
-                                    <select id="carryForward" class="form-select" formControlName="carry_forward">
+                                        <select id="carryForward" class="form-select" formControlName="carry_forward">
 
-                                        <option value="" disabled>Select</option>
-                                        <option value="TRUE">TRUE</option>
-                                        <option value="FALSE">FALSE</option>
-                                    </select>
+                                            <option value="" disabled>Select</option>
+                                            <option value="TRUE">TRUE</option>
+                                            <option value="FALSE">FALSE</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="col-md-4">
+                                        <label for="leavenumber">Max Carry Forward<span class="text-danger">*</span></label>
+                                        <input type="number" class="form-control" id="max_carry_forward"
+                                            formControlName="max_carry_forward" placeholder="Please Enter Leave number"
+                                            [ngClass]="{
+                                                'input-error': isSubmitted && LeaveRule.get('max_carry_forward')?.invalid,
+                                                'is-invalid': isSubmitted && LeaveRule.get('max_carry_forward')?.invalid
+                                                }">
+                                    </div>
                                 </div>
 
                             </div>
@@ -224,7 +240,7 @@
                                         Pay?</label><br />
                                     <small class="text-danger">
                                         (Salary will be deducted annually for leaves taken beyond the allowed limit.)
-                                    </small><br/>
+                                    </small><br />
 
                                     <div class="form-check form-check-inline ms-3 mt-2">
                                         <input class="form-check-input" type="radio" formControlName="leave_without_pay"

@@ -146,8 +146,8 @@
                                     </button>
                                 </div> -->
                                 <div class="row mt-4">
-                                    <button *ngIf="hasAccess('Employee', 'update')" type="button" class="btn dashboard-btn w-100"
-                                        (click)="goToUpdateEmployee()">
+                                    <button *ngIf="hasAccess('Employee', 'update')" type="button"
+                                        class="btn dashboard-btn w-100" (click)="goToUpdateEmployee()">
                                         Edit
                                     </button>
                                 </div>
@@ -162,25 +162,53 @@
                                 </div>
                             </div>
                             <!-- leave details -->
-                            <div class="row mt-3 text-center mb-3">
-                                <div class="col-6 border-end border-dashed">
-                                    <div class="d-flex justify-content-center align-items-center mb-1">
-                                        <i class="bi bi-clock me-2 text-primary"></i>
-                                        <h6 class="mb-0">Total Leaves</h6>
-                                    </div>
-                                    <h2 class="mb-0 fw-semibold text-dark">
-                                        {{ Employee_Data.leave_data.total_leave_count }}
-                                    </h2>
-                                </div>
+                            <div class="row mt-3">
+                                <div class="col-12">
+                                    <!-- <div class="card shadow-sm rounded-4">
 
-                                <div class="col-6">
-                                    <div class="d-flex justify-content-center align-items-center mb-1">
-                                        <i class="bi bi-check-circle me-2 text-success"></i>
-                                        <h6 class="mb-0">Available Leaves</h6>
-                                    </div>
-                                    <h2 class="mb-0 fw-semibold text-dark">
-                                        {{ Employee_Data.leave_data.available }}
-                                    </h2>
+                                        <div class="card-body"> -->
+
+                                            <ng-container *ngFor="let leave of Employee_Data?.leave_data?.leave_types">
+                                                <!-- Main Leave Row -->
+                                                <div class="row align-items-center text-center g-1">
+                                                    <!-- Leave Name -->
+                                                    <div class="col-md-4 text-start">
+                                                        <div class="fw-semibold text-dark">
+                                                            {{ leave.leave_name }}
+                                                        </div>
+                                                    </div>
+
+                                                    <!-- Total -->
+                                                    <div class="col-md-4">
+                                                        <span class="badge bg-primary fs-6">
+                                                            Total: {{ leave.total_leave }}
+                                                        </span>
+                                                    </div>
+
+                                                    <!-- Available -->
+                                                    <div class="col-md-4">
+                                                        <span class="badge fs-6"
+                                                            [ngClass]="leave.available_leave > 0 ? 'bg-success' : 'bg-danger'">
+                                                            Available: {{ leave.available_leave }}
+                                                        </span>
+                                                    </div>
+                                                </div>
+
+                                                <!-- Carry Forward Note (Full Width) -->
+                                                <div class="row" *ngIf="leave.carry_fwd > 0">
+                                                    <div class="col-12 text-start">
+                                                        <small class="text-muted fst-italic mt-1">
+                                                            <i class="bi bi-arrow-repeat"></i>
+                                                            {{ leave.carry_fwd }} carry-forwarded leave included in total
+                                                        </small>
+                                                    </div>
+                                                </div>
+
+                                                <hr class="my-2" />
+                                            </ng-container>
+
+                                        <!-- </div>
+                                    </div> -->
                                 </div>
                             </div>
 
@@ -195,19 +223,22 @@
                                         <!-- Accept -->
                                         <div>
                                             <div class="fw-bold text-success">Approved</div>
-                                            <div class="fs-3">{{Employee_Data.leave_data.total_accept}}</div>
+                                            <div class="fs-3"> {{ Employee_Data?.leave_data?.leave_requests?.approved }}
+                                            </div>
                                         </div>
 
                                         <!-- Reject -->
                                         <div>
                                             <div class="fw-bold text-danger" style="color: #70002a;">Rejected</div>
-                                            <div class="fs-3">{{Employee_Data.leave_data.total_reject}}</div>
+                                            <div class="fs-3">{{ Employee_Data?.leave_data?.leave_requests?.rejected }}
+                                            </div>
                                         </div>
 
                                         <!-- Pending -->
                                         <div>
                                             <div class="fw-bold" style="color: #806000;">Pending</div>
-                                            <div class="fs-3">{{Employee_Data.leave_data.total_pending}}</div>
+                                            <div class="fs-3"> {{ Employee_Data?.leave_data?.leave_requests?.pending }}
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -530,7 +561,7 @@
                         </div> -->
 
                                 <!-- From Date -->
-                                <div class="col-md-4">
+                                <div class="col-md-3">
                                     <label class="form-label">From Date<span class="text-danger">*</span></label>
                                     <input type="date" class="form-control" formControlName="start_date" [ngClass]="{'input-error': isLeaveSubmitted && leaveForm.get('start_date')?.invalid,
                                 'is-invalid': isLeaveSubmitted && leaveForm.get('start_date')?.invalid }" />
@@ -538,11 +569,21 @@
                                 </div>
 
                                 <!-- To Date -->
-                                <div class="col-md-4">
+                                <div class="col-md-3">
                                     <label class="form-label">To Date<span class="text-danger">*</span></label>
                                     <input type="date" class="form-control" formControlName="end_date" [ngClass]="{'input-error': isLeaveSubmitted && leaveForm.get('end_date')?.invalid,
                                 'is-invalid': isLeaveSubmitted && leaveForm.get('end_date')?.invalid }" />
 
+                                </div>
+
+                                <div class="col-md-2 d-flex align-items-end">
+                                    <div class="form-check mt-4">
+                                        <input type="checkbox" class="form-check-input" id="halfDay"
+                                            formControlName="is_half_day">
+                                        <label class="form-check-label" for="halfDay">
+                                            Half Day
+                                        </label>
+                                    </div>
                                 </div>
                             </div>
 

@@ -160,6 +160,7 @@ export class PayrollListComponent {
           this.rowData = res.data.map((item: any) => ({
             employee_code: item.employee_code,
             employeeName: item.emp_name,
+            present_days: item.present_days,
             total_hours: item.total_hours,
             overTime: item.total_overtime,
             netAmount: item.net_salary ? `₹ ${item.net_salary}` : 'NA',
@@ -214,6 +215,13 @@ export class PayrollListComponent {
       filter: true,
       maxWidth: 230,
     },
+    {
+      headerName: 'Present Days',
+      field: 'present_days',
+      sortable: true,
+      filter: true,
+      maxWidth: 230,
+    },
 
     {
       headerName: 'Total Hours',
@@ -222,14 +230,14 @@ export class PayrollListComponent {
       filter: true,
       maxWidth: 170
     },
-    {
-      headerName: 'OT(hrs)',
-      field: 'overTime',
-      sortable: true,
-      filter: true,
-      maxWidth: 130
+    // {
+    //   headerName: 'OT(hrs)',
+    //   field: 'overTime',
+    //   sortable: true,
+    //   filter: true,
+    //   maxWidth: 130
 
-    },
+    // },
     {
       headerName: 'Deductions',
       field: 'deduction',

@@ -48,6 +48,7 @@ export class EmployeeDashboardComponent {
   calculationData: any;
   attendanceDetails: any;
   totalAttendanceValue: number = 0;
+  financialYearId: any;
 
   constructor(private route: ActivatedRoute, private fb: FormBuilder, private router: Router, private toastr: ToastrService, private service: HrmserviceService, private modalService: ModalServiceService,) {
     // Generate last 20 years dynamically
@@ -68,6 +69,7 @@ export class EmployeeDashboardComponent {
     const today = new Date();
     const currentYear = today.getFullYear();
     let previousMonth = today.getMonth();
+    this.getRunningFinancialYear();
 
     if (previousMonth === 0) {
       this.selectedMonth = '12';
@@ -87,8 +89,8 @@ export class EmployeeDashboardComponent {
     let role_name = sessionStorage.getItem('roleName');
 
     if (role_name == 'Operator' || role_name == 'Supervisor' || role_name === 'Manager' || role_name === 'Maintenance Manager'
-        || role_name === 'Production Manager' || role_name === 'Quality Manager' || role_name === 'Data-Entry Operator' 
-        || role_name === 'Production Incharge' || role_name === 'Plant Incharge') {
+      || role_name === 'Production Manager' || role_name === 'Quality Manager' || role_name === 'Data-Entry Operator'
+      || role_name === 'Production Incharge' || role_name === 'Plant Incharge') {
       const signalEmpId = this.service.EmployeeId();
       if (signalEmpId != null) {
         this.employee_id = this.service.EmployeeId();
@@ -114,10 +116,13 @@ export class EmployeeDashboardComponent {
 
     this.leaveForm = this.fb.group({
       leave_id: [null, Validators.required],
-      noOfDays: [1, [Validators.required, Validators.min(1)]],
       start_date: ['', Validators.required],
       end_date: ['', Validators.required],
-      leave_reason: ['', [Validators.required, Validators.pattern(/^[A-Za-z ]+$/), this.NoWhitespaceValidator]]
+      is_half_day: [0],
+      leave_reason: [
+        '',
+        [Validators.required, Validators.pattern(/^[A-Za-z ]+$/), this.NoWhitespaceValidator]
+      ],
     });
 
     this.advanceSalaryForm = this.fb.group({
@@ -254,7 +259,7 @@ export class EmployeeDashboardComponent {
     this.attendanceDetails = [data.attendance];
     this.selectedYear = data.period.year;
     // this.selectedMonth = data.period.month;
-    let payslipMonthName = data.period.month; 
+    let payslipMonthName = data.period.month;
 
     const temp = document.createElement('div');
     temp.style.position = 'fixed';
@@ -516,12 +521,13 @@ export class EmployeeDashboardComponent {
       return;
     }
 
-    const leaveData = {
+   const leaveData = {
       employe_id: this.employee_id,
       company_id: this.company_id,
       leave_id: this.leaveForm.value.leave_id,
       start_date: this.leaveForm.value.start_date,
       end_date: this.leaveForm.value.end_date,
+      is_half_day: this.leaveForm.value.is_half_day ? 1 : 0, 
       leave_reason: this.leaveForm.value.leave_reason,
     };
 
@@ -620,6 +626,31 @@ export class EmployeeDashboardComponent {
     this.router.navigate(['/authPanal/UpdateEmployee'], {
       queryParams: { id: this.employee_id }
     });
+  }
+
+  onHalfDayChange() {
+    const isHalfDay = this.leaveForm.get('is_half_day')?.value;
+
+    if (isHalfDay) {
+      const startDate = this.leaveForm.get('start_date')?.value;
+      if (startDate) {
+        this.leaveForm.patchValue({ end_date: startDate });
+      }
+    }
+  }
+
+  getRunningFinancialYear() {
+    this.service.post('fetch/financialyear', {}).subscribe(
+      (res: any) => {
+        if (res.status === 'success') {
+          this.financialYearId = res.data.fy_id;
+        }
+      },
+      (error) => {
+        console.error('Failed to fetch financial year', error);
+        this.toastr.error('Unable to fetch financial year');
+      }
+    );
   }
 
 }

@@ -43,6 +43,9 @@ export class LeaveConfigComponent {
   currentYear: any;
   isLoading: boolean = false;
   lwpForm!: FormGroup;
+  financialYear: any = null;
+  financialYearCode: string = '';
+  financialYearId: number | null = null;
 
   public defaultColDef: ColDef = {
     editable: true,
@@ -52,20 +55,21 @@ export class LeaveConfigComponent {
 
   initializeColumns() {
     this.columnDefs = [
-      { headerName: 'Name', field: 'leave_name', sortable: true, filter: true, maxWidth: 250, },
-      { headerName: 'Leave Type', field: 'leave_type', sortable: true, filter: true, maxWidth: 220, },
+      { headerName: 'Leave Type', field: 'leave_name', sortable: true, filter: true, maxWidth: 250, },
+      { headerName: 'Year Code', field: 'year_code', sortable: true, filter: true, maxWidth: 220, },
       { headerName: 'No. of Leaves', field: 'leave_count', sortable: true, filter: true, maxWidth: 200 },
       { headerName: 'Is Carry Forward', field: 'leave_carryforwad', sortable: true, filter: true },
+      { headerName: 'Max Carry Forward', field: 'max_carry_forward', sortable: true, filter: true },
     ];
-    this.columnDefs.push({
-      headerName: 'Actions',
-      cellStyle: { border: '1px solid #ddd' },
-      cellRenderer: EditLeaveBtnComponent,
-      cellRendererParams: {
-        editCallback: (leaveId: string) => this.openEditModal(leaveId),
-        deleteCallback: (leaveId: string) => this.deleteLeaveRule(leaveId),
-      },
-    });
+    // this.columnDefs.push({
+    //   headerName: 'Actions',
+    //   cellStyle: { border: '1px solid #ddd' },
+    //   cellRenderer: EditLeaveBtnComponent,
+    //   cellRendererParams: {
+    //     editCallback: (leaveId: string) => this.openEditModal(leaveId),
+    //     deleteCallback: (leaveId: string) => this.deleteLeaveRule(leaveId),
+    //   },
+    // });
   }
 
   onGridReady(params: { api: any }) {
@@ -119,7 +123,12 @@ export class LeaveConfigComponent {
         Validators.max(31),
         Validators.pattern(/^\d+$/)
       ]],
-      carry_forward: ['FALSE', Validators.required]
+      carry_forward: ['FALSE', Validators.required],
+      max_carry_forward: ['', [
+        Validators.required,
+        Validators.min(0),
+        Validators.max(31)
+      ]]
     });
 
     this.EditLeaveRule = this.fb.group({
@@ -151,7 +160,7 @@ export class LeaveConfigComponent {
     this.getAllLeaves();
     this.initializeColumns();
     this.getLeaveTypes();
-    this.currentYear = new Date().getFullYear();
+    this.getRunningFinancialYear();
   }
 
   openModal() {
@@ -195,10 +204,10 @@ export class LeaveConfigComponent {
       if (res.status === 'success') {
         this.rowData = res.data.map((item: any) => ({
           leave_name: item.leave_name,
-          leave_type: item.leave_type,
+          year_code:item.year_code,
           leave_count: item.leave_count,
           leave_carryforwad: item.leave_carryforwad,
-          leave_id: item.leave_id
+          max_carry_forward: item.max_carry_forward,
         }));
       }
       this.isLoading = false;
@@ -251,7 +260,6 @@ export class LeaveConfigComponent {
   }
 
   getleaveData(id: any) {
-
     this.service.post("/leavesetup", {}).subscribe((res: any) => {
       if (res.status == "success") {
         this.leaveData = res.data.filter((item: any) => item.CompanyID == id);
@@ -325,8 +333,9 @@ export class LeaveConfigComponent {
         company_id: formData.companyid,
         leave_type: formData.leavetype,
         leave_count: formData.leavenumber,
-        year: this.currentYear.toString(),
-        leave_carryforwad: formData.carry_forward
+        fy_id: this.financialYearId,
+        leave_carryforwad: formData.carry_forward,
+        max_carry_forward: formData.max_carry_forward
       };
 
       this.service.post('create/leave', payload).subscribe(
@@ -471,6 +480,30 @@ export class LeaveConfigComponent {
         this.toastr.error('Failed to load Leave Without Pay setting');
       }
     });
+  }
+
+  getRunningFinancialYear() {
+    this.service.post('fetch/financialyear', {}).subscribe(
+      (res: any) => {
+        if (res.status === 'success') {
+          this.financialYear = res.data;
+          this.financialYearCode = res.data.fy_code;
+          this.financialYearId = res.data.fy_id;
+
+          this.LeaveRule.patchValue({
+            year: this.financialYearCode
+          });
+
+          this.EditLeaveRule.patchValue({
+            year: this.financialYearCode
+          });
+        }
+      },
+      (error) => {
+        console.error('Failed to fetch financial year', error);
+        this.toastr.error('Unable to fetch financial year');
+      }
+    );
   }
 
 }
