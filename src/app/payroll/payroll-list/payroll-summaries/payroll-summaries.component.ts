@@ -166,6 +166,7 @@ export class PayrollSummariesComponent {
             OT: (attendanceData.total_overtime),
             LT: (attendanceData.late_mark),
             TD: (attendanceData.total_days),
+            W: (attendanceData.weekend),
           }
         ]
 
@@ -353,7 +354,7 @@ export class PayrollSummariesComponent {
           { headerName: 'P', field: 'P' },
           { headerName: 'A', field: 'A' },
           { headerName: 'H', field: 'H' },
-          // { headerName: 'HD', field: 'HD' },
+          { headerName: 'W/O', field: 'W' },
           { headerName: 'OT(hrs)', field: 'OT' },
           { headerName: 'LT', field: 'LT' },
           { headerName: 'TD', field: 'TD' },

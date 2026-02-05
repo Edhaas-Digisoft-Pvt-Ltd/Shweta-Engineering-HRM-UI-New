@@ -70,6 +70,7 @@ import { GenerateCmsComponent } from './payroll/payroll-list/generate-cms/genera
 import { UpdateEmployeeComponent } from './employee/update-employee/update-employee.component';
 import { InsufficientLeavesComponent } from './leave/insufficient-leaves/insufficient-leaves.component';
 import { AbsenteesComponent } from './leave/absentees/absentees.component';
+import { HolidayCalendarComponent } from './configuration/holiday-calendar/holiday-calendar.component';
 // FullCalendarModule.registerPlugins([dayGridPlugin]);
 
 //onkar
@@ -133,6 +134,7 @@ import { AbsenteesComponent } from './leave/absentees/absentees.component';
     UpdateEmployeeComponent,
     InsufficientLeavesComponent,
     AbsenteesComponent,
+    HolidayCalendarComponent,
 
   ],
   imports: [

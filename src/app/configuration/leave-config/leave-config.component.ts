@@ -331,7 +331,7 @@ export class LeaveConfigComponent {
 
       const payload = {
         company_id: formData.companyid,
-        leave_type: formData.leavetype,
+        leave_type_id: formData.leavetype,
         leave_count: formData.leavenumber,
         fy_id: this.financialYearId,
         leave_carryforwad: formData.carry_forward,
@@ -369,7 +369,7 @@ export class LeaveConfigComponent {
           this.companyId = data.company_id;
 
           this.EditLeaveRule.patchValue({
-            leavetype: data.leave_type,                 // leave_type_id
+            leavetype: data.leave_type_id,                 // leave_type_id
             year: data.year,
             leavenumber: data.leave_count,
             carry_forward: data.leave_carryforwad || 'FALSE'
@@ -390,7 +390,7 @@ export class LeaveConfigComponent {
       const payload = {
         leave_id: this.leaveId,
         company_id: this.companyId,
-        leave_type: this.EditLeaveRule.value.leavetype,
+        leave_type_id: this.EditLeaveRule.value.leavetype,
         leave_name: this.EditLeaveRule.value.leavename,
         leave_count: this.EditLeaveRule.value.leavenumber,
         leave_carryforwad: this.EditLeaveRule.value.carry_forward

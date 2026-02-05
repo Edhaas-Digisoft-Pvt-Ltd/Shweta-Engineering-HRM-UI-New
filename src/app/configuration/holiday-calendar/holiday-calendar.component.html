@@ -1,0 +1,72 @@
+<div class="right-panel">
+  <div class="row gx-3 align-items-center rounded-2">
+    <div class="col-12">
+      <div class="row justify-content-end align-items-end">
+
+        <div class="col-2">
+          <label class="mb-1 fw-semibold">Select Financial Year</label>
+          <select class="form-select" [(ngModel)]="selectedFyId" (change)="getHolidays()">
+            <option *ngFor="let fy of financialYears" [value]="fy.fy_id">
+              {{ fy.fy_code }}
+            </option>
+          </select>
+        </div>
+
+        <div class="col-auto">
+          <button class="btn BtnColor ms-auto" (click)="openAddModal()">
+            Add Holiday
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <ag-grid-angular class="ag-theme-alpine mt-2" style="width: 100%; height: 70vh" [rowData]="rowData"
+    [columnDefs]="columnDefs" [defaultColDef]="defaultColDef" [pagination]="true">
+  </ag-grid-angular>
+</div>
+
+<!-- Add / Edit Modal -->
+<div class="modal fade modal-lg" id="holidayModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+
+      <div class="modal-header">
+        <h5 class="modal-title">
+          {{ selectedRowData ? 'Edit Holiday' : 'Add Holiday' }}
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+
+      <div class="modal-body">
+        <form [formGroup]="HolidayForm" (ngSubmit)="saveHoliday()">
+          <div class="row">
+            <div class="col-4">
+              <label for="year">Financial Year</label>
+              <input type="text" class="form-control" [value]="financialYearCode" disabled />
+            </div>
+
+            <div class="col-4">
+              <label>Holiday Date <span class="text-danger">*</span></label>
+              <input type="date" class="form-control" formControlName="holiday_date"
+                [ngClass]="{'is-invalid': isSubmitted && HolidayForm.get('holiday_date')?.invalid}">
+            </div>
+
+            <div class="col-4">
+              <label>Title <span class="text-danger">*</span></label>
+              <input type="text" class="form-control" formControlName="title"
+                [ngClass]="{'is-invalid': isSubmitted && HolidayForm.get('title')?.invalid}">
+            </div>
+          </div>
+
+          <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-3">
+            <button type="submit" class="btn BtnColor">
+              {{ selectedRowData ? 'Update' : 'Save' }}
+            </button>
+          </div>
+        </form>
+      </div>
+
+    </div>
+  </div>
+</div>

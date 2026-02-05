@@ -20,6 +20,9 @@
                 <li class="nav-item" (click)="selectTab('tab4')">
                     <a class="nav-link fw-bold" [ngClass]="{'active': activeTab === 'tab4'}">Settings</a>
                 </li>
+                <li class="nav-item" (click)="selectTab('tab5')">
+                    <a class="nav-link fw-bold" [ngClass]="{'active': activeTab === 'tab5'}">Holiday Calender</a>
+                </li>
             </ul>
         </div>
     </div>
@@ -45,6 +48,12 @@
     <div *ngIf="activeTab === 'tab4'">
         <div class="container ">
             <app-settings-config></app-settings-config>
+        </div>
+    </div>
+
+    <div *ngIf="activeTab === 'tab5'">
+        <div class="container ">
+            <app-holiday-calendar></app-holiday-calendar>
         </div>
     </div>
 
