@@ -36,7 +36,6 @@ export class PayrollRejectedComponent {
     resizable: true,
   };
 
-  years = [2023, 2024, 2025];
   months = [
     { id: 1, value: 'January' },
     { id: 2, value: 'February' },
@@ -106,6 +105,11 @@ export class PayrollRejectedComponent {
     this.RejectedPayrollList();
   }
 
+  getMonthName(monthId: number): string {
+    const month = this.months.find(m => m.id === monthId);
+    return month ? month.value : '';
+  }
+
   RejectedPayrollList(page: number = 1): void {
     this.isLoading = true;
     this.service.post('fetch/rejected/payroll', {
@@ -173,7 +177,6 @@ export class PayrollRejectedComponent {
       field: 'emp_name',
       sortable: true,
       filter: true,
-      minWidth: 140,
     },
     {
       headerName: 'P',
@@ -196,13 +199,13 @@ export class PayrollRejectedComponent {
     //   filter: true,
     //   minWidth: 100,
     // },
-    {
-      headerName: 'hours',
-      field: 'hours',
-      sortable: true,
-      filter: true,
-      minWidth: 100,
-    },
+    // {
+    //   headerName: 'hours',
+    //   field: 'hours',
+    //   sortable: true,
+    //   filter: true,
+    //   minWidth: 100,
+    // },
     {
       headerName: 'Bonus',
       field: 'bonus_amount',

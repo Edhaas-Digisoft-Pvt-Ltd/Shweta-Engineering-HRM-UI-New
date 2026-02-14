@@ -227,14 +227,14 @@ export class PayrollProcessRejectedComponent {
         field: 'presentDays',
         sortable: true,
         filter: true,
-        maxWidth: 70,
+        maxWidth: 80,
       },
       {
         headerName: 'A',
         field: 'absentDays',
         sortable: true,
         filter: true,
-        maxWidth: 70,
+        maxWidth: 80,
       },
       // {
       //   headerName: 'OT(hrs)',
@@ -243,13 +243,13 @@ export class PayrollProcessRejectedComponent {
       //   filter: true,
       //   minWidth: 100,
       // },
-      {
-        headerName: 'hours',
-        field: 'hours',
-        sortable: true,
-        filter: true,
-        minWidth: 100,
-      },
+      // {
+      //   headerName: 'hours',
+      //   field: 'hours',
+      //   sortable: true,
+      //   filter: true,
+      //   minWidth: 100,
+      // },
       {
         headerName: 'Bonus',
         field: 'bonus_amount',

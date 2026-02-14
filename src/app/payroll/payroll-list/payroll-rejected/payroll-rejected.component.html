@@ -25,20 +25,13 @@
                                 </div>
 
                                 <div class="col-2 dotted-line">
-                                    <label for="">Select Year</label>
-                                    <select class="form-select" [(ngModel)]="selectedYear"
-                                        (change)="onYearMonthChange()">
-                                        <option *ngFor="let year of years">{{ year }}</option>
-                                    </select>
+                                    <label for="">Year</label>
+                                    <input class="form-control" [value]="selectedYear" readonly />
                                 </div>
 
                                 <div class="col-2">
-                                    <label for="">Select Month</label>
-                                    <select class="form-select" [(ngModel)]="selectedMonth"
-                                        (change)="onYearMonthChange()">
-                                        <option *ngFor="let month of months" [value]="month.id">{{ month.value }}
-                                        </option>
-                                    </select>
+                                    <label for="">Month</label>
+                                    <input class="form-control" [value]="getMonthName(selectedMonth)" readonly />
                                 </div>
 
                                 <div class="col-auto d-flex align-items-end">
@@ -53,9 +46,9 @@
 
                     <div class="row">
                         <div class="col-12 mt-4">
-                            <ag-grid-angular class="ag-theme-alpine"
-                                [rowData]="rowData" [columnDefs]="columnDefs" [gridOptions]="gridOptions" [domLayout]="'autoHeight'"
-                                (gridReady)="onGridReady($event)" [pagination]="false" [defaultColDef]="defaultColDef">
+                            <ag-grid-angular class="ag-theme-alpine" [rowData]="rowData" [columnDefs]="columnDefs"
+                                [gridOptions]="gridOptions" [domLayout]="'autoHeight'" (gridReady)="onGridReady($event)"
+                                [pagination]="false" [defaultColDef]="defaultColDef">
                             </ag-grid-angular>
 
                             <div class="d-flex align-items-center justify-content-end flex-wrap mt-3 gap-2">

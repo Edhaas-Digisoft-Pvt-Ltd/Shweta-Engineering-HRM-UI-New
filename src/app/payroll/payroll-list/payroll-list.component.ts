@@ -474,11 +474,22 @@ export class PayrollListComponent {
     const daysInMonth = new Date(year, month, 0).getDate();
     const monthName = new Date(year, month - 1).toLocaleString('en-US', { month: 'long' });
 
-    // Header row 1
+    // ROLE BASED SORTING
+    const nonOperators = this.dataToExportExcel.filter((e: any) => e.role_id !== 2);
+    const operators = this.dataToExportExcel.filter((e: any) => e.role_id === 2);
+    const orderedEmployees = [...nonOperators, ...operators];
+
+    const isOperator = (emp: any) => emp.role_id === 2;
+
+    // HEADER ROW 1
     const headerRow1: any[] = ['Employee Code', 'Employee Name'];
+
     for (let d = 1; d <= daysInMonth; d++) headerRow1.push('');
+
     headerRow1.push(
-      // 'Absent Days',
+      'Absent Days',
+      'H/O',         
+      'W/O',
       'Present Days',
       'Hours',
       'OT Hours',
@@ -487,74 +498,64 @@ export class PayrollListComponent {
       'Total Hours',
       'Gross Salary',
       'Hours of Month',
-      'Per Hours Salary',
+      'Per Hours/Day',
       'Overtime Salary',
       'Present Day Hrs salary',
       'Deduction',
-      ...(this.showLwpColumns
-      ? ['Leave Without Pay Days', 'Leave Without Pay Amount']
-      : []),
-      'Total_Salary',
+      ...(this.showLwpColumns ? ['Leave Without Pay Days', 'Leave Without Pay Amount'] : []),
+      'Total Salary',
       'Professional Tax',
       'Employee contri. PF',
       'Employer contri. PF',
       'ESIC Employee 0.75%',
       'Advance Salary',
       'Incentive Amount',
-      'Salary Payable',
+      'Salary Payable'
     );
-    
+
     worksheet.addRow(headerRow1);
 
-    // Merge headers
-    worksheet.mergeCells(1, 1, 2, 1);
-    worksheet.mergeCells(1, 2, 2, 2);
-    worksheet.mergeCells(1, 3, 1, 2 + daysInMonth);
-    worksheet.mergeCells(1, 3 + daysInMonth, 2, 3 + daysInMonth);
-    worksheet.mergeCells(1, 4 + daysInMonth, 2, 4 + daysInMonth);
-    worksheet.mergeCells(1, 5 + daysInMonth, 2, 5 + daysInMonth);
-    worksheet.mergeCells(1, 6 + daysInMonth, 2, 6 + daysInMonth);
-    worksheet.mergeCells(1, 7 + daysInMonth, 2, 7 + daysInMonth); // Present
-    // worksheet.mergeCells(1, 8 + daysInMonth, 2, 8 + daysInMonth); // Absent
-    worksheet.mergeCells(1, 8 + daysInMonth, 2, 8 + daysInMonth); // Hours
-    worksheet.mergeCells(1, 9 + daysInMonth, 2, 9 + daysInMonth); // OT Hours
-    worksheet.mergeCells(1, 10 + daysInMonth, 2, 10 + daysInMonth); // Late
-    worksheet.mergeCells(1, 11 + daysInMonth, 2, 11 + daysInMonth); // Early leave
-    worksheet.mergeCells(1, 12 + daysInMonth, 2, 12 + daysInMonth); // Early leave
-
-    worksheet.getCell('C1').value = monthName;
-
-    // Header row 2 - attendance dates
+    // HEADER ROW 2 (DATES)
     const headerRow2: any[] = ['', ''];
     for (let d = 1; d <= daysInMonth; d++) {
       headerRow2.push(`${d} ${monthName.slice(0, 3)}`);
     }
-    // headerRow2.push('', '', '', '', '', '', '', '', '', '');
-    const extraCols =
-      10 + (this.showLwpColumns ? 2 : 0);
 
-    for (let i = 0; i < extraCols; i++) {
-      headerRow2.push('');
-    }
+    const extraCols = 22 + (this.showLwpColumns ? 2 : 0); // +1 because of H/O
+    for (let i = 0; i < extraCols; i++) headerRow2.push('');
 
     worksheet.addRow(headerRow2);
 
     worksheet.getRow(1).font = { bold: true };
     worksheet.getRow(2).font = { bold: true };
+    worksheet.getCell('C1').value = monthName;
 
-    // Fill employee data (only ONE loop)
-    this.dataToExportExcel.forEach(emp => {
-      // -------- Row 1: Attendance Status --------
-      const rowStatus: any[] = [emp.employee_code, emp.emp_name];
+    // DATA ROWS
+    orderedEmployees.forEach(emp => {
+      const operator = isOperator(emp);
+
+      const row: any[] = [emp.employee_code, emp.emp_name];
+
       for (let d = 1; d <= daysInMonth; d++) {
-        const attObj = emp.attendance.find((a: any) => {
-          const date = new Date(a.attendance_date);
-          return date.getDate() === d;
-        });
-        rowStatus.push(attObj ? attObj.status : '');
+        const att = emp.attendance.find((a: any) =>
+          new Date(a.attendance_date).getDate() === d
+        );
+        row.push(att ? att.status : '');
       }
-      rowStatus.push(
-        emp.present_days,
+
+      // Non-operator specific columns
+      if (!operator) {
+        row.push(
+          emp.absent_days ?? 0,
+          emp.holidays ?? 0,          
+          emp.weekends ?? 0,          
+          emp.present_days ?? 0
+        );
+      } else {
+        row.push('', '', '', emp.present_days ?? 0);
+      }
+
+      row.push(
         emp.hours,
         emp.total_overtime,
         emp.late_in,
@@ -567,11 +568,8 @@ export class PayrollListComponent {
         emp.present_day_hrs_salary,
         emp.deduction,
         ...(this.showLwpColumns
-        ? [
-            emp.leave_without_pay_days ?? 0,
-            emp.leave_without_pay_amount ?? 0
-          ]
-        : []),
+          ? [emp.leave_without_pay_days ?? 0, emp.leave_without_pay_amount ?? 0]
+          : []),
         emp.total_salary,
         emp.total_tax_deduction,
         emp.pf_employee_deduction,
@@ -579,71 +577,66 @@ export class PayrollListComponent {
         emp.esic_deduction,
         emp.adv_deduction,
         emp.incentive_amount,
-        emp.net_salary,
+        emp.net_salary
       );
-      worksheet.addRow(rowStatus);
 
-      // -------- Row 2: Overtime Hours --------
-      const rowOvertime: any[] = ['', ''];
-      for (let d = 1; d <= daysInMonth; d++) {
-        const attObj = emp.attendance.find((a: any) => {
-          const date = new Date(a.attendance_date);
-          return date.getDate() === d;
-        });
+      worksheet.addRow(row);
 
-        // overtime
-        const overtimeVal = attObj && attObj.over_time_hr != null 
-          ? attObj.over_time_hr 
-          : '';
-
-        rowOvertime.push(overtimeVal);
+      // BLANK ROW → ONLY FOR NON OPERATOR
+      if (!operator) {
+        worksheet.addRow([]);
       }
-      // rowOvertime.push('', '', '', '', '', '', '', '', '', '');
-      const extraCols =
-        10 + (this.showLwpColumns ? 2 : 0);
 
-      for (let i = 0; i < extraCols; i++) {
-        rowOvertime.push('');
+      // OT ROW → ONLY FOR OPERATOR
+      if (operator) {
+        const otRow: any[] = ['', ''];
+
+        for (let d = 1; d <= daysInMonth; d++) {
+          const att = emp.attendance.find((a: any) =>
+            new Date(a.attendance_date).getDate() === d
+          );
+          otRow.push(att?.over_time_hr ?? '');
+        }
+
+        const fillCols = row.length - otRow.length;
+        for (let i = 0; i < fillCols; i++) otRow.push('');
+
+        worksheet.addRow(otRow);
       }
-      worksheet.addRow(rowOvertime);
     });
 
-    //Add Totals Row BELOW ALL EMPLOYEES
+    // TOTAL ROW (UNCHANGED)
     const totals = this.dataToExportExcel_totals;
-
     const totalsRow: any[] = ['TOTAL', ''];
-    for (let d = 1; d <= daysInMonth; d++) totalsRow.push(''); // leave attendance blank
+
+    for (let d = 1; d <= daysInMonth; d++) totalsRow.push('');
 
     totalsRow.push(
-      '', '', '', '', '', '', '', '', '',
-      totals.total_overtime_salary, // Overtime Salary
-      '',                            // Present Day Hrs salary
-      '',                            // Deduction
-      ...(this.showLwpColumns
-      ? ['', ''] // LWP Days & Amount (no totals)
-      : []),
-      totals.total_salary,           // Total Salary
-      totals.total_tax,              // Professional Tax
-      totals.total_pf_employee,      // Employee PF
-      totals.total_pf_employer,      // Employer PF
-      totals.total_esic,             // ESIC
-      totals.total_adv_salary,    // Advance Salary
-      '',   
-      totals.total_net_salary        // Net Salary (Salary Payable)
+      '', '', '', '', '', '', '', '', '','','','',
+      totals.total_overtime_salary,
+      '', '',
+      ...(this.showLwpColumns ? ['', ''] : []),
+      totals.total_salary,
+      totals.total_tax,
+      totals.total_pf_employee,
+      totals.total_pf_employer,
+      totals.total_esic,
+      totals.total_adv_salary,
+      '',
+      totals.total_net_salary
     );
 
     worksheet.addRow(totalsRow);
-    const lastRow = worksheet.lastRow;
-    if (lastRow) lastRow.font = { bold: true };
+    worksheet.lastRow!.font = { bold: true };
 
-    // Optional column widths
+    // COLUMN WIDTH
     worksheet.columns.forEach((col, i) => {
       if (i < 2) col.width = 20;
       else if (i < 2 + daysInMonth) col.width = 5;
       else col.width = 15;
     });
 
-    // Export file
+    // EXPORT
     workbook.xlsx.writeBuffer().then(buffer => {
       const blob = new Blob([buffer], { type: 'application/octet-stream' });
       FileSaver.saveAs(blob, 'Payroll.xlsx');

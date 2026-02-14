@@ -32,6 +32,7 @@ export class PayrollProcessApprovedComponent {
   lastPage: number = 1;
   pagesToShow: (number | string)[] = [];
   paginationvalue: any;
+  years: number[] = [];
 
   today: string = new Date().toISOString().split('T')[0];
   constructor(private router: Router, private service: HrmserviceService, private toastr: ToastrService) { }
@@ -43,7 +44,6 @@ export class PayrollProcessApprovedComponent {
     resizable: true,
   };
 
-  years = [2023, 2024, 2025];
   months = [
     { id: 1, value: 'January' },
     { id: 2, value: 'February' },
@@ -79,6 +79,7 @@ export class PayrollProcessApprovedComponent {
 
     this.today = today.toISOString().split('T')[0];
     
+    this.generateYears(); 
     this.getCompanyNames();
     // this.getApprovedPayroll();
     this.getPagination();
@@ -102,6 +103,16 @@ export class PayrollProcessApprovedComponent {
       }
     );
   }
+  
+  generateYears(range: number = 5) {
+    const currentYear = new Date().getFullYear();
+    this.years = [];
+
+    for (let i = currentYear - range; i <= currentYear + 1; i++) {
+      this.years.push(i);
+    }
+  }
+
   onCompanyChange(event: Event): void {
     this.selectedCompanyId = (event.target as HTMLSelectElement).value;
     console.log('Selected Company ID:', this.selectedCompanyId);

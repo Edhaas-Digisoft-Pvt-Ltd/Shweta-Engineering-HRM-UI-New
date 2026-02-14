@@ -73,7 +73,8 @@ export class AbsenteesComponent {
 
   onCompanyChange(event: Event): void {
     this.selectedCompanyId = (event.target as HTMLSelectElement).value;
-    this.getAbsentees;
+    this.currentPage = 1;
+    this.getAbsentees();
   }
 
   getCompanyNames() {

@@ -18,8 +18,11 @@
                     <div class="col-2 dotted-line">
                         <label for="">Select Year</label>
                         <select class="form-select" [(ngModel)]="selectedYear" (change)="onYearMonthChange()">
-                            <option *ngFor="let year of years">{{ year }}</option>
+                            <option *ngFor="let year of years" [value]="year">
+                                {{ year }}
+                            </option>
                         </select>
+
                     </div>
 
                     <div class="col-2">
@@ -41,10 +44,10 @@
 
         <div class="row">
             <div class="col-12 mt-4">
-                <ag-grid-angular class="ag-theme-alpine" [rowData]="rowData"
-                    (gridReady)="onGridReady($event)" (selectionChanged)="onSelectionChanged($event)"
-                    rowSelection="multiple" [rowMultiSelectWithClick]="true" [columnDefs]="columnDefs"
-                    [gridOptions]="gridOptions" [pagination]="false" [domLayout]="'autoHeight'" [defaultColDef]="defaultColDef">
+                <ag-grid-angular class="ag-theme-alpine" [rowData]="rowData" (gridReady)="onGridReady($event)"
+                    (selectionChanged)="onSelectionChanged($event)" rowSelection="multiple"
+                    [rowMultiSelectWithClick]="true" [columnDefs]="columnDefs" [gridOptions]="gridOptions"
+                    [pagination]="false" [domLayout]="'autoHeight'" [defaultColDef]="defaultColDef">
                 </ag-grid-angular>
 
                 <div class="d-flex align-items-center justify-content-end flex-wrap mt-3 gap-2">

@@ -73,7 +73,8 @@ export class InsufficientLeavesComponent {
 
   onCompanyChange(event: Event): void {
     this.selectedCompanyId = (event.target as HTMLSelectElement).value;
-    this.getInsufficientLeaves;
+    this.currentPage = 1;
+    this.getInsufficientLeaves();
   }
 
   getCompanyNames() {

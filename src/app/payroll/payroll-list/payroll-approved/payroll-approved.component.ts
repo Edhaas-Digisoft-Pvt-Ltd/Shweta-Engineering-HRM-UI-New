@@ -28,6 +28,7 @@ export class PayrollApprovedComponent {
   lastPage: number = 1;
   pagesToShow: (number | string)[] = [];
   paginationvalue: any;
+  years: number[] = [];
 
   constructor(private router: Router, private service: HrmserviceService, private toastr: ToastrService) { }
 
@@ -38,7 +39,6 @@ export class PayrollApprovedComponent {
     resizable: true,
   };
 
-  years = [2023, 2024, 2025];
   months = [
     { id: 1, value: 'January' },
     { id: 2, value: 'February' },
@@ -77,6 +77,7 @@ export class PayrollApprovedComponent {
 
     this.today = today.toISOString().split('T')[0];
     
+    this.generateYears(); 
     this.getCompanyNames();
     // this.ApprovePayrollList();
     this.getPagination();
@@ -93,6 +94,15 @@ export class PayrollApprovedComponent {
         console.error('Error fetching companies:', error);
       }
     );
+  }
+
+  generateYears(range: number = 5) {
+    const currentYear = new Date().getFullYear();
+    this.years = [];
+
+    for (let i = currentYear - range; i <= currentYear + 1; i++) {
+      this.years.push(i);
+    }
   }
 
   onCompanyChange(event: Event): void {
