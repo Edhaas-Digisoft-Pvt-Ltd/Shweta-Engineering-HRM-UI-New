@@ -516,7 +516,7 @@ export class EmployeeDashboardComponent {
     this.isLeaveSubmitted = true;
 
     if (!this.leaveForm.valid) {
-      this.toastr.error('Invalid Credentials');
+      this.toastr.error('Please fill in all required details.');
       this.leaveForm.markAllAsTouched();
       return;
     }
@@ -574,7 +574,7 @@ export class EmployeeDashboardComponent {
     this.isAdvanceSalary = true;
 
     if (!this.advanceSalaryForm.valid) {
-      this.toastr.error('Invalid Credentials');
+      this.toastr.error('Please fill in all required details.');
       this.advanceSalaryForm.markAllAsTouched();
       return;
     }

@@ -56,7 +56,24 @@ export class AttendanceComponent {
     { headerName: 'CheckIn', field: 'check_in' },
     { headerName: 'CheckOut', field: 'check_out' },
     { headerName: 'ShiftId', field: 'shift_id' },
-    { headerName: 'Status', field: 'status' },
+    {
+      headerName: 'Status', field: 'status',
+      valueGetter: (params) => {
+        const row = params.data;
+
+        // If backend status exists → show it
+        if (row.status && row.status.trim() !== '') {
+          return row.status;
+        }
+
+        // If check-in & check-out exist → mark Present
+        if (row.check_in && row.check_out) {
+          return 'P';
+        }
+
+        return ''; // otherwise blank
+      }
+    },
   ];
 
   gridOptions = {
