@@ -61,12 +61,11 @@ export class ConsolidateAttendanceSummaryComponent {
   HEADERS = [
     { key: 'P', color: '#11FFA1' },
     { key: 'A', color: '#F90004' },
-    { key: 'W', color: '#EDD000' },
-    { key: 'W/od', color: '#9FFF04' },
+    { key: 'W/O', color: '#EDD000' },
+    // { key: 'W/od', color: '#9FFF04' },
     { key: 'H', color: '#04BCFF' },
-    { key: 'WFH', color: '#0066EB' },
-    { key: 'HD', color: '#0066EB' },
-    { key: 'HR', color: '#005936' },
+    // { key: 'WFH', color: '#0066EB' },
+    // { key: 'HD', color: '#0066EB' },
     { key: 'OT', color: '#FFA704' },
     { key: 'LT', color: '#880021' },
     { key: 'Th', color: '#BD7B00' },
@@ -200,11 +199,8 @@ export class ConsolidateAttendanceSummaryComponent {
                 // safe field names
                 row[`${monthKey}-P`] = item.present_days || '';
                 row[`${monthKey}-A`] = item.absent_days || '';
-                row[`${monthKey}-W`] = item.weekend || '';
-                row[`${monthKey}-WOD`] = item.weekend_od || '';
+                row[`${monthKey}-W/O`] = item.weekend || '';
                 row[`${monthKey}-H`] = item.holiday_days || '';
-                row[`${monthKey}-WFH2`] = item.work_from_home_half_day || '';
-                row[`${monthKey}-HD`] = item.half_day || '';
                 row[`${monthKey}-LT`] = item.late || '';
                 row[`${monthKey}-OT`] = item.total_overtime || '';
                 row[`${monthKey}-Period`] = `${item.period_start} - ${item.period_end}`;
@@ -270,11 +266,9 @@ export class ConsolidateAttendanceSummaryComponent {
         children: [
           { headerName: this.getHeaderWithDot('P', '#11FFA1'), field: `${monthKey}-P`, width: 70, valueFormatter: this.showDashIfEmpty, headerComponentParams: { template: this.getHeaderWithDot('P', '#11FFA1') } },
           { headerName: this.getHeaderWithDot('A', '#F90004'), field: `${monthKey}-A`, width: 70, valueFormatter: this.showDashIfEmpty, headerComponentParams: { template: this.getHeaderWithDot('A', '#F90004') } },
-          { headerName: this.getHeaderWithDot('W', '#EDD000'), field: `${monthKey}-W`, width: 70, valueFormatter: this.showDashIfEmpty, headerComponentParams: { template: this.getHeaderWithDot('W', '#EDD000') } },
-          { headerName: this.getHeaderWithDot('W/OD', '#9FFF04'), field: `${monthKey}-WOD`, width: 70, valueFormatter: this.showDashIfEmpty, headerComponentParams: { template: this.getHeaderWithDot('W/OD', '#9FFF04') } },
+          { headerName: this.getHeaderWithDot('W/O', '#EDD000'), field: `${monthKey}-W/O`, width: 70, valueFormatter: this.showDashIfEmpty, headerComponentParams: { template: this.getHeaderWithDot('W', '#EDD000') } },
           { headerName: this.getHeaderWithDot('H', '#04BCFF'), field: `${monthKey}-H`, width: 70, valueFormatter: this.showDashIfEmpty, headerComponentParams: { template: this.getHeaderWithDot('H', '#04BCFF') } },
-          { headerName: this.getHeaderWithDot('WFH', '#0066EB'), field: `${monthKey}-WFH2`, width: 70, valueFormatter: this.showDashIfEmpty, headerComponentParams: { template: this.getHeaderWithDot('WFH', '#0066EB') } },
-          { headerName: this.getHeaderWithDot('HD', '#0066EB'), field: `${monthKey}-HD`, width: 70, valueFormatter: this.showDashIfEmpty, headerComponentParams: { template: this.getHeaderWithDot('HD', '#0066EB') } },
+          // { headerName: this.getHeaderWithDot('HD', '#0066EB'), field: `${monthKey}-HD`, width: 70, valueFormatter: this.showDashIfEmpty, headerComponentParams: { template: this.getHeaderWithDot('HD', '#0066EB') } },
           { headerName: this.getHeaderWithDot('LT', '#880021'), field: `${monthKey}-LT`, width: 70, valueFormatter: this.showDashIfEmpty, headerComponentParams: { template: this.getHeaderWithDot('LT', '#880021') } },
           { headerName: this.getHeaderWithDot('OT', '#FFA704'), field: `${monthKey}-OT`, width: 70, valueFormatter: this.showDashIfEmpty, headerComponentParams: { template: this.getHeaderWithDot('OT', '#FFA704') } },
         ]
@@ -321,7 +315,7 @@ export class ConsolidateAttendanceSummaryComponent {
       return;
     }
 
-    const statuses = ['P', 'A', 'W', 'WOD', 'H', 'WFH2', 'HD', 'HR', 'OT', 'LT'];
+    const statuses = ['P', 'A', 'W/O', 'H', 'WFH2', 'HD', 'HR', 'OT', 'LT'];
 
     // Collect all months dynamically from rowData
     const monthKeys = new Set<string>();
