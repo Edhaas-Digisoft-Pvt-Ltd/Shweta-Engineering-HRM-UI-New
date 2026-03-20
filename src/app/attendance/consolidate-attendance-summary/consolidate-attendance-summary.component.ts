@@ -266,7 +266,7 @@ export class ConsolidateAttendanceSummaryComponent {
         children: [
           { headerName: this.getHeaderWithDot('P', '#11FFA1'), field: `${monthKey}-P`, width: 70, valueFormatter: this.showDashIfEmpty, headerComponentParams: { template: this.getHeaderWithDot('P', '#11FFA1') } },
           { headerName: this.getHeaderWithDot('A', '#F90004'), field: `${monthKey}-A`, width: 70, valueFormatter: this.showDashIfEmpty, headerComponentParams: { template: this.getHeaderWithDot('A', '#F90004') } },
-          { headerName: this.getHeaderWithDot('W/O', '#EDD000'), field: `${monthKey}-W/O`, width: 70, valueFormatter: this.showDashIfEmpty, headerComponentParams: { template: this.getHeaderWithDot('W', '#EDD000') } },
+          { headerName: this.getHeaderWithDot('W/O', '#EDD000'), field: `${monthKey}-W/O`, width: 70, valueFormatter: this.showDashIfEmpty, headerComponentParams: { template: this.getHeaderWithDot('W/O', '#EDD000') } },
           { headerName: this.getHeaderWithDot('H', '#04BCFF'), field: `${monthKey}-H`, width: 70, valueFormatter: this.showDashIfEmpty, headerComponentParams: { template: this.getHeaderWithDot('H', '#04BCFF') } },
           // { headerName: this.getHeaderWithDot('HD', '#0066EB'), field: `${monthKey}-HD`, width: 70, valueFormatter: this.showDashIfEmpty, headerComponentParams: { template: this.getHeaderWithDot('HD', '#0066EB') } },
           { headerName: this.getHeaderWithDot('LT', '#880021'), field: `${monthKey}-LT`, width: 70, valueFormatter: this.showDashIfEmpty, headerComponentParams: { template: this.getHeaderWithDot('LT', '#880021') } },

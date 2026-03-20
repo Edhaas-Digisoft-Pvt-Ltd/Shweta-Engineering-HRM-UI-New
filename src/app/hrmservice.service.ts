@@ -20,6 +20,10 @@ export class HrmserviceService {
   // url: string = 'http://127.0.0.1:8000/api/v1/';
 
   // url: string = 'https://edhaasdigisoft.co.in/shwetapayroll/api/v1/';
+  // url: string = 'https://shwetaengineers.co.in/hr/payroll/payroll/Shweta_Payroll_rest/api/v1/';
+  //live link
+  // url: string = 'https://shwetaengineers.co.in/seplpayroll/api/v1/';      
+  //local
   url: string = 'http://127.0.0.1:8000/api/v1/'; 
 
 
