@@ -168,46 +168,46 @@
 
                                         <div class="card-body"> -->
 
-                                            <ng-container *ngFor="let leave of Employee_Data?.leave_data?.leave_types">
-                                                <!-- Main Leave Row -->
-                                                <div class="row align-items-center text-center g-1">
-                                                    <!-- Leave Name -->
-                                                    <div class="col-md-4 text-start">
-                                                        <div class="fw-semibold text-dark">
-                                                            {{ leave.leave_name }}
-                                                        </div>
-                                                    </div>
-
-                                                    <!-- Total -->
-                                                    <div class="col-md-4">
-                                                        <span class="badge bg-primary fs-6">
-                                                            Total: {{ leave.total_leave }}
-                                                        </span>
-                                                    </div>
-
-                                                    <!-- Available -->
-                                                    <div class="col-md-4">
-                                                        <span class="badge fs-6"
-                                                            [ngClass]="leave.available_leave > 0 ? 'bg-success' : 'bg-danger'">
-                                                            Available: {{ leave.available_leave }}
-                                                        </span>
-                                                    </div>
+                                    <ng-container *ngFor="let leave of Employee_Data?.leave_data?.leave_types">
+                                        <!-- Main Leave Row -->
+                                        <div class="row align-items-center text-center g-1">
+                                            <!-- Leave Name -->
+                                            <div class="col-md-4 text-start">
+                                                <div class="fw-semibold text-dark">
+                                                    {{ leave.leave_name }}
                                                 </div>
+                                            </div>
 
-                                                <!-- Carry Forward Note (Full Width) -->
-                                                <div class="row" *ngIf="leave.carry_fwd > 0">
-                                                    <div class="col-12 text-start">
-                                                        <small class="text-muted fst-italic mt-1">
-                                                            <i class="bi bi-arrow-repeat"></i>
-                                                            {{ leave.carry_fwd }} carry-forwarded leave included in total
-                                                        </small>
-                                                    </div>
-                                                </div>
+                                            <!-- Total -->
+                                            <div class="col-md-4">
+                                                <span class="badge bg-primary fs-6">
+                                                    Total: {{ leave.total_leave }}
+                                                </span>
+                                            </div>
 
-                                                <hr class="my-2" />
-                                            </ng-container>
+                                            <!-- Available -->
+                                            <div class="col-md-4">
+                                                <span class="badge fs-6"
+                                                    [ngClass]="leave.available_leave > 0 ? 'bg-success' : 'bg-danger'">
+                                                    Available: {{ leave.available_leave }}
+                                                </span>
+                                            </div>
+                                        </div>
 
-                                        <!-- </div>
+                                        <!-- Carry Forward Note (Full Width) -->
+                                        <div class="row" *ngIf="leave.carry_fwd > 0">
+                                            <div class="col-12 text-start">
+                                                <small class="text-muted fst-italic mt-1">
+                                                    <i class="bi bi-arrow-repeat"></i>
+                                                    {{ leave.carry_fwd }} carry-forwarded leave included in total
+                                                </small>
+                                            </div>
+                                        </div>
+
+                                        <hr class="my-2" />
+                                    </ng-container>
+
+                                    <!-- </div>
                                     </div> -->
                                 </div>
                             </div>
@@ -354,81 +354,19 @@
                                 </div>
                             </div>
                         </div>
+
                         <div class=" p-3 border advanceSalaryTracking" style="border-radius: 10px;">
-                            <!-- Performnce chart -->
-                            <!-- <div class="chart-container">
-                    <canvas baseChart [data]="chartData" [options]="chartOptions">
-                    </canvas>
-                </div> -->
-                            <div class="card rounded-4 border-0">
-                                <div class="d-flex justify-content-between align-items-center mb-2">
-                                    <h5 class="fw-bold">
-                                        ₹ <span class="ms-2">Advance Salary Tracking</span>
-                                    </h5>
-                                    <select class="form-select w-auto" [(ngModel)]="selectedYear">
-                                        <option *ngFor="let year of years" [value]="year">{{ year }}</option>
-                                    </select>
-                                </div>
-
-                                <!-- Progress Bar -->
-                                <div class="progress mb-2" style="height: 8px;">
-                                    <div class="progress-bar bg-success"
-                                        [style.width.%]="(salaryTracking.paidAmount / salaryTracking.totalAmount) * 100">
-                                    </div>
-                                </div>
-                                <div class="d-flex justify-content-between small mb-4 px-1">
-                                    <div style="color:gray">
-                                        <span class="text-success"> ● </span> Paid<br />
-                                        <h5 class="text-dark">₹ {{ salaryTracking.paidAmount }}</h5>
-                                    </div>
-                                    <div class="text-muted text-end">
-                                        ● Remaining<br />
-                                        <h5 class="text-dark">₹ {{ salaryTracking.totalAmount -
-                                            salaryTracking.paidAmount }}
-                                        </h5>
-                                    </div>
-                                </div>
-
-                                <!-- Info Grid -->
-                                <div class="row g-3 row-gap-2">
-                                    <div class="col-md-2">
-                                        <label>Total Amount <span class="rupee-text">(in ₹)</span> </label>
-                                        <input class="form-control" readonly [value]="salaryTracking.totalAmount" />
-                                    </div>
-                                    <div class="col-md-4">
-                                        <label>Installment Amount <span class="rupee-text">(in ₹)</span> </label>
-                                        <input class="form-control" readonly
-                                            [value]="salaryTracking.installmentAmount" />
-                                    </div>
-                                    <div class="col-md-2">
-                                        <label>Tenure</label> <br>
-                                        <input class="form-control" readonly [value]="salaryTracking.tenure" />
-                                    </div>
-                                    <div class="col-md-4">
-                                        <label>First Installment Paid Date</label>
-                                        <input class="form-control" readonly
-                                            [value]="salaryTracking.firstInstallmentDate" />
-                                    </div>
-                                    <div class="col-md-4">
-                                        <label>Next Installment Due Date</label>
-                                        <input class="form-control" readonly
-                                            [value]="salaryTracking.nextInstallmentDueDate" />
-                                    </div>
-                                    <div class="col-md-4">
-                                        <label>Last Installment Paid Date</label>
-                                        <input class="form-control" readonly
-                                            [value]="salaryTracking.lastInstallmentPaidDate" />
-                                    </div>
-                                    <div class="col-md-3 ">
-                                        <label>Installment End Date</label>
-                                        <input class="form-control" readonly
-                                            [value]="salaryTracking.installmentEndDate" />
-                                    </div>
-                                </div>
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <h5 class="pb-2"> <i class="bi bi-currency-rupee me-2 text-primary "></i>Advance Salary</h5>
+                                <button class="btn btn-sm btn-primary" (click)="viewAll()">
+                                    View All
+                                </button>
                             </div>
-
-
+                            <ag-grid-angular class="ag-theme-alpine" style="width: 100%; height: 250px;"
+                                [rowData]="latestRowData" [columnDefs]="miniColumnDefs">
+                            </ag-grid-angular>
                         </div>
+
                     </div>
                 </div>
             </div>

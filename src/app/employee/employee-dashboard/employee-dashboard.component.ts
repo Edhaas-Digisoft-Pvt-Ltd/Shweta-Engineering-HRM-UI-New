@@ -1,6 +1,7 @@
 import { Component, ElementRef, ViewChild } from '@angular/core';
 import { FormGroup, FormBuilder, Validators, AbstractControl } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
+import { ColDef } from 'ag-grid-community';
 import { ChartData, ChartOptions } from 'chart.js';
 import { ToastrService } from 'ngx-toastr';
 import { HrmserviceService } from 'src/app/hrmservice.service';
@@ -49,6 +50,8 @@ export class EmployeeDashboardComponent {
   attendanceDetails: any;
   totalAttendanceValue: number = 0;
   financialYearId: any;
+  latestRowData: any[] = [];
+  miniColumnDefs: ColDef[] = [];
 
   constructor(private route: ActivatedRoute, private fb: FormBuilder, private router: Router, private toastr: ToastrService, private service: HrmserviceService, private modalService: ModalServiceService,) {
     // Generate last 20 years dynamically
@@ -148,6 +151,7 @@ export class EmployeeDashboardComponent {
     //   this.router.navigate(['']);
     //   return;
     // }
+    this.initializeMiniColumns();
   }
 
   hasAccess(module: string, permission: string): boolean {
@@ -250,6 +254,93 @@ export class EmployeeDashboardComponent {
         this.toastr.error(errorMessage);
       }
     });
+  }
+
+  initializeMiniColumns() {
+    this.miniColumnDefs = [
+      { headerName: 'Apply Date', field: 'apply_date', flex: 1 },
+      { headerName: 'Amount', field: 'advance_amount', flex: 1 },
+      { headerName: 'Remaining', field: 'remaining_balance', flex: 1 },
+      {
+        headerName: 'Status',
+        field: 'status',
+        flex: 1,
+        cellRenderer: this.statusButtonRenderer
+      }
+    ];
+  }
+
+  searchEmployeeAdvanceSalary() {
+    this.latestRowData = [];
+    const payload = {
+      employee_id: this.employee_id,
+      year: this.selectedYear,
+    };
+    this.service.post('emp/advancesaraly/report', payload).subscribe(
+      (res: any) => {
+        if (res.status === 'success' && res.data.length > 0) {
+          this.latestRowData = [...res.data]
+            .sort((a, b) => new Date(b.apply_date).getTime() - new Date(a.apply_date).getTime())
+            .slice(0, 5);
+        } else {
+          this.latestRowData = [];
+        }
+      },
+      () => {
+        this.latestRowData = [];
+      }
+    );
+  }
+
+  viewAll() {
+    this.router.navigate(['/authPanal/employee-report']);
+  }
+
+  statusButtonRenderer(params: any) {
+    const status = params.value;
+    const button = document.createElement('button');
+    button.innerText = status;
+    // Common styles
+    button.style.padding = '6px 12px';
+    button.style.borderRadius = '20px';
+    button.style.cursor = 'default';
+    button.style.height = '30px'; // ✅ Match AG Grid row height
+    button.style.lineHeight = '20px';
+    button.style.fontSize = '14px';
+    button.style.display = 'flex';
+    button.style.alignItems = 'center';
+    button.style.justifyContent = 'center';
+    button.style.width = '97%';
+    button.style.marginTop = '6px';
+
+    // Conditional styling
+    if (status === 'pending') {
+      button.style.backgroundColor = '#FFF291'; // light red
+      button.style.color = '#721c24'; // dark red text
+      button.style.border = '1px solid #f5c6cb';
+      button.style.borderRadius = '20px';
+    } else if (status === 'Approved') {
+      button.style.backgroundColor = '#B2FFE1B0'; // light green
+      button.style.color = 'black';
+      button.style.border = '1px solid #B2FFE1B0';
+      button.style.borderRadius = '20px';
+    } else if (status === 'Rejected') {
+      button.style.backgroundColor = '#FFAFAF'; // light green
+      button.style.color = 'black';
+      button.style.border = '1px solid #FFAFAF';
+      button.style.borderRadius = '20px';
+    } else if (status === 'Ongoing') {
+      button.style.backgroundColor = '#faffafff'; // light green
+      button.style.color = 'black';
+      button.style.border = '1px solid #f7ffafff';
+      button.style.borderRadius = '20px';
+    } else if (status === 'Completed') {
+      button.style.backgroundColor = '#c2ffafff'; // light green
+      button.style.color = 'black';
+      button.style.border = '1px solid #bfffafff';
+      button.style.borderRadius = '20px';
+    }
+    return button;
   }
 
   generatePayslip(data: any) {
@@ -521,13 +612,13 @@ export class EmployeeDashboardComponent {
       return;
     }
 
-   const leaveData = {
+    const leaveData = {
       employe_id: this.employee_id,
       company_id: this.company_id,
       leave_id: this.leaveForm.value.leave_id,
       start_date: this.leaveForm.value.start_date,
       end_date: this.leaveForm.value.end_date,
-      is_half_day: this.leaveForm.value.is_half_day ? 1 : 0, 
+      is_half_day: this.leaveForm.value.is_half_day ? 1 : 0,
       leave_reason: this.leaveForm.value.leave_reason,
     };
 
