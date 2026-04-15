@@ -7,6 +7,7 @@ import { ToastrService } from 'ngx-toastr';
 import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
 import { ModalServiceService } from '../modal-service.service';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 
 declare var bootstrap: any;
 @Component({
@@ -33,12 +34,26 @@ export class EmployeeComponent {
   lastPage: number = 1;
   pagesToShow: (number | string)[] = [];
   paginationvalue: any;
+  changePasswordForm!: FormGroup;
+  submitted = false;
+  showPassword = false;
+  showConfirmPassword = false;
+  employee_id: any;
 
-  constructor(private router: Router, private service: HrmserviceService, private modalService: ModalServiceService, private toastr: ToastrService) { }
+  constructor(private router: Router, private fb: FormBuilder, private service: HrmserviceService, private modalService: ModalServiceService, private toastr: ToastrService) { }
 
   ngOnInit() {
     // this.selectedCompanyId = this.CompanyIdService.selectedCompanyId();
     this.selectedCompanyId = this.service.selectedCompanyId();
+
+    this.changePasswordForm = this.fb.group({
+      password: ['', [
+        Validators.required,
+        Validators.minLength(6),
+        Validators.pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&]).+$/)
+      ]],
+      confirm_password: ['', Validators.required]
+    }, { validators: this.passwordMatchValidator });
 
     // this.getEmployee();
     this.getPagination();
@@ -142,6 +157,7 @@ export class EmployeeComponent {
       cellRenderer: EmployeeActionComponent,
       cellRendererParams: {
         viewEmployee: (field: any) => this.editApp(field),
+        openChangePassword: (empId: any) => this.openChangePasswordModal(empId)
       },
     }
   ];
@@ -154,13 +170,13 @@ export class EmployeeComponent {
   downloadTemplate(): void {
     const userConfirmed = confirm("Do you want to download the employee template?");
     if (userConfirmed) {
-      const headers = ['role_id', 'emp_title', 'emp_name', 'emp_email', 'emp_gender', 'department_id', 
-        'designation_id','bank_name', 'account_num', 'ifsc_code', 'doj', 'emp_contact', 'emp_address','aadhaar_number','pan_number',
-        'basic_salary', 'house_rent_allowances', 'conveyance_allowances', 'medical_allowances', 
+      const headers = ['role_id', 'emp_title', 'emp_name', 'emp_email', 'emp_gender', 'department_id',
+        'designation_id', 'bank_name', 'account_num', 'ifsc_code', 'doj', 'emp_contact', 'emp_address', 'aadhaar_number', 'pan_number',
+        'basic_salary', 'house_rent_allowances', 'conveyance_allowances', 'medical_allowances',
         'special_allowances', 'PF Employee Applicable', 'PF Employer Applicable', 'ESIC Employee APPlicable', 'Transfer Type'];
       const exampleRow = [
-        '3', 'mr', 'abc', 'abc@gmail.com', 'male', '1', '2','SBI', '458438236526', 'SBIN0005088', '2/1/2022', '9999999999',
-         'Pune','8245 1245 4587','DHTFG5432R','200000', '18000', '1000', '1000', '1000', 'Yes/No', 'Yes/No', 'Yes/No', 'NEFT/ IFT'];
+        '3', 'mr', 'abc', 'abc@gmail.com', 'male', '1', '2', 'SBI', '458438236526', 'SBIN0005088', '2/1/2022', '9999999999',
+        'Pune', '8245 1245 4587', 'DHTFG5432R', '200000', '18000', '1000', '1000', '1000', 'Yes/No', 'Yes/No', 'Yes/No', 'NEFT/ IFT'];
 
       const worksheet: XLSX.WorkSheet = XLSX.utils.aoa_to_sheet([headers, exampleRow]);
       const workbook: XLSX.WorkBook = { Sheets: { 'Template': worksheet }, SheetNames: ['Template'] };
@@ -408,4 +424,66 @@ export class EmployeeComponent {
     }
   }
 
+  //password change
+  openChangePasswordModal(empId: any) {
+    this.employee_id = empId;
+
+    this.changePasswordForm.reset();
+    this.submitted = false;
+
+    this.showPassword = false;
+    this.showConfirmPassword = false;
+
+    const modal = new bootstrap.Modal(
+      document.getElementById('changePasswordModal')
+    );
+    modal.show();
+  }
+
+  get f() {
+    return this.changePasswordForm.controls;
+  }
+  passwordMatchValidator(form: FormGroup) {
+    const pass = form.get('password')?.value;
+    const confirm = form.get('confirm_password')?.value;
+
+    return pass === confirm ? null : { mismatch: true };
+  }
+
+  changePassword() {
+    this.submitted = true;
+
+    if (this.changePasswordForm.invalid) {
+      this.toastr.error('Please fix validation errors');
+      return;
+    }
+
+    // Confirm dialog
+    if (!confirm('Are you sure you want to change password?')) {
+      return;
+    }
+
+    const payload = {
+      emp_id: this.employee_id,
+      new_password: this.changePasswordForm.value.password
+    };
+
+    this.service.post('update/password', payload).subscribe({
+      next: (res: any) => {
+        if (res.status === 'success') {
+          this.toastr.success('Password updated successfully');
+
+          this.changePasswordForm.reset();
+          this.submitted = false;
+
+          this.modalService.closeModal(); // or bootstrap close
+        } else {
+          this.toastr.error(res.message || 'Failed to update password');
+        }
+      },
+      error: () => {
+        this.toastr.error('Server error');
+      }
+    });
+  }
 }

@@ -43,7 +43,7 @@ export class LeaveApprovedRejectedComponent {
 
   ngOnInit(): void {
     this.loggedInUser = sessionStorage.getItem('employeeId');
-    
+
     const currentDate = new Date();
     this.selectedYear = new Date().getFullYear();
     this.selectedMonth = new Date().getMonth() + 1;
@@ -88,6 +88,7 @@ export class LeaveApprovedRejectedComponent {
     { headerName: 'Employee Name', field: 'emp_name', sortable: true, filter: true },
     { headerName: 'Start Date', field: 'start_date', sortable: true, filter: true },
     { headerName: 'End Date', field: 'end_date', sortable: true, filter: true },
+    { headerName: 'Apply Date', field: 'created_at', sortable: true, filter: true },
     { headerName: 'Status', field: 'leave_status', cellRenderer: this.statusButtonRenderer, sortable: true, filter: true, maxWidth: 140 },
     {
       headerName: 'Actions',
@@ -192,6 +193,7 @@ export class LeaveApprovedRejectedComponent {
             total_leave_days: item.total_leave_days,
             leave_status: item.leave_status,
             tbl_emp_leave_id: item.tbl_emp_leave_id,
+            created_at: item.created_at ? item.created_at.split(' ')[0] : ''
           }));
           this.totalRows = res.pagination.total;
           this.currentPage = res.pagination.page;

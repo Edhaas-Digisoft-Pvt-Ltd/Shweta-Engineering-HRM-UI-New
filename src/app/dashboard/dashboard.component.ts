@@ -262,11 +262,11 @@ export class DashboardComponent {
               const lateMarks = Number(attendancePercentages.late_marks);
 
               this.doughnutChartData = {
-                labels: ['Present days', 'Absent days', 'Late Marks'],
+                labels: ['Present days', 'Absent days'],
                 datasets: [
                   {
                     data: [present, absent, lateMarks],
-                    backgroundColor: ['#3A79D1', '#7C0A02', '#FFC107'],
+                    backgroundColor: ['#3A79D1', '#7C0A02'],
                     hoverOffset: 10,
                   },
                 ],

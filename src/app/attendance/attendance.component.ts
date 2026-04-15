@@ -55,7 +55,15 @@ export class AttendanceComponent {
     { headerName: 'Date', field: 'attendance_date' },
     { headerName: 'CheckIn', field: 'check_in' },
     { headerName: 'CheckOut', field: 'check_out' },
-    { headerName: 'ShiftId', field: 'shift_id' },
+    {
+      headerName: 'Shift',
+      field: 'shift_id',
+      valueFormatter: (params: any) => {
+        if (params.value == 1) return 'Morning';
+        if (params.value == 2) return 'Evening';
+        return params.value; // fallback
+      }
+    },
     {
       headerName: 'Status', field: 'status',
       valueGetter: (params) => {
@@ -103,7 +111,7 @@ export class AttendanceComponent {
   }
 
   selectedFile: File | null = null;
-  
+
   //import attendance
   onFileChange(event: any) {
     this.isLoading = true;
@@ -127,7 +135,7 @@ export class AttendanceComponent {
           this.toastr.error(res.data)
       }
     });
-    
+
   }
 
   applyFilter(status: string) {
@@ -138,7 +146,7 @@ export class AttendanceComponent {
 
   clearFilter() {
     this.currentFilter = '';
-    this.searchInputValue = ''; 
+    this.searchInputValue = '';
     this.currentPage = 1;
     this.fetchAttendance();
   }
@@ -309,7 +317,7 @@ export class AttendanceComponent {
     this.service.post('export-attendance', { from_date, to_date }).subscribe((res: any) => {
       if (res.status === 'success') {
         console.log(res);
-        
+
         const data = res.data.map((i: any) => ({
           employee_code: i.employee_code,
           emp_name: i.emp_name,

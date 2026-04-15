@@ -118,7 +118,14 @@
 
           <!-- Company Settings Accordion -->
 
-          <li class="nav-item collapsIcons" *ngIf="hasAccess('Company Settings','view')">
+           <li class="nav-item" *ngIf="hasAccess('Company List','view')">
+            <a routerLink="companyList" routerLinkActive="active-link" class="nav-link btn-like d-flex align-items-center"
+              (click)="closeAllAccordions()">
+               <i class="bi bi-gear ms-1 me-2"></i> <span class="nav-name">Company List</span>
+            </a>
+          </li>
+
+          <!-- <li class="nav-item collapsIcons" *ngIf="hasAccess('Company Settings','view')">
             <a (click)="toggleCompany($event)" class="nav-link btn-like d-flex align-items-center">
               <i class="bi bi-gear ms-1 me-2"></i> <span class="nav-name">Company Settings</span>
             </a>
@@ -131,9 +138,9 @@
               <li *ngIf="hasAccess('Manage and Policies','view')"><a routerLink="comMange&Plolicies"
                   routerLinkActive="active-link">Manage & Policies</a></li>
             </ul>
-          </li>
+          </li> -->
 
-          <div class="accordion accordion-flush accordion-sec" *ngIf="hasAccess('Company Settings','view')">
+          <!-- <div class="accordion accordion-flush accordion-sec" *ngIf="hasAccess('Company Settings','view')">
             <div class="accordion-item">
               <h2 class="accordion-header">
                 <button class="accordion-button collapsed px-2" type="button" data-bs-toggle="collapse"
@@ -152,7 +159,7 @@
                 </div>
               </div>
             </div>
-          </div>
+          </div> -->
 
           <!-- Configuration -->
           <li class="nav-item" *ngIf="hasAccess('Configuration','view')">

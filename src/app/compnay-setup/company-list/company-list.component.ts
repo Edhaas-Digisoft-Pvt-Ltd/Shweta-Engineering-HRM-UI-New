@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { AbstractControl, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
+import { ColDef } from 'ag-grid-community';
 import { ToastrService } from 'ngx-toastr';
 import { HrmserviceService } from 'src/app/hrmservice.service';
 import { ModalServiceService } from 'src/app/modal-service.service';
@@ -30,6 +31,9 @@ export class CompanyListComponent {
   isEditSubmitted = false;
   selectedId: any;
   textInputControl: any;
+  rowData: any = [];
+  columnDefs: ColDef[] = [];
+  gridApiActive: any;
 
   constructor(private router: Router, private fb: FormBuilder, private service: HrmserviceService, private modalService: ModalServiceService, private toastr: ToastrService) {
     this.companyForm = this.fb.group({
@@ -98,7 +102,56 @@ export class CompanyListComponent {
     this.today = currentDate.toISOString().split('T')[0]; // Format YYYY-MM-DD
     this.getCompanyData();
     this.getCompanyNames();
+    this.initializeCompanyColumns();
   }
+
+  initializeCompanyColumns() {
+    this.columnDefs = [
+        // {
+        //   headerName: 'Logo',
+        //   field: 'company_logo_url',
+        //   cellRenderer: (params: any) => {
+        //     if (!params.value) return '';
+        //     return `<img src="${params.value}" style="height:40px;width:40px;border-radius:5px;" />`;
+        //   },
+        //   maxWidth: 100
+        // },
+      {
+        headerName: 'Company Name',
+        field: 'company_name',
+        sortable: true,
+        filter: true
+      },
+      {
+        headerName: 'Description',
+        field: 'company_desc',
+        sortable: true,
+        filter: true
+      },
+      {
+        headerName: 'Location',
+        field: 'company_location',
+        sortable: true,
+        filter: true
+      },
+      {
+        headerName: 'Founded',
+        field: 'company_founded',
+        sortable: true,
+        filter: true
+      }
+    ];
+  }
+
+  onGridReady(params: { api: any }) {
+    this.gridApiActive = params.api;
+  }
+
+    public defaultColDef: ColDef = {
+    editable: true,
+    flex: 1,
+    resizable: true,
+  };
 
   openModal() {
     this.modalService.openModal('exampleModal')
@@ -117,7 +170,9 @@ export class CompanyListComponent {
 
   getCompanyData() {
     this.service.post("fetch/company", {}).subscribe((res: any) => {
-      this.CompanyDetails = res.Data;
+      if (res.status === 'success') {
+        this.rowData = res.data; // ✅ for ag-grid
+      }
     });
   }
 
@@ -223,12 +278,12 @@ export class CompanyListComponent {
       formData.append('company_desc', this.companyForm.value.companyDescription);
       formData.append('company_location', this.companyForm.value.companyAddress);
       formData.append('company_founded', this.companyForm.value.IncorporationDate);
-      formData.append('company_logo', this.selectedLogoFile); 
+      formData.append('company_logo', this.selectedLogoFile);
     } else {
       formData.append('master_company_name', this.companyForm.value.companyName);
       const initials = this.generateCompanyInitials(this.companyForm.value.companyName);
       formData.append('company_initials', initials);
-      formData.append('company_logo', this.selectedLogoFile); 
+      formData.append('company_logo', this.selectedLogoFile);
     }
 
     const url = isMaster ? "create/master-companie" : "create/company";

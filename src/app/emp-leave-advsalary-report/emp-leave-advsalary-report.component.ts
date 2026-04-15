@@ -28,6 +28,11 @@ export class EmpLeaveAdvsalaryReportComponent {
   tabledata: any = [];
   employee_id!: any;
   years: number[] = [];
+  leaveRowData: any[] = [];
+  leaveColumnDefs: ColDef[] = [];
+  leaveRequestForm!: FormGroup;
+  leaveRequestData: any;
+  previousLeaves: any[] = [];
 
   // years = [2023, 2024, 2025,2026];
   months = [
@@ -58,10 +63,10 @@ export class EmpLeaveAdvsalaryReportComponent {
   constructor(private fb: FormBuilder, private service: HrmserviceService, private toastr: ToastrService) { }
 
   ngOnInit() {
-    let role_name = sessionStorage.getItem('roleName') 
+    let role_name = sessionStorage.getItem('roleName')
     if (role_name == 'Operator' || role_name == 'Supervisor' || role_name === 'Manager' || role_name === 'Maintenance Manager'
-        || role_name === 'Production Manager' || role_name === 'Quality Manager' || role_name === 'Data-Entry Operator' 
-        || role_name === 'Production Incharge' || role_name === 'Plant Incharge') {
+      || role_name === 'Production Manager' || role_name === 'Quality Manager' || role_name === 'Data-Entry Operator'
+      || role_name === 'Production Incharge' || role_name === 'Plant Incharge') {
       const signalEmpId = this.service.EmployeeId();
       if (signalEmpId != null) {
         this.employee_id = this.service.EmployeeId();
@@ -89,12 +94,28 @@ export class EmpLeaveAdvsalaryReportComponent {
       installmentAmount: [{ value: '', disabled: true }],
       remainingBalance: [{ value: '', disabled: true }],
     })
+
+    this.leaveRequestForm = this.fb.group({
+      employeeName: [''],
+      startDate: [''],
+      endDate: [''],
+      leaveType: [''],
+      status: [''],
+      noOfDays: [''],
+      department: [''],
+      leavereason: ['']
+    });
     this.searchEmployeeAdvanceSalary();
     this.generateyears();
+    this.initializeColumns();
+    this.initializeLeaveColumns();
   }
 
   selectTab(tab: string) {
     this.activeTab = tab;
+    if (tab === 'tab2') {
+      this.searchEmployeeLeaves();
+    }
   }
 
   onYearMonthChange() {
@@ -109,7 +130,7 @@ export class EmpLeaveAdvsalaryReportComponent {
   searchEmployeeAdvanceSalary() {
     this.rowData = [];
     console.log('called');
-    console.log('empid', this.employee_id);    
+    console.log('empid', this.employee_id);
 
     const payload = {
       employee_id: this.employee_id,
@@ -195,22 +216,23 @@ export class EmpLeaveAdvsalaryReportComponent {
     return button;
   }
 
+  //advance salary
   initializeColumns() {
     this.columnDefs = [
-      { headerName: 'Emp Code', field: 'employee_code', sortable: true, filter: true, maxWidth: 150 },
-      { headerName: 'Employee Name', field: 'emp_name', sortable: true, filter: true, maxWidth: 180 },
-      { headerName: 'Apply Date', field: 'apply_date', sortable: true, filter: true, maxWidth: 150 },
-      { headerName: 'Adv. Amount', field: 'advance_amount', sortable: true, filter: true, maxWidth: 150 },
-      { headerName: 'Remaining Amount', field: 'remaining_balance', sortable: true, filter: true, maxWidth: 190 },
-      { headerName: 'EMI', field: 'emi', sortable: true, filter: true, maxWidth: 100 },
+      { headerName: 'Emp Code', field: 'employee_code', sortable: true, filter: true, flex: 1 },
+      { headerName: 'Emp Name', field: 'emp_name', sortable: true, filter: true, flex: 1 },
+      { headerName: 'Apply Date', field: 'apply_date', sortable: true, filter: true, flex: 1 },
+      { headerName: 'Adv. Amount', field: 'advance_amount', sortable: true, filter: true, flex: 1 },
+      { headerName: 'Remaining Amt', field: 'remaining_balance', sortable: true, filter: true, flex: 1 },
+      { headerName: 'EMI', field: 'emi', sortable: true, filter: true, flex: 0.8 },
       {
-        headerName: 'Status', field: 'status', sortable: true, filter: true, maxWidth: 150,
+        headerName: 'Status', field: 'status', sortable: true, filter: true, flex: 1,
         cellRenderer: this.statusButtonRenderer,
       },
     ];
     this.columnDefs.push({
       headerName: 'Actions',
-      maxWidth: 120,
+      flex: 1,
       cellStyle: { border: '1px solid #ddd' },
       cellRenderer: (params: any) => {
         return `<button type="button" class="btn btn-sm mb-1" data-bs-toggle="modal" data-bs-target="#salaryReport" style="background-color:#C8E3FF">
@@ -220,6 +242,48 @@ export class EmpLeaveAdvsalaryReportComponent {
       onCellClicked: (event: any) => {
         this.getSingleAdvanceSalary(event.data.adv_pay_id);
       },
+    });
+  }
+
+  //leaves
+  initializeLeaveColumns() {
+    this.leaveColumnDefs = [
+      { headerName: 'Emp Code', field: 'employee_code', flex: 1 },
+      { headerName: 'Emp Name', field: 'emp_name', flex: 1 },
+      { headerName: 'Start Date', field: 'start_date', flex: 1 },
+      { headerName: 'End Date', field: 'end_date', flex: 1 },
+      {
+        headerName: 'Apply Date',
+        field: 'created_at',
+        flex: 1,
+        valueFormatter: (params: any) => {
+          if (!params.value) return '';
+          return params.value.split(' ')[0];
+        }
+      },
+      { headerName: 'Days', field: 'total_leave_days', flex: 1 },
+      { headerName: 'Reason', field: 'leave_reason', flex: 1 },
+      {
+        headerName: 'Status',
+        field: 'leave_status',
+        flex: 1,
+        cellRenderer: this.statusButtonRenderer, // reuse same UI
+      }
+    ];
+    this.leaveColumnDefs.push({
+      headerName: 'Actions',
+      maxWidth: 120,
+      cellRenderer: (params: any) => {
+        return `<button type="button" class="btn btn-sm"
+              data-bs-toggle="modal"
+              data-bs-target="#leaveRequestModal"
+              style="background-color:#C8E3FF">
+              <i class="bi bi-eye"></i>
+            </button>`;
+      },
+      onCellClicked: (event: any) => {
+        this.openLeaveModal(event.data); // 👈 send row data
+      }
     });
   }
 
@@ -239,6 +303,7 @@ export class EmpLeaveAdvsalaryReportComponent {
     this.selectedCompanyId = (event.target as HTMLSelectElement).value;
   }
 
+  //adv salary
   getSingleAdvanceSalary(data: any) {
     this.selectedAdvpayid = data;
     this.service.post('single/report/advancesaraly', { adv_pay_id: data }).subscribe((res: any) => {
@@ -283,10 +348,51 @@ export class EmpLeaveAdvsalaryReportComponent {
     });
   }
 
+  //leaves
+  searchEmployeeLeaves() {
+    this.leaveRowData = [];
+
+    const payload = {
+      employee_id: this.employee_id,
+      year: this.selectedYear,
+    };
+
+    this.service.post('emp/leaves/report', payload).subscribe(
+      (res: any) => {
+        if (res.status === 'success' && res.data.length > 0) {
+          this.leaveRowData = res.data;
+        } else {
+          this.leaveRowData = [];
+        }
+      },
+      (error) => {
+        this.leaveRowData = [];
+        if (error.status !== 404) {
+          this.toastr.error('Error fetching leave data');
+        }
+      }
+    );
+  }
+
   calculatePaidAmount(): number {
     const total = +this.displayApprovedData.get('amount')?.value || 0;
     const remaining = +this.displayApprovedData.get('remainingBalance')?.value || 0;
     return total - remaining;
   }
 
+  openLeaveModal(data: any) {
+    this.leaveRequestData = data;
+
+    this.leaveRequestForm.patchValue({
+      employeeName: data.emp_name,
+      startDate: data.start_date,
+      endDate: data.end_date,
+      status: data.leave_status,
+      leaveType: data.leave_name,
+      noOfDays: data.total_leave_days,
+      department: data.department_name,
+      leavereason: data.leave_reason
+    });
+
+  }
 }

@@ -20,7 +20,7 @@ export class AdvanceSalaryAllempReportComponent {
   rowData: any = [];
   CompanyNames: any = [];
   selectedCompanyId: any = 1;
-  selectedYear: any;
+  selectedYear = new Date().getFullYear();
   selectedMonth: any;
   displayApprovedData!: FormGroup;
   approvedData!: any;
@@ -29,7 +29,7 @@ export class AdvanceSalaryAllempReportComponent {
   tabledata: any = [];
   searchValue: string = '';
   searchTimeout: any;
-  financialYears: number[] = [];
+  years: number[] = [];
 
   totalRows: number = 0;
   currentPage: number = 1;
@@ -42,7 +42,6 @@ export class AdvanceSalaryAllempReportComponent {
   ngOnInit() {
     this.selectedCompanyId = this.service.selectedCompanyId();
     const currentDate = new Date();
-    this.selectedYear = new Date().getFullYear();
     this.today = currentDate.toISOString().split('T')[0];
     this.role = this.service.getRole();
     this.initializeColumns();
@@ -59,6 +58,7 @@ export class AdvanceSalaryAllempReportComponent {
       requestDate: [{ value: '', disabled: true }],
       tenure: [{ value: '', disabled: true }],
       amount: [{ value: '', disabled: true }],
+      emi_status: [{ value: '', disabled: true }],
       firstInstallmentDate: [{ value: '', disabled: true }],
       installmentEndDate: [{ value: '', disabled: true }],
       lastInstallmentDate: [{ value: '', disabled: true }],
@@ -146,7 +146,7 @@ export class AdvanceSalaryAllempReportComponent {
             status: item.status,
             tenure: item.tenure,
             adv_pay_id: item.adv_pay_id,
-            last_installment_date: item.last_installment_date  ? item.last_installment_date  : '-',
+            last_installment_date: item.last_installment_date ? item.last_installment_date : '-',
 
             emi_status: item.emi_status === 'Ongoing'
               ? 'Unpaid'
@@ -188,10 +188,10 @@ export class AdvanceSalaryAllempReportComponent {
     const startYear = 2024;
     const currentYear = new Date().getFullYear();
 
-    this.financialYears = [];
+    this.years = [];
 
     for (let year = startYear; year <= currentYear; year++) {
-      this.financialYears.push(year);
+      this.years.push(year);
     }
   }
 
@@ -296,6 +296,7 @@ export class AdvanceSalaryAllempReportComponent {
           role: advanceInfo?.designation_name,
           requestDate: advanceInfo?.apply_date,
           status: advanceInfo?.status,
+          emi_status: advanceInfo?.emi_status,
           tenure: advanceInfo?.tenure,
           amount: advanceInfo?.advance_amount,
           reason: advanceInfo?.remarks,
@@ -355,13 +356,13 @@ export class AdvanceSalaryAllempReportComponent {
     //Bootstrap Icon
     if (status === 'Approved') {
       icon.className = 'bi bi-check-circle-fill';
-      icon.style.color = '#28a745'; 
+      icon.style.color = '#28a745';
     } else if (status === 'Rejected') {
       icon.className = 'bi bi-x-circle-fill';
-      icon.style.color = '#dc3545'; 
+      icon.style.color = '#dc3545';
     } else if (status === 'pending' || status === 'Pending') {
       icon.className = 'bi bi-hourglass-split';
-      icon.style.color = '#ffc107'; 
+      icon.style.color = '#ffc107';
     } else {
       icon.className = 'bi bi-question-circle';
       icon.style.color = '#6c757d';

@@ -20,6 +20,7 @@ export class EmployeeDashboardComponent {
 
   editForm!: FormGroup;
   leaveForm!: FormGroup;
+  changePasswordForm!: FormGroup;
 
   advanceSalaryForm!: FormGroup;
   tenures: string[] = [];
@@ -52,6 +53,9 @@ export class EmployeeDashboardComponent {
   financialYearId: any;
   latestRowData: any[] = [];
   miniColumnDefs: ColDef[] = [];
+  submitted = false;
+  showPassword = false;
+  showConfirmPassword = false;
 
   constructor(private route: ActivatedRoute, private fb: FormBuilder, private router: Router, private toastr: ToastrService, private service: HrmserviceService, private modalService: ModalServiceService,) {
     // Generate last 20 years dynamically
@@ -102,12 +106,16 @@ export class EmployeeDashboardComponent {
         this.employee_id = sessionStorage.getItem('employeeId');
         console.log('session storage', this.employee_id);
       }
+
+      this.searchEmployeeAdvanceSalary();
     }
 
     if (sessionStorage.getItem('roleName') == 'Admin') {
       this.route.queryParams.subscribe(params => {
         this.employee_id = params['id'];
       });
+
+      this.searchEmployeeAdvanceSalary();
     }
 
     this.editForm = this.fb.group({
@@ -152,6 +160,18 @@ export class EmployeeDashboardComponent {
     //   return;
     // }
     this.initializeMiniColumns();
+
+    this.changePasswordForm = this.fb.group({
+      password: [
+        '',
+        [
+          Validators.required,
+          Validators.minLength(6),
+          Validators.pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&]).+$/)
+        ]
+      ],
+      confirm_password: ['', Validators.required]
+    }, { validators: this.passwordMatchValidator });
   }
 
   hasAccess(module: string, permission: string): boolean {
@@ -272,6 +292,7 @@ export class EmployeeDashboardComponent {
 
   searchEmployeeAdvanceSalary() {
     this.latestRowData = [];
+
     const payload = {
       employee_id: this.employee_id,
       year: this.selectedYear,
@@ -552,7 +573,8 @@ export class EmployeeDashboardComponent {
   // ✅ Total attendance getter
   get totalAttendance(): number {
     const a = this.Employee_Data?.lastMonthAttendance;
-    return (Number(a?.present_days) || 0) + (Number(a?.absent_days) || 0) + (Number(a?.late_marks) || 0);
+    return (Number(a?.present_days));
+    // return (Number(a?.present_days) || 0) + (Number(a?.absent_days) || 0) + (Number(a?.late_marks) || 0);
   }
 
   updateData() {
@@ -687,6 +709,7 @@ export class EmployeeDashboardComponent {
           //   queryParams: { id: this.employee_id }
           // });
           this.fetchEmployee(this.employee_id);
+          this.searchEmployeeAdvanceSalary();
           this.router.navigate(['/authPanal/EmployeeInDetail']);
         } else {
           this.toastr.error(res.data || 'Request failed.');
@@ -744,4 +767,54 @@ export class EmployeeDashboardComponent {
     );
   }
 
+  //password change
+  get f() {
+    return this.changePasswordForm.controls;
+  }
+  passwordMatchValidator(form: FormGroup) {
+    const pass = form.get('password')?.value;
+    const confirm = form.get('confirm_password')?.value;
+
+    return pass === confirm ? null : { mismatch: true };
+  }
+  openChangePasswordModal() {
+    const modal = new bootstrap.Modal(document.getElementById('changePasswordModal'));
+    modal.show();
+  }
+  changePassword() {
+    this.submitted = true;
+
+    if (this.changePasswordForm.invalid) {
+      this.toastr.error('Please fix validation errors');
+      return;
+    }
+
+    // Confirm dialog
+    if (!confirm('Are you sure you want to change password?')) {
+      return;
+    }
+
+    const payload = {
+      emp_id: this.employee_id,
+      new_password: this.changePasswordForm.value.password
+    };
+
+    this.service.post('update/password', payload).subscribe({
+      next: (res: any) => {
+        if (res.status === 'success') {
+          this.toastr.success('Password updated successfully');
+
+          this.changePasswordForm.reset();
+          this.submitted = false;
+
+          this.modalService.closeModal(); // or bootstrap close
+        } else {
+          this.toastr.error(res.message || 'Failed to update password');
+        }
+      },
+      error: () => {
+        this.toastr.error('Server error');
+      }
+    });
+  }
 }

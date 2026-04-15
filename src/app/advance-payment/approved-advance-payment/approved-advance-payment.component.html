@@ -46,8 +46,8 @@
         <div class="row g-3">
           <div class="col-12">
             <!-- style="width: 100%; height: 60vh;" -->
-            <ag-grid-angular class="ag-theme-alpine" [rowData]="rowData"
-              [gridOptions]="gridOptions" [domLayout]="'autoHeight'" [pagination]="false" [columnDefs]="columnDefs" [defaultColDef]="defaultColDef"
+            <ag-grid-angular class="ag-theme-alpine" [rowData]="rowData" [gridOptions]="gridOptions"
+              [domLayout]="'autoHeight'" [pagination]="false" [columnDefs]="columnDefs" [defaultColDef]="defaultColDef"
               (gridReady)="onGridReady($event)">
             </ag-grid-angular>
 
@@ -140,6 +140,27 @@
                 </div>
               </div>
 
+              <!-- Accountant Info -->
+              <div class="row mb-3">
+                <!-- IF CONFIRMED -->
+                <div *ngIf="approvedData?.accountant_confirmation === 'Confirmed'; else pendingBlock" class="row">
+                  <div class="col-md-4">
+                    <strong>Payment Mode : </strong> {{ approvedData?.payment_mode }}
+                  </div>
+                  <div class="col-md-4">
+                    <strong>Transfer Details : </strong> {{ approvedData?.transfer_data }}
+                  </div>
+                </div>
+                <!--  ELSE -->
+                <ng-template #pendingBlock>
+                  <div class="col-12">
+                    <div class="text-warning">
+                      ⚠️ Confirmation Pending
+                    </div>
+                  </div>
+                </ng-template>
+              </div>
+
               <!-- Loan Amount Progress Bar -->
               <div class="mb-3">
                 <label class="fw-bold">Loan Amount</label>
@@ -159,13 +180,14 @@
                 <!-- Paid & Remaining in same line -->
                 <div class="d-flex justify-content-between small mt-1">
                   <div>
-                    <span *ngIf="calculatePaidAmount() > 0" class="text-success">● Paid ₹ {{ calculatePaidAmount() }}</span>
+                    <span *ngIf="calculatePaidAmount() > 0" class="text-success">● Paid ₹ {{ calculatePaidAmount()
+                      }}</span>
                   </div>
                   <div>
-                  <span class="text-secondary">● Remaining ₹ {{ displayApprovedData.get('remainingBalance')?.value ||
-                    '0'
-                    }}</span>
-                    </div>
+                    <span class="text-secondary">● Remaining ₹ {{ displayApprovedData.get('remainingBalance')?.value ||
+                      '0'
+                      }}</span>
+                  </div>
                 </div>
               </div>
 

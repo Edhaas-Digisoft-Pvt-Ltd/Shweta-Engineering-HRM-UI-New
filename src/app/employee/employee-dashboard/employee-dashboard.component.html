@@ -170,28 +170,25 @@
 
                                     <ng-container *ngFor="let leave of Employee_Data?.leave_data?.leave_types">
                                         <!-- Main Leave Row -->
-                                        <div class="row align-items-center text-center g-1">
+                                        <div class="d-flex flex-wrap align-items-center justify-content-between gap-2">
+
                                             <!-- Leave Name -->
-                                            <div class="col-md-4 text-start">
-                                                <div class="fw-semibold text-dark">
-                                                    {{ leave.leave_name }}
-                                                </div>
+                                            <div class="fw-semibold text-dark">
+                                                {{ leave.leave_name }}
                                             </div>
 
-                                            <!-- Total -->
-                                            <div class="col-md-4">
+                                            <!-- Right Side Badges -->
+                                            <div class="d-flex gap-2">
                                                 <span class="badge bg-primary fs-6">
                                                     Total: {{ leave.total_leave }}
                                                 </span>
-                                            </div>
 
-                                            <!-- Available -->
-                                            <div class="col-md-4">
                                                 <span class="badge fs-6"
                                                     [ngClass]="leave.available_leave > 0 ? 'bg-success' : 'bg-danger'">
                                                     Available: {{ leave.available_leave }}
                                                 </span>
                                             </div>
+
                                         </div>
 
                                         <!-- Carry Forward Note (Full Width) -->
@@ -357,7 +354,8 @@
 
                         <div class=" p-3 border advanceSalaryTracking" style="border-radius: 10px;">
                             <div class="d-flex justify-content-between align-items-center mb-2">
-                                <h5 class="pb-2"> <i class="bi bi-currency-rupee me-2 text-primary "></i>Advance Salary</h5>
+                                <h5 class="pb-2"> <i class="bi bi-currency-rupee me-2 text-primary "></i>Advance Salary
+                                </h5>
                                 <button class="btn btn-sm btn-primary" (click)="viewAll()">
                                     View All
                                 </button>
@@ -625,5 +623,84 @@
             </div>
         </div>
 
+    </div>
+</div>
+
+<!-- change password modal -->
+<div class="modal fade" id="changePasswordModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content p-3">
+
+            <h5 class="mb-3">Change Password</h5>
+
+            <form [formGroup]="changePasswordForm">
+
+                <!-- New Password -->
+                <div class="mb-3">
+                    <label>New Password</label>
+
+                    <div class="position-relative">
+                        <input [type]="showPassword ? 'text' : 'password'" class="form-control pe-5"
+                            formControlName="password" placeholder="Enter new password">
+
+                        <!-- Eye Icon -->
+                        <i class="bi" [ngClass]="showPassword ? 'bi-eye-slash' : 'bi-eye'"
+                            (click)="showPassword = !showPassword">
+                        </i>
+                    </div>
+
+                    <!-- Validation -->
+                    <small class="text-danger" *ngIf="submitted && f['password'].errors">
+                        <span *ngIf="f['password'].errors?.['required']">
+                            Password is required
+                        </span>
+                        <span *ngIf="f['password'].errors?.['minlength']">
+                            Minimum 6 characters required
+                        </span>
+                        <span *ngIf="f['password'].errors?.['pattern']">
+                            Must include uppercase, lowercase, number & special character
+                        </span>
+                    </small>
+                </div>
+
+                <!-- Confirm Password -->
+                <div class="mb-3">
+                    <label>Confirm Password</label>
+
+                    <div class="position-relative">
+                        <input [type]="showConfirmPassword ? 'text' : 'password'" class="form-control pe-5"
+                            formControlName="confirm_password" placeholder="Confirm password">
+
+                        <!-- Eye Icon -->
+                        <i class="bi position-absolute top-50 end-0 translate-middle-y me-3"
+                            [ngClass]="showConfirmPassword ? 'bi-eye-slash' : 'bi-eye'" style="cursor: pointer;"
+                            (click)="showConfirmPassword = !showConfirmPassword">
+                        </i>
+                    </div>
+
+                    <small class="text-danger" *ngIf="submitted && f['confirm_password'].errors">
+                        <span *ngIf="f['confirm_password'].errors?.['required']">
+                            Confirm password is required
+                        </span>
+                    </small>
+
+                    <small class="text-danger" *ngIf="submitted && changePasswordForm.errors?.['mismatch']">
+                        Passwords do not match
+                    </small>
+                </div>
+
+                <div class="text-end">
+                    <button type="button" class="btn btn-secondary me-2" data-bs-dismiss="modal">
+                        Cancel
+                    </button>
+
+                    <button type="button" class="btn btn-primary" (click)="changePassword()">
+                        Update Password
+                    </button>
+                </div>
+
+            </form>
+
+        </div>
     </div>
 </div>

@@ -84,6 +84,7 @@ export class LeaveRequestComponent {
     { headerName: 'Employee Name', field: 'emp_name', sortable: true, filter: true },
     { headerName: 'Start Date', field: 'start_date', sortable: true, filter: true },
     { headerName: 'End Date', field: 'end_date', sortable: true, filter: true },
+    { headerName: 'Apply Date', field: 'created_at', sortable: true, filter: true },
     {
       headerName: 'Actions',
       cellStyle: { border: '1px solid #ddd' },
@@ -184,6 +185,7 @@ export class LeaveRequestComponent {
             total_leave_days: item.total_leave_days,
             leave_status: item.leave_status,
             tbl_emp_leave_id: item.tbl_emp_leave_id,
+            created_at: item.created_at ? item.created_at.split(' ')[0] : ''
           }));
           this.totalRows = res.pagination.total;
           this.currentPage = res.pagination.page;

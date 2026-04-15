@@ -272,51 +272,103 @@ export class AdvancePaymentComponent {
         cellRenderer: this.statusButtonRenderer,
       },
     ];
-    if (this.hasAccess('Advance Payment', 'ApproveOrReject')) {
-      this.columnDefs.push({
-        headerName: 'Actions',
-        flex: 1,
-        cellStyle: { border: '1px solid #ddd' },
-        cellRenderer: (params: any) => {
-          return `<button type="button" class="btn btn-sm mb-1" style="background-color:#C8E3FF">
-              <i class="bi bi-pencil"></i>
-            </button>`;
-        },
-        onCellClicked: (event: any) => {
-          this.getSingleAdvanceSalary(event.data.adv_pay_id);
-          this.openModel();
-        },
-      });
-    }
-    if (this.hasAccess('Advance Payment', 'SalaryTracker')) {
-      this.columnDefs.push({
-        headerName: 'Actions',
-        flex: 1,
-        cellStyle: { border: '1px solid #ddd' },
-        cellRenderer: (params: any) => {
-          if (params.data.status === 'Approved') {
-            return `
-        <button type="button" class="btn btn-sm mb-1 st-btn" style="background-color:#C8E3FF">
+    // if (this.hasAccess('Advance Payment', 'ApproveOrReject')) {
+    //   this.columnDefs.push({
+    //     headerName: 'Actions',
+    //     flex: 1,
+    //     cellStyle: { border: '1px solid #ddd' },
+    //     cellRenderer: (params: any) => {
+    //       return `<button type="button" class="btn btn-sm mb-1" style="background-color:#C8E3FF">
+    //           <i class="bi bi-pencil"></i>
+    //         </button>`;
+    //     },
+    //     onCellClicked: (event: any) => {
+    //       this.getSingleAdvanceSalary(event.data.adv_pay_id);
+    //       this.openModel();
+    //     },
+    //   });
+    // }
+    // if (this.hasAccess('Advance Payment', 'SalaryTracker')) {
+    //   this.columnDefs.push({
+    //     headerName: 'Actions',
+    //     flex: 1,
+    //     cellStyle: { border: '1px solid #ddd' },
+    //     cellRenderer: (params: any) => {
+    //       if (params.data.status === 'Approved') {
+    //         return `
+    //     <button type="button" class="btn btn-sm mb-1 st-btn" style="background-color:#C8E3FF">
+    //       <i class="bi bi-pencil"></i>
+    //     </button>
+    //   `;
+    //       }
+    //       return '';
+    //     },
+    //     onCellClicked: (event: any) => {
+    //       if (!event.event.target.closest('.st-btn')) {
+    //         return;
+    //       }
+
+    //       if (event.data.status !== 'Approved') {
+    //         return;
+    //       }
+
+    //       this.setSalaryTrackerData(event.data);
+    //       this.openSalaryTrackerModel();
+    //     },
+    //   });
+    // }
+    this.columnDefs.push({
+      headerName: 'Actions',
+      flex: 1,
+      cellStyle: { border: '1px solid #ddd' },
+
+      cellRenderer: (params: any) => {
+        let buttons = '';
+
+        // Approve/Reject button (for pending)
+        if (
+          params.data.status === 'pending' &&
+          this.hasAccess('Advance Payment', 'ApproveOrReject')
+        ) {
+          buttons += `
+        <button type="button" class="btn btn-sm mb-1 edit-btn" style="background-color:#C8E3FF">
           <i class="bi bi-pencil"></i>
         </button>
       `;
-          }
-          return '';
-        },
-        onCellClicked: (event: any) => {
-          if (!event.event.target.closest('.st-btn')) {
-            return;
-          }
+        }
 
-          if (event.data.status !== 'Approved') {
-            return;
-          }
+        // Salary Tracker button (for Approved)
+        if (
+          params.data.status === 'Approved' &&
+          this.hasAccess('Advance Payment', 'SalaryTracker')
+        ) {
+          buttons += `
+        <button type="button" class="btn btn-sm mb-1 st-btn" style="background-color:#C8E3FF">
+          <i class="bi bi-cash"></i>
+        </button>
+      `;
+        }
 
+        return buttons;
+      },
+
+      onCellClicked: (event: any) => {
+
+        // 🔹 Open Approve Modal
+        if (event.event.target.closest('.edit-btn')) {
+          this.getSingleAdvanceSalary(event.data.adv_pay_id);
+          this.openModel();
+          return;
+        }
+
+        // 🔹 Open Salary Tracker
+        if (event.event.target.closest('.st-btn')) {
           this.setSalaryTrackerData(event.data);
           this.openSalaryTrackerModel();
-        },
-      });
-    }
+          return;
+        }
+      }
+    });
   }
 
   getSingleAdvanceSalary(data: any) {
@@ -414,9 +466,14 @@ export class AdvancePaymentComponent {
   }
 
   statusButtonRenderer(params: any) {
-    const status = params.value;
-    const button = document.createElement('button');
+    let status = params.value;
 
+    //Convert Approved → Confirm (UI only)
+    if (status === 'Approved') {
+      status = 'Confirm';
+    }
+
+    const button = document.createElement('button');
     button.innerText = status;
 
     // Common styles
@@ -439,6 +496,11 @@ export class AdvancePaymentComponent {
       button.style.border = '1px solid #f5c6cb';
       button.style.borderRadius = '20px';
     } else if (status === 'Approved') {
+      button.style.backgroundColor = '#B2FFE1B0'; // light green
+      button.style.color = 'black';
+      button.style.border = '1px solid #B2FFE1B0';
+      button.style.borderRadius = '20px';
+    } else if (status === 'Confirm') {
       button.style.backgroundColor = '#B2FFE1B0'; // light green
       button.style.color = 'black';
       button.style.border = '1px solid #B2FFE1B0';

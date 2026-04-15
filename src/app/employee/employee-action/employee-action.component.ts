@@ -5,15 +5,25 @@ import { HrmserviceService } from 'src/app/hrmservice.service';
 
 @Component({
   selector: 'app-employee-action',
-  template: `
-    <div class="d-flex align-items-center">
-      <button class="btn btn-sm me-2" (click)="viewEmployee()" style="background-color:#C8E3FF"
-      >
-        <i class="bi bi-eye"></i>
-      </button>
-     
-    </div>
-  `,
+ template: `
+  <div class="d-flex align-items-center">
+    
+    <!-- View Button -->
+    <button class="btn btn-sm me-2" 
+            (click)="viewEmployee()" 
+            style="background-color:#C8E3FF">
+      <i class="bi bi-eye"></i>
+    </button>
+
+    <!-- Change Password Button -->
+    <button class="btn btn-sm" 
+            (click)="changePassword()" 
+            style="background-color:#FFE5B4">
+      <i class="bi bi-key"></i>
+    </button>
+
+  </div>
+`,
   styles: [`
     button {
       cursor: pointer;
@@ -47,4 +57,7 @@ export class EmployeeActionComponent implements ICellRendererAngularComp {
     // this.router.navigate(['/authPanal/EmployeeInDetail']);
   }
 
+  changePassword() {
+  this.params.openChangePassword(this.employeID);
+}
 }

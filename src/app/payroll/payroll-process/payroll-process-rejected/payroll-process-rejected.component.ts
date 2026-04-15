@@ -13,7 +13,7 @@ declare var bootstrap: any;
 export class PayrollProcessRejectedComponent {
   @ViewChild('fileInput') fileInput!: ElementRef<HTMLInputElement>;
   CompanyNames: any = [];
-  selectedCompanyId: any = 1;
+  selectedCompanyId: any;
   selectedYear: any;
   selectedMonth: any;
   rowData: any = [];
@@ -70,6 +70,7 @@ export class PayrollProcessRejectedComponent {
   }
 
   ngOnInit() {
+    this.selectedCompanyId = this.service.selectedCompanyId();
     // this.selectedYear = new Date().getFullYear();
     // this.selectedMonth = new Date().getMonth();
     // const currentDate = new Date();

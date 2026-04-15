@@ -72,6 +72,9 @@ export class ApprovedAdvancePaymentComponent {
       installmentDueDate: [{ value: '', disabled: true }],
       remainingBalance: [{ value: '', disabled: true }],
       advanceAmount: [{ value: '', disabled: true }],
+      payment_mode: [{ value: '', disabled: true }],
+      transfer_data: [{ value: '', disabled: true }],
+      accountant_confirmation: [''],
       skipEmi: [false],
       skipreason: ['', Validators.required]
     })
@@ -317,6 +320,13 @@ export class ApprovedAdvancePaymentComponent {
 
   getSingleApprovedData(data: any) {
     this.selectedAdvpayid = data;
+    this.displayApprovedData.patchValue({
+      skipEmi: false,
+      skipreason: ''
+    });
+    this.displayApprovedData.get('skipreason')?.markAsPristine();
+    this.displayApprovedData.get('skipreason')?.markAsUntouched();
+
     this.service.post('single/report/advancesaraly', { adv_pay_id: data }).subscribe((res: any) => {
       if (res.status === 'success') {
         const advanceInfo = res.data.advance_info;
@@ -338,6 +348,9 @@ export class ApprovedAdvancePaymentComponent {
           remainingBalance: advanceInfo?.remaining_balance,
           advanceAmount: advanceInfo?.advance_amount,
           firstInstallmentDate: advanceInfo?.deducted_on,
+          accountant_confirmation: advanceInfo?.accountant_confirmation,
+          payment_mode: advanceInfo?.payment_mode,
+          transfer_data: advanceInfo?.transfer_data
         }
         this.displayApprovedData.patchValue(this.approvedData);
 

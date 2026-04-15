@@ -16,6 +16,7 @@ export class LoginComponent {
   readonly NoWhitespaceRegExp: RegExp = new RegExp('\\S');
   roles: any;
   logindata: any;
+  showPassword: boolean = false;
 
   constructor(
     private router: Router,
@@ -39,10 +40,15 @@ export class LoginComponent {
         Validators.required,]), // Required field
     });
   }
+  
   ngOnInit(): void {
     this.getRoles()
-
   }
+
+  togglePassword() {
+    this.showPassword = !this.showPassword;
+  }
+
   //--------------------------------------------------------------------------------------
   getRoles() {
     this.service.post('fetch/roles', {}).subscribe((res: any) => {
@@ -88,7 +94,7 @@ export class LoginComponent {
               if (permRes.status === 'success') {
                 //  Save permissions
                 this.service.setPermissions(permRes.data);
-                
+
                 // sessionStorage.setItem('permissions', JSON.stringify(permRes.data));
                 // Now set role
                 const selectedRoleId = Number(this.loginForm.value.role);
@@ -115,20 +121,20 @@ export class LoginComponent {
                 //     this.toastr.error('Unknown role. Please contact admin.');
                 //     break;
                 // }
-                if(roleName === 'accountant'){
+                if (roleName === 'accountant') {
                   this.router.navigate(['/authPanal/payrollProcess']);
                 }
-                else if(roleName === 'admin'){
+                else if (roleName === 'admin') {
                   this.router.navigate(['/authPanal/Dashboard']);
                 }
-                else if(roleName === 'operator' || roleName === 'supervisor' || roleName === 'manager' || roleName === 'maintenance manager'
-                  || roleName === 'production manager' || roleName === 'quality manager' || roleName === 'data-entry operator' 
+                else if (roleName === 'operator' || roleName === 'supervisor' || roleName === 'manager' || roleName === 'maintenance manager'
+                  || roleName === 'production manager' || roleName === 'quality manager' || roleName === 'data-entry operator'
                   || roleName === 'production incharge' || roleName === 'plant incharge'
-                ){
+                ) {
                   this.service.setEmployeeId(this.logindata.employe_id);
                   this.router.navigate(['/authPanal/EmployeeInDetail']);
                 }
-                else{
+                else {
                   this.toastr.error('Unknown role. Please contact admin.');
                 }
               } else {
@@ -160,12 +166,6 @@ export class LoginComponent {
     }
   }
   //--------------------------------------------------------------------------------------
-
-  // demoAccounts = [
-  //   { role: 'Admin', email: 'admin@gmail.com', password: '8569966566' },
-  //   { role: 'Accountant', email: 'accountant@gmail.com', password: '8586965456' },
-  //   { role: 'Emp', email: 'robbin@gmail.com', password: '9168645556' }
-  // ];
 
   demoAccounts = [
     { role: 'Admin', email: 'sepl1@gmail.com', password: '9552113579' },

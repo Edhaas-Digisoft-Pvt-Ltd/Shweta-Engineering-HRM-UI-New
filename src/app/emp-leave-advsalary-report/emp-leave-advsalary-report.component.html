@@ -12,10 +12,15 @@
             </div>
             <div class="tabs-container m-2">
                 <ul class="nav nav-tabs">
-                    <li class="nav-item" (click)="selectTab('tab1')">
+                    <li class="nav-item me-2" (click)="selectTab('tab1')">
                         <a class="nav-link fw-bold" [ngClass]="{'active': activeTab === 'tab1'}">Advance Salary</a>
                     </li>
+                    <li class="nav-item ms-2" (click)="selectTab('tab2')">
+                        <a class="nav-link fw-bold" [ngClass]="{'active': activeTab === 'tab2'}">Leaves</a>
+                    </li>
                 </ul>
+
+                <!-- tab 1 -->
                 <div class="tab-content mt-3">
                     <div *ngIf="activeTab === 'tab1'">
                         <div class="row gx-3  align-items-center rounded-2">
@@ -87,7 +92,7 @@
                                                         class="form-control" formControlName="amount"></div>
                                                 <div class="col-md-2"><strong>status</strong><input class="form-control"
                                                         formControlName="status"></div>
-                                            </div>                                       
+                                            </div>
                                         </div>
 
                                         <div class="row mb-3">
@@ -126,6 +131,117 @@
                                     </form>
                                 </div>
                             </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- tab 2 -->
+                <div *ngIf="activeTab === 'tab2'">
+                    <div class="row gx-3 align-items-center rounded-2">
+                        <div class="col-12">
+                            <div class="row justify-content-end">
+
+                                <div class="col-2">
+                                    <label>Select Year</label>
+                                    <select class="form-select" [(ngModel)]="selectedYear"
+                                        (change)="searchEmployeeLeaves()">
+                                        <option *ngFor="let year of years" [value]="year">{{ year }}</option>
+                                    </select>
+                                </div>
+
+                                <div class="col-auto d-flex align-items-end">
+                                    <button class="btn btn-primary" (click)="searchEmployeeLeaves()">Search</button>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row gap-4 row-wrap my-3">
+                        <div class="container">
+                            <div class="row g-3">
+                                <div class="col-12">
+                                    <ag-grid-angular class="ag-theme-alpine" style="width: 100%; height: 300px;"
+                                        [rowData]="leaveRowData" [columnDefs]="leaveColumnDefs"
+                                        [defaultColDef]="defaultColDef">
+                                    </ag-grid-angular>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Leave Modal -->
+                    <div class="modal fade" id="leaveRequestModal" tabindex="-1">
+                        <div class="modal-dialog modal-dialog-centered modal-xl">
+                            <div class="modal-content">
+
+                                <!-- Header -->
+                                <div class="modal-header">
+                                    <h5 class="modal-title">Leave Request Info</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                </div>
+
+                                <!-- Body -->
+                                <div class="modal-body" style="max-height: 70vh; overflow-y: auto;">
+                                    <form [formGroup]="leaveRequestForm">
+
+                                        <!-- Row 1 -->
+                                        <div class="row mb-3">
+                                            <div class="col-md-6">
+                                                <label>Employee Name</label>
+                                                <input class="form-control" formControlName="employeeName" [disabled]="true">
+                                            </div>
+
+                                            <div class="col-md-3">
+                                                <label>Start Date</label>
+                                                <input type="date" class="form-control" formControlName="startDate"
+                                                    [disabled]="true">
+                                            </div>
+
+                                            <div class="col-md-3">
+                                                <label>End Date</label>
+                                                <input type="date" class="form-control" formControlName="endDate"
+                                                    [disabled]="true">
+                                            </div>
+                                        </div>
+
+                                        <!-- Row 2 -->
+                                        <div class="row mb-3">
+                                            <div class="col-md-3">
+                                                <label>Leave Type</label>
+                                                <input class="form-control" formControlName="leaveType" [disabled]="true">
+                                            </div>
+
+                                            <div class="col-md-3">
+                                                <label>Status</label>
+                                                <input class="form-control" formControlName="status" [disabled]="true">
+                                            </div>
+
+                                            <div class="col-md-3">
+                                                <label>No. Of Days</label>
+                                                <input class="form-control" formControlName="noOfDays" [disabled]="true">
+                                            </div>
+
+                                            <div class="col-md-3">
+                                                <label>Department</label>
+                                                <input class="form-control" formControlName="department" [disabled]="true">
+                                            </div>
+                                        </div>
+
+                                        <!-- Reason -->
+                                        <div class="row mb-3">
+                                            <div class="col-12">
+                                                <label>Reason</label>
+                                                <textarea rows="2" class="form-control" formControlName="leavereason"
+                                                    [disabled]="true"></textarea>
+                                            </div>
+                                        </div>
+
+                                    </form>
+                                </div>
+
+                            </div>
+
                         </div>
                     </div>
                 </div>
