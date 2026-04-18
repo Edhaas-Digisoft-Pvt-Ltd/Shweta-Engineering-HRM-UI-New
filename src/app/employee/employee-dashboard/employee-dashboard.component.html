@@ -35,8 +35,14 @@
                         <div class="col border p-4" style="border-radius: 10px;">
 
                             <div class="d-flex flex-column">
-                                <div class="row align-items-center border-bottom border-primary border-2 mb-4 ">
-                                    <div class="col-3 ">
+                                <div class="row  mb-2 ">
+                                    <div class="row gx-0">
+                                        <div class="col  border-bottom border-primary border-2  mb-2">
+                                            <h5 class="pb-2"> <i class="bi bi-person-circle me-2 text-primary"></i>
+                                                {{Employee_Data.employee.emp_name}}</h5>
+                                        </div>
+                                    </div>
+                                    <!-- <div class="col-3 ">
                                         <img src="assets/img/user_img.png" class="profile-img img-fluid rounded-circle "
                                             alt="">
                                     </div>
@@ -50,7 +56,7 @@
                                                 <p class="pb-2 userInfo">{{this.Employee_Data.designation}}</p>
                                             </div>
                                         </div>
-                                    </div>
+                                    </div> -->
                                 </div>
 
                                 <div class="row justify-content-between my-1">
@@ -79,7 +85,7 @@
                                 </div>
 
                                 <div class="row mt-2">
-                                    <div class="col-md-4">
+                                    <div class="col-md-6">
                                         <div class="d-flex">
                                             <div class=""><i class="bi bi-calendar me-2 text-primary"></i></div>
                                             <div class="">
@@ -89,7 +95,7 @@
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="col-md-4">
+                                    <div class="col-md-6">
                                         <div class="d-flex">
                                             <div class="">
                                                 <i class="bi bi-bell me-2 text-primary "></i>
@@ -98,19 +104,6 @@
                                                 <p class="mb-0 employeeData">Status</p>
                                                 <p class="fw-bold employeeDetail">
                                                     {{Employee_Data.employee.status}}</p>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div class="col-md-4">
-                                        <div class="d-flex">
-                                            <div class="">
-                                                <i class="bi bi-geo-alt-fill me-2 text-primary "></i>
-                                            </div>
-                                            <div class="">
-                                                <p class="mb-0 employeeData ">Address</p>
-                                                <p class="fw-bold employeeDetail">
-                                                    {{Employee_Data.employee.emp_address}}</p>
                                             </div>
                                         </div>
                                     </div>
@@ -134,6 +127,19 @@
                                                 <p class="mb-0 employeeData">Monthly Salary</p>
                                                 <p class="fw-bold employeeDetail">
                                                     {{Employee_Data.employee.monthly_gross_salary}}</p>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-12">
+                                        <div class="d-flex">
+                                            <div class="">
+                                                <i class="bi bi-geo-alt-fill me-2 text-primary "></i>
+                                            </div>
+                                            <div class="">
+                                                <p class="mb-0 employeeData ">Address</p>
+                                                <p class="fw-bold employeeDetail">
+                                                    {{Employee_Data.employee.emp_address}}</p>
                                             </div>
                                         </div>
                                     </div>
@@ -168,16 +174,11 @@
 
                                         <div class="card-body"> -->
 
-                                    <ng-container *ngFor="let leave of Employee_Data?.leave_data?.leave_types">
-                                        <!-- Main Leave Row -->
+                                    <!-- <ng-container *ngFor="let leave of Employee_Data?.leave_data?.leave_types">
                                         <div class="d-flex flex-wrap align-items-center justify-content-between gap-2">
-
-                                            <!-- Leave Name -->
                                             <div class="fw-semibold text-dark">
                                                 {{ leave.leave_name }}
                                             </div>
-
-                                            <!-- Right Side Badges -->
                                             <div class="d-flex gap-2">
                                                 <span class="badge bg-primary fs-6">
                                                     Total: {{ leave.total_leave }}
@@ -188,10 +189,7 @@
                                                     Available: {{ leave.available_leave }}
                                                 </span>
                                             </div>
-
                                         </div>
-
-                                        <!-- Carry Forward Note (Full Width) -->
                                         <div class="row" *ngIf="leave.carry_fwd > 0">
                                             <div class="col-12 text-start">
                                                 <small class="text-muted fst-italic mt-1">
@@ -200,9 +198,8 @@
                                                 </small>
                                             </div>
                                         </div>
-
                                         <hr class="my-2" />
-                                    </ng-container>
+                                    </ng-container> -->
 
                                     <!-- </div>
                                     </div> -->
@@ -210,8 +207,8 @@
                             </div>
 
                             <!-- leave request status -->
-                            <div class="row ">
-                                <div class="card p-0 shadow-sm rounded-4 overflow-hidden mt-2">
+                            <div class="row">
+                                <div class="card p-0 shadow-sm rounded-4 overflow-hidden">
                                     <div class=" text-white px-4 py-2 " style="background-color: #578FCA;">
                                         <h5 class="mb-0">Leave Request Status</h5>
                                     </div>
@@ -243,17 +240,23 @@
 
                             </div>
                             <div class="row">
-                                <div class="col-lg-12  gx-2 mt-4 rounded-1 gap-2">
+                                <div class="col-lg-8  gx-2 mt-4 rounded-1 gap-2">
                                     <div class="" *ngIf="hasAccess('Leave', 'insert')">
-
                                         <button type="button" class="btn dashboard-btn w-100"
                                             (click)="openLeaveModal()">
                                             Apply For Leave
                                         </button>
                                     </div>
-
+                                </div>
+                                <div class="col-lg-4  gx-2 mt-4 rounded-1 gap-2">
+                                    <div class="" *ngIf="hasAccess('Leave', 'insert')">
+                                        <button type="button" class="btn dashboard-btn w-100" (click)="viewLeave()">
+                                            View Leave
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
+
                         </div>
                         <div class=" col p-0">
                             <div class="border p-4 " style="border-radius: 10px;">
@@ -262,7 +265,7 @@
                                             class="bi bi-file-earmark-text me-3 text-primary "></i></span>Payslip</h5>
                                 <div class=" mx-auto ">
                                     <form class="w-100">
-                                        <div class="row  justify-content-between flex-row mt-4">
+                                        <div class="row  justify-content-between flex-row mt-3">
 
                                             <!-- Select Year -->
                                             <div class="col-6"> <label for="yearSelect" class="form-label">Select
@@ -286,26 +289,74 @@
                                             </div>
 
                                         </div>
-                                        <button class="btn dashboard-btn w-100 mt-5 text-center btn-center"
+                                        <button class="btn dashboard-btn w-100 mt-3 text-center btn-center"
                                             type="button" (click)="getPayrollData()">Download</button>
                                     </form>
                                 </div>
                             </div>
 
-                            <div class="col d-flex align-items-center border px-4 mt-4"
-                                style="border-radius: 10px; height: 122px;"
+                            <div class="col d-flex align-items-center border px-4 mt-2"
+                                style="border-radius: 10px; height: 100px;"
                                 *ngIf="hasAccess('Advance Payment', 'insert')">
-                                <button class="btn dashboard-btn w-100" (click)="openAdvanceSalaryModal()">
-                                    Apply for Advance Salary
-                                </button>
+                                <div class="col-lg-10  gx-2 rounded-1 gap-2">
+                                    <div class="" *ngIf="hasAccess('Leave', 'insert')">
+                                        <button class="btn dashboard-btn w-100" (click)="openAdvanceSalaryModal()">
+                                            Apply for Advance Salary
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="col-lg-2  gx-2 rounded-1 gap-2 ms-2">
+                                    <div class="" *ngIf="hasAccess('Leave', 'insert')">
+                                        <button type="button" class="btn dashboard-btn w-100" (click)="viewAll()">
+                                            View
+                                        </button>
+                                    </div>
+                                </div>
                             </div>
 
                         </div>
                     </div>
                 </div>
 
+                <!-- BONUS FULL WIDTH BELOW -->
+                <div class="row mt-3 mb-3 justify-content-center" *ngIf="bonusData && bonusData.bonus_rate">
 
-                <div class="row">
+                    <div class="col-lg-10">
+
+                        <div class="bonus-strip d-flex justify-content-center align-items-center px-3 py-2">
+
+                            <div class="fw-bold me-5">
+                                <i class="bi bi-coin text-warning me-2"></i> Bonus :
+                            </div>
+
+                            <div class="d-flex gap-5 flex-wrap">
+
+                                <span><b>Bonus Rate:</b> ₹{{ bonusData.bonus_rate }}</span>
+                                <span><b>Present Days:</b> {{ bonusData.present_days }}</span>
+                                <span class="text-success">
+                                    <b>Amount:</b> ₹{{ bonusData.bonus_amount }}
+                                </span>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- EMPTY -->
+                <!-- <ng-template #noBonus>
+                    <div class="row mt-3 justify-content-center">
+                        <div class="col-lg-6">
+                            <div class="bonus-empty text-center py-2">
+                                Bonus is not declared yet
+                            </div>
+                        </div>
+                    </div>
+                </ng-template> -->
+
+                <!-- attendnace 4 block -->
+                <!-- <div class="row mt-2">
                     <div class="col attendaceWrapper">
                         <div class=" attendenceCard p-3 border text-center" style="border-radius: 10px;">
 
@@ -325,10 +376,10 @@
                             <h5 class="pb-0 text-center">{{Employee_Data.last_hours_data.lastMonthOvertimeHour}}</h5>
                         </div>
                     </div>
-                </div>
+                </div> -->
 
 
-                <div class="row my-2 gap-2 row-gap-3 ">
+                <div class="row my-2 gap-2 row-gap-3">
                     <div class="col attendanceAdvanceSalaryWrapper">
                         <div class=" p-3  border " style="border-radius: 10px;">
 
@@ -352,17 +403,62 @@
                             </div>
                         </div>
 
-                        <div class=" p-3 border advanceSalaryTracking" style="border-radius: 10px;">
-                            <div class="d-flex justify-content-between align-items-center mb-2">
-                                <h5 class="pb-2"> <i class="bi bi-currency-rupee me-2 text-primary "></i>Advance Salary
+                        <div class="p-3 border advanceSalaryTracking" style="border-radius: 10px;">
+
+                            <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap">
+
+                                <h5 class="mb-0">
+                                    <i class="bi bi-calendar me-2 text-primary"></i>
+                                    Daily Attendance
                                 </h5>
-                                <button class="btn btn-sm btn-primary" (click)="viewAll()">
-                                    View All
-                                </button>
+
+                                <div class="d-flex gap-2 align-items-end">
+
+                                    <div>
+                                        <!-- <label class="form-label mb-1 small">Month</label> -->
+                                        <select class="form-select form-select-sm" [(ngModel)]="selectedMonthAttendance"
+                                            (change)="onMonthYearChange()">
+                                            <option *ngFor="let month of months" [value]="month.value">
+                                                {{ month.name }}
+                                            </option>
+                                        </select>
+                                    </div>
+
+                                    <div>
+                                        <!-- <label class="form-label mb-1 small">Year</label> -->
+                                        <select class="form-select form-select-sm" [(ngModel)]="selectedYearAttendance"
+                                            (change)="onMonthYearChange()">
+                                            <option *ngFor="let year of years" [value]="year">
+                                                {{ year }}
+                                            </option>
+                                        </select>
+                                    </div>
+
+                                </div>
                             </div>
-                            <ag-grid-angular class="ag-theme-alpine" style="width: 100%; height: 250px;"
-                                [rowData]="latestRowData" [columnDefs]="miniColumnDefs">
+
+                            <ag-grid-angular class="ag-theme-alpine attendance-grid" [rowData]="attendanceRowData"
+                                [columnDefs]="attendanceColumnDefs" [pagination]="true" [paginationPageSize]="10"
+                                (gridReady)="onAttendanceGridReady($event)">
                             </ag-grid-angular>
+
+                            <!-- <div class="d-flex align-items-center justify-content-end flex-wrap mt-3 gap-2">
+                                <button class="btn btn-sm btn-primary rounded" (click)="prevPage()"
+                                    [disabled]="currentPage === 1">Prev</button>
+                                <button class="btn btn-sm btn-primary rounded" (click)="nextPage()"
+                                    [disabled]="currentPage === lastPage">Next</button>
+
+                                <ng-container *ngFor="let page of pagesToShow">
+                                    <span *ngIf="page !== '...'; else ellipsis" (click)="goToPage(page)"
+                                        [class.current]="page === currentPage" class="page-text">
+                                        <ng-container *ngIf="page === currentPage">[{{ page
+                                            }}]</ng-container>
+                                        <ng-container *ngIf="page !== currentPage">{{ page
+                                            }}</ng-container>
+                                    </span>
+                                    <ng-template #ellipsis><span class="mx-1">...</span></ng-template>
+                                </ng-container>
+                            </div> -->
                         </div>
 
                     </div>

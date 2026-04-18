@@ -1,8 +1,10 @@
 import { Component } from '@angular/core';
-import { FormBuilder, FormGroup } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ColDef } from 'ag-grid-community';
 import { HrmserviceService } from 'src/app/hrmservice.service';
 import { ToastrService } from 'ngx-toastr';
+import { ModalServiceService } from '../modal-service.service';
+import { ActivatedRoute } from '@angular/router';
 
 @Component({
   selector: 'app-emp-leave-advsalary-report',
@@ -60,7 +62,7 @@ export class EmpLeaveAdvsalaryReportComponent {
     }
   }
 
-  constructor(private fb: FormBuilder, private service: HrmserviceService, private toastr: ToastrService) { }
+  constructor(private fb: FormBuilder, private service: HrmserviceService, private toastr: ToastrService, private modalService: ModalServiceService, private route: ActivatedRoute ) { }
 
   ngOnInit() {
     let role_name = sessionStorage.getItem('roleName')
@@ -96,19 +98,31 @@ export class EmpLeaveAdvsalaryReportComponent {
     })
 
     this.leaveRequestForm = this.fb.group({
-      employeeName: [''],
-      startDate: [''],
-      endDate: [''],
-      leaveType: [''],
-      status: [''],
-      noOfDays: [''],
-      department: [''],
-      leavereason: ['']
+      employeeName: [{ value: '', disabled: true }],
+      startDate: [{ value: '', disabled: true }],
+      endDate: [{ value: '', disabled: true }],
+      leaveType: [{ value: '', disabled: true }],
+      status: [{ value: '', disabled: true }],
+      noOfDays: [{ value: '', disabled: true }],
+      department: [{ value: '', disabled: true }],
+      leavereason: [{ value: '', disabled: true }],
+      cancelReason: ['', Validators.required]
     });
+
     this.searchEmployeeAdvanceSalary();
     this.generateyears();
     this.initializeColumns();
     this.initializeLeaveColumns();
+
+    this.route.queryParams.subscribe(params => {
+      if (params['tab']) {
+        this.activeTab = params['tab'];
+
+        if (this.activeTab === 'tab2') {
+          this.searchEmployeeLeaves(); // 👈 load leaves automatically
+        }
+      }
+    });
   }
 
   selectTab(tab: string) {
@@ -275,8 +289,6 @@ export class EmpLeaveAdvsalaryReportComponent {
       maxWidth: 120,
       cellRenderer: (params: any) => {
         return `<button type="button" class="btn btn-sm"
-              data-bs-toggle="modal"
-              data-bs-target="#leaveRequestModal"
               style="background-color:#C8E3FF">
               <i class="bi bi-eye"></i>
             </button>`;
@@ -381,6 +393,7 @@ export class EmpLeaveAdvsalaryReportComponent {
   }
 
   openLeaveModal(data: any) {
+    this.modalService.openModal('leaveRequestModal')
     this.leaveRequestData = data;
 
     this.leaveRequestForm.patchValue({
@@ -394,5 +407,49 @@ export class EmpLeaveAdvsalaryReportComponent {
       leavereason: data.leave_reason
     });
 
+  }
+
+  canShowCancelButton(): boolean {
+    if (!this.leaveRequestData) return false;
+    const status = this.leaveRequestData.leave_status;
+    return status === 'pending' || status === 'Approved';
+  }
+
+  cancelLeave() {
+    if (!this.leaveRequestData?.tbl_emp_leave_id) return;
+
+    const cancelControl = this.leaveRequestForm.get('cancelReason');
+
+    // Trigger validation UI
+    cancelControl?.markAsTouched();
+
+    if (cancelControl?.invalid) {
+      this.toastr.warning('Please enter cancel reason');
+      return;
+    }
+
+    const payload = {
+      tbl_emp_leave_id: this.leaveRequestData.tbl_emp_leave_id,
+      cancel_reason: cancelControl!.value
+    };
+
+    this.service.post('cancel/leave/request', payload).subscribe(
+      (res: any) => {
+        if (res.status === true || res.status === 'success') {
+          this.toastr.success(res.message || 'Leave canceled successfully');
+          this.searchEmployeeLeaves();
+          this.modalService.closeModal();
+        } else {
+          this.toastr.warning(res.message);
+        }
+      },
+      (error) => {
+        if (error.error?.message) {
+          this.toastr.error(error.error.message);
+        } else {
+          this.toastr.error('Error canceling leave');
+        }
+      }
+    );
   }
 }

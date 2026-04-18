@@ -401,7 +401,6 @@ export class LeaveRequestComponent {
     this.pagesToShow = pages;
   }
 
-
   goToPage(page: number | string) {
     if (page === '...') return;
     if (page !== this.currentPage) {

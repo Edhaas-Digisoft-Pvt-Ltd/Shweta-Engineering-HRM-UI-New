@@ -49,7 +49,6 @@ export class LeaveComponent {
   //   }
   // ];
 
-
   constructor(private service: HrmserviceService) {}
 
   ngOnInit() {
@@ -59,14 +58,12 @@ export class LeaveComponent {
     }
 
   }
-
   
   public defaultColDef: ColDef = {
     editable: true,
     flex: 1,
     resizable: true,
   };
-
 
   getSelectedRows(): void {
     const selectedNodes = this.agGrid.api?.getSelectedNodes();

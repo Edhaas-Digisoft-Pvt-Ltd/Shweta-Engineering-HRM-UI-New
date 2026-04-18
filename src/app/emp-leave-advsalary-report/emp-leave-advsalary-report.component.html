@@ -7,7 +7,7 @@
         <div class="main-content">
             <div class="row gx-3  align-items-center p-2 rounded-2 mt-3">
                 <div class="col-12 d-flex">
-                    <h2 class="fw-bold"> <i class="bi bi-currency-rupee me-2"></i> Advance Salary</h2>
+                    <h2 class="fw-bold"> <i class="bi bi-currency-rupee me-2"></i>Reports</h2>
                 </div>
             </div>
             <div class="tabs-container m-2">
@@ -35,10 +35,10 @@
                                         </select>
                                     </div>
 
-                                    <div class="col-auto d-flex align-items-end">
+                                    <!-- <div class="col-auto d-flex align-items-end">
                                         <button class="btn btn-primary searchBtn"
                                             (click)="searchEmployeeAdvanceSalary()">Search</button>
-                                    </div>
+                                    </div> -->
                                 </div>
                             </div>
                         </div>
@@ -48,8 +48,8 @@
                                 <div class="row g-3">
                                     <div class="col-12">
                                         <ag-grid-angular class="ag-theme-alpine" style="width: 100%; height: 300px;"
-                                            [rowData]="rowData" [columnDefs]="columnDefs"
-                                            [defaultColDef]="defaultColDef" (gridReady)="onGridReady($event)">
+                                            [rowData]="rowData" [columnDefs]="columnDefs" [pagination]="true" [paginationPageSize]="10"
+                                            [defaultColDef]="defaultColDef" (gridReady)="onGridReady($event)" >
                                         </ag-grid-angular>
                                     </div>
                                 </div>
@@ -95,7 +95,7 @@
                                             </div>
                                         </div>
 
-                                        <div class="row mb-3">
+                                        <div class="row mb-3">  
                                             <div class="col-12 ps-5 pe-5">
                                                 <div class="table-responsive" style="border: 1px solid #ccc;">
                                                     <table class="table table-hover text-center align-middle">
@@ -149,9 +149,9 @@
                                     </select>
                                 </div>
 
-                                <div class="col-auto d-flex align-items-end">
+                                <!-- <div class="col-auto d-flex align-items-end">
                                     <button class="btn btn-primary" (click)="searchEmployeeLeaves()">Search</button>
-                                </div>
+                                </div> -->
 
                             </div>
                         </div>
@@ -162,7 +162,7 @@
                             <div class="row g-3">
                                 <div class="col-12">
                                     <ag-grid-angular class="ag-theme-alpine" style="width: 100%; height: 300px;"
-                                        [rowData]="leaveRowData" [columnDefs]="leaveColumnDefs"
+                                        [rowData]="leaveRowData" [columnDefs]="leaveColumnDefs" [pagination]="true" [paginationPageSize]="10"
                                         [defaultColDef]="defaultColDef">
                                     </ag-grid-angular>
                                 </div>
@@ -189,19 +189,17 @@
                                         <div class="row mb-3">
                                             <div class="col-md-6">
                                                 <label>Employee Name</label>
-                                                <input class="form-control" formControlName="employeeName" [disabled]="true">
+                                                <input class="form-control" formControlName="employeeName">
                                             </div>
 
                                             <div class="col-md-3">
                                                 <label>Start Date</label>
-                                                <input type="date" class="form-control" formControlName="startDate"
-                                                    [disabled]="true">
+                                                <input type="date" class="form-control" formControlName="startDate">
                                             </div>
 
                                             <div class="col-md-3">
                                                 <label>End Date</label>
-                                                <input type="date" class="form-control" formControlName="endDate"
-                                                    [disabled]="true">
+                                                <input type="date" class="form-control" formControlName="endDate">
                                             </div>
                                         </div>
 
@@ -209,22 +207,22 @@
                                         <div class="row mb-3">
                                             <div class="col-md-3">
                                                 <label>Leave Type</label>
-                                                <input class="form-control" formControlName="leaveType" [disabled]="true">
+                                                <input class="form-control" formControlName="leaveType">
                                             </div>
 
                                             <div class="col-md-3">
                                                 <label>Status</label>
-                                                <input class="form-control" formControlName="status" [disabled]="true">
+                                                <input class="form-control" formControlName="status">
                                             </div>
 
                                             <div class="col-md-3">
                                                 <label>No. Of Days</label>
-                                                <input class="form-control" formControlName="noOfDays" [disabled]="true">
+                                                <input class="form-control" formControlName="noOfDays">
                                             </div>
 
                                             <div class="col-md-3">
                                                 <label>Department</label>
-                                                <input class="form-control" formControlName="department" [disabled]="true">
+                                                <input class="form-control" formControlName="department">
                                             </div>
                                         </div>
 
@@ -232,9 +230,28 @@
                                         <div class="row mb-3">
                                             <div class="col-12">
                                                 <label>Reason</label>
-                                                <textarea rows="2" class="form-control" formControlName="leavereason"
-                                                    [disabled]="true"></textarea>
+                                                <textarea rows="2" class="form-control"
+                                                    formControlName="leavereason"></textarea>
                                             </div>
+                                        </div>
+
+                                        <div class="row mb-3" *ngIf="canShowCancelButton()">
+                                            <div class="col-12">
+                                                <label>Cancel Reason <span class="text-danger">*</span></label>
+                                                <textarea rows="2" class="form-control" formControlName="cancelReason"
+                                                    placeholder="Enter reason for cancel" [ngClass]="{
+                                                    'is-invalid': leaveRequestForm.get('cancelReason')?.invalid && leaveRequestForm.get('cancelReason')?.touched
+                                                }">
+                                                </textarea>
+                                            </div>
+                                        </div>
+
+                                        <div class="d-flex justify-content-end mt-3">
+                                            <!-- Show only for Pending or Approved -->
+                                            <button *ngIf="canShowCancelButton()" class="btn btn-danger"
+                                                (click)="cancelLeave()">
+                                                Cancel Leave Request
+                                            </button>
                                         </div>
 
                                     </form>

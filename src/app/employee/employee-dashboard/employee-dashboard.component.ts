@@ -56,6 +56,18 @@ export class EmployeeDashboardComponent {
   submitted = false;
   showPassword = false;
   showConfirmPassword = false;
+  bonusData: any = null;
+  attendanceRowData: any[] = [];
+  attendanceColumnDefs: ColDef[] = [];
+  attendanceGridApi: any;
+  attendancePagination: any;
+  selectedMonthAttendance: any;
+  selectedYearAttendance: any;
+  totalRows: number = 0;
+  currentPage: number = 1;
+  lastPage: number = 1;
+  pagesToShow: (number | string)[] = [];
+  paginationvalue: any;
 
   constructor(private route: ActivatedRoute, private fb: FormBuilder, private router: Router, private toastr: ToastrService, private service: HrmserviceService, private modalService: ModalServiceService,) {
     // Generate last 20 years dynamically
@@ -85,6 +97,9 @@ export class EmployeeDashboardComponent {
       this.selectedMonth = (previousMonth < 10 ? '0' : '') + previousMonth;
       this.selectedYear = currentYear;
     }
+
+    this.selectedMonthAttendance = (today.getMonth() + 1).toString().padStart(2, '0');
+    this.selectedYearAttendance = today.getFullYear();
 
     this.role = this.service.getRole();
 
@@ -172,6 +187,9 @@ export class EmployeeDashboardComponent {
       ],
       confirm_password: ['', Validators.required]
     }, { validators: this.passwordMatchValidator });
+
+    this.initializeAttendanceColumns();
+    this.fetchAttendance();
   }
 
   hasAccess(module: string, permission: string): boolean {
@@ -246,7 +264,7 @@ export class EmployeeDashboardComponent {
     this.service.post(`single/employee`, { "employe_id": id }).subscribe((res: any) => {
       this.Employee_Data = res.data;
       this.company_id = res.data.employee.company_id;
-
+      this.bonusData = res.data.bonus;
       this.getLeaveTypes();
       this.updateAttendanceChart();
     });
@@ -315,6 +333,12 @@ export class EmployeeDashboardComponent {
 
   viewAll() {
     this.router.navigate(['/authPanal/employee-report']);
+  }
+
+  viewLeave() {
+    this.router.navigate(['/authPanal/employee-report'], {
+      queryParams: { tab: 'tab2' }
+    });
   }
 
   statusButtonRenderer(params: any) {
@@ -816,5 +840,76 @@ export class EmployeeDashboardComponent {
         this.toastr.error('Server error');
       }
     });
+  }
+
+  //live attendnace
+  initializeAttendanceColumns() {
+    this.attendanceColumnDefs = [
+      { headerName: 'Date', field: 'date', flex: 1 },
+      { headerName: 'Check In', field: 'check_in', flex: 1 },
+      { headerName: 'Check Out', field: 'check_out', flex: 1 },
+      { headerName: 'Shift', field: 'shift', flex: 1 },
+      {
+        headerName: 'Status',
+        field: 'status',
+        flex: 1,
+        cellRenderer: (params: any) => {
+          const span = document.createElement('span');
+          span.innerText = params.value;
+
+          span.style.padding = '5px 10px';
+          span.style.borderRadius = '15px';
+          span.style.fontWeight = 'bold';
+
+          if (params.value === 'P') {
+            span.style.backgroundColor = '#B2FFE1';
+          } else {
+            span.style.backgroundColor = '#feffafe7';
+          }
+
+          return span;
+        }
+      }
+    ];
+  }
+
+  fetchAttendance(page: number = 1): void {
+    const payload = {
+      employee_id: this.employee_id,
+      month: Number(this.selectedMonthAttendance),
+      year: this.selectedYearAttendance,
+      page: page,
+      isexport: false
+    };
+
+    this.service.post('fetch/live/attendnace', payload).subscribe({
+      next: (res: any) => {
+        if (res.status === 'success') {
+          this.attendanceRowData = res.data;
+        } else {
+          this.attendanceRowData = [];
+          this.totalRows = 0;
+          this.pagesToShow = [];
+        }
+      },
+      error: () => {
+        this.attendanceRowData = [];
+      }
+    });
+  }
+
+  onAttendanceGridReady(params: any) {
+    this.attendanceGridApi = params.api;
+  }
+
+  onMonthYearChange() {
+    if (this.selectedMonthAttendance && this.selectedYearAttendance) {
+      this.fetchAttendance(1); // reset to page 1
+    }
+  }
+
+  onGridReady(params: { api: any }) {
+    this.gridApiActive = params.api;
+    this.fetchAttendance();
   }
 }

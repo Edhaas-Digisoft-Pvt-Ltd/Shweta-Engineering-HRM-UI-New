@@ -503,5 +503,4 @@ export class AttendanceComponent {
     }
   }
 
-
 }
