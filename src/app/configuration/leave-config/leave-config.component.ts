@@ -131,6 +131,18 @@ export class LeaveConfigComponent {
       ]]
     });
 
+    // Add this after LeaveRule is defined in constructor
+    this.LeaveRule.get('carry_forward')?.valueChanges.subscribe(value => {
+      const maxCarryControl = this.LeaveRule.get('max_carry_forward');
+      if (value === 'FALSE') {
+        maxCarryControl?.setValue(0);
+        maxCarryControl?.disable();
+      } else {
+        maxCarryControl?.setValue('');
+        maxCarryControl?.enable();
+      }
+    });
+
     this.EditLeaveRule = this.fb.group({
       leavetype: ['', [Validators.required]],             // leave_type_id
       year: [{ value: '', disabled: true }],
@@ -204,7 +216,7 @@ export class LeaveConfigComponent {
       if (res.status === 'success') {
         this.rowData = res.data.map((item: any) => ({
           leave_name: item.leave_name,
-          year_code:item.year_code,
+          year_code: item.year_code,
           leave_count: item.leave_count,
           leave_carryforwad: item.leave_carryforwad,
           max_carry_forward: item.max_carry_forward,
@@ -335,7 +347,8 @@ export class LeaveConfigComponent {
         leave_count: formData.leavenumber,
         fy_id: this.financialYearId,
         leave_carryforwad: formData.carry_forward,
-        max_carry_forward: formData.max_carry_forward
+        // getRawValue() gets value even if control is disabled
+        max_carry_forward: this.LeaveRule.getRawValue().max_carry_forward
       };
 
       this.service.post('create/leave', payload).subscribe(

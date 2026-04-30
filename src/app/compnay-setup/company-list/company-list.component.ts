@@ -39,8 +39,9 @@ export class CompanyListComponent {
     this.companyForm = this.fb.group({
       companyName: ['', [Validators.required, Validators.pattern(/^[A-Za-z\s]+$/)]],
       companyLogo: ['', Validators.required],
-      radioChoice: ['yes', Validators.required],
-      masterCompanyList: [{ value: '', disabled: true, }, Validators.required],
+      radioChoice: ['no', Validators.required],
+      masterCompanyList: ['', Validators.required],
+      // masterCompanyList: [{ value: '', disabled: true, }, Validators.required],
       IncorporationDate: ['', Validators.required],
       companyDescription: ['', [Validators.required, Validators.pattern(/^[A-Za-z0-9,\s]+$/)]],
       companyAddress: ['', [Validators.required, Validators.pattern(/^[A-Za-z0-9,\s]+$/)]],
@@ -74,14 +75,14 @@ export class CompanyListComponent {
       EditIncorporationDate: ['', Validators.required, Validators.max]
     });
 
-    this.companyForm.get('radioChoice')?.valueChanges.subscribe(value => {
-      this.textInputControl = this.companyForm.get('masterCompanyList');
-      if (value === 'yes') {
-        this.textInputControl?.disable();
-      } else {
-        this.textInputControl?.enable();
-      }
-    });
+    // this.companyForm.get('radioChoice')?.valueChanges.subscribe(value => {
+    //   this.textInputControl = this.companyForm.get('masterCompanyList');
+    //   if (value === 'yes') {
+    //     this.textInputControl?.disable();
+    //   } else {
+    //     this.textInputControl?.enable();
+    //   }
+    // });
   }
   CompanyNameList = [
     {
@@ -179,15 +180,18 @@ export class CompanyListComponent {
   getCompanyNames() {
     this.service.post('master-companies', {}).subscribe((res: any) => {
       if (res.status == "success") {
-        this.MasterCompanyNames = res.Data
+        this.MasterCompanyNames = res.Data;
+        // Auto-select first master company
+        if (this.MasterCompanyNames?.length > 0) {
+          const firstId = this.MasterCompanyNames[0].master_id;
+          this.selectedId = firstId;
+          this.companyForm.patchValue({ masterCompanyList: firstId });
+        }
       }
-    },
-      (error) => {
-        console.error('Error fetching companies:', error);
-      }
-    );
-  }
-
+    }, (error) => {
+      console.error('Error fetching companies:', error);
+    });
+}
 
   onFileSelected(event: any) {
     const file = event.target.files[0];

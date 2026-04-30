@@ -127,7 +127,7 @@
                                     </small> -->
                                 </div>
 
-                                <div class="col-lg-3 mb-3">
+                                <div class="col-lg-3">
                                     <label>Email <span class="text-danger">*</span></label>
                                     <input type="text" formControlName="email" class="form-control"
                                         [ngClass]="{'input-error': nextCheck && multiStepForm.get('email')?.invalid}"
@@ -141,7 +141,7 @@
                                         Please Enter @gmail.com
                                     </div>
                                 </div>
-                                <div class="col-lg-2 mb-3">
+                                <div class="col-lg-2">
                                     <label>contact <span class="text-danger">*</span></label>
                                     <input type="tel" maxlength="10" formControlName="contact" class="form-control"
                                         [ngClass]="{'input-error': nextCheck && multiStepForm.get('contact')?.invalid}"
@@ -160,7 +160,7 @@
                                         Please enter valid email address.
                                     </div> -->
                                 </div>
-                                <div class="col-lg mb-3">
+                                <div class="col-lg">
                                     <label>Address <span class="text-danger">*</span></label>
                                     <textarea name="" class="form-control" placeholder="Enter Address"
                                         formControlName="address" id=""
@@ -182,6 +182,62 @@
                                     </div>
                                 </div> -->
 
+
+                            </div>
+                            <div class="row">
+
+                                <!-- Password -->
+                                <div class="col-lg-3">
+                                    <label>Password <span class="text-danger">*</span></label>
+
+                                    <div class="position-relative">
+                                        <input [type]="showPassword ? 'text' : 'password'" class="form-control pe-5"
+                                            formControlName="password" placeholder="Enter password">
+
+                                        <i class="bi" [ngClass]="showPassword ? 'bi-eye-slash' : 'bi-eye'"
+                                            (click)="showPassword = !showPassword"
+                                            style="position:absolute; right:10px; top:50%; transform:translateY(-50%); cursor:pointer;">
+                                        </i>
+                                    </div>
+
+                                    <small class="text-danger"
+                                        *ngIf="multiStepForm.get('password')?.touched && multiStepForm.get('password')?.errors">
+                                        <span *ngIf="multiStepForm.get('password')?.errors?.['required']">
+                                            Password is required
+                                        </span>
+                                        <span *ngIf="multiStepForm.get('password')?.errors?.['minlength']">
+                                            Minimum 6 characters required
+                                        </span>
+                                        <span *ngIf="multiStepForm.get('password')?.errors?.['pattern']">
+                                            Must include uppercase, lowercase, number & special character
+                                        </span>
+                                    </small>
+                                </div>
+
+                                <!-- Confirm Password -->
+                                <div class="col-lg-3">
+                                    <label>Confirm Password <span class="text-danger">*</span></label>
+
+                                    <div class="position-relative">
+                                        <input [type]="showConfirmPassword ? 'text' : 'password'"
+                                            class="form-control pe-5" formControlName="confirm_password"
+                                            placeholder="Confirm password">
+
+                                        <i class="bi" [ngClass]="showConfirmPassword ? 'bi-eye-slash' : 'bi-eye'"
+                                            (click)="showConfirmPassword = !showConfirmPassword"
+                                            style="position:absolute; right:10px; top:50%; transform:translateY(-50%); cursor:pointer;">
+                                        </i>
+                                    </div>
+
+                                    <small class="text-danger"
+                                        *ngIf="multiStepForm.get('confirm_password')?.touched && multiStepForm.get('confirm_password')?.errors">
+                                        Confirm password is required
+                                    </small>
+
+                                    <small class="text-danger" *ngIf="multiStepForm.get('confirm_password')?.touched && multiStepForm.errors?.['mismatch']">
+                                        Passwords do not match
+                                    </small>
+                                </div>
 
                             </div>
                         </div>
@@ -284,8 +340,8 @@
                                     <label>Account Holder Name <span class="text-danger">*</span></label>
                                     <input type="text" formControlName="accountHolderName" class="form-control"
                                         [ngClass]="{'input-error': nextCheck && multiStepForm.get('accountHolderName')?.invalid}"
-                                        placeholder="Enter Account Holder Name" (keypress)="allowOnlyLettersAndSpace($event)"
-                                        (paste)="blockPaste($event)">
+                                        placeholder="Enter Account Holder Name"
+                                        (keypress)="allowOnlyLettersAndSpace($event)" (paste)="blockPaste($event)">
                                     <!--
                                     <small class="text-danger mb-4"
                                            *ngIf="multiStepForm.get('accountHolderName')?.invalid && multiStepForm.get('accountHolderName')?.touched">
@@ -310,8 +366,8 @@
 
                                 <div class="col-lg-4">
                                     <label>Account Number <span class="text-danger">*</span></label>
-                                    <input type="text" formControlName="accountNumber"
-                                        class="form-control" maxlength="18"
+                                    <input type="text" formControlName="accountNumber" class="form-control"
+                                        maxlength="18"
                                         [ngClass]="{'input-error': nextCheck && multiStepForm.get('accountNumber')?.invalid}"
                                         placeholder="Enter Account Number" (keypress)="allowOnlyNumbers($event)">
 
@@ -320,12 +376,12 @@
                                         <small *ngIf="multiStepForm.get('accountNumber')?.errors?.['pattern']">
                                             please enter numbers only
                                         </small>
-                                    <small *ngIf="
+                                        <small *ngIf="
                                       multiStepForm.get('accountNumber')?.errors?.['minlength'] ||
                                       multiStepForm.get('accountNumber')?.errors?.['maxlength']
                                     ">
-                                        Account number must be between 9 and 18 digits.
-                                    </small>
+                                            Account number must be between 9 and 18 digits.
+                                        </small>
                                     </div>
                                 </div>
                             </div>
@@ -335,8 +391,9 @@
                                     <label>Aadhaar Number <span class="text-danger">*</span></label>
                                     <input type="text" formControlName="aadhaarNumber" class="form-control"
                                         [ngClass]="{'input-error': nextCheck && multiStepForm.get('aadhaarNumber')?.invalid}"
-                                        placeholder="Enter Aadhaar Number" (input)="formatAadhaar($event)" (keypress)="allowOnlyNumbersAndSpace($event)">
-                                
+                                        placeholder="Enter Aadhaar Number" (input)="formatAadhaar($event)"
+                                        (keypress)="allowOnlyNumbersAndSpace($event)">
+
                                     <small class="text-danger mb-4"
                                         *ngIf="multiStepForm.get('aadhaarNumber')?.touched && multiStepForm.get('aadhaarNumber')?.invalid">
                                         <span *ngIf="multiStepForm.get('aadhaarNumber')?.errors?.['pattern']">
@@ -376,16 +433,18 @@
                                 <div class="col-lg-3">
                                     <label>Transfer Type <span class="text-danger">*</span></label><br>
                                     <div class="form-check form-check-inline">
-                                        <input class="form-check-input" type="radio" formControlName="transfer_type" id="radioDefault1" value="NEFT">
+                                        <input class="form-check-input" type="radio" formControlName="transfer_type"
+                                            id="radioDefault1" value="NEFT">
                                         <label class="form-check-label" for="radioDefault1">NEFT</label>
                                     </div>
                                     <div class="form-check form-check-inline">
-                                        <input class="form-check-input" type="radio" formControlName="transfer_type" id="radioDefault2" value="IFT">
+                                        <input class="form-check-input" type="radio" formControlName="transfer_type"
+                                            id="radioDefault2" value="IFT">
                                         <label class="form-check-label" for="radioDefault2">IFT</label>
                                     </div>
                                 </div>
 
-                                
+
                             </div>
                         </div>
 

@@ -44,6 +44,9 @@ export class CreateEmployeeComponent {
   salaryAmountChange: any;
   ctcChange: any;
   lwf: number = 0;
+  showPassword = false;
+  showConfirmPassword = false;
+  submitted = false;
 
   constructor(
     private fb: FormBuilder,
@@ -99,7 +102,7 @@ export class CreateEmployeeComponent {
         '',
         [
           Validators.required,
-           Validators.pattern(/^[0-9]+$/),
+          Validators.pattern(/^[0-9]+$/),
           Validators.minLength(9),
           Validators.maxLength(18),
         ],
@@ -137,7 +140,16 @@ export class CreateEmployeeComponent {
       pf_employee_applicable: [false],
       pf_employer_applicable: [false],
       esic_employee_applicable: [false],
-    });
+      password: [
+        '',
+        [
+          Validators.required,
+          Validators.minLength(6),
+          Validators.pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&]).+$/)
+        ]
+      ],
+      confirm_password: ['', Validators.required],
+    }, { validators: this.passwordMatchValidator });
     this.salaryStructureForm = this.fb.group({
       salaryComponents: this.fb.group({}),
     });
@@ -322,7 +334,10 @@ export class CreateEmployeeComponent {
           this.multiStepForm.controls['email'].valid &&
           this.multiStepForm.controls['contact'].valid &&
           this.multiStepForm.controls['address'].valid &&
-          this.multiStepForm.controls['gender'].valid
+          this.multiStepForm.controls['gender'].valid &&
+          this.multiStepForm.controls['password'].valid &&
+          this.multiStepForm.controls['confirm_password'].valid &&
+          !this.multiStepForm.errors?.['mismatch']
         );
 
       case 2:
@@ -330,7 +345,7 @@ export class CreateEmployeeComponent {
           this.multiStepForm.controls['role'].valid &&
           this.multiStepForm.controls['department'].valid &&
           this.multiStepForm.controls['designation'].valid &&
-          this.multiStepForm.controls['join_date'].valid 
+          this.multiStepForm.controls['join_date'].valid
           // this.multiStepForm.controls['work_pattern'].valid
         );
 
@@ -377,81 +392,104 @@ export class CreateEmployeeComponent {
 
   onSubmit() {
     if (!this.multiStepForm.valid) {
-      console.log('Invalid controls:', this.multiStepForm.controls);
-      Object.keys(this.multiStepForm.controls).forEach(key => {
-        if (this.multiStepForm.controls[key].invalid) {
-           this.toastr.error(`${key.replace(/_/g, ' ')} is invalid or required`);
-          console.log('Invalid:', key, this.multiStepForm.controls[key].errors);
-        }
-      });
-      this.multiStepForm.markAllAsTouched();
+      const form = this.multiStepForm;
+
+      //password validation
+      if (form.get('password')?.hasError('required')) {
+        this.toastr.error('Password is required');
+      }
+      else if (form.get('password')?.hasError('minlength')) {
+        this.toastr.error('Password must be at least 6 characters');
+      }
+      else if (form.get('password')?.hasError('pattern')) {
+        this.toastr.error('Password must include uppercase, lowercase, number & special character');
+      }
+      else if (form.get('confirm_password')?.hasError('required')) {
+        this.toastr.error('Confirm Password is required');
+      }
+      else if (form.errors?.['mismatch']) {
+        this.toastr.error('Passwords do not match');
+      }
+      
+      else {
+        Object.keys(this.multiStepForm.controls).forEach(key => {
+          if (this.multiStepForm.controls[key].invalid) {
+            this.toastr.error(`${key.replace(/_/g, ' ')} is invalid or required`);
+            console.log('Invalid:', key, this.multiStepForm.controls[key].errors);
+          }
+        });
+      }
+      form.markAllAsTouched();
       return;
     }
 
     // if (this.multiStepForm.valid) {
-      let company_id_value: any = this.selectedCompanyId;
+    let company_id_value: any = this.selectedCompanyId;
 
-      let current_data: any = {
+    let current_data: any = {
 
-        "company_id": this.selectedCompanyId,
-        "emp_title": this.multiStepForm.value.title,
-        "emp_name": this.multiStepForm.value.fname + " " + this.multiStepForm.value.lname,
-        "emp_email": this.multiStepForm.value.email,
-        "emp_gender": this.multiStepForm.value.gender,
-        "department_id": this.multiStepForm.value.department,
-        "designation_id": this.multiStepForm.value.designation,
-        "bank_name": this.multiStepForm.value.bankName,
-        "account_holder_name": this.multiStepForm.value.accountHolderName,
-        "account_num": this.multiStepForm.value.accountNumber,
-        "transfer_type": this.multiStepForm.value.transfer_type,
-        "aadhaar_number": this.multiStepForm.value.aadhaarNumber.replace(/\s/g, ''),
-        "pan_number": this.multiStepForm.value.panNumber,
-        "ifsc_code": this.multiStepForm.value.ifsc,
-        "doj": this.multiStepForm.value.join_date,
-        "emp_contact": this.multiStepForm.value.contact,
-        "status": "Active",
-        "emp_address": this.multiStepForm.value.address,
-        "role_id": this.multiStepForm.value.role,
+      "company_id": this.selectedCompanyId,
+      "emp_title": this.multiStepForm.value.title,
+      "emp_name": this.multiStepForm.value.fname + " " + this.multiStepForm.value.lname,
+      "emp_email": this.multiStepForm.value.email,
+      "emp_gender": this.multiStepForm.value.gender,
+      "department_id": this.multiStepForm.value.department,
+      "designation_id": this.multiStepForm.value.designation,
+      "bank_name": this.multiStepForm.value.bankName,
+      "account_holder_name": this.multiStepForm.value.accountHolderName,
+      "account_num": this.multiStepForm.value.accountNumber,
+      "transfer_type": this.multiStepForm.value.transfer_type,
+      "aadhaar_number": this.multiStepForm.value.aadhaarNumber.replace(/\s/g, ''),
+      "pan_number": this.multiStepForm.value.panNumber,
+      "ifsc_code": this.multiStepForm.value.ifsc,
+      "doj": this.multiStepForm.value.join_date,
+      "emp_contact": this.multiStepForm.value.contact,
+      "status": "Active",
+      "emp_address": this.multiStepForm.value.address,
+      "role_id": this.multiStepForm.value.role,
 
-        "basic_salary": this.multiStepForm.value.basic_salary,
-        "house_rent_allowances": this.multiStepForm.value.house_rent_allowances || 0,
-        "conveyance_allowances": this.multiStepForm.value.conveyance_allowances || 0,
-        "medical_allowances": this.multiStepForm.value.medical_allowances || 0,
-        "special_allowances": this.multiStepForm.value.special_allowances || 0,
+      "basic_salary": this.multiStepForm.value.basic_salary,
+      "house_rent_allowances": this.multiStepForm.value.house_rent_allowances || 0,
+      "conveyance_allowances": this.multiStepForm.value.conveyance_allowances || 0,
+      "medical_allowances": this.multiStepForm.value.medical_allowances || 0,
+      "special_allowances": this.multiStepForm.value.special_allowances || 0,
 
-        "annual_gross_salary": parseFloat(this.annual_gross_salary.toFixed(2)),
-        "monthly_gross_salary": parseFloat(this.monthly_gross_salary.toFixed(2)),
+      "annual_gross_salary": parseFloat(this.annual_gross_salary.toFixed(2)),
+      "monthly_gross_salary": parseFloat(this.monthly_gross_salary.toFixed(2)),
 
-        "pf_employee_applicable": this.multiStepForm.value.pf_employee_applicable || false,
-        "pf_employer_applicable": this.multiStepForm.value.pf_employer_applicable || false,
-        "esic_employee_applicable": this.multiStepForm.value.esic_employee_applicable || false,
+      "pf_employee_applicable": this.multiStepForm.value.pf_employee_applicable || false,
+      "pf_employer_applicable": this.multiStepForm.value.pf_employer_applicable || false,
+      "esic_employee_applicable": this.multiStepForm.value.esic_employee_applicable || false,
 
-        // "department_name": this.multiStepForm.value.department,
-        // "designation_name": this.multiStepForm.value.designation
-      }
+      // "department_name": this.multiStepForm.value.department,
+      // "designation_name": this.multiStepForm.value.designation
 
-      console.log('Form Submitted:', this.multiStepForm.value);
+      "password": this.multiStepForm.value.password,
+    }
 
-      this.service.post("create/employee", current_data).subscribe({
-        next: (res: any) => {
-          if (res.status === 'success') {
-            this.toastr.success('Successfully Submitted!');
-            this.multiStepForm.reset();
-            this.multiStepForm.patchValue({
-              department: null,
-              designation: null
-            });
-            this.currentStep = 1;
-            this.salaryAmount = 0;
-            this.annual_gross_salary = 0;
-          } else {
-            this.toastr.error('Submission failed!');
-          }
-        },
-        error: (err) => {
-           this.toastr.error(err.error?.data || err.error?.message || 'Something went wrong!');
+    console.log('Form Submitted:', this.multiStepForm.value);
+
+    this.service.post("create/employee", current_data).subscribe({
+      next: (res: any) => {
+        if (res.status === 'success') {
+          this.toastr.success('Successfully Submitted!');
+          this.multiStepForm.reset();
+          this.submitted = false;
+          this.multiStepForm.patchValue({
+            department: null,
+            designation: null
+          });
+          this.currentStep = 1;
+          this.salaryAmount = 0;
+          this.annual_gross_salary = 0;
+        } else {
+          this.toastr.error('Submission failed!');
         }
-      });
+      },
+      error: (err) => {
+        this.toastr.error(err.error?.data || err.error?.message || 'Something went wrong!');
+      }
+    });
 
     //   this.multiStepForm.reset();
     //   this.currentStep = 1;
@@ -502,7 +540,7 @@ export class CreateEmployeeComponent {
   //   control.setValue(num ? num.toLocaleString('en-IN') : '', { emitEvent: false });
   // }
 
-  
+
   allowOnlyLetters(event: KeyboardEvent) {
     const char = String.fromCharCode(event.keyCode);
     const pattern = /^[A-Za-z]+$/;
@@ -541,7 +579,7 @@ export class CreateEmployeeComponent {
 
   allowNumbersCharacters(event: KeyboardEvent) {
     const char = event.key;
-    const pattern = /^[A-Za-z0-9]$/; 
+    const pattern = /^[A-Za-z0-9]$/;
 
     if (!pattern.test(char)) {
       event.preventDefault();
@@ -609,4 +647,11 @@ export class CreateEmployeeComponent {
     this.multiStepForm.get('ifsc')?.setValue(value, { emitEvent: false });
   }
 
+  //password
+  passwordMatchValidator(group: FormGroup) {
+    const pass = group.get('password')?.value;
+    const confirm = group.get('confirm_password')?.value;
+
+    return pass === confirm ? null : { mismatch: true };
+  }
 }
