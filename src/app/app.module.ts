@@ -71,6 +71,7 @@ import { UpdateEmployeeComponent } from './employee/update-employee/update-emplo
 import { InsufficientLeavesComponent } from './leave/insufficient-leaves/insufficient-leaves.component';
 import { AbsenteesComponent } from './leave/absentees/absentees.component';
 import { HolidayCalendarComponent } from './configuration/holiday-calendar/holiday-calendar.component';
+import { LiveAttendanceComponent } from './attendance/live-attendance/live-attendance.component';
 // FullCalendarModule.registerPlugins([dayGridPlugin]);
 
 //onkar
@@ -135,6 +136,7 @@ import { HolidayCalendarComponent } from './configuration/holiday-calendar/holid
     InsufficientLeavesComponent,
     AbsenteesComponent,
     HolidayCalendarComponent,
+    LiveAttendanceComponent,
 
   ],
   imports: [

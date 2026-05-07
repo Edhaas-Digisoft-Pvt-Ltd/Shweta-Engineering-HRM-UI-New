@@ -97,3 +97,43 @@ label{
         padding: 9px 15px !important;
     }
 }
+
+/* toggle for active inactive */
+.toggle-switch {
+  width: 64px;
+  height: 32px;
+  background-color: #e74c3c;
+  border-radius: 50px;
+  position: relative;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  border: 2px solid #c0392b;
+  display: flex;
+  align-items: center;
+  padding: 2px;
+  justify-content: flex-start;  /* knob on left = Inactive */
+}
+
+.toggle-switch.active {
+  background-color: #2ecc71;
+  border-color: #27ae60;
+  justify-content: flex-end;    /* knob on right = Active */
+}
+
+.toggle-knob {
+  width: 26px;
+  height: 26px;
+  background: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+  transition: all 0.3s ease;
+}
+
+.toggle-icon {
+  font-size: 14px;
+  font-weight: bold;
+  line-height: 1;
+}

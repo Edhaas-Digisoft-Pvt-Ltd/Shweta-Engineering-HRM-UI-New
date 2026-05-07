@@ -73,36 +73,16 @@
                                 </div>
 
                                 <div class="col-lg">
-
-                                    <label>First Name <span class="text-danger">*</span></label>
-
-                                    <input type="text" formControlName="fname" class="form-control"
-                                        [ngClass]="{'input-error': nextCheck && multiStepForm.get('fname')?.invalid}"
-                                        placeholder="Enter First Name" required (keypress)="allowOnlyLetters($event)"
-                                        (paste)="blockPaste($event)">
-                                    <!-- <div *ngIf="multiStepForm.controls['fname'].invalid && multiStepForm.controls['fname'].touched"
-                                        class="text-danger">
-                                        Please enter first name.
-                                    </div> -->
-
-                                </div>
-                                <div class="col-lg">
-                                    <div class="mb-3">
-                                        <label>Last Name <span class="text-danger">*</span></label>
-                                        <input type="text" formControlName="lname" class="form-control"
-                                            [ngClass]="{'input-error': nextCheck && multiStepForm.get('lname')?.invalid}"
-                                            placeholder="Enter last name" (keypress)="allowOnlyLetters($event)"
-                                            (paste)="blockPaste($event)">
-                                        <!-- <div *ngIf="multiStepForm.controls['lname'].invalid && multiStepForm.controls['lname'].touched"
-                                            class="text-danger">
-                                            Please enter last name.
-                                        </div> -->
-                                    </div>
+                                    <label>Employee Name <span class="text-danger">*</span></label>
+                                    <input type="text" formControlName="emp_name" class="form-control"
+                                        [ngClass]="{'input-error': nextCheck && multiStepForm.get('emp_name')?.invalid}"
+                                        placeholder="Enter Full Name" (keypress)="allowOnlyLettersAndSpace($event)" (blur)="cleanEmployeeName()">
+                                    <small class="text-danger"
+                                        *ngIf="multiStepForm.get('emp_name')?.touched && multiStepForm.get('emp_name')?.invalid">
+                                        Please enter a valid full name (letters only).
+                                    </small>
                                 </div>
 
-
-                            </div>
-                            <div class="row">
                                 <div class="col-lg-2">
                                     <label>Gender <span class="text-danger">*</span></label>
                                     <div class="d-flex gap-3">
@@ -127,6 +107,8 @@
                                     </small> -->
                                 </div>
 
+                            </div>
+                            <div class="row mt-2">
                                 <div class="col-lg-3">
                                     <label>Email <span class="text-danger">*</span></label>
                                     <input type="text" formControlName="email" class="form-control"
@@ -141,7 +123,7 @@
                                         Please Enter @gmail.com
                                     </div>
                                 </div>
-                                <div class="col-lg-2">
+                                <div class="col-lg-3">
                                     <label>contact <span class="text-danger">*</span></label>
                                     <input type="tel" maxlength="10" formControlName="contact" class="form-control"
                                         [ngClass]="{'input-error': nextCheck && multiStepForm.get('contact')?.invalid}"
@@ -234,7 +216,8 @@
                                         Confirm password is required
                                     </small>
 
-                                    <small class="text-danger" *ngIf="multiStepForm.get('confirm_password')?.touched && multiStepForm.errors?.['mismatch']">
+                                    <small class="text-danger"
+                                        *ngIf="multiStepForm.get('confirm_password')?.touched && multiStepForm.errors?.['mismatch']">
                                         Passwords do not match
                                     </small>
                                 </div>

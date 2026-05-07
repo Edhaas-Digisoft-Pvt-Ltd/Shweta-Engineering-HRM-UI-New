@@ -1,211 +1,231 @@
 <div class="right-panel">
-  <div class="loader-overlay" *ngIf="isLoading">
-    <app-loader></app-loader>
-  </div>
-
-<div class="container mt-4" [class.loading]="isLoading">
-
-    <div class="row gx-3  ">
-        <div class="col-12 ">
-            <h3 class="fw-bold">Update Employee</h3>
-            <h6 class="mt-3 "> <a [routerLink]="['/authPanal/Employee']"
-                    style="color:black; text-decoration: none;">Employee</a> / <span>Update Employee</span> </h6>
-        </div>
-
+    <div class="loader-overlay" *ngIf="isLoading">
+        <app-loader></app-loader>
     </div>
 
-    <div class="row mt-4">
-        <div class="card border-0">
-            <div class="card-header  border-0 bg-white p-0">
-                <ul class="nav nav-tabs">
-                    <li class="nav-item">
-                        <a class="nav-link xyz" [class.active]="currentStep === 1"> Personal Info</a>
-                    </li>
-                    <span class="abc"></span>
-                    <li class="nav-item">
-                        <a class="nav-link xyz" [class.active]="currentStep === 2"> Professional Info</a>
-                    </li>
-                    <span class="abc"></span>
-                    <li class="nav-item">
-                        <a class="nav-link xyz" [class.active]="currentStep === 3"> Bank Details</a>
-                    </li>
-                    <span class="abc"></span>
-                    <li class="nav-item ">
-                        <a class="nav-link xyz" [class.active]="currentStep === 4">Statutory Info</a>
-                    </li>
-                    <span class="abc"></span>
-                    <li class="nav-item active">
-                        <a class="nav-link xyz" [class.active]="currentStep === 5"> Salary Structure</a>
-                    </li>
-                </ul>
+    <div class="container mt-4" [class.loading]="isLoading">
+
+        <div class="row gx-3  ">
+            <div class="col-12 ">
+                <h3 class="fw-bold">Update Employee</h3>
+                <h6 class="mt-3 "> <i class="bi bi-arrow-left-circle" style="color: #3674B5;"></i><a
+                        [routerLink]="['/authPanal/Employee']"
+                        style="color:#3674B5; text-decoration: none;">Employee</a> / <span>Update Employee</span> </h6>
             </div>
 
-            <div class="card-body  border-1 mt-3">
-                <div class="row" *ngIf="currentStep !== 4">
-                    <div class="col mb-3">
-                        <span class="text-danger ">* </span>
-                        Please Fill All Required Fields.
-                    </div>
+        </div>
+
+        <div class="row mt-4">
+            <div class="card border-0">
+                <div class="card-header  border-0 bg-white p-0">
+                    <ul class="nav nav-tabs">
+                        <li class="nav-item">
+                            <a class="nav-link xyz" [class.active]="currentStep === 1"> Personal Info</a>
+                        </li>
+                        <span class="abc"></span>
+                        <li class="nav-item">
+                            <a class="nav-link xyz" [class.active]="currentStep === 2"> Professional Info</a>
+                        </li>
+                        <span class="abc"></span>
+                        <li class="nav-item">
+                            <a class="nav-link xyz" [class.active]="currentStep === 3"> Bank Details</a>
+                        </li>
+                        <span class="abc"></span>
+                        <li class="nav-item ">
+                            <a class="nav-link xyz" [class.active]="currentStep === 4">Statutory Info</a>
+                        </li>
+                        <span class="abc"></span>
+                        <li class="nav-item active">
+                            <a class="nav-link xyz" [class.active]="currentStep === 5"> Salary Structure</a>
+                        </li>
+                    </ul>
                 </div>
-                <form [formGroup]="multiStepForm" (ngSubmit)="onSubmit()">
 
-                    <!-- STEP 1: Personal Info -->
-                    <div *ngIf="currentStep === 1">
-                        <div class="content border" style="border-radius: 10px;padding: 30px;">
-
-                            <div class="row">
-
-                                <div class="col-lg-2">
-                                    <label>Title
-                                        <span class="text-danger">*</span>
-                                    </label>
-                                    <select id="roleSelect" formControlName="title" class="form-select me-2"
-                                        [ngClass]="{'input-error': nextCheck && multiStepForm.get('title')?.invalid}">
-                                        <option value="" selected>Select Title</option>
-                                        <option value="Mr">Mr</option>
-                                        <option value="Mrs">Mrs</option>
-                                        <option value="Miss">Miss</option>
-                                    </select>
-                                </div>
-
-                                <div class="col-lg">
-
-                                    <label>First Name <span class="text-danger">*</span></label>
-
-                                    <input type="text" formControlName="fname" class="form-control"
-                                        [ngClass]="{'input-error': nextCheck && multiStepForm.get('fname')?.invalid}"
-                                        placeholder="Enter First Name" required (keypress)="allowOnlyLetters($event)"
-                                        (paste)="blockPaste($event)">
-                                </div>
-                                <div class="col-lg">
-                                    <div class="mb-3">
-                                        <label>Last Name <span class="text-danger">*</span></label>
-                                        <input type="text" formControlName="lname" class="form-control"
-                                            [ngClass]="{'input-error': nextCheck && multiStepForm.get('lname')?.invalid}"
-                                            placeholder="Enter last name" (keypress)="allowOnlyLetters($event)"
-                                            (paste)="blockPaste($event)">
-                                    </div>
-                                </div>
-
-                            </div>
-                            <div class="row">
-                                <div class="col-lg-2">
-                                    <label>Gender <span class="text-danger">*</span></label>
-                                    <div class="d-flex gap-3">
-                                        <div class="form-check">
-                                            <input class="form-check-input" type="radio" formControlName="gender"
-                                                value="Male" id="flexRadioDefault1">
-                                            <label class="form-check-label" for="flexRadioDefault1">
-                                                Male
-                                            </label>
-                                        </div>
-                                        <div class="form-check">
-                                            <input class="form-check-input" type="radio" formControlName="gender"
-                                                value="Female" id="flexRadioDefault2">
-                                            <label class="form-check-label" for="flexRadioDefault2">
-                                                Female
-                                            </label>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="col-lg-3 mb-3">
-                                    <label>Email <span class="text-danger">*</span></label>
-                                    <input type="text" formControlName="email" class="form-control"
-                                        [ngClass]="{'input-error': nextCheck && multiStepForm.get('email')?.invalid}"
-                                        placeholder="Enter Email" required>
-                                    <div *ngIf="multiStepForm.get('email')?.touched && multiStepForm.get('email')?.errors?.['notGmail']"
-                                        style="color: red; text-transform: none;">
-                                        Please Enter @gmail.com
-                                    </div>
-                                </div>
-                                <div class="col-lg-2 mb-3">
-                                    <label>contact <span class="text-danger">*</span></label>
-                                    <input type="tel" maxlength="10" formControlName="contact" class="form-control"
-                                        [ngClass]="{'input-error': nextCheck && multiStepForm.get('contact')?.invalid}"
-                                        placeholder="Enter Contact" required (keypress)="allowOnlyNumbers($event)">
-                                    <div *ngIf="multiStepForm.get('contact')?.invalid && multiStepForm.get('contact')?.touched"
-                                        style="color: red; text-transform: none;">
-                                        <small *ngIf="multiStepForm.get('contact')?.errors?.['pattern']">
-                                            please numbers only
-                                        </small>
-                                        <small *ngIf="multiStepForm.get('contact')?.errors?.['minlength']">
-                                            maximum length is 10 digits
-                                        </small>
-                                    </div>
-                                </div>
-                                <div class="col-lg mb-3">
-                                    <label>Address <span class="text-danger">*</span></label>
-                                    <textarea name="" class="form-control" placeholder="Enter Address"
-                                        formControlName="address" id=""
-                                        [ngClass]="{'input-error': nextCheck && multiStepForm.get('address')?.invalid}"
-                                        (keypress)="allowOnlyLetters($event)" (paste)="blockPaste($event)"></textarea>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="d-flex justify-content-center mt-4">
-                            <button type="button " class="btn next-btn rounded-2 " (click)="nextStep()"> Next
-                            </button>
+                <div class="card-body  border-1 mt-3">
+                    <div class="row" *ngIf="currentStep !== 4">
+                        <div class="col mb-3">
+                            <span class="text-danger ">* </span>
+                            Please Fill All Required Fields.
                         </div>
                     </div>
+                    <form [formGroup]="multiStepForm" (ngSubmit)="onSubmit()">
 
-                    <!-- STEP 2: Professional Info -->
-                    <div *ngIf="currentStep === 2">
-                        <div class="content border" style="border-radius: 10px;padding: 30px;">
-                            <div class="row ">
+                        <!-- STEP 1: Personal Info -->
+                        <div *ngIf="currentStep === 1">
+                            <div class="content border" style="border-radius: 10px;padding: 30px;">
 
-                                <div class="col-lg-4">
-                                    <label class="fw-bold">Select Company </label>
-                                    <br>
-                                    <select class="form-select" formControlName="company"
-                                        (click)="onCompanyChange($event)"
-                                        [ngClass]="{'input-error': nextCheck && multiStepForm.get('company')?.invalid}">
-                                        <option value="" selected disabled>Select Company</option>
-                                        <option *ngFor="let item of CompanyNames" [value]="item.company_id">
-                                            {{ item.company_name }}
-                                        </option>
-                                    </select>
-                                </div>
-                                <div class="col-lg-4">
-                                    <label class="fw-bold">Select Role <span class="text-danger">*</span></label>
-                                    <br>
-                                    <select class="form-select" formControlName="role"
-                                        [ngClass]="{'input-error': nextCheck && multiStepForm.get('role')?.invalid}">
-                                        <option value="" selected disabled>Select Role</option>
-                                        <option *ngFor="let item of roles" [value]="item.role_id">
-                                            {{ item.role_name }}
-                                        </option>
-                                    </select>
-                                </div>
-                                <div class="col-lg-4">
-                                    <label>Date Of Joinning</label>
-                                    <input type="date" formControlName="join_date" class="form-control"
-                                        [ngClass]="{'input-error': nextCheck && multiStepForm.get('join_date')?.invalid}">
-                                </div>
+                                <div class="row">
 
-                                <div class="col-lg-4 my-3">
-                                    <label>Department <span class="text-danger">*</span></label>
-                                    <select id="roleSelect" formControlName="department" class="form-select"
-                                        [ngClass]="{'input-error': nextCheck && multiStepForm.get('department')?.invalid}">
-                                        <option value="" selected disabled>Select Department</option>
-                                        <option *ngFor="let dept of departmentNames" [value]="dept.department_id">
-                                            {{ dept.department_name }}
-                                        </option>
-                                    </select>
-                                </div>
+                                    <div class="col-lg-2">
+                                        <label>Title
+                                            <span class="text-danger">*</span>
+                                        </label>
+                                        <select id="roleSelect" formControlName="title" class="form-select me-2"
+                                            [ngClass]="{'input-error': nextCheck && multiStepForm.get('title')?.invalid}">
+                                            <option value="" selected>Select Title</option>
+                                            <option value="Mr">Mr</option>
+                                            <option value="Mrs">Mrs</option>
+                                            <option value="Miss">Miss</option>
+                                        </select>
+                                    </div>
 
-                                <div class="col-lg-4 my-3">
-                                    <label>Designation <span class="text-danger">*</span></label>
-                                    <select id="roleSelect" formControlName="designation" class="form-select"
-                                        [ngClass]="{'input-error': nextCheck && multiStepForm.get('designation')?.invalid}">
-                                        <option value="" selected disabled>Select Designation</option>
-                                        <option *ngFor="let desig of designationNames" [value]="desig.designation_id">
-                                            {{ desig.designation_name }}
-                                        </option>
-                                    </select>
-                                </div>
+                                    <div class="col-lg">
+                                        <label>Employee Name <span class="text-danger">*</span></label>
+                                        <input type="text" formControlName="emp_name" class="form-control"
+                                            [ngClass]="{'input-error': nextCheck && multiStepForm.get('emp_name')?.invalid}"
+                                            placeholder="Enter Full Name" (keypress)="allowOnlyLettersAndSpace($event)" (blur)="cleanEmployeeName()">
+                                        <small class="text-danger"
+                                            *ngIf="multiStepForm.get('emp_name')?.touched && multiStepForm.get('emp_name')?.invalid">
+                                            Please enter a valid full name (letters only).
+                                        </small>
+                                    </div>
 
-                                <!-- <div class="col-lg-4 my-3">
+                                    <div class="col-lg-2">
+                                        <label>Status <span class="text-danger">*</span></label>
+                                        <div class="d-flex align-items-center gap-2 mt-1">
+
+                                            <!-- Toggle Switch -->
+                                            <div class="toggle-switch"
+                                                [class.active]="multiStepForm.get('status')?.value === 'Active'"
+                                                (click)="toggleStatus()">
+                                                <div class="toggle-knob">
+                                                    <span *ngIf="multiStepForm.get('status')?.value === 'Active'"
+                                                        class="toggle-icon text-success">✓</span>
+                                                    <span *ngIf="multiStepForm.get('status')?.value !== 'Active'"
+                                                        class="toggle-icon text-danger">✕</span>
+                                                </div>
+                                            </div>
+
+                                            <!-- Status Label -->
+                                            <span class="fw-semibold"
+                                                [ngClass]="multiStepForm.get('status')?.value === 'Active' ? 'text-success' : 'text-danger'">
+                                                {{ multiStepForm.get('status')?.value }}
+                                            </span>
+
+                                        </div>
+                                    </div>
+
+                                </div>
+                                <div class="row">
+                                    <div class="col-lg-2">
+                                        <label>Gender <span class="text-danger">*</span></label>
+                                        <div class="d-flex gap-3">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="radio" formControlName="gender"
+                                                    value="Male" id="flexRadioDefault1">
+                                                <label class="form-check-label" for="flexRadioDefault1">
+                                                    Male
+                                                </label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="radio" formControlName="gender"
+                                                    value="Female" id="flexRadioDefault2">
+                                                <label class="form-check-label" for="flexRadioDefault2">
+                                                    Female
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-lg-3 mb-3">
+                                        <label>Email <span class="text-danger">*</span></label>
+                                        <input type="text" formControlName="email" class="form-control"
+                                            [ngClass]="{'input-error': nextCheck && multiStepForm.get('email')?.invalid}"
+                                            placeholder="Enter Email" required>
+                                        <div *ngIf="multiStepForm.get('email')?.touched && multiStepForm.get('email')?.errors?.['notGmail']"
+                                            style="color: red; text-transform: none;">
+                                            Please Enter @gmail.com
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-2 mb-3">
+                                        <label>contact <span class="text-danger">*</span></label>
+                                        <input type="tel" maxlength="10" formControlName="contact" class="form-control"
+                                            [ngClass]="{'input-error': nextCheck && multiStepForm.get('contact')?.invalid}"
+                                            placeholder="Enter Contact" required (keypress)="allowOnlyNumbers($event)">
+                                        <div *ngIf="multiStepForm.get('contact')?.invalid && multiStepForm.get('contact')?.touched"
+                                            style="color: red; text-transform: none;">
+                                            <small *ngIf="multiStepForm.get('contact')?.errors?.['pattern']">
+                                                please numbers only
+                                            </small>
+                                            <small *ngIf="multiStepForm.get('contact')?.errors?.['minlength']">
+                                                maximum length is 10 digits
+                                            </small>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg mb-3">
+                                        <label>Address <span class="text-danger">*</span></label>
+                                        <textarea name="" class="form-control" placeholder="Enter Address"
+                                            formControlName="address" id=""
+                                            [ngClass]="{'input-error': nextCheck && multiStepForm.get('address')?.invalid}"
+                                            (keypress)="allowOnlyLetters($event)"
+                                            (paste)="blockPaste($event)"></textarea>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="d-flex justify-content-center mt-4">
+                                <button type="button " class="btn next-btn rounded-2 " (click)="nextStep()"> Next
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- STEP 2: Professional Info -->
+                        <div *ngIf="currentStep === 2">
+                            <div class="content border" style="border-radius: 10px;padding: 30px;">
+                                <div class="row ">
+
+                                    <div class="col-lg-4">
+                                        <label class="fw-bold">Select Company </label>
+                                        <br>
+                                        <select class="form-select" formControlName="company"
+                                            (click)="onCompanyChange($event)"
+                                            [ngClass]="{'input-error': nextCheck && multiStepForm.get('company')?.invalid}">
+                                            <option value="" selected disabled>Select Company</option>
+                                            <option *ngFor="let item of CompanyNames" [value]="item.company_id">
+                                                {{ item.company_name }}
+                                            </option>
+                                        </select>
+                                    </div>
+                                    <div class="col-lg-4">
+                                        <label class="fw-bold">Select Role <span class="text-danger">*</span></label>
+                                        <br>
+                                        <select class="form-select" formControlName="role"
+                                            [ngClass]="{'input-error': nextCheck && multiStepForm.get('role')?.invalid}">
+                                            <option value="" selected disabled>Select Role</option>
+                                            <option *ngFor="let item of roles" [value]="item.role_id">
+                                                {{ item.role_name }}
+                                            </option>
+                                        </select>
+                                    </div>
+                                    <div class="col-lg-4">
+                                        <label>Date Of Joinning</label>
+                                        <input type="date" formControlName="join_date" class="form-control"
+                                            [ngClass]="{'input-error': nextCheck && multiStepForm.get('join_date')?.invalid}">
+                                    </div>
+
+                                    <div class="col-lg-4 my-3">
+                                        <label>Department <span class="text-danger">*</span></label>
+                                        <select id="roleSelect" formControlName="department" class="form-select"
+                                            [ngClass]="{'input-error': nextCheck && multiStepForm.get('department')?.invalid}">
+                                            <option value="" selected disabled>Select Department</option>
+                                            <option *ngFor="let dept of departmentNames" [value]="dept.department_id">
+                                                {{ dept.department_name }}
+                                            </option>
+                                        </select>
+                                    </div>
+
+                                    <div class="col-lg-4 my-3">
+                                        <label>Designation <span class="text-danger">*</span></label>
+                                        <select id="roleSelect" formControlName="designation" class="form-select"
+                                            [ngClass]="{'input-error': nextCheck && multiStepForm.get('designation')?.invalid}">
+                                            <option value="" selected disabled>Select Designation</option>
+                                            <option *ngFor="let desig of designationNames"
+                                                [value]="desig.designation_id">
+                                                {{ desig.designation_name }}
+                                            </option>
+                                        </select>
+                                    </div>
+
+                                    <!-- <div class="col-lg-4 my-3">
                                     <label>Working Pattern</label>
                                     <select id="roleSelect" formControlName="work_pattern" class="form-select"
                                         [ngClass]="{'input-error': nextCheck && multiStepForm.get('work_pattern')?.invalid}">
@@ -215,274 +235,280 @@
                                         <option value="7">7 Days Week</option>
                                     </select>
                                 </div> -->
+                                </div>
+                            </div>
+
+                            <div class="d-flex justify-content-center mt-4">
+                                <button type="button" class="btn previous-btn me-2"
+                                    (click)="previousStep()">Previous</button>
+                                <button type="button" class="btn next-btn rounded-2" (click)="nextStep()">Next</button>
                             </div>
                         </div>
 
-                        <div class="d-flex justify-content-center mt-4">
-                            <button type="button" class="btn previous-btn me-2"
-                                (click)="previousStep()">Previous</button>
-                            <button type="button" class="btn next-btn rounded-2" (click)="nextStep()">Next</button>
-                        </div>
-                    </div>
+                        <!--  STEP 3: Bank Details  -->
+                        <div *ngIf="currentStep === 3">
+                            <div class="content border" style="border-radius: 10px;padding: 30px;">
+                                <div class="row">
+                                    <div class="col-lg-4">
+                                        <label>Account Holder Name <span class="text-danger">*</span></label>
+                                        <input type="text" formControlName="account_holder_name" class="form-control"
+                                            [ngClass]="{'input-error': nextCheck && multiStepForm.get('account_holder_name')?.invalid}"
+                                            placeholder="Enter Account Holder Name"
+                                            (keypress)="allowOnlyLettersAndSpace($event)" (paste)="blockPaste($event)">
+                                    </div>
 
-                    <!--  STEP 3: Bank Details  -->
-                    <div *ngIf="currentStep === 3">
-                        <div class="content border" style="border-radius: 10px;padding: 30px;">
-                            <div class="row">
-                                <div class="col-lg-4">
-                                    <label>Account Holder Name <span class="text-danger">*</span></label>
-                                    <input type="text" formControlName="account_holder_name" class="form-control"
-                                        [ngClass]="{'input-error': nextCheck && multiStepForm.get('account_holder_name')?.invalid}"
-                                        placeholder="Enter Account Holder Name" (keypress)="allowOnlyLettersAndSpace($event)"
-                                        (paste)="blockPaste($event)">
-                                </div>
+                                    <div class="col-lg-4">
+                                        <label>Bank Name <span class="text-danger">*</span></label>
+                                        <input type="text" formControlName="bankName" class="form-control"
+                                            [ngClass]="{'input-error': nextCheck && multiStepForm.get('bankName')?.invalid}"
+                                            placeholder="Enter Bank Name" (keypress)="allowOnlyLettersAndSpace($event)"
+                                            (paste)="blockPaste($event)">
+                                    </div>
 
-                                <div class="col-lg-4">
-                                    <label>Bank Name <span class="text-danger">*</span></label>
-                                    <input type="text" formControlName="bankName" class="form-control"
-                                        [ngClass]="{'input-error': nextCheck && multiStepForm.get('bankName')?.invalid}"
-                                        placeholder="Enter Bank Name" (keypress)="allowOnlyLettersAndSpace($event)"
-                                        (paste)="blockPaste($event)">
-                                </div>
+                                    <div class="col-lg-4">
+                                        <label>Account Number <span class="text-danger">*</span></label>
+                                        <input type="text" formControlName="accountNumber" class="form-control"
+                                            maxlength="18"
+                                            [ngClass]="{'input-error': nextCheck && multiStepForm.get('accountNumber')?.invalid}"
+                                            placeholder="Enter Account Number" (keypress)="allowOnlyNumbers($event)">
 
-                                <div class="col-lg-4">
-                                    <label>Account Number <span class="text-danger">*</span></label>
-                                    <input type="text" formControlName="accountNumber"
-                                        class="form-control" maxlength="18"
-                                        [ngClass]="{'input-error': nextCheck && multiStepForm.get('accountNumber')?.invalid}"
-                                        placeholder="Enter Account Number" (keypress)="allowOnlyNumbers($event)">
-
-                                    <div *ngIf="multiStepForm.get('accountNumber')?.invalid && multiStepForm.get('accountNumber')"
-                                        style="color: red; text-transform: none;">
-                                        <small *ngIf="multiStepForm.get('accountNumber')?.errors?.['pattern']">
-                                            please enter numbers only
-                                        </small>
-                                    <small *ngIf="
+                                        <div *ngIf="multiStepForm.get('accountNumber')?.invalid && multiStepForm.get('accountNumber')"
+                                            style="color: red; text-transform: none;">
+                                            <small *ngIf="multiStepForm.get('accountNumber')?.errors?.['pattern']">
+                                                please enter numbers only
+                                            </small>
+                                            <small *ngIf="
                                       multiStepForm.get('accountNumber')?.errors?.['minlength'] ||
                                       multiStepForm.get('accountNumber')?.errors?.['maxlength']
                                     ">
-                                        Account number must be between 9 and 18 digits.
-                                    </small>
+                                                Account number must be between 9 and 18 digits.
+                                            </small>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row my-3">
+                                    <div class="col-lg-3">
+                                        <label>Aadhaar Number <span class="text-danger">*</span></label>
+                                        <input type="text" formControlName="aadhaarNumber" class="form-control"
+                                            [ngClass]="{'input-error': nextCheck && multiStepForm.get('aadhaarNumber')?.invalid}"
+                                            placeholder="Enter Aadhaar Number" (input)="formatAadhaar($event)"
+                                            (keypress)="allowOnlyNumbersAndSpace($event)">
+
+                                        <small class="text-danger mb-4"
+                                            *ngIf="multiStepForm.get('aadhaarNumber')?.touched && multiStepForm.get('aadhaarNumber')?.invalid">
+                                            <span *ngIf="multiStepForm.get('aadhaarNumber')?.errors?.['pattern']">
+                                                Enter a valid Aadhaar number.
+                                            </span>
+                                        </small>
+                                    </div>
+
+                                    <div class="col-lg-3 ">
+                                        <label>PAN Number <span class="text-danger">*</span></label>
+                                        <input type="text" formControlName="panNumber" class="form-control"
+                                            [ngClass]="{'input-error': nextCheck && multiStepForm.get('panNumber')?.invalid}"
+                                            placeholder="Enter Pan Number" (input)="formatPAN($event)"
+                                            (keypress)="allowNumbersCharacters($event)">
+                                        <small class="text-danger mb-4"
+                                            *ngIf="multiStepForm.get('panNumber')?.touched && multiStepForm.get('panNumber')?.invalid">
+                                            <span *ngIf="multiStepForm.get('panNumber')?.errors?.['pattern']">
+                                                Enter a valid PAN number.
+                                            </span>
+                                        </small>
+                                    </div>
+
+                                    <div class="col-lg-3">
+                                        <label>IFSC <span class="text-danger">*</span></label>
+                                        <input type="text" formControlName="ifsc" class="form-control"
+                                            [ngClass]="{'input-error': nextCheck && multiStepForm.get('ifsc')?.invalid}"
+                                            placeholder="Enter IFSC Code" (input)="formatIFSC($event)"
+                                            (keypress)="allowNumbersCharacters($event)">
+                                    </div>
+
+                                    <div class="col-lg-3">
+                                        <label>Transfer Type <span class="text-danger">*</span></label><br>
+                                        <div class="form-check form-check-inline">
+                                            <input class="form-check-input" type="radio" formControlName="transfer_type"
+                                                id="radioDefault1" value="NEFT">
+                                            <label class="form-check-label" for="radioDefault1">NEFT</label>
+                                        </div>
+                                        <div class="form-check form-check-inline">
+                                            <input class="form-check-input" type="radio" formControlName="transfer_type"
+                                                id="radioDefault2" value="IFT">
+                                            <label class="form-check-label" for="radioDefault2">IFT</label>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
 
-                            <div class="row my-3">
-                                <div class="col-lg-3">
-                                    <label>Aadhaar Number <span class="text-danger">*</span></label>
-                                    <input type="text" formControlName="aadhaarNumber" class="form-control"
-                                        [ngClass]="{'input-error': nextCheck && multiStepForm.get('aadhaarNumber')?.invalid}"
-                                        placeholder="Enter Aadhaar Number" (input)="formatAadhaar($event)" (keypress)="allowOnlyNumbersAndSpace($event)">
-                                
-                                    <small class="text-danger mb-4"
-                                        *ngIf="multiStepForm.get('aadhaarNumber')?.touched && multiStepForm.get('aadhaarNumber')?.invalid">
-                                        <span *ngIf="multiStepForm.get('aadhaarNumber')?.errors?.['pattern']">
-                                            Enter a valid Aadhaar number.
-                                        </span>
-                                    </small>
-                                </div>
-
-                                <div class="col-lg-3 ">
-                                    <label>PAN Number <span class="text-danger">*</span></label>
-                                    <input type="text" formControlName="panNumber" class="form-control"
-                                        [ngClass]="{'input-error': nextCheck && multiStepForm.get('panNumber')?.invalid}"
-                                        placeholder="Enter Pan Number" (input)="formatPAN($event)"
-                                        (keypress)="allowNumbersCharacters($event)">
-                                    <small class="text-danger mb-4"
-                                        *ngIf="multiStepForm.get('panNumber')?.touched && multiStepForm.get('panNumber')?.invalid">
-                                        <span *ngIf="multiStepForm.get('panNumber')?.errors?.['pattern']">
-                                            Enter a valid PAN number.
-                                        </span>
-                                    </small>
-                                </div>
-
-                                <div class="col-lg-3">
-                                    <label>IFSC <span class="text-danger">*</span></label>
-                                    <input type="text" formControlName="ifsc" class="form-control"
-                                        [ngClass]="{'input-error': nextCheck && multiStepForm.get('ifsc')?.invalid}"
-                                        placeholder="Enter IFSC Code" (input)="formatIFSC($event)"
-                                        (keypress)="allowNumbersCharacters($event)">
-                                </div>
-
-                                <div class="col-lg-3">
-                                    <label>Transfer Type <span class="text-danger">*</span></label><br>
-                                    <div class="form-check form-check-inline">
-                                        <input class="form-check-input" type="radio" formControlName="transfer_type" id="radioDefault1" value="NEFT">
-                                        <label class="form-check-label" for="radioDefault1">NEFT</label>
-                                    </div>
-                                    <div class="form-check form-check-inline">
-                                        <input class="form-check-input" type="radio" formControlName="transfer_type" id="radioDefault2" value="IFT">
-                                        <label class="form-check-label" for="radioDefault2">IFT</label>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="d-flex justify-content-center mt-4">
-                            <button type="button" class="btn previous-btn me-2"
-                                (click)="previousStep()">Previous</button>
-                            <button type="button" class="btn next-btn rounded-2" (click)="nextStep()">Next</button>
-                        </div>
-                    </div>
-
-                    <!-- Step 4 : statutory Info -->
-                    <div *ngIf="currentStep === 4">
-                        <div class="mb-3">
-
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" formControlName="pf_employee_applicable"
-                                    id="pfEmployee">
-                                <label class="form-check-label" for="pfEmployee">PF Employee Applicable</label>
-                            </div>
-
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" formControlName="pf_employer_applicable"
-                                    id="pfEmployer">
-                                <label class="form-check-label" for="pfEmployer">PF Employer Applicable</label>
-                            </div>
-
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox"
-                                    formControlName="esic_employee_applicable" id="esicEmployee">
-                                <label class="form-check-label" for="esicEmployee">ESIC Employee Applicable</label>
-                            </div>
-                        </div>
-
-                        <div class="d-flex justify-content-center mt-4">
-
-                            <button type="button" class="btn previous-btn me-2"
-                                (click)="previousStep()">Previous</button>
-                            <button type="button" class="btn btn-primary next-btn  rounded-2 " (click)="nextStep()">
-                                Next</button>
-
-                        </div>
-                    </div>
-
-                    <!-- Step 5 : Salary Structure -->
-                    <div *ngIf="currentStep === 5">
-                        <div class="border" style="border-radius: 10px; padding: 30px;">
-                            <div class="main-content p-3">
-                                <table class="table table-bordered"
-                                    style="border: 1px solid #dadada; border-collapse: collapse;">
-                                    <thead>
-                                        <tr>
-                                            <th>Name Of the Component</th>
-                                            <th>Values</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr>
-                                            <td>Yearly Basic Salary</td>
-                                            <td>
-                                                <div class="w-100 d-flex align-items-center gap-2 fw-bold">
-                                                    <input type="number" placeholder="Basic Salary"
-                                                        formControlName="basic_salary" class="form-control w-50">
-                                                    <small class="text-danger"
-                                                        *ngIf="multiStepForm.get('basic_salary')?.hasError('min') && multiStepForm.get('basic_salary')?.touched">
-                                                        Salary cannot be negative.
-                                                    </small>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td>House Rent Allowances</td>
-                                            <td>
-                                                <div class="w-100 d-flex align-items-center gap-2 fw-bold">
-                                                    <input type="number" placeholder="House Rent Allowances"
-                                                        formControlName="house_rent_allowances"
-                                                        class="form-control w-50">
-                                                    <small class="text-danger"
-                                                        *ngIf="multiStepForm.get('house_rent_allowances')?.hasError('min') && multiStepForm.get('house_rent_allowances')?.touched">
-                                                        Allowances cannot be negative.
-                                                    </small>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td>Conveyance Allowances</td>
-                                            <td>
-                                                <div class="w-100 d-flex align-items-center gap-2 fw-bold">
-                                                    <input type="number" placeholder="Conveyance Allowances"
-                                                        formControlName="conveyance_allowances"
-                                                        class="form-control w-50">
-                                                    <small class="text-danger"
-                                                        *ngIf="multiStepForm.get('conveyance_allowances')?.hasError('min') && multiStepForm.get('conveyance_allowances')?.touched">
-                                                        Allowances cannot be negative.
-                                                    </small>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td>Medical Allowances</td>
-                                            <td>
-                                                <div class="w-100 d-flex align-items-center gap-2 fw-bold">
-                                                    <input type="number" placeholder="Medical Allowances"
-                                                        formControlName="medical_allowances" class="form-control w-50">
-                                                    <small class="text-danger"
-                                                        *ngIf="multiStepForm.get('medical_allowances')?.hasError('min') && multiStepForm.get('medical_allowances')?.touched">
-                                                        Allowances cannot be negative.
-                                                    </small>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td>Special Allowances</td>
-                                            <td>
-                                                <div class="w-100 d-flex align-items-center gap-2 fw-bold">
-                                                    <input type="number" placeholder="Special Allowances"
-                                                        formControlName="special_allowances" class="form-control w-50">
-                                                    <small class="text-danger"
-                                                        *ngIf="multiStepForm.get('special_allowances')?.hasError('min') && multiStepForm.get('special_allowances')?.touched">
-                                                        Allowances cannot be negative.
-                                                    </small>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                        <tr *ngFor="let field of selectedStatutoryOptions">
-                                            <td>{{ field.label }}</td>
-                                            <td>
-                                                {{ field.value }}{{ field.label.includes('PF') ||
-                                                field.label.includes('ESIC') ? '%' : '' }}
-                                            </td>
-                                        </tr>
-
-                                        <tr>
-                                            <td>Gross Salary</td>
-                                            <td>
-                                                <div class="w-100 d-flex align-items-center gap-2 fw-bold">
-                                                    <h5>Rs. {{ annual_gross_salary | number: '1.2-2' }}</h5> /
-                                                    <span class="ml-3">12</span>
-                                                </div>
-                                            </td>
-                                        </tr>
-
-                                        <tr class="amountPayable">
-                                            <td>
-                                                <h5>Monthly Gross Salary</h5>
-                                            </td>
-                                            <td>
-                                                <h5 class="fw-bold me-5">Rs. {{ monthly_gross_salary | number: '1.2-2'
-                                                    }}</h5>
-                                            </td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-
-                        <div class="d-flex justify-content-center gap-2 mt-4">
-                            <div>
+                            <div class="d-flex justify-content-center mt-4">
                                 <button type="button" class="btn previous-btn me-2"
                                     (click)="previousStep()">Previous</button>
-                            </div>
-                            <div>
-                                <button type="submit" class="btn next-btn">Update</button>
+                                <button type="button" class="btn next-btn rounded-2" (click)="nextStep()">Next</button>
                             </div>
                         </div>
-                    </div>
-                </form>
+
+                        <!-- Step 4 : statutory Info -->
+                        <div *ngIf="currentStep === 4">
+                            <div class="mb-3">
+
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox"
+                                        formControlName="pf_employee_applicable" id="pfEmployee">
+                                    <label class="form-check-label" for="pfEmployee">PF Employee Applicable</label>
+                                </div>
+
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox"
+                                        formControlName="pf_employer_applicable" id="pfEmployer">
+                                    <label class="form-check-label" for="pfEmployer">PF Employer Applicable</label>
+                                </div>
+
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox"
+                                        formControlName="esic_employee_applicable" id="esicEmployee">
+                                    <label class="form-check-label" for="esicEmployee">ESIC Employee Applicable</label>
+                                </div>
+                            </div>
+
+                            <div class="d-flex justify-content-center mt-4">
+
+                                <button type="button" class="btn previous-btn me-2"
+                                    (click)="previousStep()">Previous</button>
+                                <button type="button" class="btn btn-primary next-btn  rounded-2 " (click)="nextStep()">
+                                    Next</button>
+
+                            </div>
+                        </div>
+
+                        <!-- Step 5 : Salary Structure -->
+                        <div *ngIf="currentStep === 5">
+                            <div class="border" style="border-radius: 10px; padding: 30px;">
+                                <div class="main-content p-3">
+                                    <table class="table table-bordered"
+                                        style="border: 1px solid #dadada; border-collapse: collapse;">
+                                        <thead>
+                                            <tr>
+                                                <th>Name Of the Component</th>
+                                                <th>Values</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td>Yearly Basic Salary</td>
+                                                <td>
+                                                    <div class="w-100 d-flex align-items-center gap-2 fw-bold">
+                                                        <input type="number" placeholder="Basic Salary"
+                                                            formControlName="basic_salary" class="form-control w-50">
+                                                        <small class="text-danger"
+                                                            *ngIf="multiStepForm.get('basic_salary')?.hasError('min') && multiStepForm.get('basic_salary')?.touched">
+                                                            Salary cannot be negative.
+                                                        </small>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>House Rent Allowances</td>
+                                                <td>
+                                                    <div class="w-100 d-flex align-items-center gap-2 fw-bold">
+                                                        <input type="number" placeholder="House Rent Allowances"
+                                                            formControlName="house_rent_allowances"
+                                                            class="form-control w-50">
+                                                        <small class="text-danger"
+                                                            *ngIf="multiStepForm.get('house_rent_allowances')?.hasError('min') && multiStepForm.get('house_rent_allowances')?.touched">
+                                                            Allowances cannot be negative.
+                                                        </small>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>Conveyance Allowances</td>
+                                                <td>
+                                                    <div class="w-100 d-flex align-items-center gap-2 fw-bold">
+                                                        <input type="number" placeholder="Conveyance Allowances"
+                                                            formControlName="conveyance_allowances"
+                                                            class="form-control w-50">
+                                                        <small class="text-danger"
+                                                            *ngIf="multiStepForm.get('conveyance_allowances')?.hasError('min') && multiStepForm.get('conveyance_allowances')?.touched">
+                                                            Allowances cannot be negative.
+                                                        </small>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>Medical Allowances</td>
+                                                <td>
+                                                    <div class="w-100 d-flex align-items-center gap-2 fw-bold">
+                                                        <input type="number" placeholder="Medical Allowances"
+                                                            formControlName="medical_allowances"
+                                                            class="form-control w-50">
+                                                        <small class="text-danger"
+                                                            *ngIf="multiStepForm.get('medical_allowances')?.hasError('min') && multiStepForm.get('medical_allowances')?.touched">
+                                                            Allowances cannot be negative.
+                                                        </small>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>Special Allowances</td>
+                                                <td>
+                                                    <div class="w-100 d-flex align-items-center gap-2 fw-bold">
+                                                        <input type="number" placeholder="Special Allowances"
+                                                            formControlName="special_allowances"
+                                                            class="form-control w-50">
+                                                        <small class="text-danger"
+                                                            *ngIf="multiStepForm.get('special_allowances')?.hasError('min') && multiStepForm.get('special_allowances')?.touched">
+                                                            Allowances cannot be negative.
+                                                        </small>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            <tr *ngFor="let field of selectedStatutoryOptions">
+                                                <td>{{ field.label }}</td>
+                                                <td>
+                                                    {{ field.value }}{{ field.label.includes('PF') ||
+                                                    field.label.includes('ESIC') ? '%' : '' }}
+                                                </td>
+                                            </tr>
+
+                                            <tr>
+                                                <td>Gross Salary</td>
+                                                <td>
+                                                    <div class="w-100 d-flex align-items-center gap-2 fw-bold">
+                                                        <h5>Rs. {{ annual_gross_salary | number: '1.2-2' }}</h5> /
+                                                        <span class="ml-3">12</span>
+                                                    </div>
+                                                </td>
+                                            </tr>
+
+                                            <tr class="amountPayable">
+                                                <td>
+                                                    <h5>Monthly Gross Salary</h5>
+                                                </td>
+                                                <td>
+                                                    <h5 class="fw-bold me-5">Rs. {{ monthly_gross_salary | number:
+                                                        '1.2-2'
+                                                        }}</h5>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+
+                            <div class="d-flex justify-content-center gap-2 mt-4">
+                                <div>
+                                    <button type="button" class="btn previous-btn me-2"
+                                        (click)="previousStep()">Previous</button>
+                                </div>
+                                <div>
+                                    <button type="submit" class="btn next-btn">Update</button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
             </div>
         </div>
     </div>
-</div>
 </div>

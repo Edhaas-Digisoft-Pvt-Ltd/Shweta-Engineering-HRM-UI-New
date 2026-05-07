@@ -89,10 +89,10 @@ export class PayrollListComponent {
     const lastMonthDate = new Date(today.getFullYear(), today.getMonth() - 1, 1);
 
     this.selectedYear = lastMonthDate.getFullYear();
-    this.selectedMonth = lastMonthDate.getMonth() + 1; 
+    this.selectedMonth = lastMonthDate.getMonth() + 1;
 
     this.today = today.toISOString().split('T')[0];
-    
+
     this.getCompanyNames();
     this.getpayrollList();
 
@@ -109,7 +109,7 @@ export class PayrollListComponent {
   }
 
   getRejectReasons() {
-    this.service.post('fetch/rejection/reason', { }).subscribe((res: any) => {
+    this.service.post('fetch/rejection/reason', {}).subscribe((res: any) => {
       if (res.status == 'success') {
         this.rejectreasons = res.data
       }
@@ -344,7 +344,7 @@ export class PayrollListComponent {
     const tempPayrollIds = this.selectedRowData.map((emp: any) => emp.temp_payroll_id);
 
     const payload: any = {
-      temp_payroll_id: tempPayrollIds, 
+      temp_payroll_id: tempPayrollIds,
       rejection_id: this.selectedRejectedReason.rejection_id,
     };
 
@@ -361,8 +361,8 @@ export class PayrollListComponent {
         this.gridApi?.deselectAll();
         this.modalService.closeModal();
         this.selectedRejectedReason = '',
-        this.otherReason = '';
-        this.getpayrollList(); 
+          this.otherReason = '';
+        this.getpayrollList();
       }
       else {
         this.toastr.error('Something went wrong');
@@ -488,7 +488,7 @@ export class PayrollListComponent {
 
     headerRow1.push(
       'Absent Days',
-      'H/O',         
+      'H/O',
       'W/O',
       'Present Days',
       'Hours',
@@ -537,9 +537,16 @@ export class PayrollListComponent {
       const row: any[] = [emp.employee_code, emp.emp_name];
 
       for (let d = 1; d <= daysInMonth; d++) {
-        const att = emp.attendance.find((a: any) =>
+        // Get ALL records for this date
+        const attRecords = emp.attendance.filter((a: any) =>
           new Date(a.attendance_date).getDate() === d
         );
+
+        // Prefer the record that has actual status/data (not null)
+        const att = attRecords.find((a: any) => a.status !== null)
+          || attRecords[0]
+          || null;
+
         row.push(att ? att.status : '');
       }
 
@@ -547,8 +554,8 @@ export class PayrollListComponent {
       if (!operator) {
         row.push(
           emp.absent_days ?? 0,
-          emp.holidays ?? 0,          
-          emp.weekends ?? 0,          
+          emp.holidays ?? 0,
+          emp.weekends ?? 0,
           emp.present_days ?? 0
         );
       } else {
@@ -592,9 +599,15 @@ export class PayrollListComponent {
         const otRow: any[] = ['', ''];
 
         for (let d = 1; d <= daysInMonth; d++) {
-          const att = emp.attendance.find((a: any) =>
+          const attRecords = emp.attendance.filter((a: any) =>
             new Date(a.attendance_date).getDate() === d
           );
+
+          // Prefer record with actual over_time_hr
+          const att = attRecords.find((a: any) => a.over_time_hr !== null)
+            || attRecords[0]
+            || null;
+
           otRow.push(att?.over_time_hr ?? '');
         }
 
@@ -612,7 +625,7 @@ export class PayrollListComponent {
     for (let d = 1; d <= daysInMonth; d++) totalsRow.push('');
 
     totalsRow.push(
-      '', '', '', '', '', '', '', '', '','','','',
+      '', '', '', '', '', '', '', '', '', '', '', '',
       totals.total_overtime_salary,
       '', '',
       ...(this.showLwpColumns ? ['', ''] : []),

@@ -59,21 +59,12 @@ export class UpdateEmployeeComponent {
   ) {
     this.multiStepForm = this.fb.group({
       title: ['', Validators.required],
-      fname: [
+      emp_name: [
         '',
         [
           Validators.required,
           Validators.minLength(3),
-          Validators.pattern(this.NoWhitespaceRegExp),
-          Validators.pattern(/^[A-Za-z]+$/),
-        ],
-      ],
-      lname: [
-        '',
-        [
-          Validators.required,
-          Validators.pattern(this.NoWhitespaceRegExp),
-          Validators.pattern(/^[A-Za-z]+$/),
+          Validators.pattern(/^[A-Za-z ]+$/),
         ],
       ],
       email: ['', [Validators.required, Validators.email, this.gmailValidator]],
@@ -135,6 +126,7 @@ export class UpdateEmployeeComponent {
       pf_employee_applicable: [false],
       pf_employer_applicable: [false],
       esic_employee_applicable: [false],
+      status: ['Active', Validators.required],
     });
 
     this.salaryStructureForm = this.fb.group({
@@ -258,16 +250,11 @@ export class UpdateEmployeeComponent {
             this.getDesignationNames();
             this.multiStepForm.patchValue({ company: this.selectedCompanyId }, { emitEvent: false });
           }
-
           const fullName = this.fetchedEmployee.emp_name || '';
-          const parts = fullName.split(' ');
-          const fname = parts.shift() || '';
-          const lname = parts.join(' ') || '';
 
           this.multiStepForm.patchValue({
             title: this.fetchedEmployee.emp_title || '',
-            fname: fname,
-            lname: lname,
+            emp_name: this.fetchedEmployee.emp_name || '',
             email: this.fetchedEmployee.emp_email || '',
             address: this.fetchedEmployee.emp_address || '',
             contact: this.fetchedEmployee.emp_contact || '',
@@ -277,7 +264,7 @@ export class UpdateEmployeeComponent {
             designation: this.fetchedEmployee.designation_id || '',
             join_date: this.fetchedEmployee.doj || '',
             // work_pattern: this.fetchedEmployee.work_pattern || '',
-            account_holder_name: this.fetchedEmployee.account_holder_name || '', 
+            account_holder_name: this.fetchedEmployee.account_holder_name || '',
             bankName: this.fetchedEmployee.bank_name || '',
             accountNumber: this.fetchedEmployee.account_num || '',
             aadhaarNumber: this.fetchedEmployee.aadhaar_number || '',
@@ -294,11 +281,12 @@ export class UpdateEmployeeComponent {
             pf_employee_applicable: !!this.fetchedEmployee.pf_employee_applicable,
             pf_employer_applicable: !!this.fetchedEmployee.pf_employer_applicable,
             esic_employee_applicable: !!this.fetchedEmployee.esic_employee_applicable,
+            status: this.fetchedEmployee.status,
           }, { emitEvent: false });
 
-          ['fname', 'lname', 'address', 'contact', 'role'].forEach(field => {
-            this.multiStepForm.get(field)?.disable();
-          });
+          // ['fname', 'lname', 'address', 'contact', 'role'].forEach(field => {
+          //   this.multiStepForm.get(field)?.disable();
+          // });
 
           // update component salary vars
           this.annual_gross_salary = parseFloat(this.fetchedEmployee.annual_gross_salary) || 0;
@@ -331,19 +319,19 @@ export class UpdateEmployeeComponent {
       case 1:
         return (
           this.multiStepForm.controls['title'].valid &&
-          this.multiStepForm.controls['fname'].valid &&
-          this.multiStepForm.controls['lname'].valid &&
+          this.multiStepForm.controls['emp_name'].valid &&
           this.multiStepForm.controls['email'].valid &&
           this.multiStepForm.controls['contact'].valid &&
           this.multiStepForm.controls['address'].valid &&
-          this.multiStepForm.controls['gender'].valid
+          this.multiStepForm.controls['gender'].valid &&
+          this.multiStepForm.controls['status'].valid
         );
       case 2:
         return (
           this.multiStepForm.controls['role'].valid &&
           this.multiStepForm.controls['department'].valid &&
           this.multiStepForm.controls['designation'].valid &&
-          this.multiStepForm.controls['join_date'].valid 
+          this.multiStepForm.controls['join_date'].valid
           // this.multiStepForm.controls['work_pattern'].valid
         );
       case 3:
@@ -388,12 +376,12 @@ export class UpdateEmployeeComponent {
     this.isLoading = true
 
     let formValues = this.multiStepForm.getRawValue();
-    
+
     let payload = {
-      "employee_id": this.employe_id, 
+      "employee_id": this.employe_id,
       "company_id": this.selectedCompanyId,
       "emp_title": formValues.title,
-      "emp_name": formValues.fname + " " + formValues.lname,
+      "emp_name": formValues.emp_name,
       "emp_email": formValues.email,
       "emp_gender": formValues.gender,
       "department_id": formValues.department,
@@ -407,7 +395,6 @@ export class UpdateEmployeeComponent {
       "ifsc_code": formValues.ifsc,
       "doj": formValues.join_date,
       "emp_contact": formValues.contact,
-      "status": "Active",
       "emp_address": formValues.address,
       "role_id": formValues.role,
 
@@ -423,6 +410,7 @@ export class UpdateEmployeeComponent {
       "pf_employee_applicable": formValues.pf_employee_applicable || false,
       "pf_employer_applicable": formValues.pf_employer_applicable || false,
       "esic_employee_applicable": formValues.esic_employee_applicable || false,
+      "status": formValues.status,
     };
 
     this.service.post("update/employee", payload).subscribe({
@@ -438,7 +426,7 @@ export class UpdateEmployeeComponent {
       },
       error: (err) => {
         this.toastr.error(err.error?.data || err.error?.message || 'Something went wrong!');
-          this.isLoading = false;
+        this.isLoading = false;
       }
     });
   }
@@ -557,4 +545,17 @@ export class UpdateEmployeeComponent {
     this.multiStepForm.get('ifsc')?.setValue(value, { emitEvent: false });
   }
 
+  toggleStatus(): void {
+    const current = this.multiStepForm.get('status')?.value;
+    const newStatus = current === 'Active' ? 'Inactive' : 'Active';
+    this.multiStepForm.patchValue({ status: newStatus }, { emitEvent: false });
+  }
+
+  cleanEmployeeName(): void {
+    const control = this.multiStepForm.get('emp_name');
+    if (control) {
+      const cleaned = control.value?.trim().replace(/\s+/g, ' ') || '';
+      control.setValue(cleaned, { emitEvent: false });
+    }
+  }
 }

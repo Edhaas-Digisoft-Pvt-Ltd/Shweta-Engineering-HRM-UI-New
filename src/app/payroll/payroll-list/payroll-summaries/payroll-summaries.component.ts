@@ -557,7 +557,7 @@ export class PayrollSummariesComponent {
         </tbody>
       </table>
 
-      <p style="margin-top: 20px;">This is a system-generated payslip.</p>
+      <p style="margin-top: 20px; font-size: 12px;">This salary statement is issued for information purposes only and shall not be treated as an official document or legal proof of employment, income, or eligibility for any financial facility.</p>
     </div>
   `;
 

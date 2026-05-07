@@ -55,21 +55,12 @@ export class CreateEmployeeComponent {
   ) {
     this.multiStepForm = this.fb.group({
       title: ['', Validators.required],
-      fname: [
+      emp_name: [
         '',
         [
           Validators.required,
           Validators.minLength(3),
-          Validators.pattern(this.NoWhitespaceRegExp),
-          Validators.pattern(/^[A-Za-z]+$/),
-        ],
-      ],
-      lname: [
-        '',
-        [
-          Validators.required,
-          Validators.pattern(this.NoWhitespaceRegExp),
-          Validators.pattern(/^[A-Za-z]+$/),
+          Validators.pattern(/^[A-Za-z ]+$/),
         ],
       ],
       // email: ['', [Validators.required, Validators.email, Validators.pattern(/^[a-zA-Z0-9._%+-]+@[a-zA-Z]+\.[a-zA-Z]{2,}(?:\.[a-zA-Z]{2,})?$/)]],
@@ -329,8 +320,7 @@ export class CreateEmployeeComponent {
       case 1:
         return (
           this.multiStepForm.controls['title'].valid &&
-          this.multiStepForm.controls['fname'].valid &&
-          this.multiStepForm.controls['lname'].valid &&
+          this.multiStepForm.controls['emp_name'].valid &&
           this.multiStepForm.controls['email'].valid &&
           this.multiStepForm.controls['contact'].valid &&
           this.multiStepForm.controls['address'].valid &&
@@ -410,7 +400,7 @@ export class CreateEmployeeComponent {
       else if (form.errors?.['mismatch']) {
         this.toastr.error('Passwords do not match');
       }
-      
+
       else {
         Object.keys(this.multiStepForm.controls).forEach(key => {
           if (this.multiStepForm.controls[key].invalid) {
@@ -430,7 +420,7 @@ export class CreateEmployeeComponent {
 
       "company_id": this.selectedCompanyId,
       "emp_title": this.multiStepForm.value.title,
-      "emp_name": this.multiStepForm.value.fname + " " + this.multiStepForm.value.lname,
+      "emp_name": this.multiStepForm.value.emp_name,
       "emp_email": this.multiStepForm.value.email,
       "emp_gender": this.multiStepForm.value.gender,
       "department_id": this.multiStepForm.value.department,
@@ -473,6 +463,17 @@ export class CreateEmployeeComponent {
       next: (res: any) => {
         if (res.status === 'success') {
           this.toastr.success('Successfully Submitted!');
+
+          // Show shopfloor sync warning if any
+          if (res.shopfloor_warning) {
+            this.toastr.warning(res.shopfloor_warning, 'Shopfloor Sync');
+          }
+
+          // Show leave warning if any
+          if (res.warning) {
+            this.toastr.warning(res.warning, 'Leave Setup');
+          }
+
           this.multiStepForm.reset();
           this.submitted = false;
           this.multiStepForm.patchValue({
@@ -653,5 +654,13 @@ export class CreateEmployeeComponent {
     const confirm = group.get('confirm_password')?.value;
 
     return pass === confirm ? null : { mismatch: true };
+  }
+  
+  cleanEmployeeName(): void {
+    const control = this.multiStepForm.get('emp_name');
+    if (control) {
+      const cleaned = control.value?.trim().replace(/\s+/g, ' ') || '';
+      control.setValue(cleaned, { emitEvent: false });
+    }
   }
 }

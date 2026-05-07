@@ -15,7 +15,7 @@ export class AttendanceComponent {
   @ViewChild('agGrid', { static: false }) agGrid!: AgGridAngular;
 
   rowData: any[] = [];
-  activeTab: string = 'tab1';
+  activeTab: string = 'live';
   searchInputValue: string = '';
   gridApiActive: any;
   role: string = '';
@@ -51,7 +51,8 @@ export class AttendanceComponent {
   };
 
   columnDefs: ColDef[] = [
-    { headerName: 'Employee Code', field: 'employee_code', editable: true },
+    { headerName: 'Emp Code', field: 'employee_code', editable: true },
+    { headerName: 'Emp name', field: 'emp_name', editable: true },
     { headerName: 'Date', field: 'attendance_date' },
     { headerName: 'CheckIn', field: 'check_in' },
     { headerName: 'CheckOut', field: 'check_out' },

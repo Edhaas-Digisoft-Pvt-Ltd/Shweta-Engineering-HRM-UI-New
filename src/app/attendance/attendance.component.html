@@ -21,8 +21,14 @@
 
                 <div class="tabs-container">
                     <ul class="nav nav-tabs">
+                        <li class="nav-item" (click)="selectTab('live')">
+                            <a class="nav-link fw-bold" [ngClass]="{'active': activeTab === 'live'}">
+                                Live Attendance
+                            </a>
+                        </li>
                         <li class="nav-item" (click)="selectTab('tab1')">
-                            <a class="nav-link fw-bold" [ngClass]="{'active': activeTab === 'tab1'}">List</a>
+                            <a class="nav-link fw-bold" [ngClass]="{'active': activeTab === 'tab1'}">Imported
+                                Attendance</a>
                         </li>
                         <li class="nav-item" (click)="selectTab('tab2')">
                             <a class="nav-link fw-bold" [ngClass]="{'active': activeTab === 'tab2'}">Monthly Summary</a>
@@ -34,6 +40,11 @@
                     </ul>
 
                     <div class="tab-content mt-3">
+
+                        <div *ngIf="activeTab === 'live'">
+                            <app-live-attendance></app-live-attendance>
+                        </div>
+
                         <div *ngIf="activeTab === 'tab1'">
                             <div class="company-setup">
                                 <div class="container-fluid ">

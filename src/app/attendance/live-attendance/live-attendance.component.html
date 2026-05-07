@@ -1,0 +1,75 @@
+<div class="live-attendance">
+
+    <!-- Loader -->
+    <div class="loader-overlay" *ngIf="isLoading">
+        <app-loader></app-loader>
+    </div>
+
+    <div class="main-content" [class.loading]="isLoading">
+
+        <!-- Search + Filters -->
+        <div class="d-flex flex-wrap gap-3 align-items-end justify-content-end mb-3">
+
+            <!-- Search -->
+            <div>
+                <input class="form-control" type="text" placeholder="Search" [(ngModel)]="searchInputValue"
+                    (ngModelChange)="onSearchChange()" style="min-width: 180px;" />
+            </div>
+
+            <!-- Year -->
+            <div>
+                <label class="form-label">Year</label>
+                <select class="form-select" [(ngModel)]="selectedYear" (change)="onYearMonthChange()">
+                    <option *ngFor="let year of financialYears" [value]="year">
+                        {{ year }}
+                    </option>
+                </select>
+            </div>
+
+            <!-- Month -->
+            <div>
+                <label class="form-label">Month</label>
+                <select class="form-select" [(ngModel)]="selectedMonth" (change)="onYearMonthChange()">
+                    <option *ngFor="let m of months" [value]="m.id">
+                        {{ m.value }}
+                    </option>
+                </select>
+            </div>
+
+        </div>
+
+        <!-- Grid -->
+        <ag-grid-angular *ngIf="rowData.length > 0" #agGrid class="ag-theme-alpine" style="width: 100%; height: 55vh"
+            [rowData]="rowData" [columnDefs]="columnDefs" [defaultColDef]="defaultColDef" [rowSelection]="'multiple'"
+            (gridReady)="onGridReady($event)">
+        </ag-grid-angular>
+
+        <!-- Pagination -->
+        <div class="d-flex justify-content-end align-items-center flex-wrap mt-3 gap-2">
+
+            <button class="btn btn-sm btn-primary" (click)="prevPage()" [disabled]="currentPage === 1">
+                Prev
+            </button>
+
+            <button class="btn btn-sm btn-primary" (click)="nextPage()" [disabled]="currentPage === lastPage">
+                Next
+            </button>
+
+            <ng-container *ngFor="let page of pagesToShow">
+                <span *ngIf="page !== '...'; else ellipsis" (click)="goToPage(page)"
+                    [class.current]="page === currentPage" class="page-text">
+
+                    <ng-container *ngIf="page === currentPage">[{{ page }}]</ng-container>
+                    <ng-container *ngIf="page !== currentPage">{{ page }}</ng-container>
+
+                </span>
+
+                <ng-template #ellipsis>
+                    <span class="mx-1">...</span>
+                </ng-template>
+            </ng-container>
+
+        </div>
+
+    </div>
+</div>
