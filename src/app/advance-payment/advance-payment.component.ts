@@ -245,7 +245,7 @@ export class AdvancePaymentComponent {
   }
 
   public defaultColDef: ColDef = {
-    editable: true,
+    editable: false,
     // flex: 1,
     resizable: true,
   };

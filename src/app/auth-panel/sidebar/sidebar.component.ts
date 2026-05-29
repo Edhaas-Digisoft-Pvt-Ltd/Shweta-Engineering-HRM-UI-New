@@ -19,6 +19,7 @@ export class SidebarComponent implements OnInit {
   isAccordionOpen2 = false;
   // role: string = '';
   adminData: string | null | undefined;
+  loginType: any = ''; 
 
   toggleAccordion(which: 'accordion1' | 'accordion2') {
     if (which === 'accordion1') {
@@ -33,6 +34,7 @@ export class SidebarComponent implements OnInit {
     this.role = this.service.getRole();
     this.empName = sessionStorage.getItem('employeeName');
     this.roleName = sessionStorage.getItem('roleName');
+    this.loginType = localStorage.getItem('loginType');
 
     const employeeId = sessionStorage.getItem('employeeId');
     if (employeeId) {

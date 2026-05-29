@@ -12,8 +12,7 @@
                 </div> -->
 
                     <div class="loginImage">
-                        <img src="assets/img/loginpage.png" style="height: 100%;width: 100%;object-fit: fill;"
-                            alt="">
+                        <img src="assets/img/loginpage.png" style="height: 100%;width: 100%;object-fit: fill;" alt="">
                     </div>
 
                     <!-- <div class="loginImage ms-5 mt-5">
@@ -29,6 +28,25 @@
                 <div class="col-md-6 d-flex align-items-center justify-content-center login-box p-4">
                     <div class="text-center w-100">
                         <h2 class="mb-4 fw-bold">Login </h2>
+
+                        <!-- Login Type Toggle -->
+                        <div class="login-type-toggle mt-4 d-flex justify-content-center gap-4">
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" name="loginType" id="officeUse"
+                                    value="office" [(ngModel)]="loginType" (change)="onLoginTypeChange()">
+                                <label class="form-check-label fw-semibold" for="officeUse">
+                                    <i class="bi bi-building"></i> Office Use
+                                </label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" name="loginType" id="employeeUse"
+                                    value="employee" [(ngModel)]="loginType" (change)="onLoginTypeChange()">
+                                <label class="form-check-label fw-semibold" for="employeeUse">
+                                    <i class="bi bi-person"></i> Employee
+                                </label>
+                            </div>
+                        </div>
+
                         <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
                             <!-- Email Field -->
                             <div class="mt-4 input-group">
@@ -60,16 +78,14 @@
                                 * This Field is required
                             </small>
 
-                            <!-- Role Dropdown -->
-                            <select id="roleSelect" formControlName="role" class="form-select mt-4 ">
-                                <!-- <option value="" disabled selected>Select Role</option>
-                            <option value="admin">Admin</option>
-                            <option value="employee">Employee</option>
-                            <option value="accountant">Accountant</option> -->
-                                <option *ngFor="let cat of roles" [value]="cat.role_id">
+                            <!-- Role Dropdown (replace existing one) -->
+                            <select id="roleSelect" formControlName="role" class="form-select mt-3">
+                                <option value="" disabled selected>Select Role</option>
+                                <option *ngFor="let cat of filteredRoles" [value]="cat.role_id">
                                     {{ cat.role_name }}
                                 </option>
                             </select>
+
                             <small class="text-danger mt-1 d-block"
                                 *ngIf="loginForm.get('role')?.invalid && loginForm.get('role')?.touched">
                                 * This Field is required

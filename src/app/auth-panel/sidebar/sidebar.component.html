@@ -21,7 +21,7 @@
           </li>
 
           <!-- Attendance -->
-          <li class="nav-item" *ngIf="hasAccess('Attendance','view')">
+          <li class="nav-item" *ngIf="hasAccess('Attendance','view') && loginType === 'office'">
             <a routerLink="Attendance" routerLinkActive="active-link"
               class="nav-link btn-like d-flex align-items-center" (click)="closeAllAccordions()">
               <i class="bi bi-alarm ms-2 me-2"></i> <span class="nav-name">Attendance</span>
@@ -37,7 +37,7 @@
           </li>
 
           <!-- Advance Payment -->
-          <li class="nav-item" *ngIf="hasAccess('Advance Payment','view')">
+          <li class="nav-item" *ngIf="hasAccess('Advance Payment','view') && loginType === 'office'">
             <a routerLink="AdvancePayment" routerLinkActive="active-link"
               class="nav-link btn-like d-flex align-items-center" (click)="closeAllAccordions()">
               <i class="bi bi-currency-rupee ms-1 me-0" style="font-size:1.3rem;"></i><span class="nav-name"> Advance
@@ -62,17 +62,19 @@
             </ul>
           </li> -->
 
-          <li class="nav-item" *ngIf="hasAccess('Payroll Manage','view') || hasAccess('Payroll Manage','insert')">
+          <li class="nav-item" *ngIf="(hasAccess('Payroll Manage','view') || hasAccess('Payroll Manage','insert')) && loginType === 'office'">
             <a routerLink="payrollProcess" routerLinkActive="active-link"
               class="nav-link btn-like d-flex align-items-center" (click)="closeAllAccordions()">
-              <i class="bi bi-currency-rupee ms-1 me-0" style="font-size:1.3rem;"></i><span class="nav-name">Manage Payroll</span>
+              <i class="bi bi-currency-rupee ms-1 me-0" style="font-size:1.3rem;"></i><span class="nav-name">Manage
+                Payroll</span>
             </a>
           </li>
 
           <li class="nav-item" *ngIf="hasAccess('Payroll List','view')">
             <a routerLink="payrollList" routerLinkActive="active-link"
               class="nav-link btn-like d-flex align-items-center" (click)="closeAllAccordions()">
-              <i class="bi bi-currency-rupee ms-1 me-0" style="font-size:1.3rem;"></i><span class="nav-name">Manage Payroll</span>
+              <i class="bi bi-currency-rupee ms-1 me-0" style="font-size:1.3rem;"></i><span class="nav-name">Manage
+                Payroll</span>
             </a>
           </li>
 
@@ -118,10 +120,10 @@
 
           <!-- Company Settings Accordion -->
 
-           <li class="nav-item" *ngIf="hasAccess('Company List','view')">
-            <a routerLink="companyList" routerLinkActive="active-link" class="nav-link btn-like d-flex align-items-center"
-              (click)="closeAllAccordions()">
-               <i class="bi bi-gear ms-1 me-2"></i> <span class="nav-name">Company List</span>
+          <li class="nav-item" *ngIf="hasAccess('Company List','view')">
+            <a routerLink="companyList" routerLinkActive="active-link"
+              class="nav-link btn-like d-flex align-items-center" (click)="closeAllAccordions()">
+              <i class="bi bi-gear ms-1 me-2"></i> <span class="nav-name">Company List</span>
             </a>
           </li>
 
@@ -170,14 +172,14 @@
           </li>
 
           <!-- operator -->
-          <li class="nav-item" *ngIf="hasAccess('Employee Dashboard','view') && roleName !== 'Admin'">
+          <li class="nav-item" *ngIf="hasAccess('Employee Dashboard','view') && loginType === 'employee'">
             <a routerLink="EmployeeInDetail" routerLinkActive="active-link"
               class="nav-link btn-like d-flex align-items-center" (click)="closeAllAccordions()">
               <i class="bi bi-people-fill ms-2 me-2"></i> <span class="nav-name">Employee Dashboard</span>
             </a>
           </li>
 
-          <li class="nav-item" *ngIf="hasAccess('Employee Dashboard','view') && roleName !== 'Admin'">
+          <li class="nav-item" *ngIf="hasAccess('Employee Dashboard','view') && loginType === 'employee'">
             <a routerLink="employee-report" routerLinkActive="active-link"
               class="nav-link btn-like d-flex align-items-center" (click)="closeAllAccordions()">
               <i class="bi bi-currency-rupee ms-1 me-2" style="font-size:1.3rem;"></i><span

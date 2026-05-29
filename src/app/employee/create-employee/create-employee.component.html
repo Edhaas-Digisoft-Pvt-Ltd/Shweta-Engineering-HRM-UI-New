@@ -241,7 +241,7 @@
                             <div class="row ">
 
                                 <div class="col-lg-4">
-                                    <label class="fw-bold">Select Company </label>
+                                    <label class="fw-bold">Select Company <span class="text-danger">*</span></label>
                                     <br>
                                     <select class="form-select" formControlName="company"
                                         (click)="onCompanyChange($event)"
@@ -264,7 +264,7 @@
                                     </select>
                                 </div>
                                 <div class="col-lg-4">
-                                    <label>Date Of Joinning</label>
+                                    <label>Date Of Joinning <span class="text-danger">*</span></label>
                                     <input type="date" formControlName="join_date" class="form-control"
                                         [ngClass]="{'input-error': nextCheck && multiStepForm.get('join_date')?.invalid}">
                                 </div>
