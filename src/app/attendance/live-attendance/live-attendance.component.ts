@@ -49,17 +49,17 @@ export class LiveAttendanceComponent {
   ngOnInit() {
     this.generateFinancialYears();
     this.getPaginationValueAndFetch();
-    this.startAutoRefresh(); // live auto refresh
+    //this.startAutoRefresh(); // live auto refresh
   }
 
   // Auto refresh every 15 sec
-  startAutoRefresh() {
-    setInterval(() => {
-      if (this.activeTab === 'live') {
-        this.fetchLiveAttendance();
-      }
-    }, 15000);
-  }
+  // startAutoRefresh() {
+  //   setInterval(() => {
+  //     if (this.activeTab === 'live') {
+  //       this.fetchLiveAttendance();
+  //     }
+  //   }, 15000);
+  // }
 
   public defaultColDef: ColDef = {
     editable: false,
@@ -199,12 +199,23 @@ export class LiveAttendanceComponent {
     }
   }
 
-  onSearchChange() {
-    setTimeout(() => {
+    searchTimeout: any;
+
+  onSearchChange(): void {
+    // Debounce search to avoid too many API calls
+    clearTimeout(this.searchTimeout);
+    this.searchTimeout = setTimeout(() => {
       this.currentPage = 1;
       this.fetchLiveAttendance();
-    }, 400);
+    }, 500);
   }
+
+  // onSearchChange() {
+  //   setTimeout(() => {
+  //     this.currentPage = 1;
+  //     this.fetchLiveAttendance();
+  //   }, 500);
+  // }
 
   getPaginationValueAndFetch() {
     this.service.post('get-pagination', {}).subscribe((res: any) => {

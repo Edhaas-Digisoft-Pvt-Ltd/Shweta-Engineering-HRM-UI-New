@@ -21,7 +21,7 @@
 
                 <div class="tabs-container">
                     <ul class="nav nav-tabs">
-                        <li class="nav-item" (click)="selectTab('live')">
+                        <li class="nav-item" (click)="selectTab('live')" *ngIf="hasAccess('Live_attendance', 'view')">
                             <a class="nav-link fw-bold" [ngClass]="{'active': activeTab === 'live'}">
                                 Live Attendance
                             </a>
@@ -41,7 +41,7 @@
 
                     <div class="tab-content mt-3">
 
-                        <div *ngIf="activeTab === 'live'">
+                        <div *ngIf="activeTab === 'live' && hasAccess('Live_attendance', 'view')">
                             <app-live-attendance></app-live-attendance>
                         </div>
 

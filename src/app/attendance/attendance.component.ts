@@ -36,6 +36,8 @@ export class AttendanceComponent {
     this.loadTodayDataFromStorage();
     // this.fetchAttendance();
     this.getPaginationValueAndFetchAttendance();
+
+    this.activeTab = this.hasAccess('Live_attendance', 'view') ? 'live' : 'tab1';
   }
 
   hasAccess(module: string, permission: string): boolean {

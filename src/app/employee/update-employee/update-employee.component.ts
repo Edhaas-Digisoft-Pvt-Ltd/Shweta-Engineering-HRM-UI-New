@@ -417,6 +417,10 @@ export class UpdateEmployeeComponent {
       next: (res: any) => {
         if (res.status === 'success') {
           this.toastr.success('Successfully Updated!');
+          if (res.shopfloor_warning) {
+            this.toastr.warning(res.shopfloor_warning, 'Shopfloor Sync Warning', { timeOut: 8000 });
+          }
+
           this.router.navigate(['/authPanal/Employee']);
           this.isLoading = false;
         } else {

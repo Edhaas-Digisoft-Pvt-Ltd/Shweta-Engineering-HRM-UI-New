@@ -338,15 +338,38 @@ export class AdvancePaymentComponent {
         }
 
         // Salary Tracker button (for Approved)
+        // Salary Tracker button
         if (
-          params.data.status === 'Approved' &&
+          (params.data.status === 'Approved' || params.data.status === 'pending') &&
           this.hasAccess('Advance Payment', 'SalaryTracker')
         ) {
-          buttons += `
-        <button type="button" class="btn btn-sm mb-1 st-btn" style="background-color:#C8E3FF">
-          <i class="bi bi-cash"></i>
-        </button>
-      `;
+
+          // Disabled button for pending
+          if (params.data.status === 'pending') {
+            buttons += `
+      <button 
+        type="button" 
+        class="btn btn-sm mb-1"
+        style="background-color:#d3d3d3; cursor:not-allowed;"
+        disabled
+      >
+        <i class="bi bi-cash"></i>
+      </button>
+    `;
+          }
+
+          // Active button for approved
+          if (params.data.status === 'Approved') {
+            buttons += `
+      <button 
+        type="button" 
+        class="btn btn-sm mb-1 st-btn" 
+        style="background-color:#C8E3FF"
+      >
+        <i class="bi bi-cash"></i>
+      </button>
+    `;
+          }
         }
 
         return buttons;

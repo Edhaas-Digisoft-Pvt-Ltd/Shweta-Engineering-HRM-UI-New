@@ -13,7 +13,7 @@ import { IRowNode } from 'ag-grid-community';
 export class PayrollProcessApprovedComponent {
 
   CompanyNames: any = [];
-  selectedCompanyId: any = 1;
+  selectedCompanyId: any;
   selectedYear: any;
   selectedMonth: any;
   rowData: any = [];
@@ -64,6 +64,7 @@ export class PayrollProcessApprovedComponent {
   }
 
   ngOnInit() {
+    this.selectedCompanyId = this.service.selectedCompanyId();
     // this.selectedYear = new Date().getFullYear();
     // this.selectedMonth = new Date().getMonth();
     // const currentDate = new Date();
@@ -75,11 +76,11 @@ export class PayrollProcessApprovedComponent {
     const lastMonthDate = new Date(today.getFullYear(), today.getMonth() - 1, 1);
 
     this.selectedYear = lastMonthDate.getFullYear();
-    this.selectedMonth = lastMonthDate.getMonth() + 1; 
+    this.selectedMonth = lastMonthDate.getMonth() + 1;
 
     this.today = today.toISOString().split('T')[0];
-    
-    this.generateYears(); 
+
+    this.generateYears();
     this.getCompanyNames();
     // this.getApprovedPayroll();
     this.getPagination();
@@ -103,7 +104,7 @@ export class PayrollProcessApprovedComponent {
       }
     );
   }
-  
+
   generateYears(range: number = 5) {
     const currentYear = new Date().getFullYear();
     this.years = [];
@@ -126,14 +127,14 @@ export class PayrollProcessApprovedComponent {
   onGridReady(params: { api: any }) {
     this.gridApiActive = params.api;
   }
-  
+
   getApprovedPayroll(page: number = 1): void {
     this.isLoading = true;
     this.service.post('fetch/approved/payroll', {
       company_id: this.selectedCompanyId,
       year: this.selectedYear,
       month: this.selectedMonth,
-      page:page,
+      page: page,
       isexport: false
     }).subscribe(
       (res: any) => {
@@ -319,33 +320,33 @@ export class PayrollProcessApprovedComponent {
     this.downloadAsCSV(mergedData, `Payroll_  ${monthYear}.csv`);
   }
 
-downloadAsCSV(data: any[], filename: string) {
-  if (!data || !data.length) return;
+  downloadAsCSV(data: any[], filename: string) {
+    if (!data || !data.length) return;
 
-  const separator = ',';
-  const keys = Object.keys(data[0]);
+    const separator = ',';
+    const keys = Object.keys(data[0]);
 
-  const csvContent = [
-    keys.join(separator),
-    ...data.map(row =>
-      keys.map(k => `"${(row[k] ?? '').toString().replace(/"/g, '""')}"`).join(separator)
-    )
-  ].join('\n');
+    const csvContent = [
+      keys.join(separator),
+      ...data.map(row =>
+        keys.map(k => `"${(row[k] ?? '').toString().replace(/"/g, '""')}"`).join(separator)
+      )
+    ].join('\n');
 
-  const BOM = '\uFEFF';
-  const blob = new Blob([BOM + csvContent], { type: 'text/csv;charset=utf-8;' });
+    const BOM = '\uFEFF';
+    const blob = new Blob([BOM + csvContent], { type: 'text/csv;charset=utf-8;' });
 
-  const link = document.createElement('a');
-  const url = URL.createObjectURL(blob);
-  link.setAttribute('href', url);
-  link.setAttribute('download', filename);
-  link.style.visibility = 'hidden';
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
-}
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    link.setAttribute('href', url);
+    link.setAttribute('download', filename);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  }
 
-getPagination() {
+  getPagination() {
     this.service.post('get-pagination', {}).subscribe((res: any) => {
       if (res.status === 'success') {
         this.paginationvalue = res.data;
@@ -374,7 +375,7 @@ getPagination() {
     let startPage = current;
     let endPage = current + pageWindow - 1;
     if (endPage >= total) {
-      endPage = total - 1; 
+      endPage = total - 1;
       startPage = Math.max(2, total - pageWindow);
     }
 

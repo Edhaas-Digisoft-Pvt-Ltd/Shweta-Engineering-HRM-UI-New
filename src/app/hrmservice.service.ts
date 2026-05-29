@@ -25,14 +25,13 @@ export class HrmserviceService {
   // url: string = 'https://shwetaengineers.co.in/seplpayroll/api/v1/';  
 
   //shweta local   
-  url: string = 'http://192.168.1.2:8080/hr/seplpayroll/public/api/v1/';  
+  // url: string = 'http://192.168.1.2:8080/hr/seplpayroll/public/api/v1/';  
 
   //om local
   //  url: string = 'http://localhost/payroll/seplpayroll/public/api/v1/';
 
   //local
-  // url: string = 'http://127.0.0.1:8000/api/v1/';
-
+  url: string = 'http://127.0.0.1:8000/api/v1/';
 
   constructor(private router: Router, private httpClient: HttpClient) {
     this.loadRoleFromStorage();

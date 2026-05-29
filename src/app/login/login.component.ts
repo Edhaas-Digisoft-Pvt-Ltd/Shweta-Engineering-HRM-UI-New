@@ -26,10 +26,7 @@ export class LoginComponent {
     this.loginForm = new FormGroup({
       email: new FormControl('', [
         Validators.required,
-        Validators.email,
-        Validators.pattern(
-          /^[a-zA-Z0-9._%+-]+@[a-zA-Z]+\.[a-zA-Z]{2,}(?:\.[a-zA-Z]{2,})?$/
-        ),
+        Validators.pattern(/^[0-9]{10}$/),
       ]), // Email validation
       password: new FormControl('', [
         Validators.required,
