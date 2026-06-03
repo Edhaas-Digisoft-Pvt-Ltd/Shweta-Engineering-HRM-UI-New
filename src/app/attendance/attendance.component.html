@@ -26,6 +26,11 @@
                                 Live Attendance
                             </a>
                         </li>
+                        <li class="nav-item" (click)="selectTab('verify')" *ngIf="hasAccess('Live_attendance', 'view')">
+                            <a class="nav-link fw-bold" [ngClass]="{'active': activeTab === 'verify'}">
+                                Verify Attendance
+                            </a>
+                        </li>
                         <li class="nav-item" (click)="selectTab('tab1')">
                             <a class="nav-link fw-bold" [ngClass]="{'active': activeTab === 'tab1'}">Imported
                                 Attendance</a>
@@ -43,6 +48,10 @@
 
                         <div *ngIf="activeTab === 'live' && hasAccess('Live_attendance', 'view')">
                             <app-live-attendance></app-live-attendance>
+                        </div>
+
+                        <div *ngIf="activeTab === 'verify' && hasAccess('Live_attendance', 'view')">
+                            <app-verify-attendance></app-verify-attendance>
                         </div>
 
                         <div *ngIf="activeTab === 'tab1'">

@@ -72,6 +72,7 @@ import { InsufficientLeavesComponent } from './leave/insufficient-leaves/insuffi
 import { AbsenteesComponent } from './leave/absentees/absentees.component';
 import { HolidayCalendarComponent } from './configuration/holiday-calendar/holiday-calendar.component';
 import { LiveAttendanceComponent } from './attendance/live-attendance/live-attendance.component';
+import { VerifyAttendanceComponent } from './attendance/verify-attendance/verify-attendance.component';
 // FullCalendarModule.registerPlugins([dayGridPlugin]);
 
 //onkar
@@ -137,6 +138,7 @@ import { LiveAttendanceComponent } from './attendance/live-attendance/live-atten
     AbsenteesComponent,
     HolidayCalendarComponent,
     LiveAttendanceComponent,
+    VerifyAttendanceComponent,
 
   ],
   imports: [

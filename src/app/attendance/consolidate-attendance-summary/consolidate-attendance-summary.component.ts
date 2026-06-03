@@ -63,12 +63,12 @@ export class ConsolidateAttendanceSummaryComponent {
     { key: 'A', color: '#F90004' },
     { key: 'W/O', color: '#EDD000' },
     // { key: 'W/od', color: '#9FFF04' },
-    { key: 'H', color: '#04BCFF' },
+    { key: 'H', color: '#9FFF04' },
     // { key: 'WFH', color: '#0066EB' },
     // { key: 'HD', color: '#0066EB' },
-    { key: 'OT', color: '#FFA704' },
-    { key: 'LT', color: '#880021' },
-    { key: 'Th', color: '#BD7B00' },
+    { key: 'OT', color: '#0066EB' },
+    { key: 'LT', color: '#BD7B00' },
+    // { key: 'Th', color: '#BD7B00' },
   ];
 
   ngOnInit() {
@@ -269,8 +269,8 @@ export class ConsolidateAttendanceSummaryComponent {
           { headerName: this.getHeaderWithDot('W/O', '#EDD000'), field: `${monthKey}-W/O`, width: 70, valueFormatter: this.showDashIfEmpty, headerComponentParams: { template: this.getHeaderWithDot('W/O', '#EDD000') } },
           { headerName: this.getHeaderWithDot('H', '#04BCFF'), field: `${monthKey}-H`, width: 70, valueFormatter: this.showDashIfEmpty, headerComponentParams: { template: this.getHeaderWithDot('H', '#04BCFF') } },
           // { headerName: this.getHeaderWithDot('HD', '#0066EB'), field: `${monthKey}-HD`, width: 70, valueFormatter: this.showDashIfEmpty, headerComponentParams: { template: this.getHeaderWithDot('HD', '#0066EB') } },
-          { headerName: this.getHeaderWithDot('LT', '#880021'), field: `${monthKey}-LT`, width: 70, valueFormatter: this.showDashIfEmpty, headerComponentParams: { template: this.getHeaderWithDot('LT', '#880021') } },
-          { headerName: this.getHeaderWithDot('OT', '#FFA704'), field: `${monthKey}-OT`, width: 70, valueFormatter: this.showDashIfEmpty, headerComponentParams: { template: this.getHeaderWithDot('OT', '#FFA704') } },
+          { headerName: this.getHeaderWithDot('LT', '#BD7B00'), field: `${monthKey}-LT`, width: 70, valueFormatter: this.showDashIfEmpty, headerComponentParams: { template: this.getHeaderWithDot('LT', '#BD7B00') } },
+          { headerName: this.getHeaderWithDot('OT', '#0066EB'), field: `${monthKey}-OT`, width: 70, valueFormatter: this.showDashIfEmpty, headerComponentParams: { template: this.getHeaderWithDot('OT', '#0066EB') } },
         ]
       };
 

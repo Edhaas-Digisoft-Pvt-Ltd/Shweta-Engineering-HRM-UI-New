@@ -93,7 +93,7 @@
                                 </div>
 
                             </div>
-                            <div *ngIf="employeeDetails.role_id == 2" class="row m-0 p-0 mt-3">
+                            <div *ngIf="employeeDetails.role_id == 2 || employeeDetails.role_id == 12 ||employeeDetails.role_id == 13" class="row m-0 p-0 mt-3">
                                 <div class="col-12 col-sm-6">
                                     <div
                                         class="d-flex flex-column align-items-center justify-content-center p-2 py-2 attandance-summary">
@@ -330,7 +330,7 @@
                                             </tr>
                                             <tr>
                                                 <td data-label="Compound">Total Salary</td>
-                                                <td data-label="Calculation">OT amt+Per day amt</td>
+                                                <td data-label="Calculation">Total</td>
                                                 <td data-label="Amount (in ₹)">₹ {{
                                                     formatted(calculationData?.total_salary)}}
                                                 </td>

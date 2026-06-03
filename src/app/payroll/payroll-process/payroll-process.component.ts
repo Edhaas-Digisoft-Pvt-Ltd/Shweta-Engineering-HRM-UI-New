@@ -94,15 +94,15 @@ export class PayrollProcessComponent {
 
     // this.getPagination();
 
-    if (sessionStorage.getItem('roleName') == 'Accountant') {
-      this.router.navigate(['/authPanal/payrollProcess']);
-      return;
-    } else {
-      alert('Please Login To Proceed');
-      sessionStorage.clear();
-      this.router.navigate(['']);
-      return;
-    }
+    // if (sessionStorage.getItem('roleName') == 'Accountant') {
+    //   this.router.navigate(['/authPanal/payrollProcess']);
+    //   return;
+    // } else {
+    //   alert('Please Login To Proceed');
+    //   sessionStorage.clear();
+    //   this.router.navigate(['']);
+    //   return;
+    // }
   }
 
   getMonthName(monthId: number): string {
