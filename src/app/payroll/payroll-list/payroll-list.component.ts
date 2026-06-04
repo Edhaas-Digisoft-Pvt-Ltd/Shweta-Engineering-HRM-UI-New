@@ -510,6 +510,7 @@ export class PayrollListComponent {
       'ESIC Employee 0.75%',
       'Advance Salary',
       'Incentive Amount',
+      'Default holiday Pay',
       'Salary Payable'
     );
 
@@ -521,7 +522,7 @@ export class PayrollListComponent {
       headerRow2.push(`${d} ${monthName.slice(0, 3)}`);
     }
 
-    const extraCols = 22 + (this.showLwpColumns ? 2 : 0); // +1 because of H/O
+    const extraCols = 23 + (this.showLwpColumns ? 2 : 0); // +1 because of H/O
     for (let i = 0; i < extraCols; i++) headerRow2.push('');
 
     worksheet.addRow(headerRow2);
@@ -584,6 +585,7 @@ export class PayrollListComponent {
         emp.esic_deduction,
         emp.adv_deduction,
         emp.incentive_amount,
+        emp.default_holiday_pay,   
         emp.net_salary
       );
 
@@ -635,7 +637,7 @@ export class PayrollListComponent {
       totals.total_pf_employer,
       totals.total_esic,
       totals.total_adv_salary,
-      '',
+      '','',
       totals.total_net_salary
     );
 

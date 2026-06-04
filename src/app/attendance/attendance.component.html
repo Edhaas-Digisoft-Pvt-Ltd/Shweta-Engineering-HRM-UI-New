@@ -32,7 +32,7 @@
                             </a>
                         </li>
                         <li class="nav-item" (click)="selectTab('tab1')">
-                            <a class="nav-link fw-bold" [ngClass]="{'active': activeTab === 'tab1'}">Imported
+                            <a class="nav-link fw-bold" [ngClass]="{'active': activeTab === 'tab1'}">Verified & Imported
                                 Attendance</a>
                         </li>
                         <li class="nav-item" (click)="selectTab('tab2')">
@@ -89,8 +89,8 @@
                                                     (click)="fileInput.click()">Import Excel</button>
                                             </div>
 
-                                            <button class="btn text-white rounded-3 ExcelBtn"
-                                                (click)="exportAttendance()">Export</button>
+                                            <!-- <button class="btn text-white rounded-3 ExcelBtn"
+                                                (click)="exportAttendance()">Export</button> -->
                                         </ng-container>
 
                                     </div>

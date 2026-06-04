@@ -328,6 +328,13 @@
                                                     formatted(calculationData?.total_expense)}}
                                                 </td>
                                             </tr>
+                                             <tr *ngIf="calculationData?.default_holiday_pay > 0">
+                                                <td data-label="Compound">Default Holiday Pay</td>
+                                                <td data-label="Calculation">-</td>
+                                                <td data-label="Amount (in ₹)">₹ {{
+                                                    formatted(calculationData?.default_holiday_pay)}}
+                                                </td>
+                                            </tr>
                                             <tr>
                                                 <td data-label="Compound">Total Salary</td>
                                                 <td data-label="Calculation">Total</td>
