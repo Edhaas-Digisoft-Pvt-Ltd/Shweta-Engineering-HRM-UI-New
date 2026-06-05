@@ -132,8 +132,13 @@ export class LeaveConfigComponent {
     });
 
     // Add this after LeaveRule is defined in constructor
+    const maxCarryControl = this.LeaveRule.get('max_carry_forward');
+
+    // Set default immediately
+    maxCarryControl?.setValue(0);
+    maxCarryControl?.disable();
+
     this.LeaveRule.get('carry_forward')?.valueChanges.subscribe(value => {
-      const maxCarryControl = this.LeaveRule.get('max_carry_forward');
       if (value === 'FALSE') {
         maxCarryControl?.setValue(0);
         maxCarryControl?.disable();
