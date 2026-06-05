@@ -14,23 +14,23 @@
             <div class="card-header  border-0 bg-white p-0">
                 <ul class="nav nav-tabs">
                     <li class="nav-item">
-                        <a class="nav-link xyz" [class.active]="currentStep === 1"> Personal Info</a>
+                        <a class="nav-link xyz" [class.active]="currentStep === 1" (click)="goToStep(1)" style="cursor:pointer;"> Personal Info</a>
                     </li>
                     <span class="abc"></span>
                     <li class="nav-item">
-                        <a class="nav-link xyz" [class.active]="currentStep === 2"> Professional Info</a>
+                        <a class="nav-link xyz" [class.active]="currentStep === 2" (click)="goToStep(2)" style="cursor:pointer;"> Professional Info</a>
                     </li>
                     <span class="abc"></span>
                     <li class="nav-item">
-                        <a class="nav-link xyz" [class.active]="currentStep === 3"> Bank Details</a>
+                        <a class="nav-link xyz" [class.active]="currentStep === 3" (click)="goToStep(3)" style="cursor:pointer;"> Bank Details</a>
                     </li>
                     <span class="abc"></span>
                     <li class="nav-item ">
-                        <a class="nav-link xyz" [class.active]="currentStep === 4">Statutory Info</a>
+                        <a class="nav-link xyz" [class.active]="currentStep === 4" (click)="goToStep(4)" style="cursor:pointer;">Statutory Info</a>
                     </li>
                     <span class="abc"></span>
                     <li class="nav-item active">
-                        <a class="nav-link xyz" [class.active]="currentStep === 5"> Salary Structure</a>
+                        <a class="nav-link xyz" [class.active]="currentStep === 5" (click)="goToStep(5)" style="cursor:pointer;"> Salary Structure</a>
                     </li>
                     <!-- <span class="abc"></span> -->
                     <!-- <li class="nav-item">

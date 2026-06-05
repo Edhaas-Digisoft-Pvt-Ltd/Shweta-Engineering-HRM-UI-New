@@ -783,4 +783,8 @@ export class CreateEmployeeComponent {
     const url = URL.createObjectURL(slot.file);
     window.open(url, '_blank');
   }
+
+  goToStep(step: number): void {
+    this.currentStep = step;
+  }
 }

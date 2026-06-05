@@ -767,4 +767,8 @@ export class UpdateEmployeeComponent {
       }
     });
   }
+
+  goToStep(step: number): void {
+    this.currentStep = step;
+  }
 }
