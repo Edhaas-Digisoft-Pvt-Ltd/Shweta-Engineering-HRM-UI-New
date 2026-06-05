@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { ColDef } from 'ag-grid-community';
+import { ColDef, GridApi, GridReadyEvent } from 'ag-grid-community';
 import { ToastrService } from 'ngx-toastr';
 import { HrmserviceService } from 'src/app/hrmservice.service';
 
@@ -8,21 +8,19 @@ import { HrmserviceService } from 'src/app/hrmservice.service';
   templateUrl: './verify-attendance.component.html',
   styleUrls: ['./verify-attendance.component.css']
 })
-export class VerifyAttendanceComponent {
+export class VerifyAttendanceComponent implements OnInit {
 
   rowData: any[] = [];
   isLoading: boolean = false;
   searchInputValue: string = '';
   searchTimeout: any;
 
-  totalRows: number = 0;
-  currentPage: number = 1;
-  lastPage: number = 1;
-  pagesToShow: (number | string)[] = [];
-  paginationvalue: number = 10;
-
   selectedMonth: number = new Date().getMonth() + 1;
   selectedYear: number = new Date().getFullYear();
+
+  selectedIds: Set<number> = new Set();
+
+  private gridApi!: GridApi;
 
   months = [
     { value: 1, label: 'January' }, { value: 2, label: 'February' },
@@ -43,7 +41,18 @@ export class VerifyAttendanceComponent {
   };
 
   columnDefs: ColDef[] = [
-    { headerName: '#', valueGetter: 'node.rowIndex + 1', flex: 0, width: 60 },
+    {
+      headerName: '',
+      field: 'attendance_live_id',
+      flex: 0,
+      width: 50,
+      sortable: false,
+      filter: false,
+      // Header checkbox (select all)
+      headerCheckboxSelection: true,
+      headerCheckboxSelectionFilteredOnly: true,
+      checkboxSelection: true,
+    },
     { headerName: 'Employee Code', valueGetter: (p) => p.data?.employee?.employee_code || '' },
     { headerName: 'Name', valueGetter: (p) => p.data?.employee?.emp_name || '' },
     { headerName: 'Date', field: 'currentdate' },
@@ -60,7 +69,13 @@ export class VerifyAttendanceComponent {
     },
   ];
 
-  gridOptions = { pagination: false };
+  gridOptions = {
+    pagination: true,
+    paginationPageSize: 10,
+    paginationPageSizeSelector: [10, 25, 50, 100],
+    rowSelection: 'multiple' as const,
+    suppressRowClickSelection: true,  // only checkbox triggers selection
+  };
 
   constructor(
     private service: HrmserviceService,
@@ -68,31 +83,19 @@ export class VerifyAttendanceComponent {
   ) { }
 
   ngOnInit(): void {
-    // Populate year dropdown: 5 years back → current year
     const currentYear = new Date().getFullYear();
     for (let y = currentYear; y >= currentYear - 5; y--) {
       this.years.push(y);
     }
-
-    this.getPaginationAndFetch();
+    this.fetchUnverifiedAttendance();
   }
 
-  getPaginationAndFetch(): void {
-    this.service.post('get-pagination', {}).subscribe({
-      next: (res: any) => {
-        this.paginationvalue = res.status === 'success' ? res.data : 10;
-        this.fetchUnverifiedAttendance();
-      },
-      error: () => {
-        this.paginationvalue = 10;
-        this.fetchUnverifiedAttendance();
-      }
-    });
+  onGridReady(params: GridReadyEvent): void {
+    this.gridApi = params.api;
   }
 
   fetchUnverifiedAttendance(): void {
     const body: any = {
-      page: this.currentPage,
       month: this.selectedMonth,
       year: this.selectedYear,
     };
@@ -108,14 +111,8 @@ export class VerifyAttendanceComponent {
         this.isLoading = false;
         if (res.status === 'success') {
           this.rowData = res.data;
-          this.totalRows = res.pagination.total;
-          this.currentPage = res.pagination.page;
-          this.lastPage = res.pagination.last_page;
-          this.generatePageNumbers();
         } else {
           this.rowData = [];
-          this.totalRows = 0;
-          this.pagesToShow = [];
         }
       },
       error: (err) => {
@@ -126,15 +123,35 @@ export class VerifyAttendanceComponent {
     });
   }
 
-  verifyAll(): void {
-    if (!confirm(`Are you sure you want to verify all attendance records?`)) return;
-    // if (!confirm(`Verify all attendance for ${this.months[this.selectedMonth - 1].label} ${this.selectedYear}?`)) return;
+  // Returns selected attendance_live_ids from AG Grid
+  getSelectedIds(): number[] {
+    if (!this.gridApi) return [];
+    return this.gridApi
+      .getSelectedRows()
+      .map((row: any) => row.attendance_live_id)
+      .filter(Boolean);
+  }
+
+  get selectedCount(): number {
+    return this.gridApi ? this.gridApi.getSelectedRows().length : 0;
+  }
+
+  verifySelected(): void {
+    const ids = this.getSelectedIds();
+
+    if (ids.length === 0) {
+      this.toastr.warning('Please select at least one record to verify.');
+      return;
+    }
+
+    if (!confirm(`Verify ${ids.length} selected attendance record(s)?`)) return;
 
     this.isLoading = true;
 
     this.service.post('verify-attendance', {
       month: this.selectedMonth,
       year: this.selectedYear,
+      attendance_live_ids: ids,
     }).subscribe({
       next: (res: any) => {
         this.isLoading = false;
@@ -143,7 +160,41 @@ export class VerifyAttendanceComponent {
             `Inserted: ${res.inserted} | Skipped: ${res.skipped} | Verified: ${res.verified}`,
             'Verification Complete'
           );
-          this.fetchUnverifiedAttendance(); // refresh grid
+          // Show warning if some employees were not in payroll
+          if (res.warning) {
+            this.toastr.warning(res.warning, 'Payroll Warning', { timeOut: 6000 });
+          }
+          this.fetchUnverifiedAttendance();
+        } else {
+          // All records failed payroll check
+          this.toastr.error(res.message || 'Verification failed.', 'Error', { timeOut: 6000 });
+        }
+      },
+      error: () => {
+        this.isLoading = false;
+        this.toastr.error('Something went wrong.');
+      }
+    });
+  }
+
+  verifyAll(): void {
+    if (!confirm(`Verify ALL unverified attendance for ${this.months[this.selectedMonth - 1].label} ${this.selectedYear}?`)) return;
+
+    this.isLoading = true;
+
+    this.service.post('verify-attendance', {
+      month: this.selectedMonth,
+      year: this.selectedYear,
+      // no attendance_live_ids → backend verifies all
+    }).subscribe({
+      next: (res: any) => {
+        this.isLoading = false;
+        if (res.status === 'success') {
+          this.toastr.success(
+            `Inserted: ${res.inserted} | Skipped: ${res.skipped} | Verified: ${res.verified}`,
+            'Verification Complete'
+          );
+          this.fetchUnverifiedAttendance();
         } else {
           this.toastr.error(res.message || 'Verification failed.');
         }
@@ -158,13 +209,11 @@ export class VerifyAttendanceComponent {
   onSearchChange(): void {
     clearTimeout(this.searchTimeout);
     this.searchTimeout = setTimeout(() => {
-      this.currentPage = 1;
       this.fetchUnverifiedAttendance();
     }, 500);
   }
 
   onFilterChange(): void {
-    this.currentPage = 1;
     this.fetchUnverifiedAttendance();
   }
 
@@ -172,54 +221,6 @@ export class VerifyAttendanceComponent {
     this.searchInputValue = '';
     this.selectedMonth = new Date().getMonth() + 1;
     this.selectedYear = new Date().getFullYear();
-    this.currentPage = 1;
     this.fetchUnverifiedAttendance();
-  }
-
-  // ── Pagination ──────────────────────────────────────────
-  generatePageNumbers(): void {
-    const total = this.lastPage;
-    const current = this.currentPage;
-    const window = this.paginationvalue;
-
-    let startPage = current;
-    let endPage = current + window - 1;
-
-    if (endPage >= total) {
-      endPage = total - 1;
-      startPage = Math.max(2, total - window);
-    }
-    if (current === 1) {
-      startPage = 2;
-      endPage = Math.min(total - 1, window);
-    }
-
-    const pages: (number | string)[] = [1];
-    if (startPage > 2) pages.push('...');
-    for (let i = startPage; i <= endPage; i++) pages.push(i);
-    if (endPage < total - 1) pages.push('...');
-    if (total > 1) pages.push(total);
-
-    this.pagesToShow = pages;
-  }
-
-  goToPage(page: number | string): void {
-    if (page === '...' || page === this.currentPage) return;
-    this.currentPage = page as number;
-    this.fetchUnverifiedAttendance();
-  }
-
-  nextPage(): void {
-    if (this.currentPage < this.lastPage) {
-      this.currentPage++;
-      this.fetchUnverifiedAttendance();
-    }
-  }
-
-  prevPage(): void {
-    if (this.currentPage > 1) {
-      this.currentPage--;
-      this.fetchUnverifiedAttendance();
-    }
   }
 }
