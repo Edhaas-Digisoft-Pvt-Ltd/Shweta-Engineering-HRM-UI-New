@@ -3,6 +3,7 @@ import { FormGroup, FormBuilder, Validators } from '@angular/forms';
 import { ToastrService } from 'ngx-toastr';
 import { HrmserviceService } from 'src/app/hrmservice.service';
 import { ActivatedRoute, Router } from '@angular/router';
+import { forkJoin, Observable, of } from 'rxjs';
 
 @Component({
   selector: 'app-update-employee',
@@ -48,6 +49,24 @@ export class UpdateEmployeeComponent {
   // new for update
   employe_id: any;
   fetchedEmployee: any = null;
+
+  //Document 
+  docUploads: {
+    [key: string]: {
+      file: File | null;
+      preview: string | null;
+      error: string;
+      uploading: boolean;
+      uploaded: boolean;
+      doc_id: number | null;
+      existing: { doc_id: number; original_name: string; mime_type: string } | null;
+      deleting: boolean;
+      pendingDelete: boolean; // NEW
+    }
+  } = {
+      aadhaar: { file: null, preview: null, error: '', uploading: false, uploaded: false, doc_id: null, existing: null, deleting: false, pendingDelete: false },
+      pan_card: { file: null, preview: null, error: '', uploading: false, uploaded: false, doc_id: null, existing: null, deleting: false, pendingDelete: false },
+    };
 
   constructor(
     private fb: FormBuilder,
@@ -291,6 +310,8 @@ export class UpdateEmployeeComponent {
           // update component salary vars
           this.annual_gross_salary = parseFloat(this.fetchedEmployee.annual_gross_salary) || 0;
           this.monthly_gross_salary = parseFloat(this.fetchedEmployee.monthly_gross_salary) || 0;
+          // inside fetchEmployee() next callback, after the patchValue block:
+          this.fetchEmployeeDocs();
         } else {
           this.toastr.error('Unable to fetch employee data');
         }
@@ -420,9 +441,9 @@ export class UpdateEmployeeComponent {
           if (res.shopfloor_warning) {
             this.toastr.warning(res.shopfloor_warning, 'Shopfloor Sync Warning', { timeOut: 8000 });
           }
-
-          this.router.navigate(['/authPanal/Employee']);
-          this.isLoading = false;
+          this.handleDocOperations();
+          // this.router.navigate(['/authPanal/Employee']);
+          // this.isLoading = false;
         } else {
           this.toastr.error('Update failed!');
           this.isLoading = false;
@@ -561,5 +582,189 @@ export class UpdateEmployeeComponent {
       const cleaned = control.value?.trim().replace(/\s+/g, ' ') || '';
       control.setValue(cleaned, { emitEvent: false });
     }
+  }
+
+  // Call this inside fetchEmployee() after patchValue, or separately in ngOnInit after employe_id is set
+  fetchEmployeeDocs(): void {
+    if (!this.employe_id) return;
+
+    this.service.post('fetch/employee-documents', { employe_id: this.employe_id }).subscribe({
+      next: (res: any) => {
+        if (res.status === 'success') {
+          (res.data as any[]).forEach(doc => {
+            const slot = this.docUploads[doc.doc_type];
+            if (slot) {
+              slot.existing = {
+                doc_id: doc.doc_id,
+                original_name: doc.original_name,
+                mime_type: doc.mime_type,
+              };
+              slot.doc_id = doc.doc_id;
+            }
+          });
+        }
+      },
+      error: () => { /* silent — docs are optional */ }
+    });
+  }
+
+  deleteExistingDoc(docType: string): void {
+    const slot = this.docUploads[docType];
+    if (!slot.existing) return;
+
+    slot.doc_id = slot.existing.doc_id; // preserve for delete API call on submit
+    slot.pendingDelete = true;
+    slot.existing = null; // hide from UI → upload zone appears
+  }
+
+  onDocFileSelected(event: Event, docType: string): void {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    const slot = this.docUploads[docType];
+
+    slot.error = '';
+    slot.uploaded = false;
+    slot.doc_id = null;
+
+    if (!file) return;
+
+    const allowedTypes = ['image/jpeg', 'image/png', 'application/pdf'];
+    if (!allowedTypes.includes(file.type)) {
+      slot.error = 'Only JPG, PNG or PDF allowed.';
+      input.value = '';
+      return;
+    }
+    if (file.size > 2 * 1024 * 1024) {
+      slot.error = 'File must be under 2MB.';
+      input.value = '';
+      return;
+    }
+
+    slot.file = file;
+    slot.preview = file.type.startsWith('image/') ? URL.createObjectURL(file) : null;
+  }
+
+  removeDocFile(docType: string): void {
+    const slot = this.docUploads[docType];
+    if (slot.preview) URL.revokeObjectURL(slot.preview);
+    slot.file = null;
+    slot.preview = null;
+    slot.uploaded = false;
+    slot.error = '';
+    slot.doc_id = null;
+  }
+
+  openExistingDoc(docType: string): void {
+    const slot = this.docUploads[docType];
+    if (!slot.existing) return;
+
+    const baseUrl = this.service['url'];
+    const token = sessionStorage.getItem('AUTH') || '';
+    const url = `${baseUrl}view/employee-document/${slot.existing.doc_id}`;
+
+    fetch(url, {
+      method: 'GET',
+      headers: { 'Authorization': 'Bearer ' + token }
+    })
+      .then(res => {
+        if (!res.ok) throw new Error('Failed to fetch document');
+        return res.blob();
+      })
+      .then(blob => {
+        const blobUrl = URL.createObjectURL(blob);
+        window.open(blobUrl, '_blank');
+        // clean up after a short delay
+        setTimeout(() => URL.revokeObjectURL(blobUrl), 10000);
+      })
+      .catch(() => {
+        this.toastr.error('Could not open document. Please try again.');
+      });
+  }
+
+  openDocPreview(docType: string): void {
+    const slot = this.docUploads[docType];
+    if (!slot.file) return;
+    const url = URL.createObjectURL(slot.file);
+    window.open(url, '_blank');
+  }
+
+  uploadSingleDoc(empId: number, docType: string): Observable<any> {
+    const slot = this.docUploads[docType];
+    if (!slot.file) return of(null);
+
+    const fd = new FormData();
+    fd.append('employe_id', String(empId));
+    fd.append('doc_type', docType);
+    fd.append('document', slot.file, slot.file.name);
+    slot.uploading = true;
+
+    return new Observable(observer => {
+      const xhr = new XMLHttpRequest();
+      xhr.open('POST', this.service['url'] + 'upload/employee-document', true);
+      const token = sessionStorage.getItem('AUTH') || '';
+      if (token) xhr.setRequestHeader('Authorization', 'Bearer ' + token);
+
+      xhr.onload = () => {
+        slot.uploading = false;
+        try {
+          const res = JSON.parse(xhr.responseText);
+          if (res.status === 'success') {
+            slot.uploaded = true;
+            slot.doc_id = res.data.doc_id;
+            observer.next(res);
+          } else {
+            slot.error = res.data || 'Upload failed.';
+            observer.next(null);
+          }
+        } catch { slot.error = 'Invalid server response.'; observer.next(null); }
+        observer.complete();
+      };
+      xhr.onerror = () => {
+        slot.uploading = false;
+        slot.error = 'Network error.';
+        observer.next(null);
+        observer.complete();
+      };
+      xhr.send(fd);
+    });
+  }
+
+  handleDocOperations(): void {
+    const docTypes = Object.keys(this.docUploads);
+
+    // Build delete observables for pendingDelete slots
+    const deleteObs = docTypes
+      .filter(t => this.docUploads[t].pendingDelete && this.docUploads[t].doc_id !== null)
+      .map(t => this.service.deleteWithAuth(`delete/employee-document/${this.docUploads[t].doc_id}`));
+
+    // Build upload observables for new files
+    const uploadObs = docTypes
+      .filter(t => this.docUploads[t].file !== null)
+      .map(t => this.uploadSingleDoc(this.employe_id, t));
+
+    const allOps = [...deleteObs, ...uploadObs];
+
+    if (allOps.length === 0) {
+      // No doc operations needed
+      this.toastr.success('Successfully Updated!');
+      this.isLoading = false;
+      this.router.navigate(['/authPanal/Employee']);
+      return;
+    }
+
+    forkJoin(allOps).subscribe({
+      next: () => {
+        this.toastr.success('Successfully Updated!');
+        this.isLoading = false;
+        this.router.navigate(['/authPanal/Employee']);
+      },
+      error: () => {
+        // Employee was updated but doc ops had issues
+        this.toastr.success('Employee updated!');
+        this.toastr.warning('Some document operations failed. Please retry from this screen.', 'Doc Warning');
+        this.isLoading = false;
+        this.router.navigate(['/authPanal/Employee']);
+      }
+    });
   }
 }

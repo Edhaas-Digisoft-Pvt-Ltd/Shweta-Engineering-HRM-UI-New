@@ -2,6 +2,7 @@ import { ChangeDetectorRef, Component } from '@angular/core';
 import { FormGroup, FormBuilder, Validators } from '@angular/forms';
 import { ToastrService } from 'ngx-toastr';
 import { HrmserviceService } from 'src/app/hrmservice.service';
+import { forkJoin, of, Observable } from 'rxjs';
 
 @Component({
   selector: 'app-create-employee',
@@ -47,6 +48,21 @@ export class CreateEmployeeComponent {
   showPassword = false;
   showConfirmPassword = false;
   submitted = false;
+
+  // ── Document upload state ─────────────────────────────────────────────────────
+  docUploads: {
+    [key: string]: {
+      file: File | null;
+      preview: string | null;
+      error: string;
+      uploading: boolean;
+      uploaded: boolean;
+      doc_id: number | null;
+    }
+  } = {
+      aadhaar: { file: null, preview: null, error: '', uploading: false, uploaded: false, doc_id: null },
+      pan_card: { file: null, preview: null, error: '', uploading: false, uploaded: false, doc_id: null },
+    };
 
   constructor(
     private fb: FormBuilder,
@@ -462,46 +478,49 @@ export class CreateEmployeeComponent {
     this.service.post("create/employee", current_data).subscribe({
       next: (res: any) => {
         if (res.status === 'success') {
-          this.toastr.success('Successfully Submitted!');
+          const newEmpId = res.data.employe_id;
 
-          // Show shopfloor sync warning if any
-          if (res.shopfloor_warning) {
-            this.toastr.warning(res.shopfloor_warning, 'Shopfloor Sync');
+          // Check if any docs were selected
+          const docTypes = Object.keys(this.docUploads).filter(t => this.docUploads[t].file !== null);
+
+          if (docTypes.length > 0) {
+            // Upload docs after employee created
+            const uploads = docTypes.map(t => this.uploadSingleDoc(newEmpId, t));
+            forkJoin(uploads).subscribe({
+              next: () => {
+                const allOk = docTypes.every(t => this.docUploads[t].uploaded);
+                if (allOk) {
+                  this.toastr.success('Employee and documents saved successfully!');
+                } else {
+                  this.toastr.success('Employee created!');
+                  this.toastr.warning('Some documents failed to upload. Retry from employee profile.', 'Doc Upload');
+                }
+                this.resetDocUploads();
+                this._resetForm();
+              }
+            });
+          } else {
+            this.toastr.success('Successfully Submitted!');
+            this._resetForm();
           }
 
-          // Show leave warning if any
-          if (res.warning) {
-            this.toastr.warning(res.warning, 'Leave Setup');
-          }
-
-          this.multiStepForm.reset();
-          this.submitted = false;
-          this.multiStepForm.patchValue({
-            department: null,
-            designation: null
-          });
-          this.currentStep = 1;
-          this.salaryAmount = 0;
-          this.annual_gross_salary = 0;
-        } else {
-          this.toastr.error('Submission failed!');
+          if (res.shopfloor_warning) this.toastr.warning(res.shopfloor_warning, 'Shopfloor Sync');
+          if (res.warning) this.toastr.warning(res.warning, 'Leave Setup');
         }
       },
       error: (err) => {
         this.toastr.error(err.error?.data || err.error?.message || 'Something went wrong!');
       }
     });
+  }
 
-    //   this.multiStepForm.reset();
-    //   this.currentStep = 1;
-    //   this.salaryAmount = 0;
-    //   this.annual_gross_salary = 0;
-
-    // } else {
-    //   this.toastr.error('Please fill all required fields.');
-    //   this.multiStepForm.markAllAsTouched();
-    //   console.log(this.multiStepForm.value);
-    // }
+  private _resetForm(): void {
+    this.multiStepForm.reset();
+    this.submitted = false;
+    this.multiStepForm.patchValue({ department: null, designation: null });
+    this.currentStep = 1;
+    this.salaryAmount = 0;
+    this.annual_gross_salary = 0;
   }
 
   calculateGrossSalary(values: any) {
@@ -655,12 +674,113 @@ export class CreateEmployeeComponent {
 
     return pass === confirm ? null : { mismatch: true };
   }
-  
+
   cleanEmployeeName(): void {
     const control = this.multiStepForm.get('emp_name');
     if (control) {
       const cleaned = control.value?.trim().replace(/\s+/g, ' ') || '';
       control.setValue(cleaned, { emitEvent: false });
     }
+  }
+
+  onDocFileSelected(event: Event, docType: string): void {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    const slot = this.docUploads[docType];
+
+    slot.error = '';
+    slot.uploaded = false;
+    slot.doc_id = null;
+
+    if (!file) return;
+
+    const allowedTypes = ['image/jpeg', 'image/png', 'application/pdf'];
+    if (!allowedTypes.includes(file.type)) {
+      slot.error = 'Only JPG, PNG or PDF allowed.';
+      input.value = '';
+      return;
+    }
+    if (file.size > 2 * 1024 * 1024) {
+      slot.error = 'File must be under 2MB.';
+      input.value = '';
+      return;
+    }
+
+    slot.file = file;
+    slot.preview = file.type.startsWith('image/') ? URL.createObjectURL(file) : null;
+  }
+
+  removeDocFile(docType: string): void {
+    const slot = this.docUploads[docType];
+    if (slot.preview) URL.revokeObjectURL(slot.preview);
+    slot.file = null;
+    slot.preview = null;
+    slot.uploaded = false;
+    slot.error = '';
+    slot.doc_id = null;
+  }
+
+  uploadSingleDoc(empId: number, docType: string): Observable<any> {
+    const slot = this.docUploads[docType];
+    if (!slot.file) return of(null);
+
+    const fd = new FormData();
+    fd.append('employe_id', String(empId));
+    fd.append('doc_type', docType);
+    fd.append('document', slot.file, slot.file.name);
+
+    slot.uploading = true;
+
+    return new Observable(observer => {
+      const xhr = new XMLHttpRequest();
+      xhr.open('POST', this.service['url'] + 'upload/employee-document', true);
+
+      // Auth token — same one your service.post() uses
+      const token = sessionStorage.getItem('AUTH') || '';
+      if (token) {
+        xhr.setRequestHeader('Authorization', 'Bearer ' + token);
+      }
+
+      xhr.onload = () => {
+        slot.uploading = false;
+        try {
+          const res = JSON.parse(xhr.responseText);
+          if (res.status === 'success') {
+            slot.uploaded = true;
+            slot.doc_id = res.data.doc_id;
+            observer.next(res);
+          } else {
+            slot.error = res.data || 'Upload failed.';
+            observer.next(null);
+          }
+        } catch (e) {
+          slot.error = 'Invalid server response.';
+          observer.next(null);
+        }
+        observer.complete();
+      };
+
+      xhr.onerror = () => {
+        slot.uploading = false;
+        slot.error = 'Network error. Retry from employee profile.';
+        observer.next(null);
+        observer.complete();
+      };
+
+      xhr.send(fd);
+    });
+  }
+
+  resetDocUploads(): void {
+    Object.keys(this.docUploads).forEach(key => this.removeDocFile(key));
+  }
+
+  //show doc in new tab
+  openDocPreview(docType: string): void {
+    const slot = this.docUploads[docType];
+    if (!slot.file) return;
+
+    const url = URL.createObjectURL(slot.file);
+    window.open(url, '_blank');
   }
 }

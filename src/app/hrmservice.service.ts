@@ -117,6 +117,15 @@ export class HrmserviceService {
     return this.httpClient.delete(this.url + '/' + endpoint, reqOpts);
   }
 
+  deleteWithAuth(endpoint: string) {
+    const jwtToken = sessionStorage.getItem('AUTH') || '';
+    return this.httpClient.delete(this.url + endpoint, {
+      headers: new HttpHeaders({
+        'Authorization': 'Bearer ' + jwtToken,
+      }),
+    });
+  }
+
   patch(endpoint: string, body: any, reqOpts?: any) {
     return this.httpClient.patch(this.url + '/' + endpoint, body, reqOpts);
   }
