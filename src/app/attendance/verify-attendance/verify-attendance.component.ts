@@ -144,7 +144,7 @@ export class VerifyAttendanceComponent implements OnInit {
       return;
     }
 
-    if (!confirm(`Verify ${ids.length} selected attendance record(s)?`)) return;
+    if (!confirm(`Are you sure you want to verify ${ids.length} selected attendance record(s)?`)) return;
 
     this.isLoading = true;
 
