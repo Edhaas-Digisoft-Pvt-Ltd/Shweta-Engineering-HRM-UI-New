@@ -28,6 +28,9 @@ export class AttendanceComponent {
   paginationvalue: any;
   currentFilter: string = '';
 
+  startDate: string = this.getFirstDayOfMonth();
+  endDate: string = this.getLastDayOfMonth();
+
   constructor(private toastr: ToastrService, private service: HrmserviceService, private router: Router,) { }
 
   ngOnInit() {
@@ -150,6 +153,8 @@ export class AttendanceComponent {
   clearFilter() {
     this.currentFilter = '';
     this.searchInputValue = '';
+    this.startDate = this.getFirstDayOfMonth();
+    this.endDate = this.getLastDayOfMonth();
     this.currentPage = 1;
     this.fetchAttendance();
   }
@@ -158,6 +163,8 @@ export class AttendanceComponent {
     const body: any = {
       page: this.currentPage,
       limit: this.paginationvalue,
+      start_date: this.startDate,
+      end_date: this.endDate,
     };
 
     if (this.currentFilter) {
@@ -192,6 +199,10 @@ export class AttendanceComponent {
     });
   }
 
+  onDateRangeChange(): void {
+    this.currentPage = 1;
+    this.fetchAttendance();
+  }
 
   downloadTemplate(): void {
     const userConfirmed = confirm("Do you want to download the daily attendance template?");
@@ -504,6 +515,21 @@ export class AttendanceComponent {
       this.currentPage--;
       this.fetchAttendance();
     }
+  }
+
+  getFirstDayOfMonth(): string {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    return `${year}-${month}-01`;
+  }
+
+  getLastDayOfMonth(): string {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = now.getMonth() + 1;
+    const lastDay = new Date(year, month, 0).getDate();
+    return `${year}-${String(month).padStart(2, '0')}-${String(lastDay).padStart(2, '0')}`;
   }
 
 }

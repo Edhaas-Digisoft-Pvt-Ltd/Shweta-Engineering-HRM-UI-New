@@ -74,8 +74,9 @@ export class PayrollListComponent {
   }
 
   ngOnInit() {
-    this.selectedCompanyId = this.service.selectedCompanyId();
-
+    // this.selectedCompanyId = this.service.selectedCompanyId();
+    const savedId = this.service.selectedCompanyId();
+    this.selectedCompanyId = (savedId && savedId !== 'all') ? savedId : null;
     // this.selectedYear = new Date().getFullYear();
     // this.selectedMonth = new Date().getMonth();
     // // this.selectedYear = 2025;
@@ -94,7 +95,6 @@ export class PayrollListComponent {
     this.today = today.toISOString().split('T')[0];
 
     this.getCompanyNames();
-    this.getpayrollList();
 
     // this.getPagination();
   }
@@ -124,13 +124,18 @@ export class PayrollListComponent {
   getCompanyNames() {
     this.service.post('fetch/company', {}).subscribe((res: any) => {
       if (res.status == "success") {
-        this.CompanyNames = res.data
+        this.CompanyNames = res.data;
+
+        if (!this.selectedCompanyId || this.selectedCompanyId === 'all') {
+          this.selectedCompanyId = this.CompanyNames[0]?.company_id;
+          this.service.setCompanyId(this.selectedCompanyId);
+        }
+
+        this.getpayrollList(); // MOVE HERE — company is guaranteed to be set
       }
-    },
-      (error) => {
-        console.error('Error fetching companies:', error);
-      }
-    );
+    }, (error) => {
+      console.error('Error fetching companies:', error);
+    });
   }
 
   onCompanyChange(event: Event): void {
@@ -585,7 +590,7 @@ export class PayrollListComponent {
         emp.esic_deduction,
         emp.adv_deduction,
         emp.incentive_amount,
-        emp.default_holiday_pay,   
+        emp.default_holiday_pay,
         emp.net_salary
       );
 
@@ -637,7 +642,7 @@ export class PayrollListComponent {
       totals.total_pf_employer,
       totals.total_esic,
       totals.total_adv_salary,
-      '','',
+      '', '',
       totals.total_net_salary
     );
 

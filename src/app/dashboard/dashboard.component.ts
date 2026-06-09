@@ -59,6 +59,8 @@ export class DashboardComponent {
 
     // this.selectedYear = this.financialYears[0]; // default selected
     this.selectedYear = currentYear.toString(); // default selected
+    this.selectedCompanyId = 'all'; // Set default to 'all'
+    this.selectedCompany = 'All';
     this.getCompanyNames();
   }
 
@@ -75,9 +77,15 @@ export class DashboardComponent {
   }
 
   selectCompany(company: any) {
-    this.selectedCompany = company.company_name;
-    this.selectedCompanyId = company.company_id;
-    this.service.setCompanyId(this.selectedCompanyId);
+    if (company === 'all') {
+      this.selectedCompany = 'All Companies';
+      this.selectedCompanyId = 'all';
+      this.service.setCompanyId('all');
+    } else {
+      this.selectedCompany = company.company_name;
+      this.selectedCompanyId = company.company_id;
+      this.service.setCompanyId(this.selectedCompanyId);
+    }
 
     this.payrollStatistics();
     this.loadLeaveCards();
@@ -95,25 +103,16 @@ export class DashboardComponent {
       if (res.status === 'success') {
         this.CompanyNames = res.data;
 
-        // Check if there's a saved company ID
-        const savedCompanyId = this.service.selectedCompanyId();
+        // Always default to "All"
+        this.selectedCompanyId = 'all';
+        this.selectedCompany = 'All Companies';
+        this.service.setCompanyId('all');
 
-        // Find saved company if it exists in the new list
-        let defaultCompany = null;
-        if (savedCompanyId) {
-          defaultCompany = this.CompanyNames.find((comp: any) => comp.company_id === savedCompanyId);
-        }
-
-        // If no saved or valid company, pick the first one dynamically
-        if (!defaultCompany && this.CompanyNames.length > 0) {
-          defaultCompany = this.CompanyNames[0];
-          this.service.setCompanyId(defaultCompany.company_id);
-        }
-
-        // Now select that company
-        if (defaultCompany) {
-          this.selectCompany(defaultCompany);
-        }
+        this.payrollStatistics();
+        this.loadLeaveCards();
+        this.loadAttendanceSummary();
+        this.getDashboardSummary();
+        this.getNotifications();
       }
     });
   }

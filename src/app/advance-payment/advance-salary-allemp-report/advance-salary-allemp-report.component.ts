@@ -40,7 +40,7 @@ export class AdvanceSalaryAllempReportComponent {
   constructor(private fb: FormBuilder, private service: HrmserviceService, private toastr: ToastrService) { }
 
   ngOnInit() {
-    this.selectedCompanyId = this.service.selectedCompanyId();
+    this.selectedCompanyId = this.service.selectedCompanyId() ?? 'all';
     const currentDate = new Date();
     this.today = currentDate.toISOString().split('T')[0];
     this.role = this.service.getRole();
@@ -97,7 +97,7 @@ export class AdvanceSalaryAllempReportComponent {
 
   onCompanyChange(event: Event): void {
     this.selectedCompanyId = (event.target as HTMLSelectElement).value;
-    console.log('Selected Company ID:', this.selectedCompanyId);
+    this.currentPage = 1;
     this.getAllEmpAdvanceSalary();
   }
 
@@ -108,7 +108,10 @@ export class AdvanceSalaryAllempReportComponent {
   getCompanyNames() {
     this.service.post('fetch/company', {}).subscribe((res: any) => {
       if (res.status == "success") {
-        this.CompanyNames = res.data
+        this.CompanyNames = res.data;
+        if (!this.selectedCompanyId) {
+          this.selectedCompanyId = 'all'; 
+        }
       }
     },
       (error) => {

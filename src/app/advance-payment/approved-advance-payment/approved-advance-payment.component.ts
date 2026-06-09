@@ -43,7 +43,7 @@ export class ApprovedAdvancePaymentComponent {
   constructor(private fb: FormBuilder, private service: HrmserviceService, private toastr: ToastrService) { }
 
   ngOnInit() {
-    this.selectedCompanyId = this.service.selectedCompanyId();
+    this.selectedCompanyId = this.service.selectedCompanyId() ?? 'all';
     this.generateFinancialYears();
 
     const currentDate = new Date();
@@ -114,7 +114,7 @@ export class ApprovedAdvancePaymentComponent {
 
   onCompanyChange(event: Event): void {
     this.selectedCompanyId = (event.target as HTMLSelectElement).value;
-    console.log('Selected Company ID:', this.selectedCompanyId);
+    this.currentPage = 1;
     this.getAllApprovedRequest();
   }
 
@@ -125,7 +125,10 @@ export class ApprovedAdvancePaymentComponent {
   getCompanyNames() {
     this.service.post('fetch/company', {}).subscribe((res: any) => {
       if (res.status == "success") {
-        this.CompanyNames = res.data
+        this.CompanyNames = res.data;
+        if (!this.selectedCompanyId) {
+          this.selectedCompanyId = 'all'; 
+        }
       }
     },
       (error) => {

@@ -68,17 +68,33 @@
           </div>
         </div>
 
-        <div class="row justify-content-between gap-3 mb-3 ">
-          <div class="col border p-3 companyCard" *ngFor="let stat of CompanyNames"
-            [ngClass]="{'highlighted': selectedCompanyId === stat.company_id }" style="border-radius: 10px; cursor: pointer;"
-            (click)="selectCompany(stat)">
-            <div class="d-flex align-items-center gap-3">
-              <div class="logo-container">
-                <img [src]="stat.company_logo_url" alt="Company Logo" class="company-logo"/>
+        <div class="row mb-3">
+          <!-- All Companies Card -->
+          <div class="col-6 col-sm-4 col-md-3 col-lg-2 mb-2">
+            <div class="border p-2 companyCard h-100" [ngClass]="{'highlighted': selectedCompanyId === 'all'}"
+              style="border-radius: 10px; cursor: pointer;" (click)="selectCompany('all')">
+              <div class="d-flex flex-row align-items-center gap-2">
+                <i class="bi bi-buildings fs-3 text-primary flex-shrink-0"></i>
+                <div class="overflow-hidden">
+                  <h6 class="companyTitle mb-0 text-truncate" style="font-size: 13px;">All Companies</h6>
+                  <p class="mb-0 companyCount text-truncate" style="font-size: 11px;">View all records</p>
+                </div>
               </div>
-              <div>
-                <h6 class="companyTitle mb-1">{{ stat.company_name }}</h6>
-                <p class="mb-0 companyCount">{{ stat.company_desc }}</p>
+            </div>
+          </div>
+
+          <!-- Individual Company Cards -->
+          <div class="col-6 col-sm-4 col-md-3 col-lg-2 mb-2" *ngFor="let stat of CompanyNames">
+            <div class="border p-2 companyCard h-100" [ngClass]="{'highlighted': selectedCompanyId === stat.company_id}"
+              style="border-radius: 10px; cursor: pointer;" (click)="selectCompany(stat)">
+              <div class="d-flex flex-row align-items-center gap-2">
+                <div class="logo-container flex-shrink-0">
+                  <img [src]="stat.company_logo_url" alt="Company Logo" class="company-logo" />
+                </div>
+                <div class="overflow-hidden">
+                  <h6 class="companyTitle mb-0 text-truncate" style="font-size: 13px;">{{ stat.company_name }}</h6>
+                  <p class="mb-0 companyCount text-truncate" style="font-size: 11px;">{{ stat.company_desc }}</p>
+                </div>
               </div>
             </div>
           </div>

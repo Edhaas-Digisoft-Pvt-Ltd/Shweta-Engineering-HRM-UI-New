@@ -16,24 +16,16 @@
                     (ngModelChange)="onSearchChange()" style="min-width: 180px;" />
             </div>
 
-            <!-- Year -->
+            <!-- Start Date -->
             <div>
-                <label class="form-label">Year</label>
-                <select class="form-select" [(ngModel)]="selectedYear" (change)="onYearMonthChange()">
-                    <option *ngFor="let year of financialYears" [value]="year">
-                        {{ year }}
-                    </option>
-                </select>
+                <label class="form-label">From Date</label>
+                <input class="form-control" type="date" [(ngModel)]="startDate" (change)="onDateRangeChange()" />
             </div>
 
-            <!-- Month -->
+            <!-- End Date -->
             <div>
-                <label class="form-label">Month</label>
-                <select class="form-select" [(ngModel)]="selectedMonth" (change)="onYearMonthChange()">
-                    <option *ngFor="let m of months" [value]="m.id">
-                        {{ m.value }}
-                    </option>
-                </select>
+                <label class="form-label">To Date</label>
+                <input class="form-control" type="date" [(ngModel)]="endDate" (change)="onDateRangeChange()" />
             </div>
 
         </div>

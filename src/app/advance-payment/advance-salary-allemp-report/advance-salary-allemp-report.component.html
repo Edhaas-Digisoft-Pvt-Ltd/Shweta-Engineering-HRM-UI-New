@@ -12,6 +12,7 @@
                 <label class="form-label mb-1">Select Company</label>
                 <select class="form-select" style="min-width: 180px;" [(ngModel)]="selectedCompanyId"
                     (change)="onCompanyChange($event)">
+                    <option value="all">All</option>
                     <option *ngFor="let item of CompanyNames" [value]="item.company_id">{{ item.company_name }}</option>
                 </select>
             </div>

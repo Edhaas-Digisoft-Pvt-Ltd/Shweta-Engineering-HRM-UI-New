@@ -17,12 +17,9 @@ export class InsufficientLeavesComponent {
   searchInputValue: any;
   params: any;
   selectedCompanyId: any;
-  selectedYear: any;
-  selectedMonth: any;
   rowData: any = [];
   isLoading: boolean = false;
   selectedValue: any = 1;
-  financialYears: number[] = [];
   CompanyNames: any = [];
   totalRows: number = 0;
   currentPage: number = 1;
@@ -30,30 +27,16 @@ export class InsufficientLeavesComponent {
   pagesToShow: (number | string)[] = [];
   paginationvalue: any;
 
-  months = [
-    { id: 1, value: 'January' },
-    { id: 2, value: 'February' },
-    { id: 3, value: 'March' },
-    { id: 4, value: 'April' },
-    { id: 5, value: 'May' },
-    { id: 6, value: 'June' },
-    { id: 7, value: 'July' },
-    { id: 8, value: 'August' },
-    { id: 9, value: 'September' },
-    { id: 10, value: 'October' },
-    { id: 11, value: 'November' },
-    { id: 12, value: 'December' }
-  ];
+  startDate: string = this.getFirstDayOfMonth();
+  endDate: string = this.getLastDayOfMonth();
 
   constructor(private route: ActivatedRoute, private router: Router, private fb: FormBuilder, private service: HrmserviceService, private modalService: ModalServiceService, private toastr: ToastrService) { }
 
   ngOnInit(): void {
     const currentDate = new Date();
-    this.selectedYear = new Date().getFullYear();
-    this.selectedMonth = new Date().getMonth() + 1;
+
     this.today = currentDate.toISOString().split('T')[0];
-    this.selectedCompanyId = this.service.selectedCompanyId();
-    this.generateFinancialYears();
+    this.selectedCompanyId = this.service.selectedCompanyId() ?? 'all';
 
     this.getCompanyNames();
     this.getInsufficientLeaves();
@@ -80,25 +63,12 @@ export class InsufficientLeavesComponent {
   getCompanyNames() {
     this.service.post('fetch/company', {}).subscribe((res: any) => {
       if (res.status == "success") {
-        this.CompanyNames = res.data
+        this.CompanyNames = res.data;
+        if (!this.selectedCompanyId) {
+          this.selectedCompanyId = 'all';
+        }
       }
-    },
-      (error) => {
-        console.error('Error fetching companies:', error);
-      }
-    );
-  }
-
-  // financialYears = [2022, 2023, 2024, 2025];
-  generateFinancialYears() {
-    const startYear = 2024;
-    const currentYear = new Date().getFullYear();
-
-    this.financialYears = [];
-
-    for (let year = startYear; year <= currentYear; year++) {
-      this.financialYears.push(year);
-    }
+    });
   }
 
   getInsufficientLeaves(page: number = 1): void {
@@ -107,8 +77,8 @@ export class InsufficientLeavesComponent {
 
     const payload = {
       company_id: this.selectedCompanyId,
-      year: this.selectedYear,
-      month: this.selectedMonth,
+      start_date: this.startDate,
+      end_date: this.endDate,
       page: page,
       isexport: false,
     };
@@ -150,7 +120,8 @@ export class InsufficientLeavesComponent {
     { headerName: 'Absent Date', field: 'absent_date', sortable: true, filter: true },
   ];
 
-  onYearMonthChange() {
+  onDateRangeChange(): void {
+    this.currentPage = 1;
     this.getInsufficientLeaves();
   }
 
@@ -177,13 +148,28 @@ export class InsufficientLeavesComponent {
     return true;
   }
 
+  getFirstDayOfMonth(): string {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    return `${year}-${month}-01`;
+  }
+
+  getLastDayOfMonth(): string {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = now.getMonth() + 1;
+    const lastDay = new Date(year, month, 0).getDate();
+    return `${year}-${String(month).padStart(2, '0')}-${String(lastDay).padStart(2, '0')}`;
+  }
+
   exportExcel() {
     this.isLoading = true;
 
     this.service.post('insufficient/leaves', {
       company_id: this.selectedCompanyId,
-      year: this.selectedYear,
-      month: this.selectedMonth,
+      start_date: this.startDate,
+      end_date: this.endDate,
       isexport: true
     }).subscribe({
       next: (res: any) => {

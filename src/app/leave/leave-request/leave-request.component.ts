@@ -43,8 +43,8 @@ export class LeaveRequestComponent {
 
   ngOnInit(): void {
     this.loggedInUser = sessionStorage.getItem('employeeId');
-    
-    this.selectedCompanyId = this.service.selectedCompanyId();
+
+    this.selectedCompanyId = this.service.selectedCompanyId() ?? 'all';
 
     this.leaveRequestForm = this.fb.group({
       employeeName: [{ value: '', disabled: true }, Validators.required],
@@ -154,19 +154,21 @@ export class LeaveRequestComponent {
 
   onCompanyChange(event: Event): void {
     this.selectedCompanyId = (event.target as HTMLSelectElement).value;
+    this.currentPage = 1; // reset to first page on company change
     this.getLeaveRequests();
   }
 
   getCompanyNames() {
     this.service.post('fetch/company', {}).subscribe((res: any) => {
       if (res.status == "success") {
-        this.CompanyNames = res.data
+        this.CompanyNames = res.data;
+
+        // Set default to 'all' if no company selected
+        if (!this.selectedCompanyId) {
+          this.selectedCompanyId = 'all';
+        }
       }
-    },
-      (error) => {
-        console.error('Error fetching companies:', error);
-      }
-    );
+    });
   }
 
   getLeaveRequests(page: number = 1): void {

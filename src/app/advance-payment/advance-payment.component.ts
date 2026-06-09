@@ -23,8 +23,6 @@ export class AdvancePaymentComponent {
   gridApiActive!: GridApi;
   CompanyNames: any = [];
   selectedCompanyId: any;
-  selectedYear: any;
-  selectedMonth: any;
   rowData: any = [];
   columnDefs: ColDef[] = [];
   advPayId: any;
@@ -35,7 +33,6 @@ export class AdvancePaymentComponent {
   salaryTrackerForm!: FormGroup;
   isSubmitted = false;
   hideSubmitButton: boolean = false;
-  financialYears: number[] = [];
 
   // Pagination & grid APIs
   gridApi!: GridApi;
@@ -46,13 +43,13 @@ export class AdvancePaymentComponent {
   lastPage: number = 1;
   pagesToShow: (number | string)[] = [];
 
+  startDate: string = this.getFirstDayOfMonth();
+  endDate: string = this.getLastDayOfMonth();
+
   ngOnInit() {
-    this.selectedCompanyId = this.service.selectedCompanyId();
-    this.generateFinancialYears();
+    this.selectedCompanyId = this.service.selectedCompanyId() ?? 'all';
 
     this.getCompanyNames();
-    this.selectedYear = new Date().getFullYear();
-    this.selectedMonth = new Date().getMonth() + 1;
     this.getAllAdvSalary();
     const currentDate = new Date();
     this.today = currentDate.toISOString().split('T')[0]; // Format YYYY-MM-DD
@@ -105,17 +102,17 @@ export class AdvancePaymentComponent {
   getCompanyNames() {
     this.service.post('fetch/company', {}).subscribe((res: any) => {
       if (res.status == "success") {
-        this.CompanyNames = res.data
+        this.CompanyNames = res.data;
+        if (!this.selectedCompanyId) {
+          this.selectedCompanyId = 'all';
+        }
       }
-    },
-      (error) => {
-        console.error('Error fetching companies:', error);
-      }
-    );
+    });
   }
 
   onCompanyChange(event: Event): void {
     this.selectedCompanyId = (event.target as HTMLSelectElement).value;
+    this.currentPage = 1;
     this.getAllAdvSalary();
   }
 
@@ -124,8 +121,8 @@ export class AdvancePaymentComponent {
     this.rowData = [];
     this.service.post('fetch/allcompanyrequest', {
       company_id: this.selectedCompanyId,
-      year: this.selectedYear,
-      month: this.selectedMonth,
+      start_date: this.startDate,
+      end_date: this.endDate,
       page: page,
       isexport: false,
     }).subscribe((res: any) => {
@@ -172,35 +169,6 @@ export class AdvancePaymentComponent {
     const file = event.target.files[0];
   }
 
-  // gridApiActive: any;
-
-  // financialYears = [2022, 2023, 2024, 2025, 2026];
-  generateFinancialYears() {
-    const startYear = 2024;
-    const currentYear = new Date().getFullYear();
-
-    this.financialYears = [];
-
-    for (let year = startYear; year <= currentYear; year++) {
-      this.financialYears.push(year);
-    }
-  }
-
-  months = [
-    { id: 1, value: 'January' },
-    { id: 2, value: 'February' },
-    { id: 3, value: 'March' },
-    { id: 4, value: 'April' },
-    { id: 5, value: 'May' },
-    { id: 6, value: 'June' },
-    { id: 7, value: 'July' },
-    { id: 8, value: 'August' },
-    { id: 9, value: 'September' },
-    { id: 10, value: 'October' },
-    { id: 11, value: 'November' },
-    { id: 12, value: 'December' }
-  ];
-
   days = Array.from({ length: 31 }, (_, i) => i + 1);
 
   viewMode: 'Day' | 'Month' = 'Day'; // Default view
@@ -240,7 +208,9 @@ export class AdvancePaymentComponent {
     this.searchValue = '';
     window.location.reload();
   }
-  onYearMonthChange() {
+
+  onDateRangeChange(): void {
+    this.currentPage = 1;
     this.getAllAdvSalary();
   }
 
@@ -561,12 +531,27 @@ export class AdvancePaymentComponent {
     }
   }
 
+  getFirstDayOfMonth(): string {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    return `${year}-${month}-01`;
+  }
+
+  getLastDayOfMonth(): string {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = now.getMonth() + 1;
+    const lastDay = new Date(year, month, 0).getDate();
+    return `${year}-${String(month).padStart(2, '0')}-${String(lastDay).padStart(2, '0')}`;
+  }
+
   exportExcel() {
     this.isLoading = true;
     this.service.post('fetch/allcompanyrequest', {
       company_id: this.selectedCompanyId,
-      year: this.selectedYear,
-      month: this.selectedMonth,
+      start_date: this.startDate,
+      end_date: this.endDate,
       isexport: true,
     }).subscribe({
       next: (res: any) => {

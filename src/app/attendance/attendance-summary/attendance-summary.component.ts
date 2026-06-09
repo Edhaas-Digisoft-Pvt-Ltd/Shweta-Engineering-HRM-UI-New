@@ -64,7 +64,7 @@ export class AttendanceSummaryComponent {
   constructor(private toastr: ToastrService, private service: HrmserviceService) { }
 
   ngOnInit() {
-    this.selectedCompanyId = this.service.selectedCompanyId();
+    this.selectedCompanyId = this.service.selectedCompanyId() ?? 'all';
     this.generateyears();
 
     this.loadData();
@@ -82,7 +82,12 @@ export class AttendanceSummaryComponent {
   getCompanyNames() {
     this.service.post('fetch/company', {}).subscribe((res: any) => {
       if (res.status == "success") {
-        this.CompanyNames = res.data
+        this.CompanyNames = res.data;
+
+        // Set default to 'all' if no company selected
+        if (!this.selectedCompanyId) {
+          this.selectedCompanyId = 'all';
+        }
       }
     },
       (error) => {
@@ -93,6 +98,7 @@ export class AttendanceSummaryComponent {
 
   onCompanyChange(event: Event): void {
     this.selectedCompanyId = (event.target as HTMLSelectElement).value;
+    this.currentPage = 1;
     this.fetchDailySummary();
   }
 
@@ -100,7 +106,7 @@ export class AttendanceSummaryComponent {
     const daysInMonth = new Date(this.selectedYear, this.selectedMonth + 1, 0).getDate();
 
     this.columnDefs = [
-      { headerName: 'Employee Code', field: 'id', pinned: 'left', width: 150,  editable: true, },
+      { headerName: 'Employee Code', field: 'id', pinned: 'left', width: 150, editable: true, },
       { headerName: 'Employee Name', field: 'name', pinned: 'left', width: 200 },
     ];
 

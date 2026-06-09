@@ -71,6 +71,8 @@ export class PayrollProcessComponent {
 
   ngOnInit() {
     console.log(this.isProcess);
+    const savedId = this.service.selectedCompanyId();
+    this.selectedCompanyId = (savedId && savedId !== 'all') ? savedId : null;
 
     // this.selectedYear = new Date().getFullYear();
     // this.selectedMonth = new Date().getMonth();
@@ -121,9 +123,13 @@ export class PayrollProcessComponent {
       if (res.status === 'success') {
         this.CompanyNames = res.data;
 
-        // Always pick first company for accountant
         if (this.CompanyNames.length > 0) {
-          const defaultCompany = this.CompanyNames[0];
+
+          // If no valid company, pick first one
+          const defaultCompany = (this.selectedCompanyId && this.selectedCompanyId !== 'all')
+            ? this.CompanyNames.find((c: any) => c.company_id == this.selectedCompanyId) ?? this.CompanyNames[0]
+            : this.CompanyNames[0];  
+
           this.service.setCompanyId(defaultCompany.company_id);
           this.selectCompany(defaultCompany);
 
@@ -523,7 +529,7 @@ export class PayrollProcessComponent {
           this.showLwpColumns = this.dataToExportExcel.some(
             (row: any) => Number(row.leave_without_pay_days) > 0
           );
-          this.generateExcel();  
+          this.generateExcel();
         } else {
           // ONLY attendance excel (upto total_hours)
           this.generateAttendanceExcel();
@@ -703,7 +709,7 @@ export class PayrollProcessComponent {
       totals.total_pf_employer,
       totals.total_esic,
       totals.total_adv_salary,
-      '','',
+      '', '',
       totals.total_net_salary
     );
 

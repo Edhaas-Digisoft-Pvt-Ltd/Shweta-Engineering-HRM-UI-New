@@ -24,30 +24,13 @@ export class LiveAttendanceComponent {
   pagesToShow: (number | string)[] = [];
   paginationvalue: any;
   currentFilter: string = '';
-  selectedYear: number = new Date().getFullYear();
-  selectedMonth: number = new Date().getMonth() + 1;
 
-  financialYears: number[] = [];
-
-  months = [
-    { id: 1, value: 'January' },
-    { id: 2, value: 'February' },
-    { id: 3, value: 'March' },
-    { id: 4, value: 'April' },
-    { id: 5, value: 'May' },
-    { id: 6, value: 'June' },
-    { id: 7, value: 'July' },
-    { id: 8, value: 'August' },
-    { id: 9, value: 'September' },
-    { id: 10, value: 'October' },
-    { id: 11, value: 'November' },
-    { id: 12, value: 'December' }
-  ];
+  startDate: string = this.getFirstDayOfMonth();
+  endDate: string = this.getLastDayOfMonth();
 
   constructor(private toastr: ToastrService, private service: HrmserviceService) { }
 
   ngOnInit() {
-    this.generateFinancialYears();
     this.getPaginationValueAndFetch();
     //this.startAutoRefresh(); // live auto refresh
   }
@@ -115,8 +98,8 @@ export class LiveAttendanceComponent {
     }
 
     // send current month/year automatically
-    body.month = this.selectedMonth;
-    body.year = this.selectedYear;
+    if (this.startDate) body.start_date = this.startDate;
+    if (this.endDate) body.end_date = this.endDate;
 
     this.isLoading = true;
 
@@ -145,6 +128,25 @@ export class LiveAttendanceComponent {
     this.gridApiActive = params.api;
   }
 
+  onDateRangeChange(): void {
+    this.currentPage = 1;
+    this.fetchLiveAttendance();
+  }
+
+  getFirstDayOfMonth(): string {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    return `${year}-${month}-01`;
+  }
+
+  getLastDayOfMonth(): string {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = now.getMonth() + 1;
+    const lastDay = new Date(year, month, 0).getDate(); // gets last date of current month
+    return `${year}-${String(month).padStart(2, '0')}-${String(lastDay).padStart(2, '0')}`;
+  }
   // pagination (same as yours)
   generatePageNumbers(pageWindow: number) {
     const total = this.lastPage;
@@ -199,7 +201,7 @@ export class LiveAttendanceComponent {
     }
   }
 
-    searchTimeout: any;
+  searchTimeout: any;
 
   onSearchChange(): void {
     // Debounce search to avoid too many API calls
@@ -235,15 +237,5 @@ export class LiveAttendanceComponent {
       month: 'short',
       year: 'numeric'
     });
-  }
-
-  generateFinancialYears() {
-    const startYear = 2024;
-    const currentYear = new Date().getFullYear();
-
-    this.financialYears = [];
-    for (let y = startYear; y <= currentYear; y++) {
-      this.financialYears.push(y);
-    }
   }
 }

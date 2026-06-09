@@ -44,7 +44,7 @@ export class EmployeeComponent {
 
   ngOnInit() {
     // this.selectedCompanyId = this.CompanyIdService.selectedCompanyId();
-    this.selectedCompanyId = this.service.selectedCompanyId();
+    this.selectedCompanyId = this.service.selectedCompanyId() ?? 'all';
 
     this.changePasswordForm = this.fb.group({
       password: ['', [
@@ -73,6 +73,9 @@ export class EmployeeComponent {
       if (res.status == "success") {
         // this.optionsArray = res.map((company: any) => company.CompanyName); // <-- only CompanyName
         this.CompanyNames = res.data;
+        if (!this.selectedCompanyId) {
+          this.selectedCompanyId = 'all'; 
+        }
       }
     },
       (error) => {
@@ -84,6 +87,7 @@ export class EmployeeComponent {
   onCompanyChange(event: Event): void {
     this.selectedCompanyId = (event.target as HTMLSelectElement).value;
     this.service.setCompanyId(this.selectedCompanyId);
+    this.currentPage = 1;
     this.getEmployee();
   }
 

@@ -18,8 +18,6 @@ export class LeaveApprovedRejectedComponent {
   params: any;
   leaveRequestForm!: FormGroup;
   selectedCompanyId: any;
-  selectedYear: any;
-  selectedMonth: any;
   rowData: any = [];
   leaveRequestData!: any;
   empLeaveId: any;
@@ -32,12 +30,14 @@ export class LeaveApprovedRejectedComponent {
   lastPage: number = 1;
   pagesToShow: (number | string)[] = [];
   paginationvalue: any;
-  financialYears: number[] = [];
 
   CompanyNames: any = [];
   selectedValue: any = 1;
   exportData: any;
   loggedInUser: any;
+
+  startDate: string = this.getFirstDayOfMonth();
+  endDate: string = this.getLastDayOfMonth();
 
   constructor(private route: ActivatedRoute, private router: Router, private fb: FormBuilder, private service: HrmserviceService, private modalService: ModalServiceService, private toastr: ToastrService) { }
 
@@ -45,11 +45,8 @@ export class LeaveApprovedRejectedComponent {
     this.loggedInUser = sessionStorage.getItem('employeeId');
 
     const currentDate = new Date();
-    this.selectedYear = new Date().getFullYear();
-    this.selectedMonth = new Date().getMonth() + 1;
     this.today = currentDate.toISOString().split('T')[0]; // Format YYYY-MM-DD
-    this.selectedCompanyId = this.service.selectedCompanyId();
-    this.generateFinancialYears();
+    this.selectedCompanyId = this.service.selectedCompanyId() ?? 'all';
 
     this.leaveRequestForm = this.fb.group({
       employeeName: [{ value: '', disabled: true }, Validators.required],
@@ -129,55 +126,28 @@ export class LeaveApprovedRejectedComponent {
 
   onCompanyChange(event: Event): void {
     this.selectedCompanyId = (event.target as HTMLSelectElement).value;
+    this.currentPage = 1;
     this.getLeaveRequests();
   }
 
   getCompanyNames() {
     this.service.post('fetch/company', {}).subscribe((res: any) => {
       if (res.status == "success") {
-        this.CompanyNames = res.data
+        this.CompanyNames = res.data;
+        if (!this.selectedCompanyId) {
+          this.selectedCompanyId = 'all'; // ADD
+        }
       }
-    },
-      (error) => {
-        console.error('Error fetching companies:', error);
-      }
-    );
+    });
   }
-
-  // financialYears = [2022, 2023, 2024, 2025];
-  generateFinancialYears() {
-    const startYear = 2024;
-    const currentYear = new Date().getFullYear();
-
-    this.financialYears = [];
-
-    for (let year = startYear; year <= currentYear; year++) {
-      this.financialYears.push(year);
-    }
-  }
-
-  months = [
-    { id: 1, value: 'January' },
-    { id: 2, value: 'February' },
-    { id: 3, value: 'March' },
-    { id: 4, value: 'April' },
-    { id: 5, value: 'May' },
-    { id: 6, value: 'June' },
-    { id: 7, value: 'July' },
-    { id: 8, value: 'August' },
-    { id: 9, value: 'September' },
-    { id: 10, value: 'October' },
-    { id: 11, value: 'November' },
-    { id: 12, value: 'December' }
-  ];
 
   getLeaveRequests(page: number = 1): void {
     this.isLoading = true;
     this.rowData = [];
     this.service.post('leave/approved-rejected', {
       company_id: this.selectedCompanyId,
-      year: this.selectedYear,
-      month: this.selectedMonth,
+      start_date: this.startDate,
+      end_date: this.endDate,
       page: page,
       isexport: false,
     }).subscribe(
@@ -215,7 +185,8 @@ export class LeaveApprovedRejectedComponent {
     );
   }
 
-  onYearMonthChange() {
+  onDateRangeChange(): void {
+    this.currentPage = 1;
     this.getLeaveRequests();
   }
 
@@ -312,12 +283,27 @@ export class LeaveApprovedRejectedComponent {
     }
   }
 
+  getFirstDayOfMonth(): string {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    return `${year}-${month}-01`;
+  }
+
+  getLastDayOfMonth(): string {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = now.getMonth() + 1;
+    const lastDay = new Date(year, month, 0).getDate();
+    return `${year}-${String(month).padStart(2, '0')}-${String(lastDay).padStart(2, '0')}`;
+  }
+
   exportExcel() {
     this.isLoading = true;
     this.service.post('leave/approved-rejected', {
       company_id: this.selectedCompanyId,
-      year: this.selectedYear,
-      month: this.selectedMonth,
+      start_date: this.startDate,
+      end_date: this.endDate,
       isexport: true
     }).subscribe({
       next: (res: any) => {

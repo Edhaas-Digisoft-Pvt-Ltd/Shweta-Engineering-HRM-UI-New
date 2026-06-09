@@ -151,9 +151,9 @@ export class HrmserviceService {
   }
 
   //signal =========================================================================================
-  private _selectedCompanyId = signal<number | null>(null); //storing company id 
+  private _selectedCompanyId = signal<number | string | null>(null); //storing company id 
 
-  setCompanyId(id: number) {
+  setCompanyId(id: number | string) {
     this._selectedCompanyId.set(id);   //temp store company id
     sessionStorage.setItem('selectedCompanyId', id.toString());
   }
@@ -163,7 +163,7 @@ export class HrmserviceService {
   loadCompanyIdFromStorage() {
     const storedId = sessionStorage.getItem('selectedCompanyId');
     if (storedId) {
-      this._selectedCompanyId.set(Number(storedId));
+      this._selectedCompanyId.set(storedId === 'all' ? 'all' : Number(storedId));
     }
   }
 
