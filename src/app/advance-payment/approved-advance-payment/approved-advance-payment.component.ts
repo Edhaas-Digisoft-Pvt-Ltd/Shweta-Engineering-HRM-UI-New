@@ -21,8 +21,6 @@ export class ApprovedAdvancePaymentComponent {
   rowData: any = [];
   CompanyNames: any = [];
   selectedCompanyId: any = 1;
-  selectedYear: any;
-  selectedMonth: any;
   displayApprovedData!: FormGroup;
   approvedData!: any;
   isLoading: boolean = false;
@@ -32,23 +30,22 @@ export class ApprovedAdvancePaymentComponent {
   isSkipConfirmed: boolean = false;
   skipEmiReason: any;
   isSkipFormSubmitted = false;
-  financialYears: number[] = [];
-
   totalRows: number = 0;
   currentPage: number = 1;
   lastPage: number = 1;
   pagesToShow: (number | string)[] = [];
   paginationvalue: any;
 
+  startDate: string = this.getFirstDayOfMonth();
+  endDate: string = this.getLastDayOfMonth();
+
   constructor(private fb: FormBuilder, private service: HrmserviceService, private toastr: ToastrService) { }
 
   ngOnInit() {
     this.selectedCompanyId = this.service.selectedCompanyId() ?? 'all';
-    this.generateFinancialYears();
 
     const currentDate = new Date();
-    this.selectedYear = new Date().getFullYear();
-    this.selectedMonth = new Date().getMonth() + 1;
+
     this.today = currentDate.toISOString().split('T')[0]; // Format YYYY-MM-DD
     // this.initializeGrids();
     this.role = this.service.getRole();
@@ -118,7 +115,8 @@ export class ApprovedAdvancePaymentComponent {
     this.getAllApprovedRequest();
   }
 
-  onYearMonthChange() {
+  onDateRangeChange(): void {
+    this.currentPage = 1;
     this.getAllApprovedRequest();
   }
 
@@ -127,7 +125,7 @@ export class ApprovedAdvancePaymentComponent {
       if (res.status == "success") {
         this.CompanyNames = res.data;
         if (!this.selectedCompanyId) {
-          this.selectedCompanyId = 'all'; 
+          this.selectedCompanyId = 'all';
         }
       }
     },
@@ -147,8 +145,8 @@ export class ApprovedAdvancePaymentComponent {
     this.rowData = [];
     this.service.post('all/companyapprovedrequest', {
       company_id: this.selectedCompanyId,
-      year: this.selectedYear,
-      month: this.selectedMonth,
+      start_date: this.startDate,
+      end_date: this.endDate,
       page: page,
       isexport: false,
     }).subscribe((res: any) => {
@@ -204,17 +202,6 @@ export class ApprovedAdvancePaymentComponent {
   // gridApiActive: any;
 
   // financialYears = [2022, 2023, 2024, 2025];
-
-  generateFinancialYears() {
-    const startYear = 2024;
-    const currentYear = new Date().getFullYear();
-
-    this.financialYears = [];
-
-    for (let year = startYear; year <= currentYear; year++) {
-      this.financialYears.push(year);
-    }
-  }
 
   months = [
     { id: 1, value: 'January' },
@@ -484,8 +471,8 @@ export class ApprovedAdvancePaymentComponent {
     this.isLoading = true;
     this.service.post('all/companyapprovedrequest', {
       company_id: this.selectedCompanyId,
-      year: this.selectedYear,
-      month: this.selectedMonth,
+      start_date: this.startDate,
+      end_date: this.endDate,
       isexport: true,
     }).subscribe({
       next: (res: any) => {
@@ -529,6 +516,21 @@ export class ApprovedAdvancePaymentComponent {
         this.isLoading = false;
       }
     });
+  }
+
+  getFirstDayOfMonth(): string {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    return `${year}-${month}-01`;
+  }
+
+  getLastDayOfMonth(): string {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = now.getMonth() + 1;
+    const lastDay = new Date(year, month, 0).getDate();
+    return `${year}-${String(month).padStart(2, '0')}-${String(lastDay).padStart(2, '0')}`;
   }
 
   getPagination() {

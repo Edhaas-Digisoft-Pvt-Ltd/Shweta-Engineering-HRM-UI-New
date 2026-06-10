@@ -461,11 +461,6 @@ export class AdvancePaymentComponent {
   statusButtonRenderer(params: any) {
     let status = params.value;
 
-    //Convert Approved → Confirm (UI only)
-    if (status === 'Approved') {
-      status = 'Confirm';
-    }
-
     const button = document.createElement('button');
     button.innerText = status;
 
@@ -481,6 +476,13 @@ export class AdvancePaymentComponent {
     button.style.justifyContent = 'center';
     button.style.width = '97%';
     button.style.marginTop = '6px';
+
+    //Convert Approved → Confirm (UI only)
+    if (status === 'Approved') {
+      button.innerHTML = `<span style="font-size:11px;font-weight:600;">Confirmation</span><br><span style="font-size:10px;">Pending</span>`;
+      button.style.flexDirection = 'column';
+      button.style.lineHeight = '0.6';
+    }
 
     // Conditional styling
     if (status === 'pending') {
