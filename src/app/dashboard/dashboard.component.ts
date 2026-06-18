@@ -188,7 +188,7 @@ export class DashboardComponent {
         next: (res: any) => {
           if (res.status === 'success') {
             this.leaveCards = [
-              { title: 'Total Leave Request', count: res.data.total, icon: 'bi-calendar-event', bgColor: '#3674B5' },
+              // { title: 'Total Leave Request', count: res.data.total, icon: 'bi-calendar-event', bgColor: '#3674B5' },
               { title: 'Approved Leaves', count: res.data.approved, icon: 'bi-calendar2-check', bgColor: '#006D42' },
               { title: 'Pending Leaves', count: res.data.pending, icon: 'bi-calendar2-week', bgColor: '#C8B100' },
               { title: 'Rejected Leaves', count: res.data.rejected, icon: 'bi-calendar-x', bgColor: '#880021' },
