@@ -19,8 +19,8 @@ export class DashboardComponent {
   financialYears: any[] = [];
   selectedYear: any = '';
   selectedCompany: string = '';
-  CompanyNames: any = [];
-  selectedCompanyId: any;
+  CompanyNames: any[] = [];
+  selectedCompanyId: any[] = ['all'];
   searchValue: string = '';
   gridApiActive: any;
   leaveCards: any = [];
@@ -40,7 +40,10 @@ export class DashboardComponent {
   }
 
   ngOnInit() {
-    this.selectedCompanyId = this.service.selectedCompanyId();
+    const savedCompanyId = this.service.selectedCompanyId();
+    this.selectedCompanyId = savedCompanyId
+      ? (Array.isArray(savedCompanyId) ? savedCompanyId : [savedCompanyId])
+      : ['all'];
 
     // const currentYear = new Date().getFullYear();
     // for (let i = 0; i < 4; i++) {
@@ -56,11 +59,8 @@ export class DashboardComponent {
       this.financialYears.push(currentYear - i);
     }
 
-
-    // this.selectedYear = this.financialYears[0]; // default selected
-    this.selectedYear = currentYear.toString(); // default selected
-    this.selectedCompanyId = 'all'; // Set default to 'all'
-    this.selectedCompany = 'All';
+    this.selectedYear = currentYear.toString();
+    this.selectedCompany = 'All Companies';
     this.getCompanyNames();
   }
 
@@ -76,37 +76,23 @@ export class DashboardComponent {
     }
   }
 
-  selectCompany(company: any) {
-    if (company === 'all') {
-      this.selectedCompany = 'All Companies';
-      this.selectedCompanyId = 'all';
-      this.service.setCompanyId('all');
-    } else {
-      this.selectedCompany = company.company_name;
-      this.selectedCompanyId = company.company_id;
-      this.service.setCompanyId(this.selectedCompanyId);
-    }
-
-    this.payrollStatistics();
-    this.loadLeaveCards();
-    this.loadAttendanceSummary();
-    this.getDashboardSummary();
-    this.getNotifications();
-  }
-
-  onYearChange() {
-    this.payrollStatistics();
-  }
-
   getCompanyNames() {
     this.service.post('fetch/company', {}).subscribe((res: any) => {
       if (res.status === 'success') {
         this.CompanyNames = res.data;
 
-        // Always default to "All"
-        this.selectedCompanyId = 'all';
-        this.selectedCompany = 'All Companies';
-        this.service.setCompanyId('all');
+        // Default: first company selected (not 'all'), only on first load
+        const savedCompanyId = this.service.selectedCompanyId();
+        if (savedCompanyId) {
+          this.selectedCompanyId = Array.isArray(savedCompanyId) ? savedCompanyId : [savedCompanyId];
+        } else if (this.CompanyNames.length > 0) {
+          this.selectedCompanyId = [this.CompanyNames[0].company_id];
+        } else {
+          this.selectedCompanyId = ['all'];
+        }
+
+        this.service.setCompanyId(this.selectedCompanyId);
+        this.updateSelectedCompanyLabel();
 
         this.payrollStatistics();
         this.loadLeaveCards();
@@ -115,6 +101,65 @@ export class DashboardComponent {
         this.getNotifications();
       }
     });
+  }
+
+  isAllSelected(): boolean {
+    return this.selectedCompanyId.includes('all');
+  }
+
+  isCompanySelected(companyId: any): boolean {
+    return this.isAllSelected() || this.selectedCompanyId.includes(companyId);
+  }
+
+  selectCompany(company: any) {
+    if (company === 'all') {
+      // Clicking "All" toggles: select all, or if already all, revert to first company
+      this.selectedCompanyId = this.isAllSelected()
+        ? [this.CompanyNames[0]?.company_id].filter(Boolean)
+        : ['all'];
+    } else {
+      const companyId = company.company_id;
+
+      // If "all" was active, start fresh with just this company
+      let ids = this.isAllSelected() ? [] : [...this.selectedCompanyId];
+
+      if (ids.includes(companyId)) {
+        ids = ids.filter((id: any) => id !== companyId);
+      } else {
+        ids.push(companyId);
+      }
+
+      if (ids.length === this.CompanyNames.length) {
+        ids = ['all'];
+      }
+
+      // Never allow zero selection — fall back to first company
+      this.selectedCompanyId = ids.length ? ids : [this.CompanyNames[0]?.company_id].filter(Boolean);
+    }
+
+    this.service.setCompanyId(this.selectedCompanyId);
+    this.updateSelectedCompanyLabel();
+
+    this.payrollStatistics();
+    this.loadLeaveCards();
+    this.loadAttendanceSummary();
+    this.getDashboardSummary();
+    this.getNotifications();
+  }
+
+  updateSelectedCompanyLabel() {
+    if (this.isAllSelected()) {
+      this.selectedCompany = 'All Companies';
+    } else if (this.selectedCompanyId.length === 1) {
+      const match = this.CompanyNames.find((c: any) => c.company_id === this.selectedCompanyId[0]);
+      this.selectedCompany = match ? match.company_name : 'Select Company';
+    } else {
+      this.selectedCompany = `${this.selectedCompanyId.length} Companies Selected`;
+    }
+  }
+
+  onYearChange() {
+    this.payrollStatistics();
   }
 
   payrollStatistics() {
@@ -461,5 +506,5 @@ export class DashboardComponent {
         }
       });
   }
-
+  
 }

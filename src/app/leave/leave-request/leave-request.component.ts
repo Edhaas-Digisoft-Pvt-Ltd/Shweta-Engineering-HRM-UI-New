@@ -1,4 +1,4 @@
-import { Component, ElementRef } from '@angular/core';
+import { Component, ElementRef, HostListener } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ColDef } from 'ag-grid-community';
 import { FormGroup, FormBuilder, Validators } from '@angular/forms';
@@ -20,7 +20,10 @@ export class LeaveRequestComponent {
 
   params: any;
   leaveRequestForm!: FormGroup;
-  selectedCompanyId: any;
+
+  // Single source of truth for company filter: 'all' or array of company_id
+  selectedCompanyId: any[] = ['all'];
+
   rowData: any = [];
   leaveRequestData!: any;
   empLeaveId: any;
@@ -34,17 +37,22 @@ export class LeaveRequestComponent {
   pagesToShow: (number | string)[] = [];
   paginationvalue: any;
 
-  CompanyNames: any = [];
+  CompanyNames: any[] = [];
+  companyDropdownOpen: boolean = false;
+
   selectedValue: any = 1;
   exportData: any;
   loggedInUser: any;
 
-  constructor(private route: ActivatedRoute, private router: Router, private fb: FormBuilder, private service: HrmserviceService, private modalService: ModalServiceService, private toastr: ToastrService) { }
+  constructor(private route: ActivatedRoute, private router: Router, private fb: FormBuilder, private service: HrmserviceService, private modalService: ModalServiceService, private toastr: ToastrService, private elementRef: ElementRef) { }
 
   ngOnInit(): void {
     this.loggedInUser = sessionStorage.getItem('employeeId');
 
-    this.selectedCompanyId = this.service.selectedCompanyId() ?? 'all';
+    const savedCompanyId = this.service.selectedCompanyId();
+    this.selectedCompanyId = savedCompanyId
+      ? (Array.isArray(savedCompanyId) ? savedCompanyId : [savedCompanyId])
+      : ['all'];
 
     this.leaveRequestForm = this.fb.group({
       employeeName: [{ value: '', disabled: true }, Validators.required],
@@ -152,24 +160,87 @@ export class LeaveRequestComponent {
     this.modalService.closeModal();
   }
 
-  onCompanyChange(event: Event): void {
-    this.selectedCompanyId = (event.target as HTMLSelectElement).value;
-    this.currentPage = 1; // reset to first page on company change
-    this.getLeaveRequests();
-  }
+  // ---- Multi-select company dropdown logic ----
 
   getCompanyNames() {
     this.service.post('fetch/company', {}).subscribe((res: any) => {
       if (res.status == "success") {
         this.CompanyNames = res.data;
-
-        // Set default to 'all' if no company selected
-        if (!this.selectedCompanyId) {
-          this.selectedCompanyId = 'all';
-        }
       }
     });
   }
+
+  toggleCompanyDropdown() {
+    this.companyDropdownOpen = !this.companyDropdownOpen;
+  }
+
+  closeCompanyDropdown() {
+    this.companyDropdownOpen = false;
+  }
+
+  isAllSelected(): boolean {
+    return this.selectedCompanyId.includes('all');
+  }
+
+  isCompanySelected(companyId: any): boolean {
+    return this.isAllSelected() || this.selectedCompanyId.includes(companyId);
+  }
+
+  toggleAll(event: Event) {
+    const checked = (event.target as HTMLInputElement).checked;
+    this.selectedCompanyId = checked ? ['all'] : [this.CompanyNames[0]?.company_id].filter(Boolean);
+    this.applyCompanyFilter();
+  }
+
+  toggleCompany(companyId: any, event: Event) {
+    const checked = (event.target as HTMLInputElement).checked;
+    // If currently "all" is selected, expand it into individual company ids first
+    let ids = this.isAllSelected()
+      ? this.CompanyNames.map((c: any) => c.company_id)
+      : [...this.selectedCompanyId];
+    if (checked) {
+      if (!ids.includes(companyId)) {
+        ids.push(companyId);
+      }
+    } else {
+      ids = ids.filter((id: any) => id !== companyId);
+    }
+    // if every company ends up selected, collapse back to 'all'
+    if (ids.length === this.CompanyNames.length) {
+      ids = ['all'];
+    }
+    this.selectedCompanyId = ids.length ? ids : [];
+    this.applyCompanyFilter();
+  }
+
+  applyCompanyFilter() {
+    this.currentPage = 1;
+    this.getLeaveRequests();
+  }
+
+  get companyDropdownLabel(): string {
+    if (this.isAllSelected()) return 'All Companies';
+    if (this.selectedCompanyId.length === 1) {
+      const match = this.CompanyNames.find(c => c.company_id === this.selectedCompanyId[0]);
+      return match ? match.company_name : '1 Selected';
+    }
+    return `${this.selectedCompanyId.length} Companies Selected`;
+  }
+
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: MouseEvent): void {
+    if (this.companyDropdownOpen) {
+      const clickedInside = this.elementRef.nativeElement
+        .querySelector('.custom-select-dropdown')
+        ?.contains(event.target);
+
+      if (!clickedInside) {
+        this.companyDropdownOpen = false;
+      }
+    }
+  }
+
+  // ---- End multi-select company dropdown logic ----
 
   getLeaveRequests(page: number = 1): void {
     this.isLoading = true;
@@ -426,5 +497,3 @@ export class LeaveRequestComponent {
   }
 
 }
-
-

@@ -10,7 +10,7 @@
 
                     <div class="col-3">
                         <label class="mb-1 fw-semibold">Select Company</label>
-                        <select class="form-select" (change)="onCompanyChange($event)">
+                        <select class="form-select" [value]="selectedCompanyId" (change)="onCompanyChange($event)">
                             <option *ngFor="let item of CompanyNames" [value]="item.company_id">
                                 {{ item.company_name }}
                             </option>

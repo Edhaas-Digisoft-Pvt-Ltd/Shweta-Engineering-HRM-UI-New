@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ElementRef, HostListener } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ColDef, GridApi } from 'ag-grid-community';
 import { HrmserviceService } from 'src/app/hrmservice.service';
@@ -18,8 +18,9 @@ export class AdvanceSalaryAllempReportComponent {
   role: string = '';
   columnDefs: ColDef[] = [];
   rowData: any = [];
-  CompanyNames: any = [];
-  selectedCompanyId: any = 1;
+  CompanyNames: any[] = [];
+  selectedCompanyId: any[] = ['all'];
+  companyDropdownOpen: boolean = false;
   selectedYear = new Date().getFullYear();
   selectedMonth: any;
   displayApprovedData!: FormGroup;
@@ -37,10 +38,13 @@ export class AdvanceSalaryAllempReportComponent {
   pagesToShow: (number | string)[] = [];
   paginationvalue: any;
 
-  constructor(private fb: FormBuilder, private service: HrmserviceService, private toastr: ToastrService) { }
+  constructor(private fb: FormBuilder, private service: HrmserviceService, private toastr: ToastrService, private elementRef: ElementRef) { }
 
   ngOnInit() {
-    this.selectedCompanyId = this.service.selectedCompanyId() ?? 'all';
+    const savedCompanyId = this.service.selectedCompanyId();
+    this.selectedCompanyId = savedCompanyId
+      ? (Array.isArray(savedCompanyId) ? savedCompanyId : [savedCompanyId])
+      : ['all'];
     const currentDate = new Date();
     this.today = currentDate.toISOString().split('T')[0];
     this.role = this.service.getRole();
@@ -95,12 +99,6 @@ export class AdvanceSalaryAllempReportComponent {
     document.body.style.removeProperty('padding-right');
   }
 
-  onCompanyChange(event: Event): void {
-    this.selectedCompanyId = (event.target as HTMLSelectElement).value;
-    this.currentPage = 1;
-    this.getAllEmpAdvanceSalary();
-  }
-
   onYearMonthChange() {
     this.getAllEmpAdvanceSalary();
   }
@@ -109,15 +107,85 @@ export class AdvanceSalaryAllempReportComponent {
     this.service.post('fetch/company', {}).subscribe((res: any) => {
       if (res.status == "success") {
         this.CompanyNames = res.data;
-        if (!this.selectedCompanyId) {
-          this.selectedCompanyId = 'all'; 
-        }
       }
     },
       (error) => {
         console.error('Error fetching companies:', error);
       }
     );
+  }
+
+  toggleCompanyDropdown() {
+    this.companyDropdownOpen = !this.companyDropdownOpen;
+  }
+
+  closeCompanyDropdown() {
+    this.companyDropdownOpen = false;
+  }
+
+  isAllSelected(): boolean {
+    return this.selectedCompanyId.includes('all');
+  }
+
+  isCompanySelected(companyId: any): boolean {
+    return this.isAllSelected() || this.selectedCompanyId.includes(companyId);
+  }
+
+  toggleAll(event: Event) {
+    const checked = (event.target as HTMLInputElement).checked;
+    this.selectedCompanyId = checked ? ['all'] : [this.CompanyNames[0]?.company_id].filter(Boolean);
+    this.applyCompanyFilter();
+  }
+
+  toggleCompany(companyId: any, event: Event) {
+    const checked = (event.target as HTMLInputElement).checked;
+
+    let ids = this.isAllSelected()
+      ? this.CompanyNames.map((c: any) => c.company_id)
+      : [...this.selectedCompanyId];
+
+    if (checked) {
+      if (!ids.includes(companyId)) {
+        ids.push(companyId);
+      }
+    } else {
+      ids = ids.filter((id: any) => id !== companyId);
+    }
+
+    if (ids.length === this.CompanyNames.length) {
+      ids = ['all'];
+    }
+    this.selectedCompanyId = ids.length ? ids : [];
+
+    this.applyCompanyFilter();
+  }
+
+  applyCompanyFilter() {
+    this.currentPage = 1;
+    this.getAllEmpAdvanceSalary();
+  }
+
+  get companyDropdownLabel(): string {
+    if (this.isAllSelected()) return 'All Companies';
+    if (this.selectedCompanyId.length === 0) return 'Select Company';
+    if (this.selectedCompanyId.length === 1) {
+      const match = this.CompanyNames.find(c => c.company_id === this.selectedCompanyId[0]);
+      return match ? match.company_name : '1 Selected';
+    }
+    return `${this.selectedCompanyId.length} Companies Selected`;
+  }
+
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: MouseEvent): void {
+    if (this.companyDropdownOpen) {
+      const clickedInside = this.elementRef.nativeElement
+        .querySelector('.custom-select-dropdown')
+        ?.contains(event.target);
+
+      if (!clickedInside) {
+        this.companyDropdownOpen = false;
+      }
+    }
   }
 
   getPaidEmiCount(): number {

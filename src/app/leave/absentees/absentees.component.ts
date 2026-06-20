@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ElementRef, HostListener } from '@angular/core';
 import { FormBuilder } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ColDef } from 'ag-grid-community';
@@ -16,11 +16,12 @@ export class AbsenteesComponent {
   gridApiActive: any;
   searchInputValue: any;
   params: any;
-  selectedCompanyId: any;
+  selectedCompanyId: any[] = ['all'];
+  companyDropdownOpen: boolean = false;
   rowData: any = [];
   isLoading: boolean = false;
   selectedValue: any = 1;
-  CompanyNames: any = [];
+  CompanyNames: any[] = [];
   totalRows: number = 0;
   currentPage: number = 1;
   lastPage: number = 1;
@@ -30,12 +31,15 @@ export class AbsenteesComponent {
   startDate: string = this.getFirstDayOfMonth();
   endDate: string = this.getLastDayOfMonth();
 
-  constructor(private route: ActivatedRoute, private router: Router, private fb: FormBuilder, private service: HrmserviceService, private modalService: ModalServiceService, private toastr: ToastrService) { }
+  constructor(private route: ActivatedRoute, private router: Router, private fb: FormBuilder, private service: HrmserviceService, private modalService: ModalServiceService, private toastr: ToastrService, private elementRef: ElementRef) { }
 
   ngOnInit(): void {
     const currentDate = new Date();
     this.today = currentDate.toISOString().split('T')[0];
-    this.selectedCompanyId = this.service.selectedCompanyId();
+    const savedCompanyId = this.service.selectedCompanyId();
+    this.selectedCompanyId = savedCompanyId
+      ? (Array.isArray(savedCompanyId) ? savedCompanyId : [savedCompanyId])
+      : ['all'];
 
     this.getCompanyNames();
     this.getAbsentees();
@@ -53,10 +57,76 @@ export class AbsenteesComponent {
     resizable: true,
   };
 
-  onCompanyChange(event: Event): void {
-    this.selectedCompanyId = (event.target as HTMLSelectElement).value;
+  toggleCompanyDropdown() {
+    this.companyDropdownOpen = !this.companyDropdownOpen;
+  }
+
+  closeCompanyDropdown() {
+    this.companyDropdownOpen = false;
+  }
+
+  isAllSelected(): boolean {
+    return this.selectedCompanyId.includes('all');
+  }
+
+  isCompanySelected(companyId: any): boolean {
+    return this.isAllSelected() || this.selectedCompanyId.includes(companyId);
+  }
+
+  toggleAll(event: Event) {
+    const checked = (event.target as HTMLInputElement).checked;
+    this.selectedCompanyId = checked ? ['all'] : [this.CompanyNames[0]?.company_id].filter(Boolean);
+    this.applyCompanyFilter();
+  }
+
+  toggleCompany(companyId: any, event: Event) {
+    const checked = (event.target as HTMLInputElement).checked;
+
+    let ids = this.isAllSelected()
+      ? this.CompanyNames.map((c: any) => c.company_id)
+      : [...this.selectedCompanyId];
+
+    if (checked) {
+      if (!ids.includes(companyId)) {
+        ids.push(companyId);
+      }
+    } else {
+      ids = ids.filter((id: any) => id !== companyId);
+    }
+
+    if (ids.length === this.CompanyNames.length) {
+      ids = ['all'];
+    }
+    this.selectedCompanyId = ids.length ? ids : [];
+
+    this.applyCompanyFilter();
+  }
+
+  applyCompanyFilter() {
     this.currentPage = 1;
     this.getAbsentees();
+  }
+
+  get companyDropdownLabel(): string {
+    if (this.isAllSelected()) return 'All Companies';
+    if (this.selectedCompanyId.length === 1) {
+      const match = this.CompanyNames.find(c => c.company_id === this.selectedCompanyId[0]);
+      return match ? match.company_name : '1 Selected';
+    }
+    return `${this.selectedCompanyId.length} Companies Selected`;
+  }
+
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: MouseEvent): void {
+    if (this.companyDropdownOpen) {
+      const clickedInside = this.elementRef.nativeElement
+        .querySelector('.custom-select-dropdown')
+        ?.contains(event.target);
+
+      if (!clickedInside) {
+        this.companyDropdownOpen = false;
+      }
+    }
   }
 
   getCompanyNames() {

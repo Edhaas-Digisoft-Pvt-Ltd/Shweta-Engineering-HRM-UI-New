@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ElementRef, HostListener } from '@angular/core';
 import { ColDef, GridApi } from 'ag-grid-community';
 import { EmployeeActionComponent } from './employee-action/employee-action.component';
 import { Router } from '@angular/router';
@@ -19,11 +19,11 @@ export class EmployeeComponent {
 
   gridApiActive!: GridApi;
   searchValue: string = '';
-  CompanyNames: any;
-  selectedValue: string = 'Company A';
   employee: any = [];
   Employee_Data: any;
-  selectedCompanyId: any;
+  CompanyNames: any[] = [];
+  selectedCompanyId: any[] = ['all'];
+  companyDropdownOpen: boolean = false;
   rowData: any = [];
   importExcelCompanyId: string = '';
   isLoading: boolean = false;
@@ -40,11 +40,14 @@ export class EmployeeComponent {
   showConfirmPassword = false;
   employee_id: any;
 
-  constructor(private router: Router, private fb: FormBuilder, private service: HrmserviceService, private modalService: ModalServiceService, private toastr: ToastrService) { }
+  constructor(private router: Router, private fb: FormBuilder, private service: HrmserviceService, private modalService: ModalServiceService, private toastr: ToastrService, private elementRef: ElementRef) { }
 
   ngOnInit() {
     // this.selectedCompanyId = this.CompanyIdService.selectedCompanyId();
-    this.selectedCompanyId = this.service.selectedCompanyId() ?? 'all';
+    const savedCompanyId = this.service.selectedCompanyId();
+    this.selectedCompanyId = savedCompanyId
+      ? (Array.isArray(savedCompanyId) ? savedCompanyId : [savedCompanyId])
+      : ['all'];
 
     this.changePasswordForm = this.fb.group({
       password: ['', [
@@ -71,11 +74,7 @@ export class EmployeeComponent {
   getCompanyNames() {
     this.service.post('fetch/company', {}).subscribe((res: any) => {
       if (res.status == "success") {
-        // this.optionsArray = res.map((company: any) => company.CompanyName); // <-- only CompanyName
         this.CompanyNames = res.data;
-        if (!this.selectedCompanyId) {
-          this.selectedCompanyId = 'all'; 
-        }
       }
     },
       (error) => {
@@ -84,11 +83,78 @@ export class EmployeeComponent {
     );
   }
 
-  onCompanyChange(event: Event): void {
-    this.selectedCompanyId = (event.target as HTMLSelectElement).value;
+  toggleCompanyDropdown() {
+    this.companyDropdownOpen = !this.companyDropdownOpen;
+  }
+
+  closeCompanyDropdown() {
+    this.companyDropdownOpen = false;
+  }
+
+  isAllSelected(): boolean {
+    return this.selectedCompanyId.includes('all');
+  }
+
+  isCompanySelected(companyId: any): boolean {
+    return this.isAllSelected() || this.selectedCompanyId.includes(companyId);
+  }
+
+  toggleAll(event: Event) {
+    const checked = (event.target as HTMLInputElement).checked;
+    this.selectedCompanyId = checked ? ['all'] : [this.CompanyNames[0]?.company_id].filter(Boolean);
+    this.applyCompanyFilter();
+  }
+
+  toggleCompany(companyId: any, event: Event) {
+    const checked = (event.target as HTMLInputElement).checked;
+
+    let ids = this.isAllSelected()
+      ? this.CompanyNames.map((c: any) => c.company_id)
+      : [...this.selectedCompanyId];
+
+    if (checked) {
+      if (!ids.includes(companyId)) {
+        ids.push(companyId);
+      }
+    } else {
+      ids = ids.filter((id: any) => id !== companyId);
+    }
+
+    if (ids.length === this.CompanyNames.length) {
+      ids = ['all'];
+    }
+    this.selectedCompanyId = ids.length ? ids : [];
+
+    this.applyCompanyFilter();
+  }
+
+  applyCompanyFilter() {
     this.service.setCompanyId(this.selectedCompanyId);
     this.currentPage = 1;
     this.getEmployee();
+  }
+
+  get companyDropdownLabel(): string {
+    if (this.isAllSelected()) return 'All Companies';
+    if (this.selectedCompanyId.length === 0) return 'Select Company';
+    if (this.selectedCompanyId.length === 1) {
+      const match = this.CompanyNames.find(c => c.company_id === this.selectedCompanyId[0]);
+      return match ? match.company_name : '1 Selected';
+    }
+    return `${this.selectedCompanyId.length} Companies Selected`;
+  }
+
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: MouseEvent): void {
+    if (this.companyDropdownOpen) {
+      const clickedInside = this.elementRef.nativeElement
+        .querySelector('.custom-select-dropdown')
+        ?.contains(event.target);
+
+      if (!clickedInside) {
+        this.companyDropdownOpen = false;
+      }
+    }
   }
 
   public defaultColDef: ColDef = {
@@ -275,10 +341,6 @@ export class EmployeeComponent {
 
   // const skippedInfo = res.skipped?.map((row: any) => `Row ${row.row}: ${row.reason}`).join('\n');
   // this.toastr.warning(`${message}\n${skippedInfo}`, 'Upload Notice');
-
-  onOptionSelected() {
-    console.log('Selected option:', this.selectedValue);
-  }
 
   editApp(params: any) {
 

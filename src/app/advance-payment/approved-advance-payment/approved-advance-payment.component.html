@@ -8,23 +8,39 @@
       <div class="col-12">
         <div class="row justify-content-end">
           <div class="col-3">
-            <label for="">Select Company</label>
-            <select class="form-select" [(ngModel)]="selectedCompanyId" (change)="onCompanyChange($event)">
-              <option value="all">All</option>
-              <option *ngFor="let item of CompanyNames" [value]="item.company_id">{{ item.company_name }}</option>
-            </select>
+            <label>Select Company</label>
+            <div class="custom-select-dropdown w-100">
+              <button type="button" class="btn btn-outline-secondary dropdown-toggle-btn"
+                (click)="toggleCompanyDropdown()">
+                <span class="text-truncate">{{ companyDropdownLabel }}</span>
+                <i class="bi bi-chevron-down ms-2"></i>
+              </button>
+
+              <div class="dropdown-menu" [class.show]="companyDropdownOpen">
+                <div class="form-check dropdown-divider-item">
+                  <input class="form-check-input" type="checkbox" id="company-all-approvedadv"
+                    [checked]="isAllSelected()" (change)="toggleAll($event)">
+                  <label class="form-check-label" for="company-all-approvedadv">All</label>
+                </div>
+
+                <div class="form-check" *ngFor="let item of CompanyNames">
+                  <input class="form-check-input" type="checkbox" [id]="'company-approvedadv-' + item.company_id"
+                    [checked]="isCompanySelected(item.company_id)" (change)="toggleCompany(item.company_id, $event)">
+                  <label class="form-check-label" [for]="'company-approvedadv-' + item.company_id">{{ item.company_name
+                    }}</label>
+                </div>
+              </div>
+            </div>
           </div>
 
           <div class="col-auto">
             <label class="form-label mb-1">From Date</label>
-            <input class="form-control" type="date" [(ngModel)]="startDate"
-              (change)="onDateRangeChange()" />
+            <input class="form-control" type="date" [(ngModel)]="startDate" (change)="onDateRangeChange()" />
           </div>
 
           <div class="col-auto">
             <label class="form-label mb-1">To Date</label>
-            <input class="form-control" type="date" [(ngModel)]="endDate"
-              (change)="onDateRangeChange()" />
+            <input class="form-control" type="date" [(ngModel)]="endDate" (change)="onDateRangeChange()" />
           </div>
 
           <div class="col-auto d-flex align-items-end">

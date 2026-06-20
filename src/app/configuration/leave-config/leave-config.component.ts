@@ -264,10 +264,23 @@ export class LeaveConfigComponent {
   }
 
   // getting company name
+  // getting company name
   getCompanyNames() {
     this.service.post('fetch/company', {}).subscribe((res: any) => {
       if (res.status == "success") {
-        this.CompanyNames = res.data
+        this.CompanyNames = res.data;
+
+        if (this.CompanyNames.length > 0) {
+          // If no valid company selected yet (or it's "all"), pick the first one
+          const defaultCompany = (this.selectedCompanyId && this.selectedCompanyId !== 'all')
+            ? this.CompanyNames.find((c: any) => c.company_id == this.selectedCompanyId) ?? this.CompanyNames[0]
+            : this.CompanyNames[0];
+
+          this.selectedCompanyId = defaultCompany.company_id;
+          this.service.setCompanyId(this.selectedCompanyId);
+
+          this.getAllLeaves(); // fire only after we have a real company_id
+        }
       }
     },
       (error) => {
