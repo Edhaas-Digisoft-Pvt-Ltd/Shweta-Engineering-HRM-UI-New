@@ -24,6 +24,9 @@ export class HrmserviceService {
   //live link
   // url: string = 'https://shwetaengineers.co.in/seplpayroll/api/v1/';  
 
+  // new test link
+  // url: string = 'https://edhaasdigisoftpl.co.in/rutuja/payroll/Shweta_Payroll_rest/public/api/v1/';  
+
   //shweta local   
   // url: string = 'http://192.168.1.2:8080/hr/seplpayroll/public/api/v1/';  
 
