@@ -335,7 +335,7 @@ export class ApprovedAdvancePaymentComponent {
         filter: true,
         maxWidth: 200
       },
-      { headerName: 'Apply Date', field: 'apply_date', sortable: true, filter: true, maxWidth: 150 },
+      { headerName: 'Apply Date', field: 'apply_date', sortable: true, filter: true, maxWidth: 150, valueFormatter: this.service.dateFormatter },
       {
         headerName: 'Adv. Amount',
         field: 'advance_amount',
@@ -396,7 +396,7 @@ export class ApprovedAdvancePaymentComponent {
           company: advanceInfo?.company_name,
           department: advanceInfo?.department_name,
           role: advanceInfo?.designation_name,
-          requestDate: advanceInfo?.apply_date,
+          requestDate: this.service.formatToDDMMYYYY(advanceInfo?.apply_date,),
           status: advanceInfo?.status,
           tenure: advanceInfo?.tenure,
           amount: advanceInfo?.advance_amount,

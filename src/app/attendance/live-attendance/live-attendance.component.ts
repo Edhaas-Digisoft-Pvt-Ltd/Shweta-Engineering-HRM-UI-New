@@ -56,7 +56,7 @@ export class LiveAttendanceComponent {
   columnDefs: ColDef[] = [
     { headerName: 'Employee Code', field: 'employee.employee_code' },
     { headerName: 'Name', field: 'employee.emp_name' },
-    { headerName: 'Date', field: 'currentdate' },
+    { headerName: 'Date', field: 'currentdate', valueFormatter: this.service.dateFormatter},
     { headerName: 'Login Time', field: 'logged_in_time' },
     { headerName: 'Logout Time', field: 'logged_out_time' },
     {

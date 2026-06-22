@@ -87,9 +87,9 @@ export class LeaveApprovedRejectedComponent {
   columnDefs: ColDef[] = [
     { headerName: 'Employee Code', field: 'employee_code', sortable: true, filter: true },
     { headerName: 'Employee Name', field: 'emp_name', sortable: true, filter: true },
-    { headerName: 'Start Date', field: 'start_date', sortable: true, filter: true },
-    { headerName: 'End Date', field: 'end_date', sortable: true, filter: true },
-    { headerName: 'Apply Date', field: 'created_at', sortable: true, filter: true },
+    { headerName: 'Start Date', field: 'start_date', sortable: true, filter: true, valueFormatter: this.service.dateFormatter },
+    { headerName: 'End Date', field: 'end_date', sortable: true, filter: true, valueFormatter: this.service.dateFormatter },
+    { headerName: 'Apply Date', field: 'created_at', sortable: true, filter: true, valueFormatter: this.service.dateFormatter },
     { headerName: 'Status', field: 'leave_status', cellRenderer: this.statusButtonRenderer, sortable: true, filter: true, maxWidth: 140 },
     {
       headerName: 'Actions',

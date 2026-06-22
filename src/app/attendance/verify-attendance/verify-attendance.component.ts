@@ -14,9 +14,8 @@ export class VerifyAttendanceComponent implements OnInit {
   isLoading: boolean = false;
   searchInputValue: string = '';
   searchTimeout: any;
-
-  selectedMonth: number = new Date().getMonth() + 1;
-  selectedYear: number = new Date().getFullYear();
+  startDate: string = this.getFirstDayOfMonth();
+  endDate: string = this.getLastDayOfMonth();
 
   selectedIds: Set<number> = new Set();
 
@@ -48,17 +47,6 @@ export class VerifyAttendanceComponent implements OnInit {
   loginTimeError: boolean = false;
   logoutTimeError: boolean = false;
 
-  months = [
-    { value: 1, label: 'January' }, { value: 2, label: 'February' },
-    { value: 3, label: 'March' }, { value: 4, label: 'April' },
-    { value: 5, label: 'May' }, { value: 6, label: 'June' },
-    { value: 7, label: 'July' }, { value: 8, label: 'August' },
-    { value: 9, label: 'September' }, { value: 10, label: 'October' },
-    { value: 11, label: 'November' }, { value: 12, label: 'December' },
-  ];
-
-  years: number[] = [];
-
   public defaultColDef: ColDef = {
     flex: 1,
     resizable: true,
@@ -80,7 +68,7 @@ export class VerifyAttendanceComponent implements OnInit {
     },
     { headerName: 'Employee Code', valueGetter: (p) => p.data?.employee?.employee_code || '' },
     { headerName: 'Name', valueGetter: (p) => p.data?.employee?.emp_name || '' },
-    { headerName: 'Date', field: 'currentdate' },
+    { headerName: 'Date', field: 'currentdate', valueFormatter: this.service.dateFormatter },
     { headerName: 'Login Time', field: 'logged_in_time' },
     { headerName: 'Logout Time', field: 'logged_out_time' },
     {
@@ -126,10 +114,6 @@ export class VerifyAttendanceComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
-    const currentYear = new Date().getFullYear();
-    for (let y = currentYear; y >= currentYear - 5; y--) {
-      this.years.push(y);
-    }
     this.fetchUnverifiedAttendance();
   }
 
@@ -138,10 +122,9 @@ export class VerifyAttendanceComponent implements OnInit {
   }
 
   fetchUnverifiedAttendance(): void {
-    const body: any = {
-      month: this.selectedMonth,
-      year: this.selectedYear,
-    };
+    const body: any = {};
+    if (this.startDate) body.start_date = this.startDate;
+    if (this.endDate) body.end_date = this.endDate;
 
     if (this.searchInputValue.trim()) {
       body.search = this.searchInputValue.trim();
@@ -305,7 +288,7 @@ export class VerifyAttendanceComponent implements OnInit {
       attendance_live_id: this.editRecord.attendance_live_id,
       logged_in_time: this.formatTime(this.editRecord.logged_in_time),
       logged_out_time: this.formatTime(this.editRecord.logged_out_time),
-      updated_by:         updatedBy ? parseInt(updatedBy) : null,
+      updated_by: updatedBy ? parseInt(updatedBy) : null,
     }).subscribe({
       next: (res: any) => {
         this.isSaving = false;
@@ -349,8 +332,8 @@ export class VerifyAttendanceComponent implements OnInit {
     this.isLoading = true;
 
     this.service.post('verify-attendance', {
-      month: this.selectedMonth,
-      year: this.selectedYear,
+      start_date: this.startDate,
+      end_date: this.endDate,
       attendance_live_ids: ids,
     }).subscribe({
       next: (res: any) => {
@@ -376,13 +359,13 @@ export class VerifyAttendanceComponent implements OnInit {
   }
 
   verifyAll(): void {
-    if (!confirm(`Verify ALL unverified attendance for ${this.months[this.selectedMonth - 1].label} ${this.selectedYear}?`)) return;
+    if (!confirm(`Verify ALL unverified attendance from ${this.startDate} to ${this.endDate}?`)) return;
 
     this.isLoading = true;
 
     this.service.post('verify-attendance', {
-      month: this.selectedMonth,
-      year: this.selectedYear,
+      start_date: this.startDate,
+      end_date: this.endDate,
     }).subscribe({
       next: (res: any) => {
         this.isLoading = false;
@@ -403,6 +386,21 @@ export class VerifyAttendanceComponent implements OnInit {
     });
   }
 
+  getFirstDayOfMonth(): string {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    return `${year}-${month}-01`;
+  }
+
+  getLastDayOfMonth(): string {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = now.getMonth() + 1;
+    const lastDay = new Date(year, month, 0).getDate();
+    return `${year}-${String(month).padStart(2, '0')}-${String(lastDay).padStart(2, '0')}`;
+  }
+
   onSearchChange(): void {
     clearTimeout(this.searchTimeout);
     this.searchTimeout = setTimeout(() => {
@@ -410,14 +408,14 @@ export class VerifyAttendanceComponent implements OnInit {
     }, 500);
   }
 
-  onFilterChange(): void {
+  onDateRangeChange(): void {
     this.fetchUnverifiedAttendance();
   }
 
   clearFilter(): void {
     this.searchInputValue = '';
-    this.selectedMonth = new Date().getMonth() + 1;
-    this.selectedYear = new Date().getFullYear();
+    this.startDate = this.getFirstDayOfMonth();
+    this.endDate = this.getLastDayOfMonth();
     this.fetchUnverifiedAttendance();
   }
 }

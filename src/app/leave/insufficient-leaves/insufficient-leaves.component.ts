@@ -184,7 +184,7 @@ export class InsufficientLeavesComponent {
   columnDefs: ColDef[] = [
     { headerName: 'Employee Code', field: 'employee_code', sortable: true, filter: true },
     { headerName: 'Employee Name', field: 'emp_name', sortable: true, filter: true },
-    { headerName: 'Absent Date', field: 'absent_date', sortable: true, filter: true },
+    { headerName: 'Absent Date', field: 'absent_date', sortable: true, filter: true, valueFormatter: this.service.dateFormatter},
   ];
 
   onDateRangeChange(): void {

@@ -298,7 +298,7 @@ export class AdvancePaymentComponent {
         filter: true,
         flex: 1,
       },
-      { headerName: 'Apply Date', field: 'apply_date', sortable: true, filter: true },
+      { headerName: 'Apply Date', field: 'apply_date', sortable: true, filter: true, valueFormatter: this.service.dateFormatter },
       { headerName: 'Amount', field: 'advance_amount', sortable: true, filter: true },
       { headerName: 'Tenure', field: 'tenure', sortable: true, filter: true, flex: 1, maxWidth: 120 },
       {
@@ -445,7 +445,7 @@ export class AdvancePaymentComponent {
           company: singleAdvanceSalary?.company_name,
           department: singleAdvanceSalary?.department_name,
           role: singleAdvanceSalary?.designation_name,
-          requestData: singleAdvanceSalary?.apply_date,
+          requestData: this.service.formatToDDMMYYYY(singleAdvanceSalary?.apply_date),
           status: singleAdvanceSalary?.status,
           tenure: singleAdvanceSalary?.tenure,
           amount: singleAdvanceSalary?.advance_amount,

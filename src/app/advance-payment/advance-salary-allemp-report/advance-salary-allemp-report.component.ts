@@ -309,7 +309,7 @@ export class AdvanceSalaryAllempReportComponent {
         filter: true,
         maxWidth: 140
       },
-      { headerName: 'ApplyDate', field: 'apply_date', sortable: true, filter: true, maxWidth: 130 },
+      { headerName: 'ApplyDate', field: 'apply_date', sortable: true, filter: true, maxWidth: 130, valueFormatter: this.service.dateFormatter },
       {
         headerName: 'Adv.Amt',
         field: 'advance_amount',
