@@ -34,6 +34,9 @@ export class CompanyListComponent {
   rowData: any = [];
   columnDefs: ColDef[] = [];
   gridApiActive: any;
+  selectedCompany: any = null;
+  existingLogoUrl: string | null = null;
+  removeExistingLogo = false;
 
   constructor(private router: Router, private fb: FormBuilder, private service: HrmserviceService, private modalService: ModalServiceService, private toastr: ToastrService) {
     this.companyForm = this.fb.group({
@@ -46,8 +49,8 @@ export class CompanyListComponent {
       companyDescription: ['', [Validators.required, Validators.pattern(/^[A-Za-z0-9,\s]+$/)]],
       companyAddress: ['', [Validators.required, Validators.pattern(/^[A-Za-z0-9,\s]+$/)]],
     });
+
     this.EditcompanyForm = this.fb.group({
-      // Company Name: Only letters, numbers, spaces, dots, and ampersands (e.g., TCS, Infosys Ltd., H&M)
       EditcompanyName: [
         '',
         [
@@ -56,13 +59,9 @@ export class CompanyListComponent {
           Validators.pattern(this.NoWhitespaceRegExp)
         ]
       ],
-
-      // Company Logo: Required (file/image input)
-      EditcompanyLogo: [null, Validators.required],
       EditcompanyAddress: ['', Validators.required],
-      EditmasterCompanyList: [{ value: '', disabled: true, }, Validators.required],
+      EditmasterCompanyList: ['', Validators.required],
       radioChoice: ['yes'],
-
       EditcompanyDescription: [
         '',
         [
@@ -70,9 +69,7 @@ export class CompanyListComponent {
           Validators.pattern(/^[A-Za-z ]{2,}$/)
         ]
       ],
-
-      // Incorporation Date: Required (can use custom date validator for past dates only)
-      EditIncorporationDate: ['', Validators.required, Validators.max]
+      EditIncorporationDate: ['', Validators.required]
     });
 
     // this.companyForm.get('radioChoice')?.valueChanges.subscribe(value => {
@@ -108,15 +105,15 @@ export class CompanyListComponent {
 
   initializeCompanyColumns() {
     this.columnDefs = [
-        // {
-        //   headerName: 'Logo',
-        //   field: 'company_logo_url',
-        //   cellRenderer: (params: any) => {
-        //     if (!params.value) return '';
-        //     return `<img src="${params.value}" style="height:40px;width:40px;border-radius:5px;" />`;
-        //   },
-        //   maxWidth: 100
-        // },
+      // {
+      //   headerName: 'Logo',
+      //   field: 'company_logo_url',
+      //   cellRenderer: (params: any) => {
+      //     if (!params.value) return '';
+      //     return `<img src="${params.value}" style="height:40px;width:40px;border-radius:5px;" />`;
+      //   },
+      //   maxWidth: 100
+      // },
       {
         headerName: 'Company Name',
         field: 'company_name',
@@ -140,6 +137,32 @@ export class CompanyListComponent {
         field: 'company_founded',
         sortable: true,
         filter: true
+      },
+      {
+        headerName: 'Action',
+        field: 'action',
+        sortable: false,
+        filter: false,
+        editable: false,
+        suppressMovable: true,
+        maxWidth: 120,
+        cellRenderer: (params: any) => {
+          const wrapper = document.createElement('div');
+          wrapper.classList.add('d-flex', 'gap-2', 'align-items-center', 'h-100');
+
+          const editBtn = document.createElement('button');
+          editBtn.type = 'button';
+          editBtn.classList.add('btn', 'btn-sm', 'action-btn-grid', 'edit-btn-grid', 'me-2');
+          editBtn.style.backgroundColor = '#C8E3FF';
+          editBtn.innerHTML = '<i class="bi bi-pencil"></i>';
+          editBtn.addEventListener('click', (e: Event) => {
+            e.stopPropagation();
+            this.onEditCompany(params.data);
+          });
+
+          wrapper.appendChild(editBtn);
+          return wrapper;
+        }
       }
     ];
   }
@@ -148,7 +171,7 @@ export class CompanyListComponent {
     this.gridApiActive = params.api;
   }
 
-    public defaultColDef: ColDef = {
+  public defaultColDef: ColDef = {
     editable: true,
     flex: 1,
     resizable: true,
@@ -168,11 +191,10 @@ export class CompanyListComponent {
     return isWhitespace ? { whitespace: true } : null;
   }
 
-
   getCompanyData() {
     this.service.post("fetch/company", {}).subscribe((res: any) => {
       if (res.status === 'success') {
-        this.rowData = res.data; // ✅ for ag-grid
+        this.rowData = res.data;
       }
     });
   }
@@ -191,7 +213,7 @@ export class CompanyListComponent {
     }, (error) => {
       console.error('Error fetching companies:', error);
     });
-}
+  }
 
   onFileSelected(event: any) {
     const file = event.target.files[0];
@@ -360,5 +382,94 @@ export class CompanyListComponent {
     if (!pattern.test(char)) {
       event.preventDefault();
     }
+  }
+
+  onEditCompany(company: any) {
+    this.selectedCompany = company;
+    this.selectedId = company.master_id;
+    this.selectedLogoFile = null;
+    this.removeExistingLogo = false;
+    this.existingLogoUrl = company.company_logo_url || null;
+
+    this.EditcompanyForm.patchValue({
+      EditcompanyName: company.company_name,
+      EditcompanyAddress: company.company_location,
+      EditcompanyDescription: company.company_desc,
+      EditIncorporationDate: company.company_founded,
+      EditmasterCompanyList: company.master_id
+    });
+
+    const modalEl = document.getElementById('EditCompanyDetails');
+    if (modalEl) {
+      const modal = new bootstrap.Modal(modalEl);
+      modal.show();
+    }
+  }
+
+  onDeleteExistingLogo(): void {
+    this.removeExistingLogo = true;
+    this.existingLogoUrl = null;
+  }
+
+  onEditFileSelected(event: any) {
+    const file = event.target.files[0];
+    if (file) {
+      this.selectedLogoFile = file;
+    }
+  }
+
+  onEditMasterCompanyChange(event: Event): void {
+    this.selectedId = (event.target as HTMLSelectElement).value;
+  }
+
+  updateCompany() {
+    this.isEditSubmitted = true;
+
+    if (this.EditcompanyForm.invalid) {
+      this.toastr.error('Please fill all required fields correctly!');
+      return;
+    }
+
+    const id = this.selectedCompany?.company_id ?? this.selectedCompany?.id;
+    if (!id) {
+      this.toastr.error('Could not determine which company to update.');
+      return;
+    }
+
+    // If user deleted the old logo but didn't pick a new one, block submit
+    if (this.removeExistingLogo && !this.selectedLogoFile) {
+      this.toastr.error('Please upload a new logo or keep the existing one.');
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append('master_id', this.EditcompanyForm.value.EditmasterCompanyList);
+    formData.append('company_name', this.EditcompanyForm.value.EditcompanyName);
+    formData.append('company_desc', this.EditcompanyForm.value.EditcompanyDescription);
+    formData.append('company_location', this.EditcompanyForm.value.EditcompanyAddress);
+    formData.append('company_founded', this.EditcompanyForm.value.EditIncorporationDate);
+
+    if (this.selectedLogoFile) {
+      formData.append('company_logo', this.selectedLogoFile);
+    }
+    // if neither removed nor a new file picked, we simply don't send company_logo,
+    // so backend leaves the existing one untouched
+
+    this.service.post(`update/company/${id}`, formData).subscribe({
+      next: (res) => {
+        this.toastr.success('Company updated successfully!');
+        this.closeAllModals();
+        this.getCompanyData();
+        this.isEditSubmitted = false;
+        this.selectedCompany = null;
+        this.selectedLogoFile = null;
+        this.removeExistingLogo = false;
+        this.existingLogoUrl = null;
+      },
+      error: (err) => {
+        console.error('Update Error:', err);
+        this.toastr.error('Failed to update company.');
+      }
+    });
   }
 }

@@ -291,7 +291,7 @@
                                                         * Please Fill All Required Fields.
                                                     </div>
                                                 </div> -->
-                <form [formGroup]="EditcompanyForm">
+                <form [formGroup]="EditcompanyForm" (ngSubmit)="updateCompany()">
                     <div class="row">
 
                         <!-- Company Name -->
@@ -309,18 +309,36 @@
                         </div>
 
                         <!-- Company Logo -->
+                        <!-- Company Logo -->
+                        <!-- Company Logo -->
                         <div class="col-md-3 mb-3">
-                            <label for="companyLogo">Company Logo <span class="text-danger">*</span></label>
-                            <div class="position-relative">
-                                <input type="file" class="form-control" id="companyLogo"
-                                    (change)="onFileSelected($event)" accept="image/*"
-                                    [ngClass]="{'is-invalid': isSubmitted && !selectedLogoFile}">
-                                <div class="invalid-feedback" *ngIf="isSubmitted && !selectedLogoFile">
-                                    Company Logo is required.
+                            <label for="editCompanyLogo">Company Logo <span class="text-danger">*</span></label>
+                            <div class="d-flex align-items-center gap-2">
+
+                                <!-- Logo box (only the image, nothing else inside) -->
+                                <div *ngIf="existingLogoUrl" class="logo-box">
+                                    <img [src]="existingLogoUrl" alt="Company Logo">
                                 </div>
+
+                                <!-- Delete icon, separate from the box -->
+                                <button *ngIf="existingLogoUrl" type="button" class="btn-delete-logo"
+                                    (click)="onDeleteExistingLogo()" title="Remove logo">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+
+                                <!-- File input only when there's no existing logo -->
+                                <input *ngIf="!existingLogoUrl" type="file" class="form-control" id="editCompanyLogo"
+                                    (change)="onEditFileSelected($event)" accept="image/*"
+                                    [ngClass]="{'is-invalid': isEditSubmitted && removeExistingLogo && !selectedLogoFile}">
+                            </div>
+
+                            <div class="invalid-feedback d-block"
+                                *ngIf="isEditSubmitted && removeExistingLogo && !selectedLogoFile">
+                                Please upload a new logo or keep the existing one.
                             </div>
                         </div>
-                        <div class="col-md mb-3">
+
+                        <div  *ngIf="false" class="col-md mb-3">
                             <label for="incDate">Master Company ? <span class="text-danger">*</span></label>
                             <div class="position-relative d-flex gap-4">
                                 <div class="d-flex align-items-center gap-1">
@@ -343,13 +361,14 @@
                         <div class="col-md-4 mb-3">
                             <label for="incDate">Master Company List <span class="text-danger">*</span></label>
                             <div class="position-relative">
-                                <select name="" formControlName="EditmasterCompanyList" class="form-control" id=""
-                                    [ngClass]="{'is-invalid': isSubmitted && companyForm.get('EditmasterCompanyList')?.invalid}">
+                                <select formControlName="EditmasterCompanyList"
+                                    (change)="onEditMasterCompanyChange($event)" class="form-control"
+                                    [ngClass]="{'is-invalid': isEditSubmitted && EditcompanyForm.get('EditmasterCompanyList')?.invalid}">
                                     <option value="">--select company Name--</option>
-                                    <option value="" *ngFor="let CompanyName of CompanyNameList">
-                                        {{CompanyName.name}}
+                                    <option *ngFor="let CompanyName of MasterCompanyNames"
+                                        [value]="CompanyName.master_id">
+                                        {{CompanyName.master_company_name}}
                                     </option>
-
                                 </select>
                             </div>
                         </div>
@@ -399,7 +418,7 @@
                     </div>
 
                     <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-                        <button type="submit" class="btn btn-primary mt-3 ml-auto btn-end submit-btn">Submit</button>
+                        <button type="submit" class="btn btn-primary mt-3 ml-auto btn-end submit-btn">Update</button>
                     </div>
                 </form>
 
