@@ -14,23 +14,28 @@
             <div class="card-header  border-0 bg-white p-0">
                 <ul class="nav nav-tabs">
                     <li class="nav-item">
-                        <a class="nav-link xyz" [class.active]="currentStep === 1" (click)="goToStep(1)" style="cursor:pointer;"> Personal Info</a>
+                        <a class="nav-link xyz" [class.active]="currentStep === 1" (click)="goToStep(1)"
+                            style="cursor:pointer;"> Personal Info</a>
                     </li>
                     <span class="abc"></span>
                     <li class="nav-item">
-                        <a class="nav-link xyz" [class.active]="currentStep === 2" (click)="goToStep(2)" style="cursor:pointer;"> Professional Info</a>
+                        <a class="nav-link xyz" [class.active]="currentStep === 2" (click)="goToStep(2)"
+                            style="cursor:pointer;"> Professional Info</a>
                     </li>
                     <span class="abc"></span>
                     <li class="nav-item">
-                        <a class="nav-link xyz" [class.active]="currentStep === 3" (click)="goToStep(3)" style="cursor:pointer;"> Details</a>
+                        <a class="nav-link xyz" [class.active]="currentStep === 3" (click)="goToStep(3)"
+                            style="cursor:pointer;"> Details</a>
                     </li>
                     <span class="abc"></span>
                     <li class="nav-item ">
-                        <a class="nav-link xyz" [class.active]="currentStep === 4" (click)="goToStep(4)" style="cursor:pointer;">Statutory Info</a>
+                        <a class="nav-link xyz" [class.active]="currentStep === 4" (click)="goToStep(4)"
+                            style="cursor:pointer;">Statutory Info</a>
                     </li>
                     <span class="abc"></span>
                     <li class="nav-item active">
-                        <a class="nav-link xyz" [class.active]="currentStep === 5" (click)="goToStep(5)" style="cursor:pointer;"> Salary Structure</a>
+                        <a class="nav-link xyz" [class.active]="currentStep === 5" (click)="goToStep(5)"
+                            style="cursor:pointer;"> Salary Structure</a>
                     </li>
                     <!-- <span class="abc"></span> -->
                     <!-- <li class="nav-item">
@@ -442,7 +447,7 @@
                                 </div>
 
                                 <!-- Aadhaar Upload -->
-                                <div class="col-lg-6">
+                                <div class="col-lg-4">
                                     <label class="form-label small fw-semibold mb-1">Aadhaar Card</label>
 
                                     <ng-container *ngIf="!docUploads['aadhaar'].file; else aadhaarPreview">
@@ -500,7 +505,7 @@
                                 </div>
 
                                 <!-- PAN Upload -->
-                                <div class="col-lg-6">
+                                <div class="col-lg-4">
                                     <label class="form-label small fw-semibold mb-1">PAN Card</label>
 
                                     <ng-container *ngIf="!docUploads['pan_card'].file; else panPreview">
@@ -552,6 +557,61 @@
 
                                     <small class="text-danger" *ngIf="docUploads['pan_card'].error">
                                         <i class="bi bi-exclamation-circle me-1"></i>{{ docUploads['pan_card'].error }}
+                                    </small>
+                                </div>
+
+                                <div class="col-lg-4">
+                                    <label class="form-label small fw-semibold mb-1">QR Code</label>
+
+                                    <ng-container *ngIf="!docUploads['qr_code'].file; else qrPreview">
+                                        <label for="upload_qr"
+                                            class="d-flex align-items-center gap-2 border rounded px-3 py-2 text-muted"
+                                            style="cursor:pointer; border-style:dashed !important; border-color:#ced4da !important;">
+                                            <i class="bi bi-qr-code" style="font-size:1rem;"></i>
+                                            <span class="small">Click to upload QR Code &nbsp;<span class="text-muted"
+                                                    style="font-size:11px;">JPG, PNG, PDF</span></span>
+                                        </label>
+                                        <input type="file" id="upload_qr" class="d-none" accept=".jpg,.jpeg,.png,.pdf"
+                                            (change)="onDocFileSelected($event, 'qr_code')">
+                                    </ng-container>
+
+                                    <ng-template #qrPreview>
+                                        <div class="d-flex align-items-center gap-2 border rounded px-3 py-2 bg-light">
+                                            <img *ngIf="docUploads['qr_code'].preview"
+                                                [src]="docUploads['qr_code'].preview" class="rounded"
+                                                style="height:36px; width:50px; object-fit:cover; cursor:pointer;"
+                                                alt="QR Code" title="Click to view" (click)="openDocPreview('qr_code')">
+                                            <i *ngIf="!docUploads['qr_code'].preview"
+                                                class="bi bi-file-earmark-pdf-fill text-danger"
+                                                style="font-size:1.4rem; cursor:pointer;" title="Click to view"
+                                                (click)="openDocPreview('qr_code')"></i>
+
+                                            <div class="flex-grow-1 overflow-hidden">
+                                                <div class="small text-truncate fw-semibold" style="max-width:180px;">
+                                                    {{ docUploads['qr_code'].file?.name }}
+                                                </div>
+                                                <span class="text-muted" style="font-size:11px;">
+                                                    {{ ((docUploads['qr_code'].file?.size || 0) / 1024) | number:'1.0-0'
+                                                    }} KB
+                                                </span>
+                                                &nbsp;
+                                                <span *ngIf="docUploads['qr_code'].uploading"
+                                                    class="badge bg-warning text-dark"
+                                                    style="font-size:10px;">Uploading...</span>
+                                                <span *ngIf="docUploads['qr_code'].uploaded" class="badge bg-success"
+                                                    style="font-size:10px;"><i class="bi bi-check2"></i> Done</span>
+                                            </div>
+
+                                            <button type="button" class="btn btn-sm btn-outline-danger py-0 px-1"
+                                                (click)="removeDocFile('qr_code')"
+                                                [disabled]="docUploads['qr_code'].uploading">
+                                                <i class="bi bi-x" style="font-size:1rem;"></i>
+                                            </button>
+                                        </div>
+                                    </ng-template>
+
+                                    <small class="text-danger" *ngIf="docUploads['qr_code'].error">
+                                        <i class="bi bi-exclamation-circle me-1"></i>{{ docUploads['qr_code'].error }}
                                     </small>
                                 </div>
 

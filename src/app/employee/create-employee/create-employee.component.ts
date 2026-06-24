@@ -62,6 +62,7 @@ export class CreateEmployeeComponent {
   } = {
       aadhaar: { file: null, preview: null, error: '', uploading: false, uploaded: false, doc_id: null },
       pan_card: { file: null, preview: null, error: '', uploading: false, uploaded: false, doc_id: null },
+      qr_code:  { file: null, preview: null, error: '', uploading: false, uploaded: false, doc_id: null },
     };
 
   constructor(

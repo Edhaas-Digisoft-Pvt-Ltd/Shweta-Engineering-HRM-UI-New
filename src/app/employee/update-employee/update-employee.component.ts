@@ -66,6 +66,7 @@ export class UpdateEmployeeComponent {
   } = {
       aadhaar: { file: null, preview: null, error: '', uploading: false, uploaded: false, doc_id: null, existing: null, deleting: false, pendingDelete: false },
       pan_card: { file: null, preview: null, error: '', uploading: false, uploaded: false, doc_id: null, existing: null, deleting: false, pendingDelete: false },
+      qr_code:  { file: null, preview: null, error: '', uploading: false, uploaded: false, doc_id: null, existing: null, deleting: false, pendingDelete: false }, 
     };
 
   constructor(
