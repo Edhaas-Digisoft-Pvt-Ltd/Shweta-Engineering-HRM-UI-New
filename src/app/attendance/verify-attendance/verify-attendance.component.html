@@ -96,22 +96,29 @@
         <!-- Row 2: editable time fields -->
         <div class="row my-3">
           <!-- Login Time -->
+          <!-- Login Time -->
           <div class="col-md-6">
             <label>Login Time <span class="text-danger">*</span></label>
-            <input type="text" class="form-control" [class.is-invalid]="loginTimeError"
+            <input type="text" class="form-control" [class.is-invalid]="loginTimeError || loginShiftError"
               [(ngModel)]="editRecord.logged_in_time" placeholder="HH:MM:SS AM/PM" />
-            <div class="invalid-feedback">
+            <div class="invalid-feedback" *ngIf="loginTimeError">
               Required. Enter time as HH:MM AM/PM
+            </div>
+            <div class="invalid-feedback" *ngIf="loginShiftError" style="display:block">
+              {{ loginShiftError }}
             </div>
           </div>
 
           <!-- Logout Time -->
           <div class="col-md-6">
             <label>Logout Time <span class="text-danger">*</span></label>
-            <input type="text" class="form-control" [class.is-invalid]="logoutTimeError"
+            <input type="text" class="form-control" [class.is-invalid]="logoutTimeError || logoutShiftError"
               [(ngModel)]="editRecord.logged_out_time" placeholder="HH:MM:SS AM/PM" />
-            <div class="invalid-feedback">
+            <div class="invalid-feedback" *ngIf="logoutTimeError">
               Required. Enter time as HH:MM AM/PM
+            </div>
+            <div class="invalid-feedback" *ngIf="logoutShiftError" style="display:block">
+              {{ logoutShiftError }}
             </div>
           </div>
         </div>

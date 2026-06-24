@@ -46,6 +46,8 @@ export class VerifyAttendanceComponent implements OnInit {
     };
   loginTimeError: boolean = false;
   logoutTimeError: boolean = false;
+  loginShiftError: string = '';
+  logoutShiftError: string = '';
 
   public defaultColDef: ColDef = {
     flex: 1,
@@ -172,88 +174,84 @@ export class VerifyAttendanceComponent implements OnInit {
     this.isSaving = false;
     this.loginTimeError = false;
     this.logoutTimeError = false;
+    this.loginShiftError = '';
+    this.logoutShiftError = '';
   }
 
   // Full validation for both login and logout
   validateTimes(): boolean {
-    // Regex: HH:MM or HH:MM:SS followed by AM/PM (case insensitive)
     const timeRegex = /^(\d{1,2}):(\d{2})(:\d{2})?\s*(AM|PM)$/i;
 
     const loginVal = this.editRecord.logged_in_time.trim();
     const logoutVal = this.editRecord.logged_out_time.trim();
 
-    let hasError = false;
-
-    // Reset red borders first
+    // Reset all errors
     this.loginTimeError = false;
     this.logoutTimeError = false;
+    this.loginShiftError = '';
+    this.logoutShiftError = '';
+
+    let hasError = false;
 
     // --- Login validation ---
-    if (!loginVal) {
+    const loginMatch = loginVal.match(timeRegex);
+    if (!loginVal || !loginMatch) {
       this.loginTimeError = true;
       hasError = true;
     } else {
-      const match = loginVal.match(timeRegex);
-      if (!match) {
+      let hours = parseInt(loginMatch[1], 10);
+      const minutes = parseInt(loginMatch[2], 10);
+      const mer = loginMatch[4].toUpperCase();
+
+      if (hours < 1 || hours > 12 || minutes > 59) {
         this.loginTimeError = true;
         hasError = true;
       } else {
-        let hours = parseInt(match[1], 10);
-        const minutes = parseInt(match[2], 10);
-        const mer = match[4].toUpperCase();
+        if (mer === 'PM' && hours !== 12) hours += 12;
+        if (mer === 'AM' && hours === 12) hours = 0;
+        const totalMins = hours * 60 + minutes;
 
-        if (hours < 1 || hours > 12) { this.loginTimeError = true; hasError = true; }
-        else if (minutes > 59) { this.loginTimeError = true; hasError = true; }
-        else {
-          // Convert to 24h for shift check
-          if (mer === 'PM' && hours !== 12) hours += 12;
-          if (mer === 'AM' && hours === 12) hours = 0;
-          const totalMins = hours * 60 + minutes;
-
-          if (this.editRecord.shift_details === '1' && totalMins < 420) {
-            this.toastr.error('Morning shift login time must be 7:00 AM or later.');
-            this.loginTimeError = true;
-            hasError = true;
-          }
-          if (this.editRecord.shift_details === '2' && totalMins < 1140) {
-            this.toastr.error('Evening shift login time must be 7:00 PM or later.');
-            this.loginTimeError = true;
-            hasError = true;
-          }
+        if (this.editRecord.shift_details === '1' && (totalMins < 420 || totalMins > 1140)) {
+          this.loginShiftError = 'Morning shift login time must be 7:00 AM or later.';
+          hasError = true;
         }
-      }
-    }
-
-    // --- Logout validation ---
-    if (!logoutVal) {
-      this.logoutTimeError = true;
-      hasError = true;
-    } else {
-      const match = logoutVal.match(timeRegex);
-      if (!match) {
-        this.logoutTimeError = true;
-        hasError = true;
-      } else {
-        const minutes = parseInt(match[2], 10);
-        const hours = parseInt(match[1], 10);
-        if (hours < 1 || hours > 12 || minutes > 59) {
-          this.logoutTimeError = true;
+        if (this.editRecord.shift_details === '2' && (totalMins > 420 && totalMins < 1140)) {
+          this.loginShiftError = 'Evening shift login  time must be 7:00 PM or later.';
           hasError = true;
         }
       }
     }
 
-    if (hasError) {
-      // Only show generic toastr if no specific shift error was already shown
-      const loginMatch = loginVal.match(timeRegex);
-      const logoutMatch = logoutVal.match(timeRegex);
-      if (!loginVal || !loginMatch || !logoutVal || !logoutMatch) {
-        this.toastr.error('Please fill all required fields.');
+    // --- Logout validation ---
+    const logoutMatch = logoutVal.match(timeRegex);
+    if (!logoutVal || !logoutMatch) {
+      this.logoutTimeError = true;
+      hasError = true;
+    } else {
+      let hours = parseInt(logoutMatch[1], 10);
+      const minutes = parseInt(logoutMatch[2], 10);
+      const mer = logoutMatch[4].toUpperCase();
+
+      if (hours < 1 || hours > 12 || minutes > 59) {
+        this.logoutTimeError = true;
+        hasError = true;
+      } else {
+        if (mer === 'PM' && hours !== 12) hours += 12;
+        if (mer === 'AM' && hours === 12) hours = 0;
+        const totalMins = hours * 60 + minutes;
+
+        if (this.editRecord.shift_details === '1' && (totalMins < 420 || totalMins > 1140)) {
+          this.logoutShiftError = 'Morning shift logout time must be 7:00 PM or before.';
+          hasError = true;
+        }
+        if (this.editRecord.shift_details === '2' && (totalMins > 420 && totalMins < 1140)) {
+          this.logoutShiftError = 'Evening shift logout time must be 7:00 AM or before.';
+          hasError = true;
+        }
       }
-      return false;
     }
 
-    return true;
+    return !hasError;
   }
 
   // Format time before sending to backend
