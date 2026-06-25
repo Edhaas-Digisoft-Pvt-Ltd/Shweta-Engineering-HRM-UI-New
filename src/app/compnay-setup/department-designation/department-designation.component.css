@@ -1,0 +1,14 @@
+.tab-link {
+  color: #6c757d;
+  border-bottom: 3px solid transparent;
+  text-decoration: none;
+  transition: color 0.2s, border-color 0.2s;
+  margin-bottom: -1px; /* sits on top of border-bottom of parent */
+}
+.tab-link:hover {
+  color: #3674B5;
+}
+.tab-link--active {
+  color: #3674B5 !important;
+  border-bottom: 3px solid #3674B5;
+}

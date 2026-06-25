@@ -61,7 +61,7 @@
 <div class="modal fade" id="editAttendanceModal" tabindex="-1" aria-labelledby="editAttModalTitle"
   [class.show]="showEditModal" [style.display]="showEditModal ? 'block' : 'none'"
   [style.background]="showEditModal ? 'rgba(0,0,0,0.45)' : ''">
-  <div class="modal-dialog modal-dialog-centered modal-lg">
+  <div class="modal-dialog modal-dialog-centered modal-xl">
     <div class="modal-content">
 
       <!-- Header -->
@@ -75,11 +75,11 @@
 
         <!-- Row 1: read-only info fields -->
         <div class="row my-3">
-          <div class="col-md-3">
+          <div class="col-md-2">
             <label>Employee Code</label>
             <input type="text" class="form-control" [value]="editRecord.employee_code" disabled />
           </div>
-          <div class="col-md-3">
+          <div class="col-md-4">
             <label>Employee Name</label>
             <input type="text" class="form-control" [value]="editRecord.emp_name" disabled />
           </div>
