@@ -30,7 +30,7 @@ export class AdvanceSalaryReportComponent {
   years: number[] = [];
 
   generateyears() {
-    const startYear = 2024;
+    const startYear = 2025;
     const currentYear = new Date().getFullYear();
 
     this.years = [];
@@ -91,17 +91,16 @@ export class AdvanceSalaryReportComponent {
 
   searchEmployeeAdvanceSalary() {
     this.rowData = [];
-    const code = this.searchValue?.trim();
-    if (!code) {
+    const search = this.searchValue?.trim();
+    if (!search) {
       this.rowData = [];
-      this.toastr.error('Please Enter Employee Code');
+      this.toastr.error('Please Enter Employee Code or Name');
       return;
     }
 
     const payload = {
-      employee_code: code,
+      search: search,     
       year: this.selectedYear,
-      // month: this.selectedMonth,
     };
 
     this.service.post('emp/advancesaraly/report', payload).subscribe(
@@ -210,7 +209,7 @@ export class AdvanceSalaryReportComponent {
     this.columnDefs = [
       { headerName: 'Emp Code', field: 'employee_code', sortable: true, filter: true, maxWidth: 150 },
       { headerName: 'Employee Name', field: 'emp_name', sortable: true, filter: true, maxWidth: 180 },
-      { headerName: 'Apply Date', field: 'apply_date', sortable: true, filter: true, maxWidth: 150,  valueFormatter: this.service.dateFormatter },
+      { headerName: 'Apply Date', field: 'apply_date', sortable: true, filter: true, maxWidth: 150, valueFormatter: this.service.dateFormatter },
       { headerName: 'Adv. Amount', field: 'advance_amount', sortable: true, filter: true, maxWidth: 150 },
       { headerName: 'Remaining Amount', field: 'remaining_balance', sortable: true, filter: true, maxWidth: 190 },
       { headerName: 'EMI', field: 'emi', sortable: true, filter: true, maxWidth: 100 },

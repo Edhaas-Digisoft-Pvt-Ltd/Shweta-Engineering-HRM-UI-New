@@ -35,6 +35,7 @@ export class DashboardComponent {
   showNotifications = false;
   leavesNotification: any[] = [];
   advSalaryNotification: any[] = [];
+  incrementNotification: any[] = [];
 
   constructor(private router: Router, private service: HrmserviceService) {
   }
@@ -209,6 +210,7 @@ export class DashboardComponent {
           this.notificationCount = res.data.Count || 0;
           this.leavesNotification = res.data.leavesNotification || [];
           this.advSalaryNotification = res.data.advSalaryNotification || [];
+          this.incrementNotification = res.data.incrementNotification || [];
         }
         this.finishRequest();
       },
@@ -506,5 +508,8 @@ export class DashboardComponent {
         }
       });
   }
-  
+
+  viewEmployeeUpdate(empId: any) {
+    this.router.navigate(['/authPanal/UpdateEmployee'], { queryParams: { id: empId } });
+  }
 }

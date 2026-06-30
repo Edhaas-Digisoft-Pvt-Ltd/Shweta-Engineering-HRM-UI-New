@@ -37,8 +37,8 @@ export class LeaveApprovedRejectedComponent {
   exportData: any;
   loggedInUser: any;
 
-  startDate: string = this.getFirstDayOfMonth();
-  endDate: string = this.getLastDayOfMonth();
+  startDate: string = this.getToday();
+  endDate: string = this.getNextWeekDate();
 
   constructor(private route: ActivatedRoute, private router: Router, private fb: FormBuilder, private service: HrmserviceService, private modalService: ModalServiceService, private toastr: ToastrService, private elementRef: ElementRef) { }
 
@@ -251,6 +251,10 @@ export class LeaveApprovedRejectedComponent {
   }
 
   onDateRangeChange(): void {
+    if (this.endDate < this.startDate) {
+      this.toastr.error('End date cannot be before start date');
+      return;
+    }
     this.currentPage = 1;
     this.getLeaveRequests();
   }
@@ -348,22 +352,30 @@ export class LeaveApprovedRejectedComponent {
     }
   }
 
-  getFirstDayOfMonth(): string {
+  getToday(): string {
     const now = new Date();
-    const year = now.getFullYear();
-    const month = String(now.getMonth() + 1).padStart(2, '0');
-    return `${year}-${month}-01`;
+    return this.formatDate(now);
   }
 
-  getLastDayOfMonth(): string {
+  getNextWeekDate(): string {
     const now = new Date();
-    const year = now.getFullYear();
-    const month = now.getMonth() + 1;
-    const lastDay = new Date(year, month, 0).getDate();
-    return `${year}-${String(month).padStart(2, '0')}-${String(lastDay).padStart(2, '0')}`;
+    const nextWeek = new Date(now);
+    nextWeek.setDate(now.getDate() + 7);
+    return this.formatDate(nextWeek);
+  }
+
+  private formatDate(date: Date): string {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
   }
 
   exportExcel() {
+    if (this.endDate < this.startDate) {
+      this.toastr.error('End date cannot be before start date');
+      return;
+    }
     this.isLoading = true;
     this.service.post('leave/approved-rejected', {
       company_id: this.selectedCompanyId,
