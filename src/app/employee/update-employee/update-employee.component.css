@@ -137,3 +137,29 @@ label{
   font-weight: bold;
   line-height: 1;
 }
+
+/* checkbox visibility css */
+.form-check-input {
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+  border: 2px solid #787879 !important;
+  margin-top: 2px;
+}
+
+.form-check-input:checked {
+  background-color: #3674B5 !important;
+  border-color: #3674B5 !important;
+}
+
+.form-check-label {
+  font-size: 16px;
+  font-weight: 500;
+  color: #333;
+  margin-left: 8px;
+  cursor: pointer;
+}
+
+.form-check {
+  margin-bottom: 14px;
+}

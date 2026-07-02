@@ -36,6 +36,7 @@ export class DashboardComponent {
   leavesNotification: any[] = [];
   advSalaryNotification: any[] = [];
   incrementNotification: any[] = [];
+  shouldBlink = false;
 
   constructor(private router: Router, private service: HrmserviceService) {
   }
@@ -511,5 +512,11 @@ export class DashboardComponent {
 
   viewEmployeeUpdate(empId: any) {
     this.router.navigate(['/authPanal/UpdateEmployee'], { queryParams: { id: empId } });
+  }
+
+  startBlinkAfterDelay(delayMs: number = 10) {
+    setTimeout(() => {
+      this.shouldBlink = true;
+    }, delayMs);
   }
 }

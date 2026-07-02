@@ -49,6 +49,8 @@ export class UpdateEmployeeComponent {
   // new for update
   employe_id: any;
   fetchedEmployee: any = null;
+  isIncrementDue: boolean = false;
+  isIncrementChecked: boolean = false;
 
   //Document 
   docUploads: {
@@ -263,6 +265,8 @@ export class UpdateEmployeeComponent {
       next: (res: any) => {
         if (res.status === 'success') {
           this.fetchedEmployee = res.data.employee;
+          this.isIncrementDue = res.data.is_increment_due ?? false;
+          this.isIncrementChecked = this.isIncrementDue;
 
           if (this.fetchedEmployee.company_id) {
             this.selectedCompanyId = this.fetchedEmployee.company_id;
@@ -433,6 +437,8 @@ export class UpdateEmployeeComponent {
       "pf_employer_applicable": formValues.pf_employer_applicable || false,
       "esic_employee_applicable": formValues.esic_employee_applicable || false,
       "status": formValues.status,
+      "is_increment": this.isIncrementChecked,
+      "created_by": sessionStorage.getItem('employeeId') ?? null,
     };
 
     this.service.post("update/employee", payload).subscribe({

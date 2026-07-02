@@ -180,7 +180,7 @@
                                 <div class="row ">
 
                                     <div class="col-lg-4">
-                                        <label class="fw-bold">Select Company </label>
+                                        <label class="fw-bold">Select Company<span class="text-danger">*</span></label>
                                         <br>
                                         <select class="form-select" formControlName="company"
                                             (click)="onCompanyChange($event)"
@@ -203,7 +203,7 @@
                                         </select>
                                     </div>
                                     <div class="col-lg-4">
-                                        <label>Date Of Joinning</label>
+                                        <label>Date Of Joinning<span class="text-danger">*</span></label>
                                         <input type="date" formControlName="join_date" class="form-control"
                                             [ngClass]="{'input-error': nextCheck && multiStepForm.get('join_date')?.invalid}">
                                     </div>
@@ -713,6 +713,24 @@
                         <!-- Step 5 : Salary Structure -->
                         <div *ngIf="currentStep === 5">
                             <div class="border" style="border-radius: 10px; padding: 30px;">
+
+                                <!-- Show ONLY when employee is due for increment -->
+                                <div *ngIf="isIncrementDue">
+
+                                    <div class="alert alert-warning d-flex align-items-center gap-2 mb-3">
+                                        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                                        This employee is due for their 2-year salary increment.
+                                    </div>
+
+                                    <div class="form-check mb-3">
+                                        <input class="form-check-input" type="checkbox" id="markIncrement"
+                                            [(ngModel)]="isIncrementChecked" [ngModelOptions]="{standalone: true}">
+                                        <label class="form-check-label fw-semibold" for="markIncrement">
+                                            Mark as 2-Year Salary Increment
+                                        </label>
+                                    </div>
+                                </div>
+
                                 <div class="main-content p-3">
                                     <table class="table table-bordered"
                                         style="border: 1px solid #dadada; border-collapse: collapse;">
@@ -825,7 +843,7 @@
                                 </div>
                             </div>
 
-                            <div class="d-flex justify-content-center gap-2 mt-4">
+                            <div class="d-flex justify-content-center gap-2 mt-2">
                                 <div>
                                     <button type="button" class="btn previous-btn me-2"
                                         (click)="previousStep()">Previous</button>
