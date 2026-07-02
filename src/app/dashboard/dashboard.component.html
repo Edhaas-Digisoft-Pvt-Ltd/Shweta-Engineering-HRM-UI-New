@@ -30,17 +30,17 @@
                 style="width: 320px; z-index: 1050; background-color: #93afce; border: 1px solid #8cbaf3;">
                 <h6 class="border-bottom pb-2 mb-2">Notifications</h6>
 
+                <!-- Salary Increment Due -->
                 <div *ngIf="incrementNotification.length > 0" class="mb-3">
                   <div class="d-flex justify-content-between align-items-center mb-2">
                     <strong>Salary Increment Due</strong>
+                    <button class="btn btn-sm btn-outline-primary py-0 px-2"
+                      (click)="viewSalaryIncrement()">View</button>
                   </div>
                   <ul class="list-unstyled mb-0">
-                    <li *ngFor="let emp of incrementNotification"
-                      class="small mb-1 d-flex justify-content-between align-items-center">
-                      <span><i class="bi bi-person-circle text-warning me-1"></i>{{ emp.employee_name }} completed 2
-                        years</span>
-                      <button class="btn btn-sm btn-outline-primary py-0 px-2"
-                        (click)="viewEmployeeUpdate(emp.id)">View</button>
+                    <li *ngFor="let emp of incrementNotification" class="small mb-1">
+                      <i class="bi bi-person-circle text-warning me-1"></i>
+                      {{ emp.employee_name }} completed {{ emp.cycle_year }} years
                     </li>
                   </ul>
                 </div>

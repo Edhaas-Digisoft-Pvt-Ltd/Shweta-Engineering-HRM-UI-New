@@ -510,8 +510,8 @@ export class DashboardComponent {
       });
   }
 
-  viewEmployeeUpdate(empId: any) {
-    this.router.navigate(['/authPanal/UpdateEmployee'], { queryParams: { id: empId } });
+  viewSalaryIncrement() {
+    this.router.navigate(['authPanal/salary_increment']);
   }
 
   startBlinkAfterDelay(delayMs: number = 10) {

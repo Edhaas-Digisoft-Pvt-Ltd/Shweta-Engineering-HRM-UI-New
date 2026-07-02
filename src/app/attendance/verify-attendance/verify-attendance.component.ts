@@ -84,7 +84,7 @@ export class VerifyAttendanceComponent implements OnInit {
     },
     // ── Action column ────────────────────────────────────────────────────────
     {
-      headerName: 'Actions',
+      headerName: 'Action',
       sortable: false,
       filter: false,
       flex: 0,
