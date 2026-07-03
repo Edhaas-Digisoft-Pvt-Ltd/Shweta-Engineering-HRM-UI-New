@@ -221,21 +221,35 @@ button.accordion-button.collapsed {
     background-color: var(--role-color);
     color: white;
 }
-.navbarList {
+/* .navbarList {
     max-height: 500px;
     overflow: auto;
     margin-bottom: 10px;
-    /* padding: 0.5rem 0.5rem; */
-    /* box-shadow: rgba(0, 0, 0, 0.16) 0px 1px 4px; */
-    /* background-color: #24588f; */
     border-radius: 10px;
     scrollbar-color: #3674b5 #1c5694;
   scrollbar-width: thin;
-}
+} */
 
 @media(max-width:425px) {
     .accordion-body .nav-link {
         margin-left: 0px !important;
         width: 96%;
     }
+}
+
+.navbarList {
+    flex: 1 1 auto;
+    min-height: 0;          /* required so flex children can actually shrink */
+    overflow-y: auto;       /* scrolls only if content doesn't fit */
+    overflow-x: hidden;
+    margin-bottom: 10px;
+    border-radius: 10px;
+    scrollbar-color: #3674b5 #1c5694;
+    scrollbar-width: thin;
+}
+
+/* also give the parent flex containers min-height:0 so the flex-1 above works */
+.navbar.mt-2.h-100.d-flex.flex-column,
+.nav-content {
+    min-height: 0;
 }

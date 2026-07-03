@@ -37,10 +37,11 @@ export class InsufficientLeavesComponent {
     const currentDate = new Date();
 
     this.today = currentDate.toISOString().split('T')[0];
-    const savedCompanyId = this.service.selectedCompanyId();
-    this.selectedCompanyId = savedCompanyId
-      ? (Array.isArray(savedCompanyId) ? savedCompanyId : [savedCompanyId])
-      : ['all'];
+    this.selectedCompanyId = ['all'];
+    // const savedCompanyId = this.service.selectedCompanyId();
+    // this.selectedCompanyId = savedCompanyId
+    //   ? (Array.isArray(savedCompanyId) ? savedCompanyId : [savedCompanyId])
+    //   : ['all'];
 
     this.getCompanyNames();
     this.getInsufficientLeaves();

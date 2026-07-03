@@ -15,16 +15,26 @@
             </div>
             <div class="modal-body">
                 <form [formGroup]="EditSettingForm" (ngSubmit)="editSettingsData()">
-                    <div class="row">  
-                        <div class="col-6">
+                    <div class="row">
+                        <div class="col-5">
                             <label for="name">Name</label>
-                            <input type="text" class="form-control" id="name"  formControlName="name"/>
+                            <input type="text" class="form-control" id="name" formControlName="name" />
                         </div>
 
                         <div class="col-4">
                             <label for="value">Value<span class="text-danger">*</span></label>
                             <input type="number" class="form-control" formControlName="value"
-                            [ngClass]="{'is-invalid': EditSettingForm && EditSettingForm.get('value')?.invalid}" />
+                                [ngClass]="{'is-invalid': EditSettingForm && EditSettingForm.get('value')?.invalid}" />
+                        </div>
+
+                        <div class="col-3" *ngIf="selectedRowData?.type === 'statutory'">
+                            <label for="statutory_type">Type<span class="text-danger">*</span></label>
+                            <select class="form-control" id="statutory_type" formControlName="statutory_type"
+                                [ngClass]="{'is-invalid': EditSettingForm && EditSettingForm.get('statutory_type')?.invalid}">
+                                <option value="" disabled>Select type</option>
+                                <option *ngFor="let opt of statutoryTypeOptions" [value]="opt.value">{{ opt.label }}
+                                </option>
+                            </select>
                         </div>
                     </div>
 

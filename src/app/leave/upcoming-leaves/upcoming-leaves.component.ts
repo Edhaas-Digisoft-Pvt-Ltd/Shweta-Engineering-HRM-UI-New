@@ -1,62 +1,86 @@
-import { Component, ElementRef, HostListener } from '@angular/core';
-import { FormBuilder } from '@angular/forms';
-import { ActivatedRoute, Router } from '@angular/router';
+import { Component } from '@angular/core';
 import { ColDef } from 'ag-grid-community';
-import { ToastrService } from 'ngx-toastr';
 import { HrmserviceService } from 'src/app/hrmservice.service';
-import { ModalServiceService } from 'src/app/modal-service.service';
+import { ToastrService } from 'ngx-toastr';
 
 @Component({
-  selector: 'app-absentees',
-  templateUrl: './absentees.component.html',
-  styleUrls: ['./absentees.component.css']
+  selector: 'app-upcoming-leaves',
+  templateUrl: './upcoming-leaves.component.html',
+  styleUrls: ['./upcoming-leaves.component.css']
 })
-export class AbsenteesComponent {
-  today: string = new Date().toISOString().split('T')[0];
+export class UpcomingLeavesComponent {
   gridApiActive: any;
   searchInputValue: any;
-  params: any;
-  selectedCompanyId: any[] = ['all'];
-  companyDropdownOpen: boolean = false;
   rowData: any = [];
   isLoading: boolean = false;
-  selectedValue: any = 1;
-  CompanyNames: any[] = [];
   totalRows: number = 0;
   currentPage: number = 1;
   lastPage: number = 1;
   pagesToShow: (number | string)[] = [];
   paginationvalue: any;
 
-  startDate: string = this.getFirstDayOfMonth();
-  endDate: string = this.getLastDayOfMonth();
+  CompanyNames: any[] = [];
+  selectedCompanyId: any[] = ['all'];
+  companyDropdownOpen: boolean = false;
 
-  constructor(private route: ActivatedRoute, private router: Router, private fb: FormBuilder, private service: HrmserviceService, private modalService: ModalServiceService, private toastr: ToastrService, private elementRef: ElementRef) { }
+  dateRangeLabel: string = '';
+
+  constructor(private service: HrmserviceService, private toastr: ToastrService) { }
 
   ngOnInit(): void {
-    const currentDate = new Date();
-    this.today = currentDate.toISOString().split('T')[0];
     this.selectedCompanyId = ['all'];
-    // const savedCompanyId = this.service.selectedCompanyId();
-    // this.selectedCompanyId = savedCompanyId
-    //   ? (Array.isArray(savedCompanyId) ? savedCompanyId : [savedCompanyId])
-    //   : ['all'];
 
     this.getCompanyNames();
-    this.getAbsentees();
-
     this.getPagination();
   }
 
-  agInit(params: any): void {
-    this.params = params;
-  }
-
   public defaultColDef: ColDef = {
-    editable: true,
+    editable: false,
     flex: 1,
     resizable: true,
   };
+
+  columnDefs: ColDef[] = [
+    { headerName: 'Employee Code', field: 'employee_code', sortable: true, filter: true },
+    { headerName: 'Employee Name', field: 'emp_name', sortable: true, filter: true },
+    { headerName: 'Company', field: 'company_name', sortable: true, filter: true },
+    { headerName: 'Department', field: 'department_name', sortable: true, filter: true },
+    { headerName: 'Start Date', field: 'start_date', sortable: true, filter: true, valueFormatter: this.service.dateFormatter },
+    { headerName: 'End Date', field: 'end_date', sortable: true, filter: true, valueFormatter: this.service.dateFormatter },
+    { headerName: 'No. Of Days', field: 'total_leave_days', sortable: true, filter: true, maxWidth: 140 },
+    { headerName: 'Status', field: 'leave_status', cellRenderer: this.statusButtonRenderer, sortable: true, filter: true, maxWidth: 140 },
+  ];
+
+  statusButtonRenderer(params: any) {
+    const status = params.value;
+    const button = document.createElement('button');
+
+    button.innerText = status;
+    button.style.padding = '6px 12px';
+    button.style.borderRadius = '20px';
+    button.style.cursor = 'default';
+    button.style.height = '30px';
+    button.style.lineHeight = '20px';
+    button.style.fontSize = '14px';
+    button.style.display = 'flex';
+    button.style.alignItems = 'center';
+    button.style.justifyContent = 'center';
+    button.style.width = '97%';
+    button.style.marginTop = '6px';
+    button.style.backgroundColor = '#B2FFE1B0';
+    button.style.color = 'black';
+    button.style.border = '1px solid #B2FFE1B0';
+
+    return button;
+  }
+
+  getCompanyNames() {
+    this.service.post('fetch/company', {}).subscribe((res: any) => {
+      if (res.status == "success") {
+        this.CompanyNames = res.data;
+      }
+    });
+  }
 
   toggleCompanyDropdown() {
     this.companyDropdownOpen = !this.companyDropdownOpen;
@@ -82,11 +106,9 @@ export class AbsenteesComponent {
 
   toggleCompany(companyId: any, event: Event) {
     const checked = (event.target as HTMLInputElement).checked;
-
     let ids = this.isAllSelected()
       ? this.CompanyNames.map((c: any) => c.company_id)
       : [...this.selectedCompanyId];
-
     if (checked) {
       if (!ids.includes(companyId)) {
         ids.push(companyId);
@@ -94,18 +116,16 @@ export class AbsenteesComponent {
     } else {
       ids = ids.filter((id: any) => id !== companyId);
     }
-
     if (ids.length === this.CompanyNames.length) {
       ids = ['all'];
     }
     this.selectedCompanyId = ids.length ? ids : [];
-
     this.applyCompanyFilter();
   }
 
   applyCompanyFilter() {
     this.currentPage = 1;
-    this.getAbsentees();
+    this.getUpcomingLeaves();
   }
 
   get companyDropdownLabel(): string {
@@ -117,83 +137,50 @@ export class AbsenteesComponent {
     return `${this.selectedCompanyId.length} Companies Selected`;
   }
 
-  @HostListener('document:click', ['$event'])
-  onDocumentClick(event: MouseEvent): void {
-    if (this.companyDropdownOpen) {
-      const clickedInside = this.elementRef.nativeElement
-        .querySelector('.custom-select-dropdown')
-        ?.contains(event.target);
-
-      if (!clickedInside) {
-        this.companyDropdownOpen = false;
-      }
-    }
-  }
-
-  getCompanyNames() {
-    this.service.post('fetch/company', {}).subscribe((res: any) => {
-      if (res.status == "success") {
-        this.CompanyNames = res.data
-      }
-    },
-      (error) => {
-        console.error('Error fetching companies:', error);
-      }
-    );
-  }
-
-  getAbsentees(page: number = 1): void {
+  getUpcomingLeaves(page: number = 1): void {
     this.isLoading = true;
     this.rowData = [];
-
-    const payload = {
+    this.service.post('leave/upcoming', {
       company_id: this.selectedCompanyId,
-      start_date: this.startDate,
-      end_date: this.endDate,
       page: page,
       isexport: false,
-    };
-
-    this.service.post('fetch/absentees', payload).subscribe(
+    }).subscribe(
       (res: any) => {
-        if (res.status) {
+        if (res.date_range) {
+          this.dateRangeLabel = `${res.date_range.from} to ${res.date_range.to}`;
+        }
+        if (res.status === 'success') {
           this.rowData = res.data.map((item: any) => ({
             employee_code: item.employee_code,
             emp_name: item.emp_name,
-            absent_date: item.absent_date
+            company_name: item.company_name,
+            department_name: item.department_name,
+            start_date: item.start_date,
+            end_date: item.end_date,
+            total_leave_days: item.total_leave_days,
+            leave_status: item.leave_status,
+            tbl_emp_leave_id: item.tbl_emp_leave_id,
           }));
           this.totalRows = res.pagination.total;
           this.currentPage = res.pagination.page;
           this.lastPage = res.pagination.last_page;
           this.generatePageNumbers(this.paginationvalue);
         } else {
-          this.toastr.error(res.message);
+          this.toastr.warning('Data Not Found');
         }
         this.isLoading = false;
       },
       (error) => {
-        console.error('API Error:', error);
-
-        if (error.status === 400 && error.error?.message) {
-          this.toastr.error(error.error.message);
-        } else {
-          this.toastr.error('Something went wrong while fetching data');
+        if (error.status === 400 && error.error?.date_range) {
+          const d = error.error.date_range;
+          this.dateRangeLabel = `${d.from} to ${d.to}`;
         }
-
+        if (error.status !== 400) {
+          console.error(error);
+        }
         this.isLoading = false;
       }
     );
-  }
-
-  columnDefs: ColDef[] = [
-    { headerName: 'Employee Code', field: 'employee_code', sortable: true, filter: true },
-    { headerName: 'Employee Name', field: 'emp_name', sortable: true, filter: true },
-    { headerName: 'Absent Date', field: 'absent_date', sortable: true, filter: true, valueFormatter: this.service.dateFormatter},
-  ];
-
-  onDateRangeChange(): void {
-    this.currentPage = 1;
-    this.getAbsentees();
   }
 
   onGridReady(params: { api: any }) {
@@ -201,9 +188,6 @@ export class AbsenteesComponent {
   }
   onFilterBoxChange() {
     this.gridApiActive.setQuickFilter(this.searchInputValue);
-  }
-  searchValue(searchValue: any) {
-    throw new Error('Method not implemented.');
   }
   emptyInput() {
     this.searchInputValue = '';
@@ -215,98 +199,66 @@ export class AbsenteesComponent {
     paginationPageSize: 10,
   };
 
-  refresh(params: any): boolean {
-    return true;
+  exportExcel() {
+    this.isLoading = true;
+    this.service.post('leave/upcoming', {
+      company_id: this.selectedCompanyId,
+      isexport: true
+    }).subscribe({
+      next: (res: any) => {
+        if (res.status === 'success' && res.data.length) {
+          const rows = res.data.map((r: any) => [
+            r.employee_code,
+            r.emp_name,
+            r.company_name,
+            r.department_name,
+            r.start_date,
+            r.end_date,
+            r.total_leave_days,
+            r.leave_status
+          ]);
+
+          const csvArray: string[][] = [
+            ['Employee Code', 'Employee Name', 'Company', 'Department', 'Start Date', 'End Date', 'Days', 'Status'],
+            ...rows
+          ];
+
+          const csv = csvArray
+            .map((row: string[]) => row.map((v: string | number | null) => `"${v ?? ''}"`).join(','))
+            .join('\n');
+
+          const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+          const link = Object.assign(document.createElement('a'), {
+            href: URL.createObjectURL(blob),
+            download: 'UpcomingLeaves.csv'
+          });
+          link.click();
+
+          this.toastr.success('Upcoming Leaves exported successfully!');
+        } else {
+          this.toastr.warning('No data found to export');
+        }
+        this.isLoading = false;
+      },
+      error: (err) => {
+        if (err.status === 400) {
+          this.toastr.warning('No data found to export');
+        } else {
+          this.toastr.error('Error while exporting data');
+        }
+        this.isLoading = false;
+      }
+    });
   }
 
   getPagination() {
     this.service.post('get-pagination', {}).subscribe((res: any) => {
       if (res.status === 'success') {
         this.paginationvalue = res.data;
-
-        this.getAbsentees();
+        this.getUpcomingLeaves();
       } else {
         this.paginationvalue = 10;
-        this.getAbsentees();
-      }
-    });
-  }
-
-  getFirstDayOfMonth(): string {
-    const now = new Date();
-    const year = now.getFullYear();
-    const month = String(now.getMonth() + 1).padStart(2, '0');
-    return `${year}-${month}-01`;
-  }
-
-  getLastDayOfMonth(): string {
-    const now = new Date();
-    const year = now.getFullYear();
-    const month = now.getMonth() + 1;
-    const lastDay = new Date(year, month, 0).getDate();
-    return `${year}-${String(month).padStart(2, '0')}-${String(lastDay).padStart(2, '0')}`;
-  }
-
-  exportExcel() {
-    this.isLoading = true;
-
-    this.service.post('fetch/absentees', {
-      company_id: this.selectedCompanyId,
-      start_date: this.startDate,
-      end_date: this.endDate,
-      isexport: true
-    }).subscribe({
-      next: (res: any) => {
-        if (res.status === 'success' && res.data && res.data.length > 0) {
-
-          const cleanText = (val: any) =>
-            String(val ?? '').replace(/\u00A0/g, ' ').replace(/Â/g, '');
-
-          const rows = res.data.map((r: any) => [
-            r.employee_code,
-            cleanText(r.emp_name),
-            r.absent_date
-          ]);
-
-          const csvArray: string[][] = [
-            ['Employee Code', 'Employee Name', 'Absent Date'],
-            ...rows
-          ];
-
-          const csv = csvArray
-            .map(row => row.map(v => `"${v ?? ''}"`).join(','))
-            .join('\n');
-
-          const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-          const link = document.createElement('a');
-
-          link.href = URL.createObjectURL(blob);
-          link.download = 'absentees.csv';
-          link.click();
-
-          this.toastr.success('Absentee report exported successfully!');
-        } else {
-          this.toastr.warning('No data found to export');
-        }
-
-        this.isLoading = false;
-      },
-      error: (err) => {
-        if (err.status === 400) {
-          this.toastr.warning(err.error?.message || 'No data found to export');
-        } else {
-          this.toastr.error('Error while exporting absentee data');
-        }
-        this.isLoading = false;
-      }
-    });
-  }
-
-  getpaginationvalue() {
-    this.service.post('get-pagination', {}).subscribe((res: any) => {
-      if (res.status === 'success') {
-        this.paginationvalue = res.data
-        this.generatePageNumbers(this.paginationvalue)
+        this.getUpcomingLeaves();
       }
     });
   }
@@ -345,21 +297,21 @@ export class AbsenteesComponent {
     if (page === '...') return;
     if (page !== this.currentPage) {
       this.currentPage = page as number;
-      this.getAbsentees(this.currentPage);
+      this.getUpcomingLeaves(this.currentPage);
     }
   }
 
   prevPage() {
     if (this.currentPage > 1) {
       this.currentPage--;
-      this.getAbsentees(this.currentPage);
+      this.getUpcomingLeaves(this.currentPage);
     }
   }
 
   nextPage() {
     if (this.currentPage < this.lastPage) {
       this.currentPage++;
-      this.getAbsentees(this.currentPage);
+      this.getUpcomingLeaves(this.currentPage);
     }
   }
 }

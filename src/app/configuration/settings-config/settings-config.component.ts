@@ -18,6 +18,11 @@ export class SettingsConfigComponent {
   EditSettingForm!: FormGroup;
   isEditSubmitted = false;
 
+  statutoryTypeOptions = [
+    { label: 'Fixed', value: 'fixed' },
+    { label: 'Percentage', value: 'percentage' },
+  ];
+
   public defaultColDef: ColDef = {
     editable: true,
     flex: 1,
@@ -35,8 +40,9 @@ export class SettingsConfigComponent {
 
     this.EditSettingForm = this.fb.group({
       name: [{ value: '', disabled: true }, Validators.required],
-      value: [{ value: '' }, Validators.required],
-    })
+      value: ['', Validators.required],
+      statutory_type: [''], // validators set dynamically in openEditModal
+    });
   }
 
   initializeColumns() {
@@ -46,7 +52,7 @@ export class SettingsConfigComponent {
         headerName: 'Value', field: 'value', sortable: true, filter: true,
         valueFormatter: (params) =>
           params.data?.type === 'statutory'
-            ? `${params.value} %`
+            ? (params.data?.statutory_type === 'percentage' ? `${params.value} %` : `${params.value}`)
             : params.value
       },
       {
@@ -60,7 +66,6 @@ export class SettingsConfigComponent {
   }
 
   getSettingsdata() {
-    this.rowData = [];
     this.service.post('fetch-settings', {}).subscribe((res: any) => {
       try {
         if (res.status === 'success' && res.data.length > 0) {
@@ -87,7 +92,8 @@ export class SettingsConfigComponent {
         if (res.status === 'success' && res.data.length > 0) {
           const statutoryInfoData = res.data.map((item: any) => ({
             name: item.statutory_name,
-            value: Number(item.statutory_percentage),
+            value: Number(item.statutory_value),
+            statutory_type: item.statutory_type,   // 'fixed' | 'percentage'
             id: item.statutory_id,
             type: 'statutory'
           }));
@@ -107,10 +113,17 @@ export class SettingsConfigComponent {
 
     this.EditSettingForm.patchValue({
       name: rowData.name,
-      value: rowData.value
+      value: rowData.value,
+      statutory_type: rowData.type === 'statutory' ? rowData.statutory_type : '',
     });
 
-    this.EditSettingForm.patchValue(this.selectedRowData);
+    const statutoryTypeControl = this.EditSettingForm.get('statutory_type');
+    if (rowData.type === 'statutory') {
+      statutoryTypeControl?.setValidators([Validators.required]);
+    } else {
+      statutoryTypeControl?.clearValidators();
+    }
+    statutoryTypeControl?.updateValueAndValidity();
 
     const modalElement = document.getElementById('editsettingsmodal');
     if (modalElement) {
@@ -139,7 +152,8 @@ export class SettingsConfigComponent {
     const payload = {
       statutory_id: this.selectedRowData.id,
       statutory_name: this.selectedRowData.name,
-      statutory_percentage: this.EditSettingForm.value.value
+      statutory_type: this.EditSettingForm.value.statutory_type,
+      statutory_value: this.EditSettingForm.value.value
     };
 
     this.service.post('update-statutory-info', payload).subscribe(
@@ -176,5 +190,4 @@ export class SettingsConfigComponent {
       this.updateStatutory();
     }
   }
-
 }

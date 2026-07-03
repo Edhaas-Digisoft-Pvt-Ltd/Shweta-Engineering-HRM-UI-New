@@ -37,8 +37,8 @@ export class LeaveApprovedRejectedComponent {
   exportData: any;
   loggedInUser: any;
 
-  startDate: string = this.getToday();
-  endDate: string = this.getNextWeekDate();
+  startDate: string = this.getFirstDayOfMonth();
+  endDate: string = this.getLastDayOfMonth();
 
   constructor(private route: ActivatedRoute, private router: Router, private fb: FormBuilder, private service: HrmserviceService, private modalService: ModalServiceService, private toastr: ToastrService, private elementRef: ElementRef) { }
 
@@ -47,10 +47,11 @@ export class LeaveApprovedRejectedComponent {
 
     const currentDate = new Date();
     this.today = currentDate.toISOString().split('T')[0]; // Format YYYY-MM-DD
-    const savedCompanyId = this.service.selectedCompanyId();
-    this.selectedCompanyId = savedCompanyId
-      ? (Array.isArray(savedCompanyId) ? savedCompanyId : [savedCompanyId])
-      : ['all'];
+    this.selectedCompanyId = ['all'];
+    // const savedCompanyId = this.service.selectedCompanyId();
+    // this.selectedCompanyId = savedCompanyId
+    //   ? (Array.isArray(savedCompanyId) ? savedCompanyId : [savedCompanyId])
+    //   : ['all'];
 
     this.leaveRequestForm = this.fb.group({
       employeeName: [{ value: '', disabled: true }, Validators.required],
@@ -251,10 +252,6 @@ export class LeaveApprovedRejectedComponent {
   }
 
   onDateRangeChange(): void {
-    if (this.endDate < this.startDate) {
-      this.toastr.error('End date cannot be before start date');
-      return;
-    }
     this.currentPage = 1;
     this.getLeaveRequests();
   }
@@ -352,16 +349,19 @@ export class LeaveApprovedRejectedComponent {
     }
   }
 
-  getToday(): string {
+  getFirstDayOfMonth(): string {
     const now = new Date();
-    return this.formatDate(now);
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    return `${year}-${month}-01`;
   }
 
-  getNextWeekDate(): string {
+  getLastDayOfMonth(): string {
     const now = new Date();
-    const nextWeek = new Date(now);
-    nextWeek.setDate(now.getDate() + 7);
-    return this.formatDate(nextWeek);
+    const year = now.getFullYear();
+    const month = now.getMonth() + 1;
+    const lastDay = new Date(year, month, 0).getDate();
+    return `${year}-${String(month).padStart(2, '0')}-${String(lastDay).padStart(2, '0')}`;
   }
 
   private formatDate(date: Date): string {

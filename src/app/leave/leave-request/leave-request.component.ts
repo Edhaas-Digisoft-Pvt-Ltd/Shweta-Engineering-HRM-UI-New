@@ -49,10 +49,11 @@ export class LeaveRequestComponent {
   ngOnInit(): void {
     this.loggedInUser = sessionStorage.getItem('employeeId');
 
-    const savedCompanyId = this.service.selectedCompanyId();
-    this.selectedCompanyId = savedCompanyId
-      ? (Array.isArray(savedCompanyId) ? savedCompanyId : [savedCompanyId])
-      : ['all'];
+    this.selectedCompanyId = ['all'];
+    // const savedCompanyId = this.service.selectedCompanyId();
+    // this.selectedCompanyId = savedCompanyId
+    //   ? (Array.isArray(savedCompanyId) ? savedCompanyId : [savedCompanyId])
+    //   : ['all'];
 
     this.leaveRequestForm = this.fb.group({
       employeeName: [{ value: '', disabled: true }, Validators.required],

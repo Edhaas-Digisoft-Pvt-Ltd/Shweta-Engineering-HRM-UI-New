@@ -15,6 +15,9 @@
           <li class="nav-item" (click)="selectTab('tab1')">
             <a class="nav-link fw-bold" [ngClass]="{'active': activeTab === 'tab1'}">Leave Requests</a>
           </li>
+          <li class="nav-item" (click)="selectTab('tab5')">
+            <a class="nav-link fw-bold" [ngClass]="{'active': activeTab === 'tab5'}">Upcoming Leaves</a>
+          </li>
           <li class="nav-item" (click)="selectTab('tab2')">
             <a class="nav-link fw-bold" [ngClass]="{'active': activeTab === 'tab2'}">Approved & Rejected</a>
           </li>
@@ -76,11 +79,11 @@
               </div>
             </div>
 
-            <div class="row gap-4 row-wrap my-3 ">
+            <div class="row gap-4 row-wrap">
               <div class="container  ">
 
                 <div class="row">
-                  <div class="col-12 mt-4 p-0">
+                  <div class="col-12 mt-1 p-0">
                     <ag-grid-angular class="ag-theme-alpine" [rowData]="rowData" [domLayout]="'autoHeight'"
                       [columnDefs]="columnDefs" [defaultColDef]="defaultColDef" (gridReady)="onGridReady($event)"
                       [gridOptions]="gridOptions" [pagination]="false">
@@ -111,6 +114,12 @@
           </div>
         </div>
 
+      </div>
+    </div>
+
+    <div *ngIf="activeTab === 'tab5'">
+      <div class="container ">
+        <app-upcoming-leaves></app-upcoming-leaves>
       </div>
     </div>
 

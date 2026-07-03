@@ -6,21 +6,19 @@
 
         <div class="col col-lg-3 col-sm-2 fixed-top custom-bg-side pe-3 ps-3 sideNav  h-100  text-end  " #sideNav
             [ngClass]="{ 'open': isSideNavOpen, 'closed': !isSideNavOpen }">
-            <div class="d-flex justify-content-between align-items-center mt-3 mb-4 border-bottom pb-3 border-2">
+            <div class="d-flex justify-content-between align-items-center mt-2 mb-2 border-bottom pb-2">
                 <div class="d-flex align-items-center gap-3">
                     <img src="assets/img/logo_img.png" class="logo bg-white rounded-2 p-1" alt="">
                     <span class="company_heading">Shweta Engineers</span>
                 </div>
-
-
             </div>
 
-            <div class="flex-wrap justify-content-between  align-items-center userName">
-                <p> <span class="fw-bold"> {{empName}} &nbsp;</span> <span class="text-lowercase">logged in as</span>
+            <div class="flex-wrap justify-content-between align-items-center userName mb-1">
+                <p class="mb-0"> <span class="fw-bold"> {{empName}} &nbsp;</span> <span class="text-lowercase">logged in as</span>
                     <span class="fw-bold">&nbsp; {{roleName}} </span>
                 </p>
             </div>
-            <hr>
+            <hr class="my-1">
             <!-- <button class="btn btn-white   mt-2 navigation-btn " (click)="toggleSideNav()">
 
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-list" viewBox="0 0 16 16">
