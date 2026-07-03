@@ -289,25 +289,6 @@ export class AttendanceComponent {
     this.onFilterBoxChange();
   }
 
-  // exportAttendance() {
-  //   this.service.post('export-attendance', {}).subscribe((res: any) => {
-  //     if (res.status === 'success') {
-  //       const data = res.data.map((i: any) => ({
-  //         employee_code: i.login_id,
-  //         attendance_date: this.formatDate(i.currentdate),
-  //         check_in: this.formatTime(i.logged_in_time),
-  //         check_out: this.formatTime(i.logged_out_time),
-  //         shift_id: i.shift_details
-  //       }));
-
-  //       const ws = XLSX.utils.json_to_sheet(data);
-  //       const wb = XLSX.utils.book_new();
-  //       XLSX.utils.book_append_sheet(wb, ws, 'Attendance');
-  //       XLSX.writeFile(wb, 'Attendance.xlsx');
-  //     }
-  //   });
-  // }
-
   exportAttendance() {
     const today = new Date();
     const firstDayLastMonth = new Date(today.getFullYear(), today.getMonth() - 1, 1);
@@ -532,4 +513,61 @@ export class AttendanceComponent {
     return `${year}-${String(month).padStart(2, '0')}-${String(lastDay).padStart(2, '0')}`;
   }
 
+  exportVerifiedOrImportedAttendnace(): void {
+    const body: any = {
+      isexport: true,
+      start_date: this.startDate,
+      end_date: this.endDate,
+    };
+
+    if (this.currentFilter) {
+      body.status = this.currentFilter;
+    }
+
+    if (this.searchInputValue && this.searchInputValue.trim() !== '') {
+      body.search = this.searchInputValue.trim();
+    }
+
+    this.isLoading = true;
+
+    this.service.post('fetch/attendance', body).subscribe({
+      next: (res: any) => {
+        this.isLoading = false;
+        if (res.status === 'success' && res.data.length) {
+          const data = res.data.map((i: any) => ({
+            employee_code: i.employee_code,
+            emp_name: i.emp_name,
+            attendance_date: this.formatToDDMMYYYY(i.attendance_date),
+            check_in: i.check_in,
+            check_out: i.check_out,
+            shift_id: i.shift_id,
+          }));
+
+          const ws = XLSX.utils.json_to_sheet(data, {
+            header: ['employee_code', 'emp_name', 'attendance_date', 'check_in', 'check_out', 'shift_id'],
+          });
+          ws['!cols'] = [
+            { wch: 15 }, { wch: 20 }, { wch: 15 },
+            { wch: 12 }, { wch: 12 }, { wch: 10 },
+          ];
+
+          const wb = XLSX.utils.book_new();
+          XLSX.utils.book_append_sheet(wb, ws, 'Attendance');
+          XLSX.writeFile(wb, `Attendance_${this.startDate}_to_${this.endDate}.xlsx`);
+
+          this.toastr.success('Attendance exported successfully!');
+        } else {
+          this.toastr.warning('No data found to export.');
+        }
+      },
+      error: (err) => {
+        this.isLoading = false;
+        if (err.status === 404) {
+          this.toastr.warning('No data found to export.');
+        } else {
+          this.toastr.error('Error while exporting data.');
+        }
+      }
+    });
+  }
 }
