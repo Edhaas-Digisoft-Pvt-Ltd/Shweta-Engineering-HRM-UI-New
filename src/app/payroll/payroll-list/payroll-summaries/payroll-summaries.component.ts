@@ -185,9 +185,14 @@ export class PayrollSummariesComponent {
 
         this.deduct = [
           {
-            Compound: 'Provident Fund (PF)',
+            Compound: 'Employee PF Contribution',
             deduction: 'PF',
             amount: this.calculationData.pf_employee_deduction ?? 0
+          },
+          {
+            Compound: 'Employer PF Contribution',
+            deduction: 'PF',
+            amount: this.calculationData.pf_employer_contribution ?? 0
           },
           {
             Compound: 'Professional Tax (PT)',
