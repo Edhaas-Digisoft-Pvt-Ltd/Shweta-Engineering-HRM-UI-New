@@ -38,6 +38,7 @@ import { EmpLeaveAdvsalaryReportComponent } from './emp-leave-advsalary-report/e
 import { LeaveRequestComponent } from './leave/leave-request/leave-request.component';
 import { UpdateEmployeeComponent } from './employee/update-employee/update-employee.component';
 import { SalaryIncrementComponent } from './salary-increment/salary-increment.component';
+import { EmployeeVerifiedAttendanceComponent } from './employee-verified-attendance/employee-verified-attendance.component';
 
 const routes: Routes = [
   {
@@ -217,6 +218,13 @@ const routes: Routes = [
         canActivate: [PermissionGuard],
         resolve: { permissions: PermissionsResolver },
         data: { module: 'Salary_increment', permission: 'view' }
+      },
+      {
+        path: 'employee-verified-attendance',
+        component: EmployeeVerifiedAttendanceComponent,
+        canActivate: [PermissionGuard],
+        resolve: { permissions: PermissionsResolver },
+        data: { module: 'Employee Dashboard', permission: 'view' }
       },
     ]
   },

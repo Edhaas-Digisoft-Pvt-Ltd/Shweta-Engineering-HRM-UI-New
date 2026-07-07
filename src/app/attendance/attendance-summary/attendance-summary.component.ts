@@ -65,10 +65,11 @@ export class AttendanceSummaryComponent {
   constructor(private toastr: ToastrService, private service: HrmserviceService, private elementRef: ElementRef) { }
 
   ngOnInit() {
-    const savedCompanyId = this.service.selectedCompanyId();
-    this.selectedCompanyId = savedCompanyId
-      ? (Array.isArray(savedCompanyId) ? savedCompanyId : [savedCompanyId])
-      : ['all'];
+    // const savedCompanyId = this.service.selectedCompanyId();
+    // this.selectedCompanyId = savedCompanyId
+    //   ? (Array.isArray(savedCompanyId) ? savedCompanyId : [savedCompanyId])
+    //   : ['all'];
+    this.selectedCompanyId = ['all'];
     this.generateyears();
 
     this.loadData();

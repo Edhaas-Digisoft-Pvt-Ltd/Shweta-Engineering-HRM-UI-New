@@ -882,7 +882,7 @@ export class EmployeeDashboardComponent {
       isexport: false
     };
 
-    this.service.post('fetch/live/attendnace', payload).subscribe({
+    this.service.post('fetch/live/attendance', payload).subscribe({
       next: (res: any) => {
         if (res.status === 'success') {
           this.attendanceRowData = res.data;

@@ -1,0 +1,11 @@
+.pagination-icon {
+  cursor: pointer;
+  font-size: 16px;
+  color: #495057;
+}
+
+.pagination-icon.disabled {
+  color: #ced4da;
+  pointer-events: none;
+  cursor: default;
+}

@@ -195,6 +195,13 @@
             </a>
           </li>
 
+          <li class="nav-item" *ngIf="hasAccess('Employee Dashboard','view') && loginType === 'employee'">
+            <a routerLink="employee-verified-attendance" routerLinkActive="active-link" class="nav-link btn-like d-flex align-items-center"
+              (click)="closeAllAccordions()">
+              <i class="bi bi-alarm ms-1 me-2" style="font-size:1.3rem;"></i><span class="nav-name">Verified Attendance</span>
+            </a>
+          </li>
+
         </ul>
       </div>
 

@@ -76,6 +76,7 @@ import { VerifyAttendanceComponent } from './attendance/verify-attendance/verify
 import { DepartmentDesignationComponent } from './compnay-setup/department-designation/department-designation.component';
 import { SalaryIncrementComponent } from './salary-increment/salary-increment.component';
 import { UpcomingLeavesComponent } from './leave/upcoming-leaves/upcoming-leaves.component';
+import { EmployeeVerifiedAttendanceComponent } from './employee-verified-attendance/employee-verified-attendance.component';
 // FullCalendarModule.registerPlugins([dayGridPlugin]);
 
 //onkar
@@ -145,6 +146,7 @@ import { UpcomingLeavesComponent } from './leave/upcoming-leaves/upcoming-leaves
     DepartmentDesignationComponent,
     SalaryIncrementComponent,
     UpcomingLeavesComponent,
+    EmployeeVerifiedAttendanceComponent,
 
   ],
   imports: [

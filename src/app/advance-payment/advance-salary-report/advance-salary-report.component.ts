@@ -132,19 +132,6 @@ export class AdvanceSalaryReportComponent {
     this.gridApi = params.api;
   }
 
-  // getemployees () {
-  //    this.service.post('all/employee', {}).subscribe((res: any) => {
-  //     console.log(res)
-  //     if (res.status == "success") {
-  //       this.employees = res.data
-  //     }
-  //   },
-  //     (error) => {
-  //       console.error('Error fetching companies:', error);
-  //     }
-  //   );
-  // }
-
   emptyInput() {
     this.searchValue = '';
     window.location.reload();

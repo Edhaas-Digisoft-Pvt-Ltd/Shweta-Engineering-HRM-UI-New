@@ -48,10 +48,11 @@ export class AdvancePaymentComponent {
   endDate: string = this.getLastDayOfMonth();
 
   ngOnInit() {
-    const savedCompanyId = this.service.selectedCompanyId();
-    this.selectedCompanyId = savedCompanyId
-      ? (Array.isArray(savedCompanyId) ? savedCompanyId : [savedCompanyId])
-      : ['all'];
+    // const savedCompanyId = this.service.selectedCompanyId();
+    // this.selectedCompanyId = savedCompanyId
+    //   ? (Array.isArray(savedCompanyId) ? savedCompanyId : [savedCompanyId])
+    //   : ['all'];
+    this.selectedCompanyId = ['all'];
 
     this.getCompanyNames();
     this.getAllAdvSalary();

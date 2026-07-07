@@ -74,15 +74,8 @@ export class PayrollListComponent {
   }
 
   ngOnInit() {
-    // this.selectedCompanyId = this.service.selectedCompanyId();
-    const savedId = this.service.selectedCompanyId();
-    this.selectedCompanyId = (savedId && savedId !== 'all') ? savedId : null;
-    // this.selectedYear = new Date().getFullYear();
-    // this.selectedMonth = new Date().getMonth();
-    // // this.selectedYear = 2025;
-    // // this.selectedMonth = 12;
-    // const currentDate = new Date();
-    // this.today = currentDate.toISOString().split('T')[0];
+    // const savedId = this.service.selectedCompanyId();
+    // this.selectedCompanyId = (savedId && savedId !== 'all') ? savedId : null;
 
     const today = new Date();
 
@@ -126,12 +119,10 @@ export class PayrollListComponent {
       if (res.status == "success") {
         this.CompanyNames = res.data;
 
-        if (!this.selectedCompanyId || this.selectedCompanyId === 'all') {
-          this.selectedCompanyId = this.CompanyNames[0]?.company_id;
-          this.service.setCompanyId(this.selectedCompanyId);
-        }
+        this.selectedCompanyId = this.CompanyNames[0]?.company_id;
+        this.service.setCompanyId(this.selectedCompanyId);
 
-        this.getpayrollList(); // MOVE HERE — company is guaranteed to be set
+        this.getpayrollList(); 
       }
     }, (error) => {
       console.error('Error fetching companies:', error);
