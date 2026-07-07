@@ -1,29 +1,28 @@
 <div class="right-panel">
-  <div class="loader-overlay" *ngIf="isLoading">
-    <app-loader></app-loader>
-  </div>
-  <div class="main-content" [class.loading]="isLoading">
+    <div class="loader-overlay" *ngIf="isLoading">
+        <app-loader></app-loader>
+    </div>
+    <div class="main-content" [class.loading]="isLoading">
 
-            <div class="row gx-3  align-items-center rounded-2">
-                <div class="col-12">
-                    <div class="row justify-content-end">
-                        <div class="col-3">
-                            <label for="">Select Company</label>
-                            <select class="form-select" (change)="onCompanyChange($event)">
-                                <option *ngFor="let item of CompanyNames" [value]="item.company_id">{{ item.company_name
-                                    }}
-                                </option>
-                            </select>
-                        </div>
+        <div class="row gx-3  align-items-center rounded-2">
+            <div class="col-12">
+                <div class="row justify-content-end">
+                    <div class="col-3">
+                        <label for="">Select Company</label>
+                        <select class="form-select" [(ngModel)]="selectedCompanyId" (change)="onCompanyChange($event)">
+                            <option *ngFor="let item of CompanyNames" [value]="item.company_id">{{
+                                item.company_name }}</option>
+                        </select>
+                    </div>
 
-                        <div class="col-2 dotted-line">
-                            <label for="">Year</label>
-                            <input class="form-control" [value]="selectedYear" readonly />
-                        </div>
-                        <div class="col-2">
-                            <label for="">Month</label>
-                            <input class="form-control" [value]="getMonthName(selectedMonth)" readonly />
-                        </div>
+                    <div class="col-2 dotted-line">
+                        <label for="">Year</label>
+                        <input class="form-control" [value]="selectedYear" readonly />
+                    </div>
+                    <div class="col-2">
+                        <label for="">Month</label>
+                        <input class="form-control" [value]="getMonthName(selectedMonth)" readonly />
+                    </div>
 
 
                     <div class="col-auto d-flex align-items-end">
@@ -37,20 +36,20 @@
                         </div>
                     </div>
 
-                        <div class="col-auto d-flex align-items-end">
-                            <button class="btn exportExcelBtn btn-primary me-3" (click)="exportExcel()">
-                                <i class="bi bi-file-earmark-text-fill"></i>
-                            </button>
-                        </div>
-
+                    <div class="col-auto d-flex align-items-end">
+                        <button class="btn exportExcelBtn btn-primary me-3" (click)="exportExcel()">
+                            <i class="bi bi-file-earmark-text-fill"></i>
+                        </button>
                     </div>
+
                 </div>
             </div>
+        </div>
 
         <div class="row">
             <div class="col-12 mt-4">
-                <ag-grid-angular class="ag-theme-alpine" [rowData]="rowData"
-                    [columnDefs]="columnDefs" [gridOptions]="gridOptions" [pagination]="false" [domLayout]="'autoHeight'"
+                <ag-grid-angular class="ag-theme-alpine" [rowData]="rowData" [columnDefs]="columnDefs"
+                    [gridOptions]="gridOptions" [pagination]="false" [domLayout]="'autoHeight'"
                     (gridReady)="onGridReady($event)" (selectionChanged)="onSelectionChanged($event)"
                     rowSelection="multiple" [rowMultiSelectWithClick]="true" [defaultColDef]="defaultColDef">
                 </ag-grid-angular>

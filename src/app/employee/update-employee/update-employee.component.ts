@@ -4,6 +4,7 @@ import { ToastrService } from 'ngx-toastr';
 import { HrmserviceService } from 'src/app/hrmservice.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { forkJoin, Observable, of } from 'rxjs';
+import { ModalServiceService } from 'src/app/modal-service.service';
 
 @Component({
   selector: 'app-update-employee',
@@ -52,6 +53,13 @@ export class UpdateEmployeeComponent {
   isIncrementDue: boolean = false;
   isIncrementChecked: boolean = false;
 
+  showIncrementHistory = false;
+  incrementCurrent: any = null;
+  incrementAnnualGross: number = 0;
+  incrementMonthlyGross: number = 0;
+  incrementHistoryList: any[] = [];
+  incrementForm!: FormGroup;
+
   //Document 
   docUploads: {
     [key: string]: {
@@ -68,7 +76,7 @@ export class UpdateEmployeeComponent {
   } = {
       aadhaar: { file: null, preview: null, error: '', uploading: false, uploaded: false, doc_id: null, existing: null, deleting: false, pendingDelete: false },
       pan_card: { file: null, preview: null, error: '', uploading: false, uploaded: false, doc_id: null, existing: null, deleting: false, pendingDelete: false },
-      qr_code:  { file: null, preview: null, error: '', uploading: false, uploaded: false, doc_id: null, existing: null, deleting: false, pendingDelete: false }, 
+      qr_code: { file: null, preview: null, error: '', uploading: false, uploaded: false, doc_id: null, existing: null, deleting: false, pendingDelete: false },
     };
 
   constructor(
@@ -77,7 +85,8 @@ export class UpdateEmployeeComponent {
     private toastr: ToastrService,
     private service: HrmserviceService,
     private route: ActivatedRoute,
-    private router: Router
+    private router: Router,
+    private modalService: ModalServiceService
   ) {
     this.multiStepForm = this.fb.group({
       title: ['', Validators.required],
@@ -160,6 +169,19 @@ export class UpdateEmployeeComponent {
       if (params['id']) {
         this.employe_id = params['id'];
       }
+    });
+
+    this.incrementForm = this.fb.group({
+      increment_status: ['inc_yes', Validators.required],
+      basic_salary: [0],
+      house_rent_allowances: [0],
+      conveyance_allowances: [0],
+      medical_allowances: [0],
+      special_allowances: [0],
+    });
+
+    this.incrementForm.valueChanges.subscribe(values => {
+      this.calculateIncrementGross(values);
     });
   }
 
@@ -483,6 +505,18 @@ export class UpdateEmployeeComponent {
     }, { emitEvent: false });
   }
 
+  calculateIncrementGross(values: any): void {
+    const total =
+      Number(values.basic_salary || 0) +
+      Number(values.house_rent_allowances || 0) +
+      Number(values.conveyance_allowances || 0) +
+      Number(values.medical_allowances || 0) +
+      Number(values.special_allowances || 0);
+
+    this.incrementAnnualGross = total;
+    this.incrementMonthlyGross = total / 12;
+  }
+
   logTotalDeductions() {
     const total = this.selectedStatutoryOptions.reduce((sum, field) => {
       return sum + Number(field.value || 0);
@@ -777,5 +811,99 @@ export class UpdateEmployeeComponent {
 
   goToStep(step: number): void {
     this.currentStep = step;
+  }
+
+  openSalaryIncrementModal(): void {
+    this.service.post('salary-increment/details', { employee_id: this.employe_id }).subscribe((res: any) => {
+      if (res.status === 'success') {
+        this.incrementCurrent = res.data.current_salary;
+        this.incrementForm.patchValue({
+          increment_status: 'inc_yes',
+          basic_salary: this.incrementCurrent.basic_salary,
+          house_rent_allowances: this.incrementCurrent.house_rent_allowances,
+          conveyance_allowances: this.incrementCurrent.conveyance_allowances,
+          medical_allowances: this.incrementCurrent.medical_allowances,
+          special_allowances: this.incrementCurrent.special_allowances,
+        });
+        this.applyIncrementValidators();
+        this.calculateIncrementGross(this.incrementForm.getRawValue());
+        this.showIncrementHistory = false;
+        this.modalService.openModal('salaryIncrementModal');
+      } else {
+        this.toastr.error('Unable to load salary details');
+      }
+    });
+  }
+
+  applyIncrementValidators(): void {
+    const basicCtrl = this.incrementForm.get('basic_salary');
+    if (this.incrementForm.get('increment_status')?.value === 'inc_yes') {
+      basicCtrl?.setValidators([Validators.required, Validators.min(1)]);
+    } else {
+      basicCtrl?.clearValidators();
+    }
+    basicCtrl?.updateValueAndValidity();
+  }
+
+  closeIncrementModal(): void {
+    this.showIncrementHistory = false;
+    this.modalService.closeModal();
+  }
+
+  toggleIncrementHistory(): void {
+    this.showIncrementHistory = !this.showIncrementHistory;
+    if (this.showIncrementHistory && this.incrementHistoryList.length === 0) {
+      this.service.post('salary-increment/history', { employee_id: this.employe_id }).subscribe((res: any) => {
+        if (res.status === 'success') this.incrementHistoryList = res.data;
+      });
+    }
+  }
+
+  openIncrementHistoryOnly(): void {
+    this.service.post('salary-increment/history', { employee_id: this.employe_id }).subscribe((res: any) => {
+      if (res.status === 'success') {
+        this.incrementHistoryList = res.data;
+        this.modalService.openModal('incrementHistoryOnlyModal');
+      } else {
+        this.toastr.error('Unable to load increment history');
+      }
+    });
+  }
+
+  submitIncrement(): void {
+    if (this.incrementForm.invalid) {
+      this.incrementForm.markAllAsTouched();
+      this.toastr.error('Yearly Basic Salary is required for salary increment.');
+      return;
+    }
+
+    const v = this.incrementForm.getRawValue();
+    const payload = {
+      employee_id: this.employe_id,
+      increment_status: v.increment_status,
+      basic_salary: v.basic_salary,
+      house_rent_allowances: v.house_rent_allowances,
+      conveyance_allowances: v.conveyance_allowances,
+      medical_allowances: v.medical_allowances,
+      special_allowances: v.special_allowances,
+      annual_gross_salary: parseFloat(this.incrementAnnualGross.toFixed(2)),
+      monthly_gross_salary: parseFloat(this.incrementMonthlyGross.toFixed(2)),
+      created_by: sessionStorage.getItem('employeeId') ?? null,
+    };
+
+    this.service.post('salary-increment/save', payload).subscribe({
+      next: (res: any) => {
+        if (res.status === 'success') {
+          this.toastr.success('Salary increment recorded!');
+          this.isIncrementDue = false;
+          this.showIncrementHistory = false;
+          this.modalService.closeModal();
+          this.fetchEmployee();
+        } else {
+          this.toastr.error(res.message || 'Failed to save');
+        }
+      },
+      error: (err) => this.toastr.error(err.error?.message || 'Something went wrong!'),
+    });
   }
 }

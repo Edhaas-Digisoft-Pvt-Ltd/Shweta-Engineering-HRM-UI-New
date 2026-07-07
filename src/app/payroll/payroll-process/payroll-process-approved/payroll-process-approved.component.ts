@@ -4,6 +4,8 @@ import { Router } from '@angular/router';
 import { HrmserviceService } from 'src/app/hrmservice.service';
 import { ToastrService } from 'ngx-toastr';
 import { IRowNode } from 'ag-grid-community';
+import * as ExcelJS from 'exceljs';
+import * as FileSaver from 'file-saver';
 
 @Component({
   selector: 'app-payroll-process-approved',
@@ -33,6 +35,7 @@ export class PayrollProcessApprovedComponent {
   pagesToShow: (number | string)[] = [];
   paginationvalue: any;
   years: number[] = [];
+  dataToExportExcel: any[] = [];
 
   today: string = new Date().toISOString().split('T')[0];
   constructor(private router: Router, private service: HrmserviceService, private toastr: ToastrService) { }
@@ -116,7 +119,6 @@ export class PayrollProcessApprovedComponent {
 
   onCompanyChange(event: Event): void {
     this.selectedCompanyId = (event.target as HTMLSelectElement).value;
-    console.log('Selected Company ID:', this.selectedCompanyId);
     this.getApprovedPayroll();
   }
 
@@ -286,66 +288,6 @@ export class PayrollProcessApprovedComponent {
     });
   }
 
-  exportSelectedRowsToCSV() {
-    const selectedNodes: IRowNode<any>[] = this.gridApiActive.getSelectedNodes();
-    const selectedData = selectedNodes.map((node: IRowNode<any>) => node.data);
-
-    if (selectedData.length === 0) {
-      this.toastr.warning('Please select at least one row to export.');
-      return;
-    }
-
-    const monthYear = `${this.selectedYear}-${this.selectedMonth.toString().padStart(2, '0')}`;
-    const consolidatedData = this.consolidatedSummary[monthYear] || [];
-
-    const mergedData = selectedData.map((row: any) => {
-      const attendance = consolidatedData.find((att: any) => att.employee_code === row.employee_code);
-
-      return {
-        'Employee Code': row.employee_code,
-        'Employee Name': row.emp_name || attendance?.emp_name,
-        'Department': row.department,
-        'Present Days': row.presentDays,
-        'Absent Days': row.absentDays,
-        'WFH/2': attendance?.work_from_home_half_day || '0',
-        'Half Day': attendance?.half_day || '0',
-        'Late': attendance?.late || '0',
-        'Total OT': row.overTime,
-        'Total Hrs': row.hours,
-        'Bonus&Incentive': row.bonus_incentive_amount,
-        'Net Salary': row.net_salary,
-      };
-    });
-
-    this.downloadAsCSV(mergedData, `Payroll_  ${monthYear}.csv`);
-  }
-
-  downloadAsCSV(data: any[], filename: string) {
-    if (!data || !data.length) return;
-
-    const separator = ',';
-    const keys = Object.keys(data[0]);
-
-    const csvContent = [
-      keys.join(separator),
-      ...data.map(row =>
-        keys.map(k => `"${(row[k] ?? '').toString().replace(/"/g, '""')}"`).join(separator)
-      )
-    ].join('\n');
-
-    const BOM = '\uFEFF';
-    const blob = new Blob([BOM + csvContent], { type: 'text/csv;charset=utf-8;' });
-
-    const link = document.createElement('a');
-    const url = URL.createObjectURL(blob);
-    link.setAttribute('href', url);
-    link.setAttribute('download', filename);
-    link.style.visibility = 'hidden';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  }
-
   getPagination() {
     this.service.post('get-pagination', {}).subscribe((res: any) => {
       if (res.status === 'success') {
@@ -421,6 +363,136 @@ export class PayrollProcessApprovedComponent {
       this.currentPage++;
       this.getApprovedPayroll(this.currentPage);
     }
+  }
+
+  exportExcel() {
+    if (!this.selectedCompanyId || !this.selectedYear || !this.selectedMonth) {
+      this.toastr.warning('Select company, year and month first');
+      return;
+    }
+
+    this.isLoading = true;
+
+    this.service.post('fetch/approved/payroll', {
+      company_id: this.selectedCompanyId,
+      year: this.selectedYear,
+      month: this.selectedMonth,
+      isexport: true
+    }).subscribe((res: any) => {
+      this.isLoading = false;
+
+      if (res.status === 'success' && res.data?.length > 0) {
+        this.dataToExportExcel = res.data;
+        this.generateExcel();
+      } else {
+        this.toastr.warning('No data to export');
+      }
+    }, (error) => {
+      this.isLoading = false;
+      if (error.status === 404) {
+        this.toastr.warning('No data to export');
+      } else {
+        this.toastr.error('Failed to fetch payroll data for export');
+      }
+    });
+  }
+
+  // Adjust this to your real "Operator" role_id
+  private isOperator(emp: any): boolean {
+    return emp.role_id === 2;
+  }
+
+  generateExcel() {
+    if (!this.dataToExportExcel || this.dataToExportExcel.length === 0) {
+      this.toastr.warning('No data to export');
+      return;
+    }
+
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet('Approved Payroll');
+
+    const year = this.selectedYear;
+    const month = this.selectedMonth;
+    const daysInMonth = new Date(year, month, 0).getDate();
+    const monthName = new Date(year, month - 1).toLocaleString('en-US', { month: 'long' });
+
+    // GROUP: non-operators first, operators after
+    const nonOperators = this.dataToExportExcel.filter((e: any) => !this.isOperator(e));
+    const operators = this.dataToExportExcel.filter((e: any) => this.isOperator(e));
+    const orderedEmployees = [...nonOperators, ...operators];
+
+    const hasNonOperator = nonOperators.length > 0;
+
+    // BASE HEADER (always shown)
+    const baseHeaderLeft = ['Employee Code', 'Employee Name', 'Role'];
+    const attendanceHeader = hasNonOperator ? ['Absent Days', 'H/D', 'W/O'] : [];
+    const restHeader = [
+      'Present Days', 'Hours', 'OT Hours', 'LATE IN', 'Every 4 late mark 4hrs deduction',
+      'Total Hours', 'Gross Salary', 'Hours of the Month', 'Per Hours/Day',
+      'Overtime Salary', 'Present Day Hrs Salary', 'Other', 'Ded.',
+      'Total Salary', 'Professional Tax', 'Employee contri. PF', 'Employer contri. PF',
+      'ESIC Employee 0.75%', 'Incentive', 'Salary Advance', 'Salary Payable'
+    ];
+
+    const headerRow = [...baseHeaderLeft, ...attendanceHeader, ...restHeader];
+
+    worksheet.addRow(['', '', '', monthName]);
+    worksheet.addRow(headerRow);
+    worksheet.getRow(1).font = { bold: true };
+    worksheet.getRow(2).font = { bold: true };
+
+    // total_month_hours — using daysInMonth*8 as a placeholder; swap for real source if you have one
+    const hoursOfMonth = daysInMonth * 8;
+
+    orderedEmployees.forEach((emp: any) => {
+      const operator = this.isOperator(emp);
+
+      const row: any[] = [emp.employee_code, emp.emp_name, emp.role_name];
+
+      if (hasNonOperator) {
+        if (!operator) {
+          row.push(emp.absent_days ?? 0, emp.holidays ?? 0, emp.weekends ?? 0);
+        } else {
+          row.push('', '', ''); // blank for operators
+        }
+      }
+
+      row.push(
+        emp.present_days ?? 0,
+        emp.total_hours,
+        emp.total_overtime,
+        emp.late_in ?? 0,                              // placeholder until source confirmed
+        emp.every_4_late_mark_4_hrs_deduction ?? 0,    // placeholder until source confirmed
+        emp.total_hours,                                // Total Hours (same as Hours unless you have a distinct calc)
+        emp.basic_salary,                               // Gross Salary
+        hoursOfMonth,
+        emp.per_hours_amount,
+        emp.overtime_amount,
+        emp.present_day_hrs_salary,
+        emp.other ?? 0,          // placeholder
+        emp.deduction ?? 0,      // placeholder
+        emp.total_salary,
+        emp.total_tax_deduction,
+        emp.pf_employee_deduction,
+        emp.pf_employer_contribution,
+        emp.esic_deduction,
+        emp.incentive_amount,
+        emp.adv_deduction,       // Salary Advance
+        emp.net_salary           // Salary Payable
+      );
+
+      worksheet.addRow(row);
+    });
+
+    // COLUMN WIDTHS
+    worksheet.columns.forEach((col, i) => {
+      col.width = i < 2 ? 20 : 15;
+    });
+
+    workbook.xlsx.writeBuffer().then(buffer => {
+      const blob = new Blob([buffer], { type: 'application/octet-stream' });
+      FileSaver.saveAs(blob, 'ApprovedPayroll.xlsx');
+    });
   }
 
 }

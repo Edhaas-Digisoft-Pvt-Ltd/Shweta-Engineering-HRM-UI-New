@@ -44,10 +44,11 @@ export class EmployeeComponent {
 
   ngOnInit() {
     // this.selectedCompanyId = this.CompanyIdService.selectedCompanyId();
-    const savedCompanyId = this.service.selectedCompanyId();
-    this.selectedCompanyId = savedCompanyId
-      ? (Array.isArray(savedCompanyId) ? savedCompanyId : [savedCompanyId])
-      : ['all'];
+    // const savedCompanyId = this.service.selectedCompanyId();
+    this.selectedCompanyId = ['all'];
+    // this.selectedCompanyId = savedCompanyId
+    //   ? (Array.isArray(savedCompanyId) ? savedCompanyId : [savedCompanyId])
+    //   : ['all'];
 
     this.changePasswordForm = this.fb.group({
       password: ['', [

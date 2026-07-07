@@ -48,11 +48,18 @@
 
                 <div class="card-body  border-1 mt-3">
                     <div class="row" *ngIf="currentStep !== 4">
-                        <div class="col mb-3">
-                            <span class="text-danger ">* </span>
-                            Please Fill All Required Fields.
+                        <div class="col mb-3 d-flex justify-content-between align-items-center">
+                            <span>
+                                <span class="text-danger">* </span>
+                                Please Fill All Required Fields.
+                            </span>
+                            <button *ngIf="currentStep === 5" type="button" class="btn btn-sm btn-outline-secondary"
+                                (click)="openIncrementHistoryOnly()">
+                                <i class="bi bi-clock-history me-1"></i> View Increment History
+                            </button>
                         </div>
                     </div>
+                    
                     <form [formGroup]="multiStepForm" (ngSubmit)="onSubmit()">
 
                         <!-- STEP 1: Personal Info -->
@@ -715,21 +722,19 @@
                             <div class="border" style="border-radius: 10px; padding: 30px;">
 
                                 <!-- Show ONLY when employee is due for increment -->
-                                <!-- <div *ngIf="isIncrementDue">
-
-                                    <div class="alert alert-warning d-flex align-items-center gap-2 mb-3">
-                                        <i class="bi bi-exclamation-triangle-fill me-2"></i>
-                                        This employee is due for their 2-year salary increment.
+                                <div *ngIf="isIncrementDue">
+                                    <div
+                                        class="alert alert-warning d-flex justify-content-between align-items-center mb-3">
+                                        <span>
+                                            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                                            This employee is due for a salary increment.
+                                        </span>
+                                        <button type="button" class="btn btn-sm btn-primary"
+                                            (click)="openSalaryIncrementModal()">
+                                            Salary Increment
+                                        </button>
                                     </div>
-
-                                    <div class="form-check mb-3">
-                                        <input class="form-check-input" type="checkbox" id="markIncrement"
-                                            [(ngModel)]="isIncrementChecked" [ngModelOptions]="{standalone: true}">
-                                        <label class="form-check-label fw-semibold" for="markIncrement">
-                                            Mark as 2-Year Salary Increment
-                                        </label>
-                                    </div>
-                                </div> -->
+                                </div>
 
                                 <div class="main-content p-3">
                                     <table class="table table-bordered"
@@ -856,6 +861,204 @@
                     </form>
                 </div>
             </div>
+        </div>
+    </div>
+</div>
+
+<!-- Salary Increment Modal -->
+<div class="modal fade" id="salaryIncrementModal" tabindex="-1">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+
+            <div class="modal-header">
+                <h5 class="modal-title">Salary Increment</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body">
+
+                <div class="d-flex justify-content-end mb-3">
+                    <button type="button" class="btn btn-sm btn-outline-secondary" (click)="toggleIncrementHistory()">
+                        {{ showIncrementHistory ? 'Hide History' : 'View History' }}
+                    </button>
+                </div>
+
+                <!-- History (toggle) -->
+                <div *ngIf="showIncrementHistory" class="mb-3">
+                    <table class="table table-sm table-bordered">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Cycle</th>
+                                <th>Years Completed</th>
+                                <th>Status</th>
+                                <th>Prev Monthly</th>
+                                <th>New Monthly</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr *ngFor="let h of incrementHistoryList">
+                                <td>{{ h.increment_date }}</td>
+                                <td>{{ h.increment_cycle }}</td>
+                                <td>{{ h.years_completed_in_company }}</td>
+                                <td>{{ h.increment_status === 'inc_yes' ? 'Incremented' : 'No Increment' }}</td>
+                                <td>{{ h.previous_monthly_gross | number:'1.2-2' }}</td>
+                                <td>{{ h.new_monthly_gross | number:'1.2-2' }}</td>
+                            </tr>
+                            <tr *ngIf="!incrementHistoryList.length">
+                                <td colspan="6" class="text-center text-muted">No history yet</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <form [formGroup]="incrementForm">
+                    <div class="d-flex gap-4 mb-3">
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" formControlName="increment_status"
+                                value="inc_yes" id="incYes" (change)="applyIncrementValidators()">
+                            <label class="form-check-label" for="incYes">Mark as Salary Increment</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" formControlName="increment_status"
+                                value="inc_no" id="incNo" (change)="applyIncrementValidators()">
+                            <label class="form-check-label" for="incNo">No Increment</label>
+                        </div>
+                    </div>
+
+                    <table class="table table-bordered">
+                        <thead>
+                            <tr>
+                                <th>Component</th>
+                                <th>Current Salary</th>
+                                <th *ngIf="incrementForm.get('increment_status')?.value === 'inc_yes'">Incremented
+                                    Salary</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Yearly Basic Salary</td>
+                                <td><input type="number" class="form-control" [value]="incrementCurrent?.basic_salary"
+                                        disabled></td>
+                                <td *ngIf="incrementForm.get('increment_status')?.value === 'inc_yes'">
+                                    <input type="number" class="form-control" formControlName="basic_salary">
+                                    <small class="text-danger"
+                                        *ngIf="incrementForm.get('basic_salary')?.touched && incrementForm.get('basic_salary')?.invalid">
+                                        Basic Salary is required when marking increment.
+                                    </small>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>House Rent Allowances</td>
+                                <td><input type="number" class="form-control"
+                                        [value]="incrementCurrent?.house_rent_allowances" disabled></td>
+                                <td *ngIf="incrementForm.get('increment_status')?.value === 'inc_yes'">
+                                    <input type="number" class="form-control" formControlName="house_rent_allowances">
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Conveyance Allowances</td>
+                                <td><input type="number" class="form-control"
+                                        [value]="incrementCurrent?.conveyance_allowances" disabled></td>
+                                <td *ngIf="incrementForm.get('increment_status')?.value === 'inc_yes'">
+                                    <input type="number" class="form-control" formControlName="conveyance_allowances">
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Medical Allowances</td>
+                                <td><input type="number" class="form-control"
+                                        [value]="incrementCurrent?.medical_allowances" disabled></td>
+                                <td *ngIf="incrementForm.get('increment_status')?.value === 'inc_yes'">
+                                    <input type="number" class="form-control" formControlName="medical_allowances">
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Special Allowances</td>
+                                <td><input type="number" class="form-control"
+                                        [value]="incrementCurrent?.special_allowances" disabled></td>
+                                <td *ngIf="incrementForm.get('increment_status')?.value === 'inc_yes'">
+                                    <input type="number" class="form-control" formControlName="special_allowances">
+                                </td>
+                            </tr>
+
+                            <!-- Gross Salary rows — always shown, both columns populated -->
+                            <tr>
+                                <td><strong>Gross Salary</strong></td>
+                                <td>
+                                    <h6 class="mb-0">Rs. {{ incrementCurrent?.annual_gross_salary | number: '1.2-2' }} /
+                                        12</h6>
+                                </td>
+                                <td *ngIf="incrementForm.get('increment_status')?.value === 'inc_yes'">
+                                    <h6 class="mb-0">Rs. {{ incrementAnnualGross | number: '1.2-2' }} / 12</h6>
+                                </td>
+                            </tr>
+                            <tr class="amountPayable">
+                                <td><strong>Monthly Gross Salary</strong></td>
+                                <td>
+                                    <h6 class="fw-bold mb-0">Rs. {{ incrementCurrent?.monthly_gross_salary | number:
+                                        '1.2-2' }}</h6>
+                                </td>
+                                <td *ngIf="incrementForm.get('increment_status')?.value === 'inc_yes'">
+                                    <h6 class="fw-bold mb-0">Rs. {{ incrementMonthlyGross | number: '1.2-2' }}</h6>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </form>
+
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" (click)="submitIncrement()">Submit</button>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<!-- Increment History Only Modal -->
+<div class="modal fade" id="incrementHistoryOnlyModal" tabindex="-1">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+
+            <div class="modal-header">
+                <h5 class="modal-title">Salary Increment History</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body">
+                <table class="table table-sm table-bordered">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Cycle</th>
+                            <th>Years Completed</th>
+                            <th>Status</th>
+                            <th>Prev Monthly</th>
+                            <th>New Monthly</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr *ngFor="let h of incrementHistoryList">
+                            <td>{{ h.increment_date }}</td>
+                            <td>{{ h.increment_cycle }}</td>
+                            <td>{{ h.years_completed_in_company }}</td>
+                            <td>{{ h.increment_status === 'inc_yes' ? 'Incremented' : 'No Increment' }}</td>
+                            <td>{{ h.previous_monthly_gross | number:'1.2-2' }}</td>
+                            <td>{{ h.new_monthly_gross | number:'1.2-2' }}</td>
+                        </tr>
+                        <tr *ngIf="!incrementHistoryList.length">
+                            <td colspan="6" class="text-center text-muted">No history yet</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+
         </div>
     </div>
 </div>

@@ -52,6 +52,8 @@ export class PayrollSummariesComponent {
   showReasonError: boolean = false;
   showOtherReasonError: boolean = false;
   isLoading: boolean = false;
+  expenseAmountInWords: string = '';
+  pendingExpensePayload: any = null;
 
   constructor(private route: ActivatedRoute, private router: Router, private formBuilder: FormBuilder, private modalService: ModalServiceService, private service: HrmserviceService, private toastr: ToastrService) {
     this.payrollDetails = this.formBuilder.group({
@@ -97,11 +99,11 @@ export class PayrollSummariesComponent {
     // this.selectedMonth = new Date().getMonth();
     // const currentDate = new Date();
     // this.today = currentDate.toISOString().split('T')[0];
-     const today = new Date();
+    const today = new Date();
     const lastMonthDate = new Date(today.getFullYear(), today.getMonth() - 1, 1);
 
     this.selectedYear = lastMonthDate.getFullYear();
-    this.selectedMonth = lastMonthDate.getMonth() + 1; 
+    this.selectedMonth = lastMonthDate.getMonth() + 1;
 
     this.today = today.toISOString().split('T')[0];
 
@@ -215,13 +217,13 @@ export class PayrollSummariesComponent {
           //   amount:0,
           // },
         ];
-        if(this.calculationData.leave_without_pay_days != 'Null' && this.calculationData.leave_without_pay_days >0){
+        if (this.calculationData.leave_without_pay_days != 'Null' && this.calculationData.leave_without_pay_days > 0) {
           this.deduct.push(
-          {
-            Compound: 'Leave w/o Pay',
-            deduction:  this.calculationData.leave_without_pay_days + ' - days',
-            amount:  this.calculationData.leave_without_pay_amount
-          }
+            {
+              Compound: 'Leave w/o Pay',
+              deduction: this.calculationData.leave_without_pay_days + ' - days',
+              amount: this.calculationData.leave_without_pay_amount
+            }
           )
         }
         this.isLoading = false;
@@ -235,26 +237,44 @@ export class PayrollSummariesComponent {
       this.toastr.error("Please enter required fields");
       return;
     }
-    this.isLoading = true;
-    const payload = {
+
+    const amount = Number(this.expenseForm.value.expenseAmount);
+    this.expenseAmountInWords = this.numberToWords(amount);
+
+    this.pendingExpensePayload = {
       employee_id: this.employee_id,
       year_month: `${this.selectedYear}-${(this.selectedMonth)
         .toString().padStart(2, '0')}`,
       expense_description: this.expenseForm.value.expenseDescription,
       expense_amount: this.expenseForm.value.expenseAmount
     };
-    this.service.post('add/expense-in-salary', payload).subscribe((res: any) => {
+
+    // Open the confirmation modal instead of submitting directly
+    this.modalService.openModal('ConfirmExpenseModal');
+  }
+
+  confirmAddExpense() {
+    if (!this.pendingExpensePayload) return;
+
+    this.isLoading = true;
+    this.service.post('add/expense-in-salary', this.pendingExpensePayload).subscribe((res: any) => {
       if (res.status === 'success') {
         this.toastr.success("Expense added successfully");
         this.getSinglePayroll();
         this.expenseForm.reset();
         this.isSubmitted = false;
-        this.isLoading = false;
       } else {
         this.toastr.error("Something went wrong");
-        this.isLoading = false;
       }
+      this.isLoading = false;
+      this.cancelAddExpense();
     });
+  }
+
+  cancelAddExpense() {
+    this.pendingExpensePayload = null;
+    this.expenseAmountInWords = '';
+    this.modalService.closeModal();
   }
 
   deleteExpense(expense_id: number) {
@@ -478,6 +498,48 @@ export class PayrollSummariesComponent {
     paginationPageSizeSelector: [10, 50, 100],
   };
 
+  numberToWords(num: number): string {
+    if (num == null || isNaN(num)) return '';
+    num = Math.floor(num);
+    if (num === 0) return 'Zero Rupees';
+
+    const ones = ['', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine',
+      'Ten', 'Eleven', 'Twelve', 'Thirteen', 'Fourteen', 'Fifteen', 'Sixteen', 'Seventeen', 'Eighteen', 'Nineteen'];
+    const tens = ['', '', 'Twenty', 'Thirty', 'Forty', 'Fifty', 'Sixty', 'Seventy', 'Eighty', 'Ninety'];
+
+    const twoDigits = (n: number): string => {
+      if (n === 0) return '';
+      if (n < 20) return ones[n] + ' ';
+      return tens[Math.floor(n / 10)] + ' ' + (n % 10 !== 0 ? ones[n % 10] + ' ' : '');
+    };
+
+    const threeDigits = (n: number): string => {
+      let str = '';
+      if (n >= 100) {
+        str += ones[Math.floor(n / 100)] + ' Hundred ';
+        n %= 100;
+      }
+      str += twoDigits(n);
+      return str;
+    };
+
+    let result = '';
+    const crore = Math.floor(num / 10000000);
+    num %= 10000000;
+    const lakh = Math.floor(num / 100000);
+    num %= 100000;
+    const thousand = Math.floor(num / 1000);
+    num %= 1000;
+    const hundred = num;
+
+    if (crore > 0) result += threeDigits(crore) + 'Crore ';
+    if (lakh > 0) result += threeDigits(lakh) + 'Lakh ';
+    if (thousand > 0) result += threeDigits(thousand) + 'Thousand ';
+    if (hundred > 0) result += threeDigits(hundred);
+
+    return result.trim() + ' Rupees Only';
+  }
+
   downloadPayslip() {
     if (!this.employeeDetails || !this.calculationData || !this.attendanceDetails) {
       this.toastr.error('Missing payslip data.');
@@ -534,26 +596,20 @@ export class PayrollSummariesComponent {
           <tr>
             <td style="border-right:none;">Overtime</td>
             <td style="border-left:none; border-right:none;">${this.calculationData?.overtime_amount ?? 0}</td>
-            <td style="border-left:1px solid #000; border-right:none;">ESIC</td>
-            <td style="border-left:none;">${this.calculationData?.esic_deduction ?? 0}</td>
+            <td style="border-left:1px solid #000; border-right:none;">PF Employer</td>
+            <td style="border-left:none;">${this.calculationData?.pf_employer_contribution ?? 0}</td>
           </tr>
            <tr>
             <td style="border-right:none;">Extra Expense</td>
             <td style="border-left:none; border-right:none;">${this.calculationData?.total_expense ?? 0}</td>
-            <td style="border-left:1px solid #000; border-right:none;">Advance EMI</td>
-            <td style="border-left:none;">${this.calculationData?.advance_amount ?? 0}</td>
+             <td style="border-left:1px solid #000; border-right:none;">ESIC</td>
+            <td style="border-left:none;">${this.calculationData?.esic_deduction ?? 0}</td>
           </tr>
            <tr>
             <td style="border-right:none;">Incentive</td>
             <td style="border-left:none; border-right:none;">${this.calculationData?.incentive_amount ?? 0}</td>
-            <td style="border-left:1px solid #000; border-right:none;"></td>
-            <td style="border-left:none;"></td>
-          </tr>
-          <tr style="font-weight:bold;">
-            <td style="border-right:none;">Total Earnings</td>
-            <td style="border-left:none; border-right:none;">${this.calculationData?.total_salary ?? 0}</td>
-            <td style="border-left:1px solid #000; border-right:none;">Total Deductions</td>
-            <td style="border-left:none;">${this.calculationData?.total_tax_deduction ?? 0}</td>
+              <td style="border-left:1px solid #000; border-right:none;">Advance EMI</td>
+            <td style="border-left:none;">${this.calculationData?.advance_amount ?? 0}</td>
           </tr>
           <tr style="font-weight:bold; background:#f5f5f5;">
             <td colspan="2" style="border-right:none;">Net Salary</td>

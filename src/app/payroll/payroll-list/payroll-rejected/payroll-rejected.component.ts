@@ -97,7 +97,6 @@ export class PayrollRejectedComponent {
 
   onCompanyChange(event: Event): void {
     this.selectedCompanyId = (event.target as HTMLSelectElement).value;
-    console.log('Selected Company ID:', this.selectedCompanyId);
     this.RejectedPayrollList();
   }
 
