@@ -2,40 +2,51 @@ a.nav-link.active {
     background: #3674B5 !important;
     color: white !important;
     border-radius: 30px;
-    padding: 12px 25px !important;
-    font-size: 18px;
+    padding: clamp(6px, 1vw, 12px) clamp(8px, 2vw, 25px) !important;
+    font-size: clamp(11px, 1.1vw, 18px);
 }
 
 a.nav-link {
     color: #BCBCBC;
     border-radius: 30px;
-    padding: 12px 25px !important;
+    padding: clamp(6px, 1vw, 12px) clamp(8px, 2vw, 25px) !important;
     border: 1px solid #3674B5;
     background: #F6F6F6;
-    font-size: 18px;
-    font-weight:600;
-}
-a.nav-link:hover {
-    border:1px solid #23558a ;
+    font-size: clamp(11px, 1.1vw, 18px);
+    font-weight: 600;
+    display: block;
+    line-height: 1.2;
+    word-break: break-word;
+    /* ADDED — text wraps to 2 lines instead of pushing width out */
 }
 
-ul.nav.nav-tabs{
+a.nav-link:hover {
+    border: 1px solid #23558a;
+}
+
+ul.nav.nav-tabs {
     border-bottom: 0px;
-    justify-content: space-between;
     margin-bottom: 20px;
     display: flex;
+    flex-wrap: nowrap;
+    /* ADDED — never breaks to a new row */
     align-items: center;
     justify-content: center;
-}
-ul.nav.nav-tabs .nav-item{
-   flex-grow: 1;
-   text-align: center;
+    width: 100%;
 }
 
+ul.nav.nav-tabs .nav-item {
+    flex: 1 1 0;
+    min-width: 0;
+    /* ADDED — lets items shrink below content width */
+    text-align: center;
+}
 
 span.abc {
     display: inline-block;
-    width: 30px;
+    width: clamp(6px, 1.5vw, 30px);
+    /* ADDED — connector shrinks too */
+    flex-shrink: 0;
     background: #3674B5;
     height: 2px;
 }
@@ -44,7 +55,8 @@ td {
     padding: 10px 10px;
     vertical-align: baseline;
 }
-thead th{
+
+thead th {
     background: #578FCA !important;
     color: white !important;
     padding: 15px 10px !important;
@@ -55,16 +67,18 @@ thead th{
     width: 250px;
     background: white;
 }
+
 .previous-btn {
     height: 55px;
     width: 163px;
     text-align: center;
     font-size: 20px;
     font-weight: 500;
-    background-color:  #94C8FF !important;
+    background-color: #94C8FF !important;
     color: black !important;
 }
-.next-btn{
+
+.next-btn {
     background-color: #3674B5 !important;
     height: 55px;
     width: 163px;
@@ -75,91 +89,88 @@ thead th{
     font-weight: 500;
 }
 
-label{
+label {
     font-weight: 600;
     margin-bottom: 10px;
-    font-size: 18px     ;
+    font-size: 18px;
 }
-.statutoryCheckbox label{
+
+.statutoryCheckbox label {
     margin-bottom: 0px;
 }
 
-.leavesData td{
+.leavesData td {
     background-color: #F3F9FF;
 }
 
-.errorDisplay{
+.errorDisplay {
     box-shadow: 1px 1px red;
-}
-
-@media(max-width:1440px){
-    a.nav-link {
-        padding: 9px 15px !important;
-    }
 }
 
 /* toggle for active inactive */
 .toggle-switch {
-  width: 64px;
-  height: 32px;
-  background-color: #e74c3c;
-  border-radius: 50px;
-  position: relative;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-  border: 2px solid #c0392b;
-  display: flex;
-  align-items: center;
-  padding: 2px;
-  justify-content: flex-start;  /* knob on left = Inactive */
+    width: 64px;
+    height: 32px;
+    background-color: #e74c3c;
+    border-radius: 50px;
+    position: relative;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    border: 2px solid #c0392b;
+    display: flex;
+    align-items: center;
+    padding: 2px;
+    justify-content: flex-start;
+    /* knob on left = Inactive */
 }
 
 .toggle-switch.active {
-  background-color: #2ecc71;
-  border-color: #27ae60;
-  justify-content: flex-end;    /* knob on right = Active */
+    background-color: #2ecc71;
+    border-color: #27ae60;
+    justify-content: flex-end;
+    /* knob on right = Active */
 }
 
 .toggle-knob {
-  width: 26px;
-  height: 26px;
-  background: white;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.3);
-  transition: all 0.3s ease;
+    width: 26px;
+    height: 26px;
+    background: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+    transition: all 0.3s ease;
 }
 
 .toggle-icon {
-  font-size: 14px;
-  font-weight: bold;
-  line-height: 1;
+    font-size: 14px;
+    font-weight: bold;
+    line-height: 1;
 }
 
 /* checkbox visibility css */
 .form-check-input {
-  width: 20px;
-  height: 20px;
-  cursor: pointer;
-  border: 2px solid #787879 !important;
-  margin-top: 2px;
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+    border: 2px solid #787879 !important;
+    margin-top: 2px;
 }
 
 .form-check-input:checked {
-  background-color: #3674B5 !important;
-  border-color: #3674B5 !important;
+    background-color: #3674B5 !important;
+    border-color: #3674B5 !important;
 }
 
 .form-check-label {
-  font-size: 16px;
-  font-weight: 500;
-  color: #333;
-  margin-left: 8px;
-  cursor: pointer;
+    font-size: 16px;
+    font-weight: 500;
+    color: #333;
+    margin-left: 8px;
+    cursor: pointer;
 }
 
 .form-check {
-  margin-bottom: 14px;
+    margin-bottom: 14px;
 }
