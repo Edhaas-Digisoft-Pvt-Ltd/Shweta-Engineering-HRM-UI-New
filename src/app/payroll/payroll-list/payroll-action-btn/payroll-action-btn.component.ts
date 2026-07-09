@@ -31,7 +31,7 @@ export class PayrollActionBtnComponent implements ICellRendererAngularComp {
 
   viewPayroll() {
     this.router.navigate(['/authPanal/payrollSummary'],{
-      queryParams: { id: this.employeeID, temp_payroll_id: this.tempPayrollID}
+      queryParams: { id: this.employeeID, temp_payroll_id: this.tempPayrollID, source: this.params.source}
     });
   }
 

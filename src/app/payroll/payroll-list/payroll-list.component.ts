@@ -260,6 +260,7 @@ export class PayrollListComponent {
         // clickedEdit: (field: any) => this.getqutation(field),
         // clickedView: (field: any) => this.viewqutation(field),
         // quotationEdit: (field: any) => this.editqutation(field),
+        source: 'list'
       },
       flex: 1
 

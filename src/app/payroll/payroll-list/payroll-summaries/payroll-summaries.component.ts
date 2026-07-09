@@ -54,6 +54,7 @@ export class PayrollSummariesComponent {
   isLoading: boolean = false;
   expenseAmountInWords: string = '';
   pendingExpensePayload: any = null;
+  source: string = 'list';
 
   constructor(private route: ActivatedRoute, private router: Router, private formBuilder: FormBuilder, private modalService: ModalServiceService, private service: HrmserviceService, private toastr: ToastrService) {
     this.payrollDetails = this.formBuilder.group({
@@ -108,6 +109,7 @@ export class PayrollSummariesComponent {
     this.today = today.toISOString().split('T')[0];
 
     this.route.queryParams.subscribe(params => {
+      this.source = params['source'] || 'list';
       this.employee_id = params['id'];
       this.tempPayrollId = params['temp_payroll_id']
       // console.log('Received employee  payroll:', this.employee_id);
@@ -320,16 +322,11 @@ export class PayrollSummariesComponent {
   }
 
   backtoPayroll() {
-    if (this.hasAccess('Payroll List', 'view')) {
-      this.router.navigate(['/authPanal/payrollList']);
-      return;
-    }
-
-    if (this.hasAccess('Payroll Manage', 'view')) {
+    if (this.source === 'process') {
       this.router.navigate(['/authPanal/payrollProcess']);
-      return;
+    } else {
+      this.router.navigate(['/authPanal/payrollList']);
     }
-    this.router.navigate(['/authPanal/payrollList']);
   }
 
   columnDefs: ColDef[] = [

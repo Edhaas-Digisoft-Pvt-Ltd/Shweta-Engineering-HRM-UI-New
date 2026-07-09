@@ -369,6 +369,7 @@ export class PayrollProcessComponent {
         cellRenderer: PayrollActionBtnComponent,
         cellRendererParams: {
           viewEmployee: (field: any) => this.editApp(field),
+          source: 'process'
         },
         flex: 1
 

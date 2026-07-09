@@ -11,9 +11,10 @@
 
                         <h2> <i class="bi bi-currency-rupee me-2"></i> Payroll</h2>
                         <p style="color: #3674B5;">
-                            <span (click)="backtoPayroll()" style="cursor: pointer;">
+                            <span (click)="backtoPayroll()" style="cursor:pointer;">
                                 <i class="bi bi-arrow-left-circle ms-2"></i>
-                                <span class="fw-bolder ms-2">Payroll List</span>
+                                <span class="fw-bolder ms-2">{{ source === 'process' ? 'Payroll Process' : 'Payroll
+                                    List' }}</span>
                             </span>
                             /
                             <span>
@@ -63,7 +64,7 @@
                                             <input class="form-control readOnlyInput" [value]="selectedYear">
                                         </div>
 
-                                        <div *ngIf="hasAccess('Payroll List', 'view')" class="col-md-4">
+                                        <div *ngIf="source === 'list' && hasAccess('Payroll List', 'view')" class="col-md-4">
                                             <button class="btn btn-danger text-white" (click)="openModal()">Reject
                                                 Payroll</button>
                                         </div>
@@ -93,7 +94,8 @@
                                 </div>
 
                             </div>
-                            <div *ngIf="employeeDetails.role_id == 2 || employeeDetails.role_id == 12 ||employeeDetails.role_id == 13" class="row m-0 p-0 mt-3">
+                            <div *ngIf="employeeDetails.role_id == 2 || employeeDetails.role_id == 12 ||employeeDetails.role_id == 13"
+                                class="row m-0 p-0 mt-3">
                                 <div class="col-12 col-sm-6">
                                     <div
                                         class="d-flex flex-column align-items-center justify-content-center p-2 py-2 attandance-summary">
@@ -328,7 +330,7 @@
                                                     formatted(calculationData?.total_expense)}}
                                                 </td>
                                             </tr>
-                                             <tr *ngIf="calculationData?.default_holiday_pay > 0">
+                                            <tr *ngIf="calculationData?.default_holiday_pay > 0">
                                                 <td data-label="Compound">Default Holiday Pay</td>
                                                 <td data-label="Calculation">-</td>
                                                 <td data-label="Amount (in ₹)">₹ {{
@@ -605,8 +607,8 @@
         <div class="modal-content rounded-4">
             <div class="modal-header text-white rounded-top-4">
                 <h5 class="modal-title" id="confirmExpenseLabel">Confirm Expense</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
-                    aria-label="Close" (click)="cancelAddExpense()"></button>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"
+                    (click)="cancelAddExpense()"></button>
             </div>
             <div class="modal-body">
                 <p class="mb-2">
