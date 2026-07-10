@@ -84,14 +84,15 @@ export class DashboardComponent {
         this.CompanyNames = res.data;
 
         // Default: first company selected (not 'all'), only on first load
-        const savedCompanyId = this.service.selectedCompanyId();
-        if (savedCompanyId) {
-          this.selectedCompanyId = Array.isArray(savedCompanyId) ? savedCompanyId : [savedCompanyId];
-        } else if (this.CompanyNames.length > 0) {
-          this.selectedCompanyId = [this.CompanyNames[0].company_id];
-        } else {
-          this.selectedCompanyId = ['all'];
-        }
+        // const savedCompanyId = this.service.selectedCompanyId();
+        // if (savedCompanyId) {
+        //   this.selectedCompanyId = Array.isArray(savedCompanyId) ? savedCompanyId : [savedCompanyId];
+        // } else if (this.CompanyNames.length > 0) {
+        //   this.selectedCompanyId = [this.CompanyNames[0].company_id];
+        // } else {
+        //   this.selectedCompanyId = ['all'];
+        // }
+        this.selectedCompanyId = ['all'];
 
         this.service.setCompanyId(this.selectedCompanyId);
         this.updateSelectedCompanyLabel();
