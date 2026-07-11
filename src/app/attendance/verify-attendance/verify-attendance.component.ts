@@ -34,6 +34,7 @@ export class VerifyAttendanceComponent implements OnInit {
     shiftLabel: string;
     logged_in_time: string;
     logged_out_time: string;
+    admin_marked_absent: boolean;
   } = {
       attendance_live_id: null,
       employee_code: '',
@@ -43,6 +44,7 @@ export class VerifyAttendanceComponent implements OnInit {
       shiftLabel: '',
       logged_in_time: '',
       logged_out_time: '',
+      admin_marked_absent: false,
     };
   loginTimeError: boolean = false;
   logoutTimeError: boolean = false;
@@ -71,17 +73,27 @@ export class VerifyAttendanceComponent implements OnInit {
     { headerName: 'Employee Code', valueGetter: (p) => p.data?.employee?.employee_code || '' },
     { headerName: 'Name', valueGetter: (p) => p.data?.employee?.emp_name || '' },
     { headerName: 'Date', field: 'currentdate', valueFormatter: this.service.dateFormatter },
-    { headerName: 'Login Time', field: 'logged_in_time' },
-    { headerName: 'Logout Time', field: 'logged_out_time' },
+    {
+      headerName: 'Login Time',
+      field: 'logged_in_time',
+      valueGetter: (p) => p.data?.admin_marked_absent === 'Yes' ? '' : (p.data?.logged_in_time || ''),
+    },
+    {
+      headerName: 'Logout Time',
+      field: 'logged_out_time',
+      valueGetter: (p) => p.data?.admin_marked_absent === 'Yes' ? '' : (p.data?.logged_out_time || ''),
+    },
     {
       headerName: 'Shift',
       field: 'shift_details',
+      valueGetter: (p) => p.data?.admin_marked_absent === 'Yes' ? '' : (p.data?.shift_details || ''),
       valueFormatter: (p) => {
         if (p.value == '1') return 'Morning';
         if (p.value == '2') return 'Evening';
         return p.value || '';
       }
     },
+    { headerName: 'Status', field: 'attendance_status', width: 110, flex: 0 },
     // ── Action column ────────────────────────────────────────────────────────
     {
       headerName: 'Action',
@@ -152,21 +164,56 @@ export class VerifyAttendanceComponent implements OnInit {
   }
 
   // ── Edit Modal Methods ─────────────────────────────────────────────────────
+  private stashedLogin: string = '';
+  private stashedLogout: string = '';
+  private stashedShift: string = '';
+  private stashedShiftLabel: string = '';
 
   openEditModal(row: any): void {
     const shift = row.shift_details?.toString() || '';
+    const isAbsent = row.admin_marked_absent === 'Yes';
+    const shiftLabel = shift === '1' ? 'Morning' : shift === '2' ? 'Evening' : shift;
+
+    this.stashedLogin = row.logged_in_time || '';
+    this.stashedLogout = row.logged_out_time || '';
+    this.stashedShift = shift;
+    this.stashedShiftLabel = shiftLabel;
+
     this.editRecord = {
       attendance_live_id: row.attendance_live_id,
       employee_code: row.employee?.employee_code || '',
       emp_name: row.employee?.emp_name || '',
       currentdate: row.currentdate || '',
-      shift_details: shift,
-      shiftLabel: shift === '1' ? 'Morning' : shift === '2' ? 'Evening' : shift,
-      logged_in_time: row.logged_in_time || '',
-      logged_out_time: row.logged_out_time || '',
+      shift_details: isAbsent ? '' : shift,
+      shiftLabel: isAbsent ? '' : shiftLabel,
+      logged_in_time: isAbsent ? '' : (row.logged_in_time || ''),
+      logged_out_time: isAbsent ? '' : (row.logged_out_time || ''),
+      admin_marked_absent: isAbsent,
     };
-    // removed updateTimeConstraints()
     this.showEditModal = true;
+  }
+  onAbsentToggleChange(): void {
+    if (this.editRecord.admin_marked_absent) {
+      this.stashedLogin = this.editRecord.logged_in_time;
+      this.stashedLogout = this.editRecord.logged_out_time;
+      this.stashedShift = this.editRecord.shift_details;
+      this.stashedShiftLabel = this.editRecord.shiftLabel;
+
+      this.editRecord.logged_in_time = '';
+      this.editRecord.logged_out_time = '';
+      this.editRecord.shift_details = '';
+      this.editRecord.shiftLabel = '';
+
+      this.loginTimeError = false;
+      this.logoutTimeError = false;
+      this.loginShiftError = '';
+      this.logoutShiftError = '';
+    } else {
+      this.editRecord.logged_in_time = this.stashedLogin || '';
+      this.editRecord.logged_out_time = this.stashedLogout || '';
+      this.editRecord.shift_details = this.stashedShift || '';
+      this.editRecord.shiftLabel = this.stashedShiftLabel || '';
+    }
   }
 
   closeEditModal(): void {
@@ -180,6 +227,13 @@ export class VerifyAttendanceComponent implements OnInit {
 
   // Full validation for both login and logout
   validateTimes(): boolean {
+    if (this.editRecord.admin_marked_absent) {
+      this.loginTimeError = false;
+      this.logoutTimeError = false;
+      this.loginShiftError = '';
+      this.logoutShiftError = '';
+      return true;
+    }
     const timeRegex = /^(\d{1,2}):(\d{2})(:\d{2})?\s*(AM|PM)$/i;
 
     const loginVal = this.editRecord.logged_in_time.trim();
@@ -282,12 +336,18 @@ export class VerifyAttendanceComponent implements OnInit {
 
     const updatedBy = sessionStorage.getItem('employeeId');
 
-    this.service.post('update-attendance-time', {
+    const payload: any = {
       attendance_live_id: this.editRecord.attendance_live_id,
-      logged_in_time: this.formatTime(this.editRecord.logged_in_time),
-      logged_out_time: this.formatTime(this.editRecord.logged_out_time),
+      admin_marked_absent: this.editRecord.admin_marked_absent,
       updated_by: updatedBy ? parseInt(updatedBy) : null,
-    }).subscribe({
+    };
+
+    if (!this.editRecord.admin_marked_absent) {
+      payload.logged_in_time = this.formatTime(this.editRecord.logged_in_time);
+      payload.logged_out_time = this.formatTime(this.editRecord.logged_out_time);
+    }
+
+    this.service.post('update-attendance-time', payload).subscribe({
       next: (res: any) => {
         this.isSaving = false;
         if (res.status === 'success') {

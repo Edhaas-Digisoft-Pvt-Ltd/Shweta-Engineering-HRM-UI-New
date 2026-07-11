@@ -95,30 +95,33 @@
 
         <!-- Row 2: editable time fields -->
         <div class="row my-3">
-          <!-- Login Time -->
-          <!-- Login Time -->
           <div class="col-md-6">
             <label>Login Time <span class="text-danger">*</span></label>
             <input type="text" class="form-control" [class.is-invalid]="loginTimeError || loginShiftError"
-              [(ngModel)]="editRecord.logged_in_time" placeholder="HH:MM:SS AM/PM" />
-            <div class="invalid-feedback" *ngIf="loginTimeError">
-              Required. Enter time as HH:MM AM/PM
-            </div>
-            <div class="invalid-feedback" *ngIf="loginShiftError" style="display:block">
-              {{ loginShiftError }}
-            </div>
+              [(ngModel)]="editRecord.logged_in_time" placeholder="HH:MM:SS AM/PM"
+              [disabled]="editRecord.admin_marked_absent" />
+            <div class="invalid-feedback" *ngIf="loginTimeError">Required. Enter time as HH:MM AM/PM</div>
+            <div class="invalid-feedback" *ngIf="loginShiftError" style="display:block">{{ loginShiftError }}</div>
           </div>
 
-          <!-- Logout Time -->
           <div class="col-md-6">
             <label>Logout Time <span class="text-danger">*</span></label>
             <input type="text" class="form-control" [class.is-invalid]="logoutTimeError || logoutShiftError"
-              [(ngModel)]="editRecord.logged_out_time" placeholder="HH:MM:SS AM/PM" />
-            <div class="invalid-feedback" *ngIf="logoutTimeError">
-              Required. Enter time as HH:MM AM/PM
-            </div>
-            <div class="invalid-feedback" *ngIf="logoutShiftError" style="display:block">
-              {{ logoutShiftError }}
+              [(ngModel)]="editRecord.logged_out_time" placeholder="HH:MM:SS AM/PM"
+              [disabled]="editRecord.admin_marked_absent" />
+            <div class="invalid-feedback" *ngIf="logoutTimeError">Required. Enter time as HH:MM AM/PM</div>
+            <div class="invalid-feedback" *ngIf="logoutShiftError" style="display:block">{{ logoutShiftError }}</div>
+          </div>
+        </div>
+
+        <div class="row my-2">
+          <div class="col-12">
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" id="markAbsentCheck"
+                [(ngModel)]="editRecord.admin_marked_absent" (ngModelChange)="onAbsentToggleChange()" />
+              <label class="form-check-label fw-semibold" for="markAbsentCheck">
+                Mark as Absent
+              </label>
             </div>
           </div>
         </div>
