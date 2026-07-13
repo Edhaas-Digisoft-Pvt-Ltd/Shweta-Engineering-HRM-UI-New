@@ -33,8 +33,13 @@
                     </div>
 
                     <div class="col-auto d-flex align-items-end">
-                        <button class="btn btn-primary exportExcelBtn me-2" (click)="exportExcel()">
-                            <i class="bi bi-file-earmark-text-fill"></i>
+                        <button class="btn btn-primary exportExcelBtn me-2" (click)="exportPdf()"
+                            [disabled]="isPdfExporting">
+                            <span *ngIf="!isPdfExporting">
+                                <i class="bi bi-file-earmark-text-fill"></i>
+                            </span>
+                            <span *ngIf="isPdfExporting" class="spinner-border spinner-border-sm" role="status"
+                                aria-hidden="true"></span>
                         </button>
                     </div>
                 </div>
@@ -70,4 +75,50 @@
         </div>
 
     </div>
+</div>
+
+<div style="position: absolute; left: -9999px; top: 0;">
+    <table id="pdfExportTable" style="border-collapse: collapse; font-family: Arial, sans-serif; font-size: 12px;">
+        <caption style="text-align: left; font-weight: bold; font-size: 14px; padding-bottom: 8px;">
+            Approved Payroll - {{ pdfMonthLabel }}
+        </caption>
+        <thead>
+            <tr>
+                <th class="pdf-th">Employee Name</th>
+                <th class="pdf-th">Present Day</th>
+                <th class="pdf-th">Present Day Hrs</th>
+                <th class="pdf-th">OT Hrs</th>
+                <th class="pdf-th">Fixed Salary</th>
+                <th class="pdf-th">Total Working Hrs of the Month</th>
+                <th class="pdf-th">OT per Hrs.</th>
+                <th class="pdf-th">Total Gross Salary</th>
+                <th class="pdf-th">PT</th>
+                <th class="pdf-th">PF Employer Cont.</th>
+                <th class="pdf-th">PF Employee Cont.</th>
+                <th class="pdf-th">ESIC</th>
+                <th class="pdf-th">Incentive</th>
+                <th class="pdf-th">Salary Advance</th>
+                <th class="pdf-th">Net Salary Paid</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr *ngFor="let row of pdfExportRows">
+                <td class="pdf-td" style="text-align: left;">{{ row.emp_name }}</td>
+                <td class="pdf-td">{{ row.present_days }}</td>
+                <td class="pdf-td">{{ row.present_day_hrs }}</td>
+                <td class="pdf-td">{{ row.ot_hrs }}</td>
+                <td class="pdf-td">{{ row.fixed_salary }}</td>
+                <td class="pdf-td">{{ row.hours_of_month }}</td>
+                <td class="pdf-td">{{ row.ot_per_hrs }}</td>
+                <td class="pdf-td">{{ row.total_gross_salary }}</td>
+                <td class="pdf-td">{{ row.pt }}</td>
+                <td class="pdf-td">{{ row.pf_employer }}</td>
+                <td class="pdf-td">{{ row.pf_employee }}</td>
+                <td class="pdf-td">{{ row.esic }}</td>
+                <td class="pdf-td">{{ row.incentive }}</td>
+                <td class="pdf-td">{{ row.salary_advance }}</td>
+                <td class="pdf-td">{{ row.net_salary }}</td>
+            </tr>
+        </tbody>
+    </table>
 </div>

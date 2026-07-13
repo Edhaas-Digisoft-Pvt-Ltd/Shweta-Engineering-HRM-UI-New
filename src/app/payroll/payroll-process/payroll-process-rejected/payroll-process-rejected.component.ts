@@ -82,14 +82,18 @@ export class PayrollProcessRejectedComponent {
     const lastMonthDate = new Date(today.getFullYear(), today.getMonth() - 1, 1);
 
     this.selectedYear = lastMonthDate.getFullYear();
-    this.selectedMonth = lastMonthDate.getMonth() + 1; 
+    this.selectedMonth = lastMonthDate.getMonth() + 1;
 
     this.today = today.toISOString().split('T')[0];
-    
+
     this.getCompanyNames();
     // this.getRejectedPayroll();
     this.getPagination();
     this.initializeColumns();
+  }
+
+  hasAccess(module: string, permission: string): boolean {
+    return this.service.hasPermission(module, permission);
   }
 
   getMonthName(monthId: number): string {

@@ -81,7 +81,7 @@ export class AttendanceComponent {
         }
 
         // If check-in & check-out exist → mark Present
-        if (row.check_in && row.check_out) {
+        if (row.check_in) {
           return 'P';
         }
 

@@ -70,7 +70,7 @@ export class PayrollProcessComponent {
   }
 
   ngOnInit() {
-    console.log(this.isProcess);
+    // console.log(this.isProcess);
     const savedId = this.service.selectedCompanyId();
     this.selectedCompanyId = (savedId && savedId !== 'all') ? savedId : null;
 
@@ -89,6 +89,8 @@ export class PayrollProcessComponent {
 
     this.today = today.toISOString().split('T')[0];
 
+    this.activeTab = this.hasAccess('Payroll List', 'view') ? 'tab1' : 'tab3';
+
     this.getCompanyNames();
     this.initializeColumns();
     this.initializeColumnsforProcess();
@@ -105,6 +107,10 @@ export class PayrollProcessComponent {
     //   this.router.navigate(['']);
     //   return;
     // }
+  }
+
+  hasAccess(module: string, permission: string): boolean {
+    return this.service.hasPermission(module, permission);
   }
 
   getMonthName(monthId: number): string {
@@ -128,7 +134,7 @@ export class PayrollProcessComponent {
           // If no valid company, pick first one
           const defaultCompany = (this.selectedCompanyId && this.selectedCompanyId !== 'all')
             ? this.CompanyNames.find((c: any) => c.company_id == this.selectedCompanyId) ?? this.CompanyNames[0]
-            : this.CompanyNames[0];  
+            : this.CompanyNames[0];
 
           this.service.setCompanyId(defaultCompany.company_id);
           this.selectCompany(defaultCompany);
