@@ -108,28 +108,20 @@ export class EmployeeDashboardComponent {
     //   console.log('Received employee code:', params['id']);
     // });
 
-    let role_name = sessionStorage.getItem('roleName');
+    const isAdmin = sessionStorage.getItem('roleName') === 'Admin';
 
-    if (role_name == 'Operator' || role_name == 'Supervisor' || role_name === 'Manager' || role_name === 'Maintenance Manager'
-      || role_name === 'Production Manager' || role_name === 'Quality Manager' || role_name === 'Data-Entry Operator'
-      || role_name === 'Production Incharge' || role_name === 'Plant Incharge' || role_name === 'Accountant' || role_name === 'Helper' || role_name === 'Driver') {
+    if (!isAdmin) {
       const signalEmpId = this.service.EmployeeId();
       if (signalEmpId != null) {
-        this.employee_id = this.service.EmployeeId();
-        console.log('from signal', this.employee_id);
+        this.employee_id = signalEmpId;
       } else {
         this.employee_id = sessionStorage.getItem('employeeId');
-        console.log('session storage', this.employee_id);
       }
-
       this.searchEmployeeAdvanceSalary();
-    }
-
-    if (sessionStorage.getItem('roleName') == 'Admin') {
+    } else {
       this.route.queryParams.subscribe(params => {
         this.employee_id = params['id'];
       });
-
       this.searchEmployeeAdvanceSalary();
     }
 

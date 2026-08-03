@@ -253,3 +253,66 @@ button.accordion-button.collapsed {
 .nav-content {
     min-height: 0;
 }
+
+/* ================================================================
+   SIDEBAR SCROLL / LOGOUT FIX
+   Styling :host directly is the reliable way to size the
+   <app-sidebar> custom element itself — a plain "app-sidebar"
+   selector in a parent or global stylesheet is fragile because it
+   depends on load order / specificity. :host is scoped precisely
+   to this element from inside its own component.
+   ================================================================ */
+:host {
+    display: flex !important;
+    flex-direction: column !important;
+    flex: 1 1 auto !important;   /* grow into the space left AFTER the logo/username/toggle-button header */
+    min-height: 0 !important;
+    width: 100%;
+    overflow: hidden !important;
+}
+
+.navbar.mt-2.h-100.d-flex.flex-column {
+    height: 100% !important;     /* 100% of :host, which now has a correct, flex-computed size */
+    min-height: 0 !important;
+    overflow: hidden !important;
+}
+
+/* This wrapper (parent of .nav-content) is the actual break in the chain:
+   as a flex child its default min-height is "auto" (= its content's natural
+   size), so it refuses to shrink to fit, regardless of anything set on its
+   children. That's what was making the whole sidebar ignore viewport height. */
+.w-100.flex-grow-1.d-flex.flex-column {
+    min-height: 0 !important;
+    overflow: hidden !important;
+}
+
+.nav-content {
+    overflow: hidden !important;
+}
+
+/* Chrome/Edge/Safari don't support scrollbar-width/scrollbar-color,
+   so give them an explicit visible scrollbar too */
+.navbarList::-webkit-scrollbar {
+    width: 6px;
+}
+
+.navbarList::-webkit-scrollbar-track {
+    background: #1c5694;
+    border-radius: 10px;
+}
+
+.navbarList::-webkit-scrollbar-thumb {
+    background-color: #3674b5;
+    border-radius: 10px;
+}
+
+.nav-content hr {
+    flex-shrink: 0;
+    margin: 6px 0;
+    border-color: rgba(255, 255, 255, 0.3);
+}
+
+/* Logout row must never shrink or get pushed out of view */
+.userLogin {
+    flex-shrink: 0 !important;
+}

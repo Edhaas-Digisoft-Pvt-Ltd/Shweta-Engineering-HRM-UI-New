@@ -28,12 +28,9 @@ export class EmployeeVerifiedAttendanceComponent {
   constructor(private service: HrmserviceService, private toastr: ToastrService) { }
 
   ngOnInit() {
-    let role_name = sessionStorage.getItem('roleName');
-    if (role_name == 'Operator' || role_name == 'Supervisor' || role_name === 'Manager' || role_name === 'Maintenance Manager'
-      || role_name === 'Production Manager' || role_name === 'Quality Manager' || role_name === 'Data-Entry Operator'
-      || role_name === 'Production Incharge' || role_name === 'Plant Incharge' || role_name === 'Accountant'
-      || role_name === 'Helper' || role_name === 'Driver') {
+    const isAdmin = sessionStorage.getItem('roleName') === 'Admin';
 
+    if (!isAdmin) {
       const signalEmpId = this.service.EmployeeId();
       if (signalEmpId != null) {
         this.employee_id = signalEmpId;
