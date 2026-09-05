@@ -438,26 +438,26 @@ export class EmployeeDashboardComponent {
           <tr>
             <td>Overtime amount</td>
             <td>${this.calculationData?.overtime_amount ?? 0}</td>
+             <td>PF Employer</td>
+            <td>${this.calculationData?.pf_employer_contribution ?? 0}</td>
+          </tr>
+          <tr>
+            <td>Incentive amount</td>
+            <td>${this.calculationData?.incentive_amount ?? 0}</td>
             <td>ESIC</td>
             <td>${this.calculationData?.esic_deduction ?? 0}</td>
           </tr>
           <tr>
-           <td>Incentive amount</td>
-            <td>${this.calculationData?.incentive_amount ?? 0}</td>
+            <td>Total Miscellaneous Expenses</td>
+            <td>${this.calculationData?.extra_expenses ?? 0}</td>
             <td>Advance EMI</td>
-            <td>${this.calculationData?.advance_amount ?? 0}</td>
+            <td>${this.calculationData?.adv_deduction ?? 0}</td>
           </tr>
           <tr>
-           <td>Extra Expense</td>
-            <td>${this.calculationData?.total_expense ?? 0}</td>
             <td></td>
             <td></td>
-          </tr>
-          <tr style="font-weight:bold;">
-            <td>Total Earnings</td>
-            <td>${this.calculationData?.total_salary ?? 0}</td>
-            <td>Total Deductions</td>
-            <td>${this.calculationData?.total_tax_deduction ?? 0}</td>
+            <td>Total Miscellaneous Deductions</td>
+            <td>${this.calculationData?.extra_deductions ?? 0}</td>
           </tr>
           <tr style="font-weight:bold; background:#f5f5f5;">
             <td colspan="2">Net Salary</td>

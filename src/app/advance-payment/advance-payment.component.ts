@@ -46,6 +46,8 @@ export class AdvancePaymentComponent {
 
   startDate: string = this.getFirstDayOfMonth();
   endDate: string = this.getLastDayOfMonth();
+  loggedInUser: any;
+  originalTenure: any;
 
   ngOnInit() {
     // const savedCompanyId = this.service.selectedCompanyId();
@@ -59,6 +61,7 @@ export class AdvancePaymentComponent {
     const currentDate = new Date();
     this.today = currentDate.toISOString().split('T')[0]; // Format YYYY-MM-DD
     // this.initializeGrids();
+    this.loggedInUser = sessionStorage.getItem('employeeId')
 
     this.role = this.service.getRole();
     this.initializeColumns();
@@ -455,10 +458,50 @@ export class AdvancePaymentComponent {
           installmentAmount: singleAdvanceSalary?.emi,
         }
         this.EditAdvancePayment.patchValue(this.EditAdvancePaymentData);
+        this.originalTenure = singleAdvanceSalary?.tenure;
+        if (singleAdvanceSalary?.status === 'pending') {
+          this.EditAdvancePayment.get('tenure')?.enable();
+        } else {
+          this.EditAdvancePayment.get('tenure')?.disable();
+        }
         this.isLoading = false;
       }
       this.isLoading = false;
     })
+  }
+
+  onTenureChange(newTenure: any) {
+    const amount = this.EditAdvancePaymentData?.amount;
+    const tenure = Number(newTenure);
+    if (amount && tenure) {
+      this.EditAdvancePayment.get('installmentAmount')?.setValue(Math.floor(amount / tenure));
+    }
+  }
+
+  updateTenure() {
+    const tenure = this.EditAdvancePayment.get('tenure')?.value;
+    if (!tenure) { return; }
+
+    const payload = {
+      adv_pay_id: this.advPayId,
+      tenure: tenure,
+      updated_by: this.loggedInUser
+    };
+
+    this.isLoading = true;
+    this.service.post('update/advancetenure', payload).subscribe((res: any) => {
+      if (res.status === 'success') {
+        this.toastr.success('Tenure updated successfully');
+        this.EditAdvancePayment.patchValue({ installmentAmount: res.data.emi });
+        this.getAllAdvSalary(this.currentPage);
+      } else {
+        this.toastr.error('Failed to update tenure');
+      }
+      this.isLoading = false;
+    }, () => {
+      this.toastr.error('Server error');
+      this.isLoading = false;
+    });
   }
 
   setSalaryTrackerData(data: any) {
@@ -585,21 +628,50 @@ export class AdvancePaymentComponent {
   };
 
   updateStatus(data: any) {
-    if (confirm("Do you want to update Status?") == true) {
-      const payload = {
-        adv_pay_id: this.advPayId,
-        status: data
+    const currentTenure = this.EditAdvancePayment.get('tenure')?.value;
+    const tenureChanged = data === 'Approved' && currentTenure && Number(currentTenure) !== Number(this.originalTenure);
+
+    const confirmMsg = tenureChanged
+      ? `You have changed the tenure from ${this.originalTenure} to ${currentTenure} month(s). Are you sure you want to approve this request with the changed tenure?`
+      : "Do you want to update Status?";
+
+    if (confirm(confirmMsg) == true) {
+      if (tenureChanged) {
+        const tenurePayload = {
+          adv_pay_id: this.advPayId,
+          tenure: currentTenure,
+          updated_by: this.loggedInUser
+        };
+
+        this.isLoading = true;
+        this.service.post('update/advancetenure', tenurePayload).subscribe(() => {
+          this.proceedStatusUpdate(data);
+        }, () => {
+          this.toastr.error('Failed to update tenure before approval');
+          this.isLoading = false;
+        });
+      } else {
+        this.proceedStatusUpdate(data);
       }
-      this.service.post(`update/advancesaraly`, payload).subscribe((res: any) => {
-        if (res.status === 'success') {
-          this.toastr.success("Advance salary status updated successfully");
-          this.getAllAdvSalary();
-          this.modalService.closeModal();
-        }
-      }, (error) => {
-        console.error('Error:', error);
-      });
     }
+  }
+
+  proceedStatusUpdate(data: any) {
+    const payload = {
+      adv_pay_id: this.advPayId,
+      status: data
+    }
+    this.service.post(`update/advancesaraly`, payload).subscribe((res: any) => {
+      if (res.status === 'success') {
+        this.toastr.success("Advance salary status updated successfully");
+        this.getAllAdvSalary();
+        this.modalService.closeModal();
+      }
+      this.isLoading = false;
+    }, (error) => {
+      console.error('Error:', error);
+      this.isLoading = false;
+    });
   }
 
   getFirstDayOfMonth(): string {

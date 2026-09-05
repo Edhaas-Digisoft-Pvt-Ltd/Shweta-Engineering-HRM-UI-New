@@ -122,19 +122,34 @@
                                     <div class="row m-0 p-0">
                                         <h5 class="pb-2 border-bottom border-primary-light">
                                             <i class="bi bi-wallet2 me-2 text-primary "></i>
-                                            Miscellaneous Expenses
+                                            Miscellaneous Expenses / Deductions
                                         </h5>
                                         <form [formGroup]="expenseForm" (ngSubmit)="addExpenseInSalary()">
                                             <div class="row m-0 p-0 px-2 mt-2">
+
+                                                <div class="col-12 mb-3">
+                                                    <label class="me-4">Type <span class="text-danger">*</span></label>
+                                                    <div class="form-check form-check-inline">
+                                                        <input class="form-check-input" type="radio" formControlName="expenseType"
+                                                            id="typeAdd" value="add">
+                                                        <label class="form-check-label" for="typeAdd">Add</label>
+                                                    </div>
+                                                    <div class="form-check form-check-inline">
+                                                        <input class="form-check-input" type="radio" formControlName="expenseType"
+                                                            id="typeDeduct" value="deduct">
+                                                        <label class="form-check-label" for="typeDeduct">Deduct</label>
+                                                    </div>
+                                                </div>
+
                                                 <div class="col-md-6 mb-3">
-                                                    <label>Description <span class="text-danger">*</span></label>
+                                                    <label>Reason <span class="text-danger">*</span></label>
                                                     <input type="text" class="form-control"
                                                         formControlName="expenseDescription"
-                                                        placeholder="Enter description"
+                                                        placeholder="Enter reason"
                                                         [ngClass]="{'is-invalid': isSubmitted && expenseForm.get('expenseDescription')?.invalid}">
                                                     <div class="invalid-feedback"
                                                         *ngIf="isSubmitted && expenseForm.get('expenseDescription')?.invalid">
-                                                        Please enter a valid description.
+                                                        Please enter a valid reason.
                                                     </div>
                                                 </div>
 
@@ -146,16 +161,13 @@
                                                         (keypress)="allowOnlyNumbers($event)">
                                                     <div class="invalid-feedback"
                                                         *ngIf="isSubmitted && expenseForm.get('expenseAmount')?.errors">
-                                                        <span
-                                                            *ngIf="expenseForm.get('expenseAmount')?.errors?.['pattern']">
+                                                        <span *ngIf="expenseForm.get('expenseAmount')?.errors?.['pattern']">
                                                             Only numbers allowed.
                                                         </span>
-
                                                         <span *ngIf="expenseForm.get('expenseAmount')?.errors?.['min']">
                                                             Amount must be greater than 0.
                                                         </span>
                                                     </div>
-
                                                 </div>
 
                                                 <div class="col-md-2 d-flex align-items-end mb-3">
@@ -169,15 +181,21 @@
                                         <table class="table table-bordered table-striped mt-2">
                                             <thead>
                                                 <tr>
-                                                    <th>Description</th>
+                                                    <th>Type</th>
+                                                    <th>Reason</th>
                                                     <th>Amount (₹)</th>
                                                     <th></th>
                                                 </tr>
                                             </thead>
                                             <tbody>
                                                 <tr *ngFor="let item of expensesList">
+                                                    <td>
+                                                        <span class="badge" [ngClass]="item.expense_amount < 0 ? 'bg-danger' : 'bg-success'">
+                                                            {{ getExpenseType(item.expense_amount) }}
+                                                        </span>
+                                                    </td>
                                                     <td>{{ item.expense_description }}</td>
-                                                    <td>{{ item.expense_amount}}</td>
+                                                    <td>{{ formatted(getAbsAmount(item.expense_amount)) }}</td>
                                                     <td class="text-center">
                                                         <i class="bi bi-trash text-danger fs-5 cursor-pointer"
                                                             (click)="deleteExpense(item.expense_id)">
@@ -323,11 +341,25 @@
                                                     formatted(calculationData?.overtime_amount)}}
                                                 </td>
                                             </tr>
-                                            <tr>
-                                                <td data-label="Compound">Extra Expenses</td>
-                                                <td data-label="Calculation">expenses</td>
+                                            <!-- <tr>
+                                                <td data-label="Compound">Extra Expense / Deduction</td>
+                                                <td data-label="Calculation"> - </td>
                                                 <td data-label="Amount (in ₹)">₹ {{
                                                     formatted(calculationData?.total_expense)}}
+                                                </td>
+                                            </tr> -->
+                                             <tr>
+                                                <td data-label="Compound">Total Miscellaneous Expenses</td>
+                                                <td data-label="Calculation"> - </td>
+                                                <td data-label="Amount (in ₹)">₹ {{
+                                                    formatted(calculationData?.extra_expenses)}}
+                                                </td>
+                                            </tr>
+                                             <tr>
+                                                <td data-label="Compound">Total Miscellaneous Deductions</td>
+                                                <td data-label="Calculation"> - </td>
+                                                <td data-label="Amount (in ₹)">₹ {{
+                                                    formatted(calculationData?.extra_deductions)}}
                                                 </td>
                                             </tr>
                                             <tr *ngIf="calculationData?.default_holiday_pay > 0">
@@ -612,7 +644,11 @@
             </div>
             <div class="modal-body">
                 <p class="mb-2">
-                    <strong>Description:</strong> {{ expenseForm.value.expenseDescription }}
+                    <strong>Type:</strong>
+                    {{ expenseForm.value.expenseType === 'deduct' ? 'Deduct' : 'Add' }}
+                </p>
+                <p class="mb-2">
+                    <strong>Reason:</strong> {{ expenseForm.value.expenseDescription }}
                 </p>
                 <p class="mb-2">
                     <strong>Amount:</strong> ₹ {{ formatted(expenseForm.value.expenseAmount) }}
@@ -626,7 +662,8 @@
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" (click)="cancelAddExpense()"
                     data-bs-dismiss="modal">Cancel</button>
-                <button type="button" class="btn comBtn text-white" (click)="confirmAddExpense()">
+                <button type="button" class="btn comBtn text-white" (click)="confirmAddExpense()" [disabled]="isConfirmingExpense">
+                    <span *ngIf="isConfirmingExpense" class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
                     Confirm
                 </button>
             </div>

@@ -52,6 +52,7 @@ export class PayrollSummariesComponent {
   showReasonError: boolean = false;
   showOtherReasonError: boolean = false;
   isLoading: boolean = false;
+  isConfirmingExpense: boolean = false;
   expenseAmountInWords: string = '';
   pendingExpensePayload: any = null;
   source: string = 'list';
@@ -65,6 +66,7 @@ export class PayrollSummariesComponent {
     });
 
     this.expenseForm = this.formBuilder.group({
+      expenseType: ['add', [Validators.required]], // 'add' | 'deduct'
       expenseDescription: ['', [Validators.required, Validators.pattern(/^[A-Za-z0-9\s]+$/)]],
       expenseAmount: ['', [Validators.required, Validators.pattern(/^[0-9]+$/), Validators.min(1)]]
     });
@@ -240,36 +242,48 @@ export class PayrollSummariesComponent {
       return;
     }
 
-    const amount = Number(this.expenseForm.value.expenseAmount);
-    this.expenseAmountInWords = this.numberToWords(amount);
+    const type = this.expenseForm.value.expenseType; // 'add' | 'deduct'
+    const rawAmount = Number(this.expenseForm.value.expenseAmount);
+    const signedAmount = type === 'deduct' ? -rawAmount : rawAmount;
+
+    // Words always shown for the positive/absolute value
+    this.expenseAmountInWords = this.numberToWords(Math.abs(rawAmount));
 
     this.pendingExpensePayload = {
       employee_id: this.employee_id,
       year_month: `${this.selectedYear}-${(this.selectedMonth)
         .toString().padStart(2, '0')}`,
       expense_description: this.expenseForm.value.expenseDescription,
-      expense_amount: this.expenseForm.value.expenseAmount
+      expense_amount: signedAmount // stored with sign in DB
     };
 
-    // Open the confirmation modal instead of submitting directly
     this.modalService.openModal('ConfirmExpenseModal');
   }
 
   confirmAddExpense() {
-    if (!this.pendingExpensePayload) return;
+    if (!this.pendingExpensePayload || this.isConfirmingExpense) return;   // guard added
 
+    this.isConfirmingExpense = true;   // ADD
     this.isLoading = true;
-    this.service.post('add/expense-in-salary', this.pendingExpensePayload).subscribe((res: any) => {
-      if (res.status === 'success') {
-        this.toastr.success("Expense added successfully");
-        this.getSinglePayroll();
-        this.expenseForm.reset();
-        this.isSubmitted = false;
-      } else {
+    this.service.post('add/expense-in-salary', this.pendingExpensePayload).subscribe({
+      next: (res: any) => {
+        if (res.status === 'success') {
+          this.toastr.success("Expense added successfully");
+          this.getSinglePayroll();
+          this.expenseForm.reset({ expenseType: 'add' });
+          this.isSubmitted = false;
+        } else {
+          this.toastr.error("Something went wrong");
+        }
+        this.isLoading = false;
+        this.isConfirmingExpense = false;   // ADD
+        this.cancelAddExpense();
+      },
+      error: () => {
+        this.isLoading = false;
+        this.isConfirmingExpense = false;   // ADD — reset on error too
         this.toastr.error("Something went wrong");
       }
-      this.isLoading = false;
-      this.cancelAddExpense();
     });
   }
 
@@ -307,6 +321,14 @@ export class PayrollSummariesComponent {
     const decPart = parts[1] ? '.' + parts[1] : '';
 
     return intPart + decPart;
+  }
+
+  getExpenseType(amount: number): string {
+    return amount < 0 ? 'Deduct' : 'Add';
+  }
+
+  getAbsAmount(amount: number): number {
+    return Math.abs(amount ?? 0);
   }
 
   // calculateProgress(): number {
@@ -596,17 +618,23 @@ export class PayrollSummariesComponent {
             <td style="border-left:1px solid #000; border-right:none;">PF Employer</td>
             <td style="border-left:none;">${this.calculationData?.pf_employer_contribution ?? 0}</td>
           </tr>
-           <tr>
-            <td style="border-right:none;">Extra Expense</td>
-            <td style="border-left:none; border-right:none;">${this.calculationData?.total_expense ?? 0}</td>
-             <td style="border-left:1px solid #000; border-right:none;">ESIC</td>
-            <td style="border-left:none;">${this.calculationData?.esic_deduction ?? 0}</td>
-          </tr>
-           <tr>
+          <tr>
             <td style="border-right:none;">Incentive</td>
             <td style="border-left:none; border-right:none;">${this.calculationData?.incentive_amount ?? 0}</td>
-              <td style="border-left:1px solid #000; border-right:none;">Advance EMI</td>
+            <td style="border-left:1px solid #000; border-right:none;">ESIC</td>
+            <td style="border-left:none;">${this.calculationData?.esic_deduction ?? 0}</td>
+          </tr>
+          <tr>
+            <td style="border-right:none;">Total Miscellaneous Expenses</td>
+            <td style="border-left:none; border-right:none;">${this.calculationData?.extra_expenses ?? 0}</td>
+            <td style="border-left:1px solid #000; border-right:none;">Advance EMI</td>
             <td style="border-left:none;">${this.calculationData?.advance_amount ?? 0}</td>
+          </tr>
+          <tr>
+            <td style="border-right:none;"></td>
+            <td style="border-left:none; border-right:none;"></td>
+            <td style="border-left:1px solid #000; border-right:none;">Total Miscellaneous Deductions</td>
+            <td style="border-left:none;">${this.calculationData?.extra_deductions ?? 0}</td>
           </tr>
           <tr style="font-weight:bold; background:#f5f5f5;">
             <td colspan="2" style="border-right:none;">Net Salary</td>
