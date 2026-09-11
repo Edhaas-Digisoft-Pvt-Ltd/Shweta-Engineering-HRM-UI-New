@@ -120,14 +120,14 @@ export class LeaveConfigComponent {
       leavenumber: ['', [
         Validators.required,
         Validators.min(1),
-        Validators.max(31),
+        Validators.max(365),
         Validators.pattern(/^\d+$/)
       ]],
       carry_forward: ['FALSE', Validators.required],
       max_carry_forward: ['', [
         Validators.required,
         Validators.min(0),
-        Validators.max(31)
+        Validators.max(365)
       ]]
     });
 
@@ -154,7 +154,7 @@ export class LeaveConfigComponent {
       leavenumber: ['', [
         Validators.required,
         Validators.min(1),
-        Validators.max(31),
+        Validators.max(365),
         Validators.pattern(/^\d+$/)
       ]],
       carry_forward: ['FALSE', Validators.required]

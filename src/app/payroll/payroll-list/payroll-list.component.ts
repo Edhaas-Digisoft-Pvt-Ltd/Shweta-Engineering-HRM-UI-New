@@ -295,6 +295,13 @@ export class PayrollListComponent {
       return;
     }
 
+    const confirmed = window.confirm(
+      `Are you sure you want to approve ${this.selectedRowData.length} payroll record(s)?`
+    );
+    if (!confirmed) {
+      return;
+    }
+
     const temp_payroll_ids = this.selectedRowData.map((emp: any) => ({
       temp_payroll_id: emp.temp_payroll_id
 
@@ -506,6 +513,8 @@ export class PayrollListComponent {
       'Employer contri. PF',
       'ESIC Employee 0.75%',
       'Advance Salary',
+      'Miscellaneous Expenses',
+      'Miscellaneous Deductions',
       'Incentive Amount',
       'Default holiday Pay',
       'Salary Payable'
@@ -519,7 +528,7 @@ export class PayrollListComponent {
       headerRow2.push(`${d} ${monthName.slice(0, 3)}`);
     }
 
-    const extraCols = 23 + (this.showLwpColumns ? 2 : 0); // +1 because of H/O
+    const extraCols = 25 + (this.showLwpColumns ? 2 : 0); // +1 because of H/O
     for (let i = 0; i < extraCols; i++) headerRow2.push('');
 
     worksheet.addRow(headerRow2);
@@ -581,6 +590,8 @@ export class PayrollListComponent {
         emp.pf_employer_contribution,
         emp.esic_deduction,
         emp.adv_deduction,
+        emp.misc_expense ?? 0,
+        emp.misc_deduction ?? 0,
         emp.incentive_amount,
         emp.default_holiday_pay,
         emp.net_salary
@@ -634,7 +645,7 @@ export class PayrollListComponent {
       totals.total_pf_employer,
       totals.total_esic,
       totals.total_adv_salary,
-      '', '',
+      '','','', '',
       totals.total_net_salary
     );
 

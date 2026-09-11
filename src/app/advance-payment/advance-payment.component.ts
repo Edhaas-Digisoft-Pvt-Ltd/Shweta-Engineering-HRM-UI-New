@@ -1,6 +1,6 @@
 import { Component, ElementRef, HostListener } from '@angular/core';
 import { FormGroup, FormBuilder, Validators } from '@angular/forms';
-import { ColDef, GridApi } from 'ag-grid-community';
+import { ColDef, GridApi, GridOptions } from 'ag-grid-community';
 import { HrmserviceService } from '../hrmservice.service';
 import { ToastrService } from 'ngx-toastr';
 import { Router } from '@angular/router';
@@ -48,6 +48,10 @@ export class AdvancePaymentComponent {
   endDate: string = this.getLastDayOfMonth();
   loggedInUser: any;
   originalTenure: any;
+
+  // ===== NEW: multiselect + per-row action dropdown state =====
+  selectedRows: any[] = [];
+  rowActions: { [advPayId: string]: string } = {}; // 'none' | 'Approved' | 'Rejected'
 
   ngOnInit() {
     // const savedCompanyId = this.service.selectedCompanyId();
@@ -191,6 +195,8 @@ export class AdvancePaymentComponent {
   getAllAdvSalary(page: number = 1) {
     this.isLoading = true;
     this.rowData = [];
+    this.selectedRows = [];
+    this.rowActions = {};
     this.service.post('fetch/allcompanyrequest', {
       company_id: this.selectedCompanyId,
       start_date: this.startDate,
@@ -292,8 +298,101 @@ export class AdvancePaymentComponent {
     resizable: true,
   };
 
+  // ===== NEW: fires whenever ag-grid row checkbox selection changes =====
+  onSelectionChanged(event?: any) {
+    if (!this.gridApi) { return; }
+    this.selectedRows = this.gridApi.getSelectedRows();
+  }
+
+  // ===== NEW: fires when a row's action dropdown value changes =====
+  onRowActionChange(data: any, value: string) {
+    this.rowActions[data.adv_pay_id] = value;
+  }
+
+  // ===== NEW: Submit button handler =====
+  // Only rows whose checkbox is ticked are considered.
+  // - dropdown = "No selection" -> that row is skipped, nothing happens
+  // - dropdown = "Approve"      -> row gets approved
+  // - dropdown = "Reject"       -> row gets rejected
+  submitBulkActions() {
+    if (!this.gridApi) { return; }
+
+    const checkedRows = this.gridApi.getSelectedRows();
+
+    if (!checkedRows.length) {
+      this.toastr.warning('Please select at least one row using the checkbox.');
+      return;
+    }
+
+    const toProcess = checkedRows
+      .map((row: any) => ({ row, action: this.rowActions[row.adv_pay_id] || 'none' }))
+      .filter((entry) => entry.action === 'Approved' || entry.action === 'Rejected');
+
+    if (!toProcess.length) {
+      // every checked row has "No selection" -> nothing to do
+      this.toastr.info('No action selected for the checked rows.');
+      return;
+    }
+
+    const approveCount = toProcess.filter((e) => e.action === 'Approved').length;
+    const rejectCount = toProcess.filter((e) => e.action === 'Rejected').length;
+
+    if (!confirm(`Approve ${approveCount} and reject ${rejectCount} request(s)?`)) {
+      return;
+    }
+
+    this.isLoading = true;
+    let remaining = toProcess.length;
+    let failed = 0;
+
+    toProcess.forEach(({ row, action }) => {
+      this.service.post('update/advancesaraly', { adv_pay_id: row.adv_pay_id, status: action }).subscribe(
+        () => {
+          remaining--;
+          if (remaining === 0) {
+            if (failed) {
+              this.toastr.warning(`Done with ${failed} failure(s). Refreshing list.`);
+            } else {
+              this.toastr.success('Selected requests updated successfully');
+            }
+            this.getAllAdvSalary(this.currentPage);
+          }
+        },
+        () => {
+          remaining--;
+          failed++;
+          if (remaining === 0) {
+            this.toastr.warning(`Done with ${failed} failure(s). Refreshing list.`);
+            this.getAllAdvSalary(this.currentPage);
+          }
+        }
+      );
+    });
+  }
+
   initializeColumns() {
-    this.columnDefs = [
+    // WITH THIS:
+    this.columnDefs = [];
+
+    if (this.hasAccess('Advance Payment', 'ApproveOrReject')) {
+      this.columnDefs.push({
+        headerName: '',
+        colId: 'checkboxCol',
+        checkboxSelection: (params: any) => params.data && params.data.status !== 'Approved',
+        headerCheckboxSelection: true,
+        headerCheckboxSelectionFilteredOnly: true,
+        width: 50,
+        minWidth: 50,
+        maxWidth: 50,
+        pinned: 'left',
+        sortable: false,
+        filter: false,
+        resizable: false,
+        suppressMenu: true,
+      });
+    }
+
+    this.columnDefs.push(
       { headerName: 'Emp Code', field: 'employee_code', sortable: true, filter: true, flex: 1, },
       {
         headerName: 'Employee Name',
@@ -313,113 +412,102 @@ export class AdvancePaymentComponent {
         flex: 1,
         cellRenderer: this.statusButtonRenderer,
       },
-    ];
-    // if (this.hasAccess('Advance Payment', 'ApproveOrReject')) {
-    //   this.columnDefs.push({
-    //     headerName: 'Actions',
-    //     flex: 1,
-    //     cellStyle: { border: '1px solid #ddd' },
-    //     cellRenderer: (params: any) => {
-    //       return `<button type="button" class="btn btn-sm mb-1" style="background-color:#C8E3FF">
-    //           <i class="bi bi-pencil"></i>
-    //         </button>`;
-    //     },
-    //     onCellClicked: (event: any) => {
-    //       this.getSingleAdvanceSalary(event.data.adv_pay_id);
-    //       this.openModel();
-    //     },
-    //   });
-    // }
-    // if (this.hasAccess('Advance Payment', 'SalaryTracker')) {
-    //   this.columnDefs.push({
-    //     headerName: 'Actions',
-    //     flex: 1,
-    //     cellStyle: { border: '1px solid #ddd' },
-    //     cellRenderer: (params: any) => {
-    //       if (params.data.status === 'Approved') {
-    //         return `
-    //     <button type="button" class="btn btn-sm mb-1 st-btn" style="background-color:#C8E3FF">
-    //       <i class="bi bi-pencil"></i>
-    //     </button>
-    //   `;
-    //       }
-    //       return '';
-    //     },
-    //     onCellClicked: (event: any) => {
-    //       if (!event.event.target.closest('.st-btn')) {
-    //         return;
-    //       }
+    );
 
-    //       if (event.data.status !== 'Approved') {
-    //         return;
-    //       }
-
-    //       this.setSalaryTrackerData(event.data);
-    //       this.openSalaryTrackerModel();
-    //     },
-    //   });
-    // }
     this.columnDefs.push({
       headerName: 'Actions',
-      flex: 1,
+      colId: 'actionDropdownCol',
+      flex: 1.8,
+      minWidth: 220,
       cellStyle: { border: '1px solid #ddd' },
 
       cellRenderer: (params: any) => {
-        let buttons = '';
+        const container = document.createElement('div');
+        container.style.display = 'flex';
+        container.style.alignItems = 'center';
+        container.style.gap = '6px';
+        container.style.flexWrap = 'wrap';
 
-        // Approve/Reject button (for pending)
+        // ===== Approve/Reject dropdown (only relevant for pending rows) =====
         if (
           params.data.status === 'pending' &&
           this.hasAccess('Advance Payment', 'ApproveOrReject')
         ) {
-          buttons += `
-        <button type="button" class="btn btn-sm mb-1 edit-btn" style="background-color:#C8E3FF">
-          <i class="bi bi-pencil"></i>
-        </button>
-      `;
+          const select = document.createElement('select');
+          select.className = 'form-select form-select-sm';
+          select.style.width = '120px';
+          select.style.display = 'inline-block';
+
+          const options = [
+            { value: 'none', label: 'No selection' },
+            { value: 'Approved', label: 'Approve' },
+            { value: 'Rejected', label: 'Reject' },
+          ];
+
+          options.forEach((opt) => {
+            const optionEl = document.createElement('option');
+            optionEl.value = opt.value;
+            optionEl.text = opt.label;
+            select.appendChild(optionEl);
+          });
+
+          // Dropdown works independently of the checkbox — admin can pick the
+          // action first and check the row after, or check first and pick after.
+          const currentValue = this.rowActions[params.data.adv_pay_id] || 'none';
+          select.value = currentValue;
+
+          select.addEventListener('change', (event: any) => {
+            this.onRowActionChange(params.data, event.target.value);
+          });
+
+          container.appendChild(select);
         }
 
-        // Salary Tracker button (for Approved)
-        // Salary Tracker button
+        // ===== View (eye) button - replaces the pencil, same click behaviour =====
+        if (
+          params.data.status === 'pending' &&
+          this.hasAccess('Advance Payment', 'ApproveOrReject')
+        ) {
+          const eyeBtn = document.createElement('button');
+          eyeBtn.type = 'button';
+          eyeBtn.className = 'btn btn-sm mb-1 edit-btn';
+          eyeBtn.style.backgroundColor = '#C8E3FF';
+          eyeBtn.innerHTML = `<i class="bi bi-eye"></i>`;
+          container.appendChild(eyeBtn);
+        }
+
+        // ===== Salary Tracker button (unchanged logic) =====
         if (
           (params.data.status === 'Approved' || params.data.status === 'pending') &&
           this.hasAccess('Advance Payment', 'SalaryTracker')
         ) {
-
-          // Disabled button for pending
           if (params.data.status === 'pending') {
-            buttons += `
-      <button 
-        type="button" 
-        class="btn btn-sm mb-1"
-        style="background-color:#d3d3d3; cursor:not-allowed;"
-        disabled
-      >
-        <i class="bi bi-cash"></i>
-      </button>
-    `;
+            const disabledBtn = document.createElement('button');
+            disabledBtn.type = 'button';
+            disabledBtn.className = 'btn btn-sm mb-1';
+            disabledBtn.style.backgroundColor = '#d3d3d3';
+            disabledBtn.style.cursor = 'not-allowed';
+            disabledBtn.disabled = true;
+            disabledBtn.innerHTML = `<i class="bi bi-cash"></i>`;
+            container.appendChild(disabledBtn);
           }
 
-          // Active button for approved
           if (params.data.status === 'Approved') {
-            buttons += `
-      <button 
-        type="button" 
-        class="btn btn-sm mb-1 st-btn" 
-        style="background-color:#C8E3FF"
-      >
-        <i class="bi bi-cash"></i>
-      </button>
-    `;
+            const stBtn = document.createElement('button');
+            stBtn.type = 'button';
+            stBtn.className = 'btn btn-sm mb-1 st-btn';
+            stBtn.style.backgroundColor = '#C8E3FF';
+            stBtn.innerHTML = `<i class="bi bi-cash"></i>`;
+            container.appendChild(stBtn);
           }
         }
 
-        return buttons;
+        return container;
       },
 
       onCellClicked: (event: any) => {
 
-        // 🔹 Open Approve Modal
+        // 🔹 Open Approve Modal (view request details)
         if (event.event.target.closest('.edit-btn')) {
           this.getSingleAdvanceSalary(event.data.adv_pay_id);
           this.openModel();
@@ -622,9 +710,12 @@ export class AdvancePaymentComponent {
     return button;
   }
 
-  gridOptions = {
+  gridOptions: GridOptions = {
     pagination: false,
     paginationPageSize: 10,
+    rowSelection: 'multiple',
+    suppressRowClickSelection: true,
+    isRowSelectable: (rowNode: any) => rowNode.data && rowNode.data.status !== 'Approved',
   };
 
   updateStatus(data: any) {

@@ -177,12 +177,6 @@ export class PayrollApprovedComponent {
 
   columnDefs: ColDef[] = [
     {
-      headerName: '',
-      maxWidth: 50,
-      checkboxSelection: true,
-      headerCheckboxSelection: true,
-    },
-    {
       headerName: 'Emp Code',
       field: 'employee_code',
       sortable: true,
@@ -441,6 +435,8 @@ export class PayrollApprovedComponent {
       fixed_salary: emp.basic_salary ?? 0,
       hours_of_month: hoursOfMonth,
       ot_per_hrs: emp.per_hours_amount ?? 0,
+      late_in: emp.late_in ?? 0,
+      late_mark_ded: emp.every_4_late_mark_4_hrs_deduction ?? 0,
       total_gross_salary: emp.total_salary ?? 0,
       pt: emp.total_tax_deduction ?? 0,
       pf_employer: emp.pf_employer_contribution ?? '',
@@ -448,6 +444,8 @@ export class PayrollApprovedComponent {
       esic: emp.esic_deduction ?? '',
       incentive: emp.incentive_amount ?? '',
       salary_advance: emp.adv_deduction ?? '',
+misc_expense: emp.misc_expense ?? 0,
+      misc_deduction: emp.misc_deduction ?? 0,
       net_salary: emp.net_salary ?? 0,
     }));
   }

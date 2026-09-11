@@ -238,6 +238,8 @@ export class PayrollProcessComponent {
             employe_id: item.employe_id,
             bonus_amount: item.bonus_amount ? `₹ ${item.bonus_amount}` : 'NA',
             adv_deduction: item.adv_deduction ? `₹ ${item.adv_deduction}` : 'NA',
+            misc_expense: item.misc_expense ? `₹ ${item.misc_expense}` : 'NA',        
+            misc_deduction: item.misc_deduction ? `₹ ${item.misc_deduction}` : 'NA', 
             net_salary: item.net_salary ? `₹ ${item.net_salary}` : 'NA',
           }));
           // this.totalRows = res.pagination.total;
@@ -601,6 +603,8 @@ export class PayrollProcessComponent {
       'Employer contri. PF',
       'ESIC Employee 0.75%',
       'Advance Salary',
+      'Miscellaneous Expenses',  
+      'Miscellaneous Deductions', 
       'Incentive Amount',
       'Default Holiday Pay',
       'Salary Payable'
@@ -614,7 +618,7 @@ export class PayrollProcessComponent {
       headerRow2.push(`${d} ${monthName.slice(0, 3)}`);
     }
 
-    const extraCols = 23 + (this.showLwpColumns ? 2 : 0); // +1 because of H/O
+    const extraCols = 25 + (this.showLwpColumns ? 2 : 0); // +1 because of H/O
     for (let i = 0; i < extraCols; i++) headerRow2.push('');
 
     worksheet.addRow(headerRow2);
@@ -669,6 +673,8 @@ export class PayrollProcessComponent {
         emp.pf_employer_contribution,
         emp.esic_deduction,
         emp.adv_deduction,
+        emp.misc_expense ?? 0,   
+        emp.misc_deduction ?? 0, 
         emp.incentive_amount,
         emp.default_holiday_pay,
         emp.net_salary
@@ -716,7 +722,7 @@ export class PayrollProcessComponent {
       totals.total_pf_employer,
       totals.total_esic,
       totals.total_adv_salary,
-      '', '',
+      '','','', '',
       totals.total_net_salary
     );
 

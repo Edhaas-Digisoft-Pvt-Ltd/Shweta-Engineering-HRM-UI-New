@@ -68,6 +68,11 @@
                   </div>
 
                   <div class="col-auto d-flex align-items-end">
+                    <!-- WITH THIS: -->
+                    <button class="btn btn-success me-2" *ngIf="hasAccess('Advance Payment', 'ApproveOrReject')"
+                      (click)="submitBulkActions()">
+                      Submit
+                    </button>
                     <button class="btn btn-primary exportExcelBtn me-2" (click)="exportExcel()">
                       <i class="bi bi-file-earmark-text-fill"></i>
                     </button>
@@ -84,7 +89,8 @@
                   <div class="col-12">
                     <ag-grid-angular class="ag-theme-alpine" [rowData]="rowData" [domLayout]="'autoHeight'"
                       [columnDefs]="columnDefs" [gridOptions]="gridOptions" [pagination]="false"
-                      [defaultColDef]="defaultColDef" (gridReady)="onGridReady($event)">
+                      [defaultColDef]="defaultColDef" (gridReady)="onGridReady($event)"
+                      (selectionChanged)="onSelectionChanged($event)">
                     </ag-grid-angular>
 
                     <div class="d-flex align-items-center justify-content-end flex-wrap mt-3 gap-2">

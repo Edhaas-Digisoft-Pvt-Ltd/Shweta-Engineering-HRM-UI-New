@@ -31,6 +31,7 @@ export class AdvanceSalaryAllempReportComponent {
   searchValue: string = '';
   searchTimeout: any;
   years: number[] = [];
+  sortBy: 'employee' | 'date' = 'employee';
 
   totalRows: number = 0;
   currentPage: number = 1;
@@ -101,6 +102,11 @@ export class AdvanceSalaryAllempReportComponent {
   }
 
   onYearMonthChange() {
+    this.getAllEmpAdvanceSalary();
+  }
+
+  onSortByChange() {
+    this.currentPage = 1;
     this.getAllEmpAdvanceSalary();
   }
 
@@ -202,7 +208,8 @@ export class AdvanceSalaryAllempReportComponent {
       year: this.selectedYear,
       page: page,
       isexport: false,
-      search: this.searchValue || ''
+      search: this.searchValue || '',
+      sort_by: this.sortBy
     }).subscribe((res: any) => {
       try {
         if (res.status === 'success') {
@@ -460,6 +467,7 @@ export class AdvanceSalaryAllempReportComponent {
       company_id: this.selectedCompanyId,
       year: this.selectedYear,
       isexport: true,
+      sort_by: this.sortBy
     }).subscribe({
       next: (res: any) => {
         if (res.status === 'success' && res.data.length) {

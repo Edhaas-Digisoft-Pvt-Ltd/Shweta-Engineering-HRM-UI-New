@@ -2,3 +2,25 @@
     background-color: #3674B5;
     color: white;
 }
+
+.form-check-input[type="radio"] {
+  border: 2px solid #8f9092;
+  width: 1.1em;
+  height: 1.1em;
+  cursor: pointer;
+}
+
+.form-check-input[type="radio"]:checked {
+  background-color: #0d6efd;
+  border-color: #0d6efd;
+}
+
+.form-check-input[type="radio"]:focus {
+  border-color: #0d6efd;
+  box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+}
+
+.form-check-label {
+  cursor: pointer;
+  font-weight: 500;
+}
