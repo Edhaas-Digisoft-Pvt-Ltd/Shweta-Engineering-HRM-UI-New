@@ -5,6 +5,7 @@ import { HrmserviceService } from '../hrmservice.service';
 import { ToastrService } from 'ngx-toastr';
 import { Router } from '@angular/router';
 import { ModalServiceService } from '../modal-service.service';
+import { debounceTime, distinctUntilChanged, Subject } from 'rxjs';
 declare var bootstrap: any;
 @Component({
   selector: 'app-advance-payment',
@@ -47,6 +48,7 @@ export class AdvancePaymentComponent {
   startDate: string = this.getFirstDayOfMonth();
   endDate: string = this.getLastDayOfMonth();
   loggedInUser: any;
+  private searchSubject = new Subject<string>();
   originalTenure: any;
 
   // ===== NEW: multiselect + per-row action dropdown state =====
@@ -62,6 +64,15 @@ export class AdvancePaymentComponent {
 
     this.getCompanyNames();
     this.getAllAdvSalary();
+
+    this.searchSubject.pipe(
+      debounceTime(400),
+      distinctUntilChanged()
+    ).subscribe(() => {
+      this.currentPage = 1;
+      this.getAllAdvSalary();
+    });
+
     const currentDate = new Date();
     this.today = currentDate.toISOString().split('T')[0]; // Format YYYY-MM-DD
     // this.initializeGrids();
@@ -203,6 +214,7 @@ export class AdvancePaymentComponent {
       end_date: this.endDate,
       page: page,
       isexport: false,
+      search: this.searchValue || null,
     }).subscribe((res: any) => {
       try {
         if (res.status === 'success' && res.data.length > 0) {
@@ -276,9 +288,7 @@ export class AdvancePaymentComponent {
   }
 
   onFilterBoxChange() {
-    if (this.gridApiActive) {
-      this.gridApiActive.setQuickFilter(this.searchValue);
-    }
+    this.searchSubject.next(this.searchValue);
   }
 
   // search code

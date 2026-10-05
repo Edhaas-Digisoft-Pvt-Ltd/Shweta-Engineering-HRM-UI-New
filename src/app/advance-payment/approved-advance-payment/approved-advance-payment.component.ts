@@ -5,6 +5,7 @@ import { EmployeeActionComponent } from 'src/app/employee/employee-action/employ
 import { HrmserviceService } from 'src/app/hrmservice.service';
 import { ToastrService } from 'ngx-toastr';
 import * as bootstrap from 'bootstrap';
+import { debounceTime, distinctUntilChanged, Subject } from 'rxjs';
 
 @Component({
   selector: 'app-approved-advance-payment',
@@ -39,6 +40,7 @@ export class ApprovedAdvancePaymentComponent {
 
   startDate: string = this.getFirstDayOfMonth();
   endDate: string = this.getLastDayOfMonth();
+  private searchSubject = new Subject<string>();
 
   constructor(private fb: FormBuilder, private service: HrmserviceService, private toastr: ToastrService, private elementRef: ElementRef) { }
 
@@ -58,6 +60,14 @@ export class ApprovedAdvancePaymentComponent {
     this.getCompanyNames();
     // this.getAllApprovedRequest();
     this.getPagination();
+
+    this.searchSubject.pipe(
+      debounceTime(400),
+      distinctUntilChanged()
+    ).subscribe(() => {
+      this.currentPage = 1;
+      this.getAllApprovedRequest();
+    });
 
     this.displayApprovedData = this.fb.group({
       id: [{ value: '', disabled: true }],
@@ -218,6 +228,7 @@ export class ApprovedAdvancePaymentComponent {
       end_date: this.endDate,
       page: page,
       isexport: false,
+      search: this.searchValue || null,
     }).subscribe((res: any) => {
       try {
         if (res.status === 'success') {
@@ -310,9 +321,7 @@ export class ApprovedAdvancePaymentComponent {
   }
 
   onFilterBoxChange() {
-    if (this.gridApiActive) {
-      this.gridApiActive.setQuickFilter(this.searchValue);
-    }
+    this.searchSubject.next(this.searchValue);
   }
 
   // search code

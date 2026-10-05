@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { ColDef } from 'ag-grid-community';
 import { HrmserviceService } from 'src/app/hrmservice.service';
 import { ToastrService } from 'ngx-toastr';
+import { debounceTime, distinctUntilChanged, Subject } from 'rxjs';
 
 @Component({
   selector: 'app-upcoming-leaves',
@@ -24,6 +25,7 @@ export class UpcomingLeavesComponent {
   companyDropdownOpen: boolean = false;
 
   dateRangeLabel: string = '';
+  private searchSubject = new Subject<string>();
 
   constructor(private service: HrmserviceService, private toastr: ToastrService) { }
 
@@ -32,6 +34,14 @@ export class UpcomingLeavesComponent {
 
     this.getCompanyNames();
     this.getPagination();
+
+    this.searchSubject.pipe(
+      debounceTime(400),
+      distinctUntilChanged()
+    ).subscribe(() => {
+      this.currentPage = 1;
+      this.getUpcomingLeaves();
+    });
   }
 
   public defaultColDef: ColDef = {
@@ -144,6 +154,7 @@ export class UpcomingLeavesComponent {
       company_id: this.selectedCompanyId,
       page: page,
       isexport: false,
+      search: this.searchInputValue || null,
     }).subscribe(
       (res: any) => {
         if (res.date_range) {
@@ -187,7 +198,7 @@ export class UpcomingLeavesComponent {
     this.gridApiActive = params.api;
   }
   onFilterBoxChange() {
-    this.gridApiActive.setQuickFilter(this.searchInputValue);
+    this.searchSubject.next(this.searchInputValue);
   }
   emptyInput() {
     this.searchInputValue = '';

@@ -7,6 +7,10 @@
     <div class="row gx-3  align-items-center rounded-2">
       <div class="col-12">
         <div class="row justify-content-end">
+          <div class="col-auto d-flex align-items-end">
+            <input type="text" class="form-control" placeholder="Search"
+              [(ngModel)]="searchValue" (ngModelChange)="onFilterBoxChange()" />
+          </div>
           <div class="col-3">
             <label>Select Company</label>
             <div class="custom-select-dropdown w-100">

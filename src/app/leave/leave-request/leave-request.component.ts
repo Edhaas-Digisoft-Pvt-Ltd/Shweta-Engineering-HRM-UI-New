@@ -6,6 +6,7 @@ import { HrmserviceService } from 'src/app/hrmservice.service';
 import { EditLeaveRequestComponent } from './edit-leave-request/edit-leave-request.component';
 import { ToastrService } from 'ngx-toastr';
 import { ModalServiceService } from 'src/app/modal-service.service';
+import { debounceTime, distinctUntilChanged, Subject } from 'rxjs';
 
 declare var bootstrap: any;
 
@@ -43,6 +44,7 @@ export class LeaveRequestComponent {
   selectedValue: any = 1;
   exportData: any;
   loggedInUser: any;
+  private searchSubject = new Subject<string>();
 
   constructor(private route: ActivatedRoute, private router: Router, private fb: FormBuilder, private service: HrmserviceService, private modalService: ModalServiceService, private toastr: ToastrService, private elementRef: ElementRef) { }
 
@@ -68,6 +70,14 @@ export class LeaveRequestComponent {
     this.getCompanyNames();
     // this.getLeaveRequests();
     this.getPagination();
+
+    this.searchSubject.pipe(
+      debounceTime(400),
+      distinctUntilChanged()
+    ).subscribe(() => {
+      this.currentPage = 1;
+      this.getLeaveRequests();
+    });
   }
 
   agInit(params: any): void {
@@ -246,13 +256,13 @@ export class LeaveRequestComponent {
   getLeaveRequests(page: number = 1): void {
     this.isLoading = true;
     this.rowData = [];
-    this.service.post('leave/request', { company_id: this.selectedCompanyId, page: page, isexport: false, }).subscribe(
+    this.service.post('leave/request', { company_id: this.selectedCompanyId, page: page, isexport: false, search: this.searchInputValue || null }).subscribe(
       (res: any) => {
         if (res.status === 'success') {
           this.rowData = res.data.map((item: any) => ({
             employee_code: item.employee_code,
             emp_name: item.emp_name,
-            company_name: item.company_name,
+            company_name: item.company_name,  
             department_name: item.department_name,
             start_date: item.start_date,
             end_date: item.end_date,
@@ -324,7 +334,8 @@ export class LeaveRequestComponent {
     this.gridApiActive = params.api;
   }
   onFilterBoxChange() {
-    this.gridApiActive.setQuickFilter(this.searchInputValue);
+    // this.gridApiActive.setQuickFilter(this.searchInputValue);
+     this.searchSubject.next(this.searchInputValue);
   }
   searchValue(searchValue: any) {
     throw new Error('Method not implemented.');

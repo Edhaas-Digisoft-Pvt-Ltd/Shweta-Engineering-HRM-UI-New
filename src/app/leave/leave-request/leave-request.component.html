@@ -40,6 +40,10 @@
                 </div> -->
 
                   <div class="row justify-content-end">
+                    <div class="col-auto d-flex align-items-end">
+                      <input type="text" class="form-control" placeholder="Search"
+                        [(ngModel)]="searchInputValue" (ngModelChange)="onFilterBoxChange()" />
+                    </div>
                     <div class="col-3">
                       <label>Select Company</label>
                       <div class="custom-select-dropdown w-100" (clickOutside)="closeCompanyDropdown()">

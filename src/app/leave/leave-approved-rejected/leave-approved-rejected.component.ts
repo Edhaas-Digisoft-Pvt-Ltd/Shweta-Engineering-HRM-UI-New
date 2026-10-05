@@ -5,6 +5,7 @@ import { FormGroup, FormBuilder, Validators } from '@angular/forms';
 import { HrmserviceService } from 'src/app/hrmservice.service';
 import { ToastrService } from 'ngx-toastr';
 import { ModalServiceService } from 'src/app/modal-service.service';
+import { debounceTime, distinctUntilChanged, Subject } from 'rxjs';
 
 @Component({
   selector: 'app-leave-approved-rejected',
@@ -39,6 +40,7 @@ export class LeaveApprovedRejectedComponent {
 
   startDate: string = this.getFirstDayOfMonth();
   endDate: string = this.getLastDayOfMonth();
+  private searchSubject = new Subject<string>();
 
   constructor(private route: ActivatedRoute, private router: Router, private fb: FormBuilder, private service: HrmserviceService, private modalService: ModalServiceService, private toastr: ToastrService, private elementRef: ElementRef) { }
 
@@ -65,6 +67,14 @@ export class LeaveApprovedRejectedComponent {
     });
     this.getCompanyNames();
     this.getPagination();
+
+    this.searchSubject.pipe(
+      debounceTime(400),
+      distinctUntilChanged()
+    ).subscribe(() => {
+      this.currentPage = 1;
+      this.getLeaveRequests();
+    });
   }
 
   agInit(params: any): void {
@@ -216,6 +226,7 @@ export class LeaveApprovedRejectedComponent {
       end_date: this.endDate,
       page: page,
       isexport: false,
+      search: this.searchInputValue || null,
     }).subscribe(
       (res: any) => {
         if (res.status === 'success') {
@@ -298,7 +309,7 @@ export class LeaveApprovedRejectedComponent {
     this.gridApiActive = params.api;
   }
   onFilterBoxChange() {
-    this.gridApiActive.setQuickFilter(this.searchInputValue);
+    this.searchSubject.next(this.searchInputValue);
   }
   searchValue(searchValue: any) {
     throw new Error('Method not implemented.');

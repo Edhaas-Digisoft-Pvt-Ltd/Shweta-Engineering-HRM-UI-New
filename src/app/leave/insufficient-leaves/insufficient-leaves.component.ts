@@ -5,6 +5,7 @@ import { ColDef } from 'ag-grid-community';
 import { ToastrService } from 'ngx-toastr';
 import { HrmserviceService } from 'src/app/hrmservice.service';
 import { ModalServiceService } from 'src/app/modal-service.service';
+import { debounceTime, distinctUntilChanged, Subject } from 'rxjs';
 
 @Component({
   selector: 'app-insufficient-leaves',
@@ -30,6 +31,7 @@ export class InsufficientLeavesComponent {
 
   startDate: string = this.getFirstDayOfMonth();
   endDate: string = this.getLastDayOfMonth();
+  private searchSubject = new Subject<string>();
 
   constructor(private route: ActivatedRoute, private router: Router, private fb: FormBuilder, private service: HrmserviceService, private modalService: ModalServiceService, private toastr: ToastrService, private elementRef: ElementRef) { }
 
@@ -47,6 +49,14 @@ export class InsufficientLeavesComponent {
     this.getInsufficientLeaves();
 
     this.getPagination();
+
+    this.searchSubject.pipe(
+      debounceTime(400),
+      distinctUntilChanged()
+    ).subscribe(() => {
+      this.currentPage = 1;
+      this.getInsufficientLeaves();
+    });
   }
 
   agInit(params: any): void {
@@ -149,6 +159,7 @@ export class InsufficientLeavesComponent {
       end_date: this.endDate,
       page: page,
       isexport: false,
+      search: this.searchInputValue || null,
     };
 
     this.service.post('insufficient/leaves', payload).subscribe(
@@ -197,7 +208,7 @@ export class InsufficientLeavesComponent {
     this.gridApiActive = params.api;
   }
   onFilterBoxChange() {
-    this.gridApiActive.setQuickFilter(this.searchInputValue);
+    this.searchSubject.next(this.searchInputValue);
   }
   searchValue(searchValue: any) {
     throw new Error('Method not implemented.');
