@@ -68,7 +68,7 @@ export class PayrollSummariesComponent {
     this.expenseForm = this.formBuilder.group({
       expenseType: ['add', [Validators.required]], // 'add' | 'deduct'
       expenseDescription: ['', [Validators.required, Validators.pattern(/^[A-Za-z0-9\s]+$/)]],
-      expenseAmount: ['', [Validators.required, Validators.pattern(/^[0-9]+$/), Validators.min(1)]]
+      expenseAmount: ['', [Validators.required, Validators.pattern(/^\d+(\.\d{1,2})?$/), Validators.min(0.01)]]
     });
   }
 
@@ -323,6 +323,16 @@ export class PayrollSummariesComponent {
     return intPart + decPart;
   }
 
+  formattedMoney(value: number | string | null | undefined): string {
+    if (value == null || value === '') return '0.00';
+    const num = Number(value);
+    if (isNaN(num)) return '0.00';
+    return num.toLocaleString('en-IN', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    });
+  }
+
   getExpenseType(amount: number): string {
     return amount < 0 ? 'Deduct' : 'Add';
   }
@@ -517,10 +527,11 @@ export class PayrollSummariesComponent {
     paginationPageSizeSelector: [10, 50, 100],
   };
 
-  numberToWords(num: number): string {
-    if (num == null || isNaN(num)) return '';
-    num = Math.floor(num);
-    if (num === 0) return 'Zero Rupees';
+  numberToWords(amount: number): string {
+    if (amount == null || isNaN(amount)) return '';
+
+    const rupees = Math.floor(amount);
+    const paise = Math.round((amount - rupees) * 100);
 
     const ones = ['', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine',
       'Ten', 'Eleven', 'Twelve', 'Thirteen', 'Fourteen', 'Fifteen', 'Sixteen', 'Seventeen', 'Eighteen', 'Nineteen'];
@@ -538,25 +549,28 @@ export class PayrollSummariesComponent {
         str += ones[Math.floor(n / 100)] + ' Hundred ';
         n %= 100;
       }
-      str += twoDigits(n);
-      return str;
+      return str + twoDigits(n);
     };
 
-    let result = '';
-    const crore = Math.floor(num / 10000000);
-    num %= 10000000;
-    const lakh = Math.floor(num / 100000);
-    num %= 100000;
-    const thousand = Math.floor(num / 1000);
-    num %= 1000;
-    const hundred = num;
+    const convert = (n: number): string => {
+      let result = '';
+      const crore = Math.floor(n / 10000000); n %= 10000000;
+      const lakh = Math.floor(n / 100000); n %= 100000;
+      const thousand = Math.floor(n / 1000); n %= 1000;
 
-    if (crore > 0) result += threeDigits(crore) + 'Crore ';
-    if (lakh > 0) result += threeDigits(lakh) + 'Lakh ';
-    if (thousand > 0) result += threeDigits(thousand) + 'Thousand ';
-    if (hundred > 0) result += threeDigits(hundred);
+      if (crore > 0) result += threeDigits(crore) + 'Crore ';
+      if (lakh > 0) result += threeDigits(lakh) + 'Lakh ';
+      if (thousand > 0) result += threeDigits(thousand) + 'Thousand ';
+      if (n > 0) result += threeDigits(n);
+      return result.trim();
+    };
 
-    return result.trim() + ' Rupees Only';
+    const rupeesWords = rupees > 0 ? convert(rupees) + ' Rupees' : '';
+    const paiseWords = paise > 0 ? convert(paise) + ' Paise' : '';
+
+    if (!rupeesWords && !paiseWords) return 'Zero Rupees';
+
+    return [rupeesWords, paiseWords].filter(Boolean).join(' and ') + ' Only';
   }
 
   downloadPayslip() {
@@ -682,10 +696,32 @@ export class PayrollSummariesComponent {
   }
 
   allowOnlyNumbers(event: KeyboardEvent) {
-    const char = String.fromCharCode(event.keyCode);
-    const pattern = /^[0-9]*$/;
+    const input = event.target as HTMLInputElement;
+    const char = event.key;
 
-    if (!pattern.test(char)) {
+    // allow control keys
+    if (event.ctrlKey || event.metaKey || char.length > 1) return;
+
+    // only digits and dot
+    if (!/^[0-9.]$/.test(char)) {
+      event.preventDefault();
+      return;
+    }
+
+    // build what the value would be after this key
+    const start = input.selectionStart ?? input.value.length;
+    const end = input.selectionEnd ?? input.value.length;
+    const next = input.value.slice(0, start) + char + input.value.slice(end);
+
+    // allow digits with optional single dot and max 2 decimals
+    if (!/^\d*\.?\d{0,2}$/.test(next)) {
+      event.preventDefault();
+    }
+  }
+
+  onAmountPaste(event: ClipboardEvent) {
+    const text = event.clipboardData?.getData('text') ?? '';
+    if (!/^\d+(\.\d{1,2})?$/.test(text.trim())) {
       event.preventDefault();
     }
   }
