@@ -145,7 +145,7 @@ export class PayrollApprovedComponent {
               overTime: item.total_overtime + ' hrs',
               employe_id: item.employe_id,
               bonus_amount: item.bonus_amount ? `₹ ${item.bonus_amount}` : 'NA',
-              advance_salary: item.advance_salary ? `₹ ${item.advance_salary}` : 'NA',
+              advance_salary: item.adv_deduction ? `₹ ${item.adv_deduction}` : 'NA',
               net_salary: item.net_salary ? `₹ ${item.net_salary}` : 'NA',
             }));
             this.totalRows = res.pagination.total;
@@ -444,7 +444,7 @@ export class PayrollApprovedComponent {
       esic: emp.esic_deduction ?? '',
       incentive: emp.incentive_amount ?? '',
       salary_advance: emp.adv_deduction ?? '',
-misc_expense: emp.misc_expense ?? 0,
+      misc_expense: emp.misc_expense ?? 0,
       misc_deduction: emp.misc_deduction ?? 0,
       net_salary: emp.net_salary ?? 0,
     }));

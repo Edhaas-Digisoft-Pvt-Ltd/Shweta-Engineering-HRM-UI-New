@@ -132,7 +132,7 @@ export class PayrollRejectedComponent {
               overTime: item.total_overtime,
               employe_id: item.employe_id,
               bonus_amount: item.bonus_amount ? `₹${item.bonus_amount}` : 'NA',
-              advance_salary: item.advance_salary ? `₹${item.advance_salary}` : 'NA',
+              advance_salary: item.adv_deduction ? `₹${item.adv_deduction}` : 'NA',
               net_salary: item.net_salary ? `₹${item.net_salary}` : 'NA',
             }));
             this.totalRows = res.pagination.total;
