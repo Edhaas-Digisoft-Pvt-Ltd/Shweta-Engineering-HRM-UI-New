@@ -452,6 +452,7 @@ export class CreateEmployeeComponent {
       "doj": this.multiStepForm.value.join_date,
       "emp_contact": this.multiStepForm.value.contact,
       "status": "Active",
+      "is_non_time_based": 0,
       "emp_address": this.multiStepForm.value.address,
       "role_id": this.multiStepForm.value.role,
 

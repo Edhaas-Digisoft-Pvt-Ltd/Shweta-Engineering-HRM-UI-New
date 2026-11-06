@@ -23,6 +23,9 @@
                 <li class="nav-item" (click)="selectTab('tab5')">
                     <a class="nav-link fw-bold" [ngClass]="{'active': activeTab === 'tab5'}">Holiday Calender</a>
                 </li>
+                <li class="nav-item" (click)="selectTab('tab6')">
+                    <a class="nav-link fw-bold" [ngClass]="{'active': activeTab === 'tab6'}">Die Rate</a>
+                </li>
             </ul>
         </div>
     </div>
@@ -54,6 +57,12 @@
     <div *ngIf="activeTab === 'tab5'">
         <div class="container ">
             <app-holiday-calendar></app-holiday-calendar>
+        </div>
+    </div>
+
+    <div *ngIf="activeTab === 'tab6'">
+        <div class="container ">
+            <app-die-rate-config></app-die-rate-config>
         </div>
     </div>
 

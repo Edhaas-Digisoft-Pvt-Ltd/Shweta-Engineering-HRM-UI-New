@@ -1,0 +1,51 @@
+<div class="right-panel">
+    <div class="row mb-2 mt-0 justify-content-end">
+        <div class="col-md-4">
+            <input type="text" class="form-control" placeholder="Search Die Number or Remark" [(ngModel)]="searchText"
+                (ngModelChange)="applyFilter()" />
+        </div>
+    </div>
+
+    <div class="row">
+        <ag-grid-angular class="ag-theme-alpine" style="width: 100%; height: 70vh;" [rowData]="filteredRows"
+            [columnDefs]="columnDefs" [pagination]="true" [paginationPageSize]="10" [defaultColDef]="defaultColDef">
+        </ag-grid-angular>
+    </div>
+</div>
+
+<div class="modal fade modal-lg" id="editdieratemodal" tabindex="-1" aria-labelledby="editdieratemodalLabel">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editdieratemodalLabel">Edit Die Rate</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form [formGroup]="EditDieRateForm" (ngSubmit)="editDieRate()">
+                    <div class="row">
+                        <div class="col-4">
+                            <label for="die_number">Die Number</label>
+                            <input type="text" class="form-control" id="die_number" formControlName="die_number" />
+                        </div>
+
+                        <div class="col-5">
+                            <label for="remark">Remark</label>
+                            <input type="text" class="form-control" id="remark" formControlName="remark" />
+                        </div>
+
+                        <div class="col-3">
+                            <label for="die_rate">Die Rate<span class="text-danger">*</span></label>
+                            <input type="number" min="0" step="0.01" class="form-control" id="die_rate"
+                                formControlName="die_rate"
+                                [ngClass]="{'is-invalid': isEditSubmitted && EditDieRateForm.get('die_rate')?.invalid}" />
+                        </div>
+                    </div>
+
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                        <button type="submit" class="btn BtnColor mt-3 ml-auto btn-end">Update</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

@@ -158,6 +158,7 @@ export class UpdateEmployeeComponent {
       pf_employer_applicable: [false],
       esic_employee_applicable: [false],
       status: ['Active', Validators.required],
+      is_non_time_based: [false],
     });
 
     this.salaryStructureForm = this.fb.group({
@@ -328,6 +329,7 @@ export class UpdateEmployeeComponent {
             pf_employer_applicable: !!this.fetchedEmployee.pf_employer_applicable,
             esic_employee_applicable: !!this.fetchedEmployee.esic_employee_applicable,
             status: this.fetchedEmployee.status,
+            is_non_time_based: Number(this.fetchedEmployee.is_non_time_based) === 1,
           }, { emitEvent: false });
 
           // ['fname', 'lname', 'address', 'contact', 'role'].forEach(field => {
@@ -459,6 +461,7 @@ export class UpdateEmployeeComponent {
       "pf_employer_applicable": formValues.pf_employer_applicable || false,
       "esic_employee_applicable": formValues.esic_employee_applicable || false,
       "status": formValues.status,
+      "is_non_time_based": (this.isOperatorRole && formValues.is_non_time_based) ? 1 : 0,
       "is_increment": this.isIncrementChecked,
       "created_by": sessionStorage.getItem('employeeId') ?? null,
     };
@@ -905,5 +908,11 @@ export class UpdateEmployeeComponent {
       },
       error: (err) => this.toastr.error(err.error?.message || 'Something went wrong!'),
     });
+  }
+
+  get isOperatorRole(): boolean {
+    const roleId = this.multiStepForm.get('role')?.value;
+    const role = (this.roles || []).find((r: any) => String(r.role_id) === String(roleId));
+    return (role?.role_name || '').trim().toLowerCase() === 'operator';
   }
 }
