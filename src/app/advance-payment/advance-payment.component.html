@@ -319,3 +319,64 @@
     </div>
   </div>
 </div>
+
+<!-- Advance Salary History Modal -->
+<div class="modal fade" id="advanceHistoryModal" tabindex="-1">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content">
+
+      <div class="modal-header text-white">
+        <h5 class="modal-title">Advance Salary History</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+
+      <div class="modal-body">
+        <div class="row align-items-end mb-3 g-2">
+          <div class="col-md-5">
+            <div><strong>Emp Code:</strong> {{ historyEmp?.employee_code }}</div>
+            <div><strong>Name:</strong> {{ historyEmp?.emp_name }}</div>
+          </div>
+          <div class="col-md-3">
+            <label class="form-label mb-1">From Date</label>
+            <input type="date" class="form-control" [(ngModel)]="historyStartDate" (change)="loadHistory()" />
+          </div>
+          <div class="col-md-3">
+            <label class="form-label mb-1">To Date</label>
+            <input type="date" class="form-control" [(ngModel)]="historyEndDate" (change)="loadHistory()" />
+          </div>
+        </div>
+
+        <div class="table-responsive">
+          <table class="table table-bordered table-sm align-middle text-center mb-0">
+            <thead class="table-primary">
+              <tr>
+                <th>Apply Date</th>
+                <th>Amount (₹)</th>
+                <th>Tenure</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngIf="historyLoading">
+                <td colspan="4">Loading...</td>
+              </tr>
+              <tr *ngIf="!historyLoading && historyRows.length === 0">
+                <td colspan="4" class="text-muted">No advance salary records in this date range.</td>
+              </tr>
+              <tr *ngFor="let r of historyRows">
+                <td>{{ r.apply_date | date:'dd-MM-yyyy' }}</td>
+                <td>{{ r.advance_amount }}</td>
+                <td>{{ r.tenure }} Month{{ r.tenure > 1 ? 's' : '' }}</td>
+                <td><span class="badge rounded-pill" [ngClass]="historyStatusClass(r)">{{ historyStatusLabel(r) }}</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline-dark" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>

@@ -55,6 +55,13 @@ export class AdvancePaymentComponent {
   selectedRows: any[] = [];
   rowActions: { [advPayId: string]: string } = {}; // 'none' | 'Approved' | 'Rejected'
 
+  // ===== Advance salary history popup =====
+  historyEmp: { employee_id: any; employee_code: string; emp_name: string } | null = null;
+  historyStartDate: string = this.getFirstDayOfMonth();
+  historyEndDate: string = this.getLastDayOfMonth();
+  historyRows: any[] = [];
+  historyLoading = false;
+
   ngOnInit() {
     // const savedCompanyId = this.service.selectedCompanyId();
     // this.selectedCompanyId = savedCompanyId
@@ -219,6 +226,7 @@ export class AdvancePaymentComponent {
       try {
         if (res.status === 'success' && res.data.length > 0) {
           this.rowData = res.data.map((item: any) => ({
+            employee_id: item.employee_id,
             employee_code: item.employee_code,
             apply_date: item.apply_date,
             emp_name: item.emp_name,
@@ -403,32 +411,21 @@ export class AdvancePaymentComponent {
     }
 
     this.columnDefs.push(
-      { headerName: 'Emp Code', field: 'employee_code', sortable: true, filter: true, flex: 1, },
-      {
-        headerName: 'Employee Name',
-        field: 'emp_name',
-        sortable: true,
-        filter: true,
-        flex: 1,
-      },
-      { headerName: 'Apply Date', field: 'apply_date', sortable: true, filter: true, valueFormatter: this.service.dateFormatter },
-      { headerName: 'Amount', field: 'advance_amount', sortable: true, filter: true },
-      { headerName: 'Tenure', field: 'tenure', sortable: true, filter: true, flex: 1, maxWidth: 120 },
-      {
-        headerName: 'Status',
-        field: 'status',
-        sortable: true,
-        filter: true,
-        flex: 1,
-        cellRenderer: this.statusButtonRenderer,
-      },
+      { headerName: 'Emp Code', field: 'employee_code', sortable: true, filter: true, flex: 1, minWidth: 125 },
+      { headerName: 'Employee Name', field: 'emp_name', sortable: true, filter: true, width: 175 },
+      { headerName: 'Apply Date', field: 'apply_date', sortable: true, filter: true, flex: 1, minWidth: 135, valueFormatter: this.service.dateFormatter },
+      { headerName: 'Amount', field: 'advance_amount', sortable: true, filter: true, flex: 1, minWidth: 110 },
+      { headerName: 'Tenure', field: 'tenure', sortable: true, filter: true, flex: 0.8, minWidth: 60 },
+      { headerName: 'Status', field: 'status', sortable: true, filter: true, width: 150, cellRenderer: this.statusButtonRenderer },
     );
 
     this.columnDefs.push({
       headerName: 'Actions',
       colId: 'actionDropdownCol',
-      flex: 1.8,
-      minWidth: 220,
+      width: 260,
+      minWidth: 260,
+      maxWidth: 260,
+      resizable: false,
       cellStyle: { border: '1px solid #ddd' },
 
       cellRenderer: (params: any) => {
@@ -436,7 +433,8 @@ export class AdvancePaymentComponent {
         container.style.display = 'flex';
         container.style.alignItems = 'center';
         container.style.gap = '6px';
-        container.style.flexWrap = 'wrap';
+        container.style.flexWrap = 'nowrap';   // was 'wrap'
+        container.style.height = '100%';
 
         // ===== Approve/Reject dropdown (only relevant for pending rows) =====
         if (
@@ -445,7 +443,8 @@ export class AdvancePaymentComponent {
         ) {
           const select = document.createElement('select');
           select.className = 'form-select form-select-sm';
-          select.style.width = '120px';
+          select.style.width = '110px';
+          select.style.flexShrink = '0';
           select.style.display = 'inline-block';
 
           const options = [
@@ -480,7 +479,7 @@ export class AdvancePaymentComponent {
         ) {
           const eyeBtn = document.createElement('button');
           eyeBtn.type = 'button';
-          eyeBtn.className = 'btn btn-sm mb-1 edit-btn';
+          eyeBtn.className = 'btn btn-sm edit-btn';
           eyeBtn.style.backgroundColor = '#C8E3FF';
           eyeBtn.innerHTML = `<i class="bi bi-eye"></i>`;
           container.appendChild(eyeBtn);
@@ -494,7 +493,7 @@ export class AdvancePaymentComponent {
           if (params.data.status === 'pending') {
             const disabledBtn = document.createElement('button');
             disabledBtn.type = 'button';
-            disabledBtn.className = 'btn btn-sm mb-1';
+            disabledBtn.className = 'btn btn-sm';
             disabledBtn.style.backgroundColor = '#d3d3d3';
             disabledBtn.style.cursor = 'not-allowed';
             disabledBtn.disabled = true;
@@ -505,11 +504,22 @@ export class AdvancePaymentComponent {
           if (params.data.status === 'Approved') {
             const stBtn = document.createElement('button');
             stBtn.type = 'button';
-            stBtn.className = 'btn btn-sm mb-1 st-btn';
+            stBtn.className = 'btn btn-sm st-btn';
             stBtn.style.backgroundColor = '#C8E3FF';
             stBtn.innerHTML = `<i class="bi bi-cash"></i>`;
             container.appendChild(stBtn);
           }
+        }
+
+        // ===== History button (all rows) =====
+        if (this.hasAccess('Advance Payment', 'ApproveOrReject')) {
+          const historyBtn = document.createElement('button');
+          historyBtn.type = 'button';
+          historyBtn.className = 'btn btn-sm history-btn';
+          historyBtn.title = 'Advance salary history';
+          historyBtn.style.backgroundColor = '#C8E3FF';
+          historyBtn.innerHTML = `<i class="bi bi-clock-history"></i>`;
+          container.appendChild(historyBtn);
         }
 
         return container;
@@ -528,6 +538,13 @@ export class AdvancePaymentComponent {
         if (event.event.target.closest('.st-btn')) {
           this.setSalaryTrackerData(event.data);
           this.openSalaryTrackerModel();
+          return;
+        }
+
+        // 🔹 Open Advance Salary History
+        if (event.event.target.closest('.history-btn')) {
+          if (!this.hasAccess('Advance Payment', 'ApproveOrReject')) { return; }
+          this.openHistory(event.data);
           return;
         }
       }
@@ -669,52 +686,43 @@ export class AdvancePaymentComponent {
   }
 
   statusButtonRenderer(params: any) {
-    let status = params.value;
+    const status = params.value;
 
     const button = document.createElement('button');
-    button.innerText = status;
-
-    // Common styles
-    button.style.padding = '6px 12px';
     button.style.borderRadius = '20px';
     button.style.cursor = 'default';
-    button.style.height = '30px'; //Match AG Grid row height
-    button.style.lineHeight = '20px';
-    button.style.fontSize = '14px';
+    button.style.height = '34px';
+    button.style.width = '100%';
+    button.style.marginTop = '4px';
+    button.style.padding = '0 8px';
     button.style.display = 'flex';
     button.style.alignItems = 'center';
     button.style.justifyContent = 'center';
-    button.style.width = '97%';
-    button.style.marginTop = '6px';
+    button.style.whiteSpace = 'nowrap';
 
-    //Convert Approved → Confirm (UI only)
     if (status === 'Approved') {
-      button.innerHTML = `<span style="font-size:11px;font-weight:600;">Confirmation</span><br><span style="font-size:10px;">Pending</span>`;
-      button.style.flexDirection = 'column';
-      button.style.lineHeight = '0.6';
-    }
+      // UI only: Approved is shown as Confirmation / Pending (two lines)
+      button.innerHTML =
+        `<span style="display:flex;flex-direction:column;align-items:center;line-height:1.15;">
+         <span style="font-size:12px;font-weight:600;">Confirmation</span>
+         <span style="font-size:10px;">Pending</span>
+       </span>`;
+      button.style.backgroundColor = '#B2FFE1B0';
+      button.style.color = 'black';
+      button.style.border = '1px solid #B2FFE1B0';
+    } else {
+      button.innerText = status;
+      button.style.fontSize = '14px';
 
-    // Conditional styling
-    if (status === 'pending') {
-      button.style.backgroundColor = '#FFF291'; // light red
-      button.style.color = '#721c24'; // dark red text
-      button.style.border = '1px solid #f5c6cb';
-      button.style.borderRadius = '20px';
-    } else if (status === 'Approved') {
-      button.style.backgroundColor = '#B2FFE1B0'; // light green
-      button.style.color = 'black';
-      button.style.border = '1px solid #B2FFE1B0';
-      button.style.borderRadius = '20px';
-    } else if (status === 'Confirm') {
-      button.style.backgroundColor = '#B2FFE1B0'; // light green
-      button.style.color = 'black';
-      button.style.border = '1px solid #B2FFE1B0';
-      button.style.borderRadius = '20px';
-    } else if (status === 'Rejected') {
-      button.style.backgroundColor = '#FFAFAF'; // light green
-      button.style.color = 'black';
-      button.style.border = '1px solid #FFAFAF';
-      button.style.borderRadius = '20px';
+      if (status === 'pending') {
+        button.style.backgroundColor = '#FFF291';
+        button.style.color = '#721c24';
+        button.style.border = '1px solid #f5e36b';
+      } else if (status === 'Rejected') {
+        button.style.backgroundColor = '#FFAFAF';
+        button.style.color = 'black';
+        button.style.border = '1px solid #FFAFAF';
+      }
     }
 
     return button;
@@ -896,5 +904,60 @@ export class AdvancePaymentComponent {
       this.getAllAdvSalary(this.currentPage);
       this.generatePageNumbers();
     }
+  }
+
+  openHistory(row: any) {
+    this.historyEmp = {
+      employee_id: row.employee_id,
+      employee_code: row.employee_code,
+      emp_name: row.emp_name,
+    };
+    // default = current month
+    this.historyStartDate = this.getFirstDayOfMonth();
+    this.historyEndDate = this.getLastDayOfMonth();
+    this.historyRows = [];
+    this.loadHistory();
+    this.modalService.openModal('advanceHistoryModal');
+  }
+
+  loadHistory() {
+    if (!this.historyEmp) { return; }
+
+    if (!this.historyStartDate || !this.historyEndDate || this.historyStartDate > this.historyEndDate) {
+      this.toastr.warning('Please select a valid date range');
+      return;
+    }
+
+    this.historyLoading = true;
+    this.service.post('emp/advancesaraly/history', {
+      employee_id: this.historyEmp.employee_id,
+      start_date: this.historyStartDate,
+      end_date: this.historyEndDate,
+    }).subscribe({
+      next: (res: any) => {
+        this.historyRows = res.status === 'success' ? res.data : [];
+        this.historyLoading = false;
+      },
+      error: () => {
+        this.historyRows = [];
+        this.toastr.error('Unable to load advance salary history');
+        this.historyLoading = false;
+      },
+    });
+  }
+
+  // Same wording the main grid uses: Approved but not confirmed by accountant = "Confirmation Pending"
+  historyStatusLabel(r: any): string {
+    if (r.status === 'Approved' && r.accountant_confirmation !== 'Confirmed') {
+      return 'Confirmation Pending';
+    }
+    return r.status;
+  }
+
+  historyStatusClass(r: any): string {
+    const s = this.historyStatusLabel(r);
+    if (s === 'pending') return 'bg-warning text-dark';
+    if (s === 'Rejected') return 'bg-danger';
+    return 'bg-success'; // Approved / Confirmation Pending
   }
 }
