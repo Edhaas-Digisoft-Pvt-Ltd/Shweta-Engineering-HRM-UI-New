@@ -145,6 +145,7 @@ export class PayrollApprovedComponent {
               overTime: item.total_overtime + ' hrs',
               employe_id: item.employe_id,
               bonus_amount: item.bonus_amount ? `₹ ${item.bonus_amount}` : 'NA',
+              job_amount: Number(item.is_non_time_based) === 1 ? `₹ ${item.job_amount}` : '-',
               advance_salary: item.adv_deduction ? `₹ ${item.adv_deduction}` : 'NA',
               net_salary: item.net_salary ? `₹ ${item.net_salary}` : 'NA',
             }));
@@ -220,6 +221,13 @@ export class PayrollApprovedComponent {
     {
       headerName: 'Bonus',
       field: 'bonus_amount',
+      sortable: true,
+      filter: true,
+      minWidth: 120,
+    },
+    {
+      headerName: 'Job Amount',
+      field: 'job_amount',
       sortable: true,
       filter: true,
       minWidth: 120,

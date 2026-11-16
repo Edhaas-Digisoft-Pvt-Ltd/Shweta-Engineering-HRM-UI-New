@@ -78,7 +78,7 @@
 
                     <div class="col-12 row m-0 p-0 mt-4">
                         <div class="col-12 col-md">
-                            <div class="row m-0 p-0">
+                            <div class="row m-0 p-0" *ngIf="!isJobBased">
                                 <div class="col-12 col-sm-6">
                                     <div
                                         class="d-flex flex-column align-items-center justify-content-center p-2 py-2 attandance-summary">
@@ -95,7 +95,7 @@
                                 </div>
 
                             </div>
-                            <div *ngIf="employeeDetails.role_id == 2 || employeeDetails.role_id == 12 ||employeeDetails.role_id == 13"
+                            <div *ngIf="!isJobBased && (employeeDetails.role_id == 2 || employeeDetails.role_id == 12 ||employeeDetails.role_id == 13)"
                                 class="row m-0 p-0 mt-3">
                                 <div class="col-12 col-sm-6">
                                     <div
@@ -115,6 +115,38 @@
                                 <p class="mb-1"><i class="bi bi-clock me-2"></i>Per Hours/Day</p>
                                 <h4 class="m-0">100.96</h4>
                             </div> -->
+                                </div>
+                            </div>
+
+                            <!-- job (die rate) based operator: die wise breakup -->
+                            <div class="row m-0 p-0 px-2 mt-3" *ngIf="isJobBased">
+                                <div class="mb-3 p-3 border rounded">
+                                    <h5 class="pb-2 border-bottom border-primary-light">Job Details (Die wise)</h5>
+                                    <div *ngIf="dieDetails.length === 0" class="text-muted">No jobs found for this month.</div>
+                                    <div class="table-responsive" *ngIf="dieDetails.length > 0">
+                                        <table class="table table-sm table-bordered mb-0">
+                                            <thead>
+                                                <tr>
+                                                    <th>Die No</th>
+                                                    <th class="text-end">Jobs Done</th>
+                                                    <th class="text-end">Die Rate (₹)</th>
+                                                    <th class="text-end">Amount (₹)</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr *ngFor="let d of dieDetails">
+                                                    <td>{{ d.die_number }}</td>
+                                                    <td class="text-end">{{ formatted(d.jobs_done) }}</td>
+                                                    <td class="text-end">{{ formattedMoney(d.die_rate) }}</td>
+                                                    <td class="text-end">{{ formattedMoney(d.amount) }}</td>
+                                                </tr>
+                                                <tr class="fw-bold">
+                                                    <td colspan="3" class="text-end">Total Job Amount</td>
+                                                    <td class="text-end">{{ formattedMoney(calculationData?.job_amount) }}</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
                                 </div>
                             </div>
 
@@ -330,19 +362,25 @@
                                                 </td>
                                                 <!-- <td>Otto</td> -->
                                             </tr>
-                                            <tr>
+                                            <tr *ngIf="isJobBased">
+                                                <td data-label="Compound">Job Amount</td>
+                                                <td data-label="Calculation">Jobs x Die Rate</td>
+                                                <td data-label="Amount (in ₹)">₹ {{
+                                                    formatted(calculationData?.job_amount) }}</td>
+                                            </tr>
+                                            <tr *ngIf="!isJobBased">
                                                 <td data-label="Compound">Monthly Gross Salary</td>
                                                 <td data-label="Calculation">-</td>
                                                 <td data-label="Amount (in ₹)">₹ {{
                                                     formatted(calculationData?.monthly_gross_salary) }}</td>
                                             </tr>
-                                            <tr>
+                                            <tr *ngIf="!isJobBased">
                                                 <td data-label="Compound">Present Day Hrs Salary</td>
                                                 <td data-label="Calculation">-</td>
                                                 <td data-label="Amount (in ₹)">₹ {{
                                                     formatted(calculationData?.present_day_hrs_salary) }}</td>
                                             </tr>
-                                            <tr>
+                                            <tr *ngIf="!isJobBased">
                                                 <td data-label="Compound">Over Time Salary</td>
                                                 <td data-label="Calculation">(OT-LT) * per hr</td>
                                                 <td data-label="Amount (in ₹)">₹ {{

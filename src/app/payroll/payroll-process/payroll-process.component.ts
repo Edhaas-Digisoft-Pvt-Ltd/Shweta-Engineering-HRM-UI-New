@@ -27,6 +27,11 @@ export class PayrollProcessComponent {
   gridApiTemp!: GridApi;
   activeTab: string = 'tab1';
   isProcess: any = false;
+
+  // 'time' = attendance based payroll, 'job' = job (die rate) based operators (is_non_time_based)
+  payrollType: 'time' | 'job' = 'time';
+  genAll: any[] = [];    // all employees ready to generate (both types)
+  tempAll: any[] = [];   // all generated (temp) payrolls (both types)
   columnDefs: ColDef[] = [];
   tempColumnDefs: ColDef[] = [];
   selectedEmployee: any = null;
@@ -67,6 +72,34 @@ export class PayrollProcessComponent {
 
   selectTab(tab: string) {
     this.activeTab = tab;
+  }
+
+  // ---- Time based / Job based filter ----
+  private matchesType(row: any): boolean {
+    const isJob = Number(row.is_non_time_based) === 1;
+    return this.payrollType === 'job' ? isJob : !isJob;
+  }
+
+  applyTypeFilter() {
+    this.rowData = this.genAll.filter((r: any) => this.matchesType(r));
+    this.tempRowData = this.tempAll.filter((r: any) => this.matchesType(r));
+    this.isProcess = this.tempRowData.length > 0;
+  }
+
+  setPayrollType(type: 'time' | 'job') {
+    if (this.payrollType === type) return;
+    this.payrollType = type;
+    this.initializeColumns();
+    this.initializeColumnsforProcess();
+    this.applyTypeFilter();
+  }
+
+  private showFailures(res: any) {
+    const failed = (res?.results ?? []).filter((r: any) => r.status !== 'success');
+    if (failed.length > 0) {
+      const msg = failed.slice(0, 3).map((r: any) => `Emp ${r.employee_id}: ${r.message ?? r.data ?? 'failed'}`).join(' | ');
+      this.toastr.warning(`${failed.length} payroll(s) not generated. ${msg}`);
+    }
   }
 
   ngOnInit() {
@@ -175,6 +208,7 @@ export class PayrollProcessComponent {
   getPayrollProcess(page: number = 1): void {
     this.isLoading = true;
     this.rowData = [];
+    this.genAll = [];
     this.service.post('fetch/payroll', {
       company_id: this.selectedCompanyId,
       year: this.selectedYear,
@@ -185,7 +219,7 @@ export class PayrollProcessComponent {
       if (res.status === 'success') {
         this.dataToExportExcel = res.data;
         this.dataToExportExcel_totals = res.totals;
-        this.rowData = res.data.map((item: any) => ({
+        this.genAll = res.data.map((item: any) => ({
           employee_code: item.employee_code,
           emp_name: item.emp_name,
           department: item.department_name,
@@ -195,7 +229,9 @@ export class PayrollProcessComponent {
           total_hours: item.total_hours,
           overTime: item.overtime_hrs,
           employe_id: item.employe_id,
+          is_non_time_based: item.is_non_time_based,
         }));
+        this.applyTypeFilter();
         // this.totalRows = res.pagination.total;
         // this.currentPage = res.pagination.page;
         // this.lastPage = res.pagination.last_page;
@@ -204,6 +240,7 @@ export class PayrollProcessComponent {
       this.isLoading = false;
     }, (error) => {
       this.isLoading = false;
+      this.applyTypeFilter();
       if (error.status === 404) {
         // this.toastr.warning('Data Not Found');
         this.isLoading = false;
@@ -226,8 +263,9 @@ export class PayrollProcessComponent {
     this.service.post('fetch/temp/payroll', payload).subscribe({
       next: (res: any) => {
         if (res.status === 'success' && res.data && res.data.length > 0) {
-          this.isProcess = true;
-          this.tempRowData = res.data.map((item: any) => ({
+          this.tempAll = res.data.map((item: any) => ({
+            is_non_time_based: item.is_non_time_based,
+            job_amount: Number(item.is_non_time_based) === 1 ? `₹ ${item.job_amount}` : '-',
             employee_code: item.employee_code,
             emp_name: item.emp_name,
             department_name: item.department_name,
@@ -242,29 +280,33 @@ export class PayrollProcessComponent {
             misc_deduction: item.misc_deduction ? `₹ ${item.misc_deduction}` : 'NA', 
             net_salary: item.net_salary ? `₹ ${item.net_salary}` : 'NA',
           }));
+          this.applyTypeFilter();
           // this.totalRows = res.pagination.total;
           // this.currentPage = res.pagination.page;
           // this.lastPage = res.pagination.last_page;
           // this.generatePageNumbers(this.paginationvalue);
         }
         else {
-          this.isProcess = false;
-          this.tempRowData = [];
-          this.getPayrollProcess();
+          this.tempAll = [];
+          this.applyTypeFilter();
         }
         this.isLoading = false;
       },
       error: () => {
-        this.isProcess = false;
-        this.tempRowData = [];
-        this.getPayrollProcess();
+        this.tempAll = [];
+        this.applyTypeFilter();
         this.isLoading = false;
       }
     });
   }
 
   generatePayroll() {
+    if (!this.rowData || this.rowData.length === 0) {
+      this.toastr.warning('No employees to generate for this type.');
+      return;
+    }
     this.isLoading = true;
+    // rowData is already filtered by the selected type (time based / job based)
     const payrolls = this.rowData.map((emp: any) => ({
       employee_id: emp.employe_id,
       year: this.selectedYear,
@@ -274,9 +316,11 @@ export class PayrollProcessComponent {
     const payload = { payrolls };
 
     this.service.post('craete/temp/payroll', payload).subscribe({
-      next: () => {
+      next: (res: any) => {
+        this.showFailures(res);
         this.toastr.success('Temporary payroll created.');
         this.getTempPayroll();
+        this.getPayrollProcess();
         this.isLoading = false;
       },
       error: () => {
@@ -314,6 +358,7 @@ export class PayrollProcessComponent {
 
   processPayroll() {
     this.isLoading = true;
+    // tempRowData is already filtered by the selected type
     const payrolls = this.tempRowData.map((emp: any) => ({
       employee_id: emp.employe_id,
       year: this.selectedYear,
@@ -324,6 +369,7 @@ export class PayrollProcessComponent {
       if (res.status == 'success') {
         this.toastr.success('Payroll processed successfully.');
         this.getTempPayroll();
+        this.getPayrollProcess();
         this.isLoading = false;
       } else {
         this.toastr.error('Something went wrong');
@@ -334,6 +380,14 @@ export class PayrollProcessComponent {
 
 
   initializeColumns() {
+    if (this.payrollType === 'job') {
+      this.columnDefs = [
+        { headerName: 'Emp Code', field: 'employee_code', sortable: true, filter: true },
+        { headerName: 'Emp Name', field: 'emp_name', sortable: true, filter: true },
+        { headerName: 'Role', field: 'role', sortable: true, filter: true },
+      ];
+      return;
+    }
     this.columnDefs = [
       { headerName: 'Emp Code', field: 'employee_code', sortable: true, filter: true },
       { headerName: 'Emp Name', field: 'emp_name', sortable: true, filter: true },
@@ -346,6 +400,26 @@ export class PayrollProcessComponent {
   }
 
   initializeColumnsforProcess() {
+    if (this.payrollType === 'job') {
+      this.tempColumnDefs = [
+        { headerName: 'Emp Code', field: 'employee_code', sortable: true, filter: true, minWidth: 160 },
+        { headerName: 'Emp Name', field: 'emp_name', sortable: true, filter: true, minWidth: 140 },
+        { headerName: 'Job Amount', field: 'job_amount', sortable: true, filter: true },
+        { headerName: 'Adv Salary', field: 'adv_deduction', sortable: true, filter: true },
+        { headerName: 'Net Salary', field: 'net_salary', sortable: true, filter: true },
+        {
+          headerName: 'Actions',
+          cellStyle: { border: '1px solid #ddd' },
+          cellRenderer: PayrollActionBtnComponent,
+          cellRendererParams: {
+            viewEmployee: (field: any) => this.editApp(field),
+            source: 'process'
+          },
+          flex: 1
+        },
+      ];
+      return;
+    }
     this.tempColumnDefs = [
       { headerName: 'Emp Code', field: 'employee_code', sortable: true, filter: true, minWidth: 160 },
       { headerName: 'Emp Name', field: 'emp_name', sortable: true, filter: true, minWidth: 140 },
@@ -529,11 +603,16 @@ export class PayrollProcessComponent {
     }).subscribe((res: any) => {
       this.isLoading = false;
 
-      if (res.status === 'success' && res.data?.length > 0) {
-        this.dataToExportExcel = res.data;
-        this.dataToExportExcel_totals = res.totals ?? {};
+      // export only the selected type (time based / job based)
+      const typeRows = (res.data ?? []).filter((r: any) => this.matchesType(r));
 
-        if (this.isProcess) {
+      if (res.status === 'success' && typeRows.length > 0) {
+        this.dataToExportExcel = typeRows;
+        this.dataToExportExcel_totals = this.calcTotals(typeRows);
+
+        if (this.payrollType === 'job') {
+          this.generateJobExcel();
+        } else if (this.isProcess) {
           // FULL payroll excel (existing)
           this.showLwpColumns = this.dataToExportExcel.some(
             (row: any) => Number(row.leave_without_pay_days) > 0
@@ -550,6 +629,67 @@ export class PayrollProcessComponent {
     }, () => {
       this.isLoading = false;
       this.toastr.error('Failed to export');
+    });
+  }
+
+  // totals for the exported rows (backend totals cover every employee, so recompute per type)
+  private calcTotals(rows: any[]): any {
+    const sum = (key: string) => rows.reduce((t: number, r: any) => t + Number(r[key] ?? 0), 0);
+    return {
+      total_overtime_salary: sum('overtime_amount'),
+      total_salary: sum('total_salary'),
+      total_tax: sum('total_tax_deduction'),
+      total_pf_employee: sum('pf_employee_deduction'),
+      total_pf_employer: sum('pf_employer_contribution'),
+      total_esic: sum('esic_deduction'),
+      total_adv_salary: sum('adv_deduction'),
+      total_net_salary: sum('net_salary'),
+    };
+  }
+
+  // job (die rate) based operators excel
+  generateJobExcel() {
+    const workbook = new ExcelJS.Workbook();
+    const ws = workbook.addWorksheet('Job Payroll');
+    const monthName = new Date(this.selectedYear, this.selectedMonth - 1).toLocaleString('en-US', { month: 'long' });
+
+    ws.addRow([`Job based payroll - ${monthName} ${this.selectedYear}`]);
+    ws.getRow(1).font = { bold: true };
+    ws.addRow([
+      'Employee Code', 'Employee Name', 'Job Amount', 'Miscellaneous Expenses', 'Total Salary',
+      'Professional Tax', 'Employee contri. PF', 'Employer contri. PF', 'ESIC',
+      'Advance Salary', 'Miscellaneous Deductions', 'Net Salary'
+    ]);
+    ws.getRow(2).font = { bold: true };
+
+    this.dataToExportExcel.forEach((emp: any) => {
+      ws.addRow([
+        emp.employee_code, emp.emp_name, emp.job_amount ?? 0, emp.misc_expense ?? 0, emp.total_salary ?? 0,
+        emp.total_tax_deduction ?? 0, emp.pf_employee_deduction ?? 0, emp.pf_employer_contribution ?? 0,
+        emp.esic_deduction ?? 0, emp.adv_deduction ?? 0, emp.misc_deduction ?? 0, emp.net_salary ?? 0
+      ]);
+    });
+
+    const t = this.dataToExportExcel_totals;
+    ws.addRow(['TOTAL', '', '', '', t.total_salary, t.total_tax, t.total_pf_employee, t.total_pf_employer,
+      t.total_esic, t.total_adv_salary, '', t.total_net_salary]);
+    ws.lastRow!.font = { bold: true };
+    ws.columns.forEach(col => col.width = 20);
+
+    // die wise breakup (only once payroll is generated)
+    const dieSheet = workbook.addWorksheet('Die Details');
+    dieSheet.addRow(['Employee Code', 'Employee Name', 'Die No', 'Jobs Done', 'Die Rate', 'Amount']);
+    dieSheet.getRow(1).font = { bold: true };
+    this.dataToExportExcel.forEach((emp: any) => {
+      (emp.die_details ?? []).forEach((d: any) => {
+        dieSheet.addRow([emp.employee_code, emp.emp_name, d.die_number, Number(d.jobs_done), Number(d.die_rate), Number(d.amount)]);
+      });
+    });
+    dieSheet.columns.forEach(col => col.width = 18);
+
+    workbook.xlsx.writeBuffer().then(buffer => {
+      const blob = new Blob([buffer], { type: 'application/octet-stream' });
+      FileSaver.saveAs(blob, 'Payroll_job_based.xlsx');
     });
   }
 

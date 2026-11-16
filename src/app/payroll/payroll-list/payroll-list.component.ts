@@ -158,6 +158,7 @@ export class PayrollListComponent {
             employeeName: item.emp_name,
             present_days: item.present_days,
             total_hours: item.total_hours,
+            job_amount: Number(item.is_non_time_based) === 1 ? `₹ ${item.job_amount}` : '-',
             overTime: item.total_overtime,
             netAmount: item.net_salary ? `₹ ${item.net_salary}` : 'NA',
             deduction: item.deduction ? `₹ ${item.deduction}` : 'NA',
@@ -225,6 +226,13 @@ export class PayrollListComponent {
       sortable: true,
       filter: true,
       maxWidth: 170
+    },
+    {
+      headerName: 'Job Amount',
+      field: 'job_amount',
+      sortable: true,
+      filter: true,
+      maxWidth: 150
     },
     // {
     //   headerName: 'OT(hrs)',

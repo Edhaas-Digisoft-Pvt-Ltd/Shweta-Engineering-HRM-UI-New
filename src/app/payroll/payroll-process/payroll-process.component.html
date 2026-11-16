@@ -28,6 +28,16 @@
 
       <div class="tab-content mt-3">
         <div *ngIf="activeTab === 'tab1' && hasAccess('Payroll List','view')">
+          <!-- payroll type: time based / job (die rate) based -->
+          <ul class="nav nav-pills ms-2">
+            <li class="nav-item" (click)="setPayrollType('time')">
+              <a class="nav-link fw-bold" [ngClass]="{ 'active': payrollType === 'time' }">Time Based</a>
+            </li>
+            <li class="nav-item" (click)="setPayrollType('job')">
+              <a class="nav-link fw-bold" [ngClass]="{ 'active': payrollType === 'job' }">Job Based (Die Rate)</a>
+            </li>
+          </ul>
+
           <div class="row gx-3 align-items-center p-2 rounded-2">
             <div class="col-12 mt-2">
               <div class="row justify-content-end">

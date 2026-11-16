@@ -56,6 +56,8 @@ export class PayrollSummariesComponent {
   expenseAmountInWords: string = '';
   pendingExpensePayload: any = null;
   source: string = 'list';
+  isJobBased: boolean = false;   // job (die rate) based operator
+  dieDetails: any[] = [];
 
   constructor(private route: ActivatedRoute, private router: Router, private formBuilder: FormBuilder, private modalService: ModalServiceService, private service: HrmserviceService, private toastr: ToastrService) {
     this.payrollDetails = this.formBuilder.group({
@@ -149,7 +151,10 @@ export class PayrollSummariesComponent {
     this.service.post('get/single/payroll_list', { employee_id: this.employee_id }).subscribe((res: any) => {
       if (res.status == 'success') {
         this.employeeDetails = res.data.payroll_summary[0];
-        const attendanceData = res.data.attendance_summary[0];
+        // job based operators may have no attendance rows
+        const attendanceData = res.data.attendance_summary[0] ?? {};
+        this.isJobBased = Number(this.employeeDetails?.is_non_time_based) === 1;
+        this.dieDetails = res.data.die_details || [];
         this.AdvanceSalaryDetails = res.data.advance_salary || [];;
         this.hasAdvanceSalary = this.AdvanceSalaryDetails.length > 0;;
         this.calculationData = res.data.calculation;
@@ -621,8 +626,8 @@ export class PayrollSummariesComponent {
             <td style="border-left:none;">${this.calculationData?.total_tax_deduction ?? 0}</td>
           </tr>
           <tr>
-            <td style="border-right:none;">Present Day Hours Salary</td>
-            <td style="border-left:none; border-right:none;">${this.calculationData?.present_day_hrs_salary ?? 0}</td>
+            <td style="border-right:none;">${this.isJobBased ? 'Job Amount' : 'Present Day Hours Salary'}</td>
+            <td style="border-left:none; border-right:none;">${this.isJobBased ? (this.calculationData?.job_amount ?? 0) : (this.calculationData?.present_day_hrs_salary ?? 0)}</td>
             <td style="border-left:1px solid #000; border-right:none;">PF Employee</td>
             <td style="border-left:none;">${this.calculationData?.pf_employee_deduction ?? 0}</td>
           </tr>
