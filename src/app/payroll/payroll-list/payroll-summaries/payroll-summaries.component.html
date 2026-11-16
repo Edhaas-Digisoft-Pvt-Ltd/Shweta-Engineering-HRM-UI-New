@@ -642,7 +642,7 @@
                     <form>
                         <div class="modal-body">
 
-                            <div class="row mb-3">
+                            <div class="row mb-3" *ngIf="!isJobBased">
                                 <div class="col-md-7">
                                     <label class="form-label">Reject Reason</label>
                                     <select class="form-select" [(ngModel)]="selectedRejectedReason" name="rejectReason"
@@ -654,10 +654,10 @@
                                 </div>
                             </div>
 
-                            <div class="row mb-3" *ngIf="selectedRejectedReason?.rejection_reason === 'Other'">
+                            <div class="row mb-3" *ngIf="isJobBased || selectedRejectedReason?.rejection_reason === 'Other'">
                                 <div class="col-md-7">
                                     <label class="form-label">Enter Reason</label>
-                                    <input type="text" class="form-control" [(ngModel)]="otherReason" name="otherReason"
+                                    <input type="text" class="form-control" [(ngModel)]="otherReason" name="otherReason" maxlength="255"
                                         [ngClass]="{ 'is-invalid': showOtherReasonError }" placeholder="Enter reason" />
                                 </div>
                             </div>

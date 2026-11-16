@@ -953,3 +953,31 @@ h2 {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   padding: 4px;
 }
+
+/* Time Based / Job Based (Die Rate) pills on the payroll screens (Process, Approved, Payroll List) */
+ul.payroll-type-pills .nav-link {
+  cursor: pointer;
+  position: relative;
+  color: #9e9e9e;
+}
+
+ul.payroll-type-pills .nav-link:hover {
+  border: none;
+}
+
+ul.payroll-type-pills .nav-link.active {
+  border: none;
+  padding-bottom: 20px !important;
+  color: #fff !important;
+}
+
+ul.payroll-type-pills .nav-link.active::after {
+  position: absolute;
+  content: "";
+  width: 100%;
+  height: 10px;
+  background: #94C8FF;
+  bottom: 0px;
+  left: 0px;
+  border-radius: 10px 10px 0px 0px;
+}

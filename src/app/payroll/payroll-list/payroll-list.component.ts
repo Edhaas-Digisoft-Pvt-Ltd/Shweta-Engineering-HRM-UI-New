@@ -8,6 +8,7 @@ import { ToastrService } from 'ngx-toastr';
 import * as ExcelJS from 'exceljs';
 import * as FileSaver from 'file-saver';
 import { ModalServiceService } from 'src/app/modal-service.service';
+import { exportJobPayrollExcel } from '../shared/job-payroll-excel';
 
 @Component({
   selector: 'app-payroll-list',
@@ -30,6 +31,12 @@ export class PayrollListComponent {
   isLoading: boolean = false;
   dataToExportExcel: any[] = [];
   dataToExportExcel_totals: any = {}
+
+  // 'time' = attendance based payroll, 'job' = job (die rate) based operators (is_non_time_based)
+  payrollType: 'time' | 'job' = 'time';
+  // same choice for the Approved tab (the approved list reloads when it changes)
+  approvedPayrollType: 'time' | 'job' = 'time';
+  allRows: any[] = [];   // every pending payroll of the month (both types)
 
   totalRows: number = 0;
   currentPage: number = 1;
@@ -142,6 +149,7 @@ export class PayrollListComponent {
   getpayrollList(page: number = 1): void {
     this.isLoading = true;
     this.rowData = [];
+    this.allRows = [];
     this.service.post('get/payroll_list', {
       company_id: this.selectedCompanyId,
       year: this.selectedYear,
@@ -153,7 +161,7 @@ export class PayrollListComponent {
         if (res.status === 'success' && res.data?.length > 0) {
           this.dataToExportExcel = res.data;
           this.dataToExportExcel_totals = res.totals;
-          this.rowData = res.data.map((item: any) => ({
+          this.allRows = res.data.map((item: any) => ({
             employee_code: item.employee_code,
             employeeName: item.emp_name,
             present_days: item.present_days,
@@ -163,8 +171,11 @@ export class PayrollListComponent {
             netAmount: item.net_salary ? `₹ ${item.net_salary}` : 'NA',
             deduction: item.deduction ? `₹ ${item.deduction}` : 'NA',
             employe_id: item.employe_id,
+            is_non_time_based: item.is_non_time_based,
+            adv_deduction: item.adv_deduction ? `₹ ${item.adv_deduction}` : 'NA',
             temp_payroll_id: item.temp_payroll_id
           }));
+          this.applyTypeFilter();
           // this.totalRows = res.pagination.total;
           // this.currentPage = res.pagination.page;
           // this.lastPage = res.pagination.last_page;
@@ -190,6 +201,49 @@ export class PayrollListComponent {
         }
       });
   }
+
+  // ---- Time based / Job based filter ----
+  private matchesType(row: any): boolean {
+    const isJob = Number(row.is_non_time_based) === 1;
+    return this.payrollType === 'job' ? isJob : !isJob;
+  }
+
+  applyTypeFilter() {
+    this.rowData = this.allRows.filter((r: any) => this.matchesType(r));
+  }
+
+  setPayrollType(type: 'time' | 'job') {
+    if (this.payrollType === type) return;
+    this.payrollType = type;
+    this.selectedRowData = [];
+    this.gridApi?.deselectAll();
+    this.applyTypeFilter();
+  }
+
+  // columns of the job based (die rate) list
+  jobColumnDefs: ColDef[] = [
+    {
+      headerName: '',
+      maxWidth: 50,
+      checkboxSelection: true,
+      headerCheckboxSelection: true,
+    },
+    { headerName: 'Employee Code', field: 'employee_code', sortable: true, filter: true, maxWidth: 180 },
+    { headerName: 'Employee Name', field: 'employeeName', sortable: true, filter: true, maxWidth: 230 },
+    { headerName: 'Job Amount', field: 'job_amount', sortable: true, filter: true, maxWidth: 170 },
+    { headerName: 'Adv Salary', field: 'adv_deduction', sortable: true, filter: true, maxWidth: 170 },
+    { headerName: 'Net Amount', field: 'netAmount', sortable: true, filter: true, maxWidth: 170 },
+    {
+      headerName: 'Actions',
+      cellStyle: { border: '1px solid #ddd' },
+      cellRenderer: PayrollActionBtnComponent,
+      cellRendererParams: {
+        viewEmployee: (field: any) => this.editApp(field),
+        source: 'list'
+      },
+      flex: 1
+    },
+  ];
 
   columnDefs: ColDef[] = [
     {
@@ -226,13 +280,6 @@ export class PayrollListComponent {
       sortable: true,
       filter: true,
       maxWidth: 170
-    },
-    {
-      headerName: 'Job Amount',
-      field: 'job_amount',
-      sortable: true,
-      filter: true,
-      maxWidth: 150
     },
     // {
     //   headerName: 'OT(hrs)',
@@ -331,7 +378,52 @@ export class PayrollListComponent {
     });
   }
 
+  // job (die rate) based: no reason list, user types the reason, backend treats it like reason "Other"
+  private rejectJobPayroll() {
+    this.showOtherReasonError = false;
+
+    if (this.selectedRowData.length === 0) {
+      this.toastr.warning('Please select at least one employee.');
+      return;
+    }
+
+    if (!this.otherReason || this.otherReason.trim() === '') {
+      this.showOtherReasonError = true;
+      return;
+    }
+
+    const otherReasonId = this.rejectreasons?.find((r: any) => r.rejection_reason === 'Other')?.rejection_id ?? 3;
+
+    const payload = {
+      temp_payroll_id: this.selectedRowData.map((emp: any) => emp.temp_payroll_id),
+      rejection_id: otherReasonId,
+      other_reason: this.otherReason.trim(),
+    };
+
+    this.service.post('rejected/payroll', payload).subscribe((res: any) => {
+      const failed = (res?.results ?? []).filter((r: any) => r.status !== 'success');
+      if (res.status == 'success' && failed.length === 0) {
+        this.toastr.success('Payroll rejected successfully');
+      } else if (res.status == 'success') {
+        this.toastr.warning(failed[0]?.message ?? 'Some payroll could not be rejected');
+      } else {
+        this.toastr.error('Something went wrong');
+        return;
+      }
+      this.selectedRowData = [];
+      this.gridApi?.deselectAll();
+      this.modalService.closeModal();
+      this.otherReason = '';
+      this.getpayrollList();
+    });
+  }
+
   rejectPayroll() {
+    if (this.payrollType === 'job') {
+      this.rejectJobPayroll();
+      return;
+    }
+
     this.showReasonError = false;
     this.showOtherReasonError = false;
 
@@ -449,9 +541,16 @@ export class PayrollListComponent {
     }).subscribe((res: any) => {
       this.isLoading = false;
 
-      if (res.status === 'success' && res.data?.length > 0) {
-        this.dataToExportExcel = res.data;
-        this.dataToExportExcel_totals = res.totals;
+      // export only the selected type (time based / job based)
+      const typeRows = (res.data ?? []).filter((r: any) => this.matchesType(r));
+
+      if (res.status === 'success' && typeRows.length > 0 && this.payrollType === 'job') {
+        // job (die rate) based operators have their own excel (same sheet as Manage Payroll)
+        exportJobPayrollExcel(typeRows, Number(this.selectedYear), Number(this.selectedMonth));
+      } else if (res.status === 'success' && typeRows.length > 0) {
+        this.dataToExportExcel = typeRows;
+        // backend totals cover every employee: use them as is when nothing was filtered out (existing behaviour)
+        this.dataToExportExcel_totals = typeRows.length === res.data.length ? res.totals : this.calcTotals(typeRows);
         this.showLwpColumns = this.dataToExportExcel.some(
           (row: any) =>
             row.leave_without_pay_days !== null &&
@@ -470,6 +569,23 @@ export class PayrollListComponent {
         this.toastr.error('Failed to fetch payroll data for export');
       }
     });
+  }
+
+  // totals of the exported rows (only used when the other type was filtered out of the export)
+  private calcTotals(rows: any[]): any {
+    const sum = (key: string) => rows.reduce((t: number, r: any) => t + Number(r[key] ?? 0), 0);
+    return {
+      total_overtime_salary: sum('overtime_amount'),
+      total_salary: sum('total_salary'),
+      total_tax: sum('total_tax_deduction'),
+      total_pf_employee: sum('pf_employee_deduction'),
+      total_pf_employer: sum('pf_employer_contribution'),
+      total_esic: sum('esic_deduction'),
+      total_adv_salary: sum('adv_deduction'),
+      total_net_salary: sum('net_salary'),
+      total_misc_expense: sum('misc_expense'),
+      total_misc_deduction: sum('misc_deduction'),
+    };
   }
 
   generateExcel() {

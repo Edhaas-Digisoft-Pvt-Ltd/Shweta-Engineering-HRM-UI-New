@@ -29,7 +29,7 @@
       <div class="tab-content mt-3">
         <div *ngIf="activeTab === 'tab1' && hasAccess('Payroll List','view')">
           <!-- payroll type: time based / job (die rate) based -->
-          <ul class="nav nav-pills ms-2">
+          <ul class="nav nav-pills ms-2 payroll-type-pills">
             <li class="nav-item" (click)="setPayrollType('time')">
               <a class="nav-link fw-bold" [ngClass]="{ 'active': payrollType === 'time' }">Time Based</a>
             </li>
@@ -151,7 +151,17 @@
         </div>
 
         <div *ngIf="activeTab === 'tab3'">
-          <app-payroll-process-approved></app-payroll-process-approved>
+          <!-- payroll type: time based / job (die rate) based -->
+          <ul class="nav nav-pills ms-2 payroll-type-pills">
+            <li class="nav-item" (click)="approvedPayrollType = 'time'">
+              <a class="nav-link fw-bold" [ngClass]="{ 'active': approvedPayrollType === 'time' }">Time Based</a>
+            </li>
+            <li class="nav-item" (click)="approvedPayrollType = 'job'">
+              <a class="nav-link fw-bold" [ngClass]="{ 'active': approvedPayrollType === 'job' }">Job Based (Die Rate)</a>
+            </li>
+          </ul>
+
+          <app-payroll-process-approved [payrollType]="approvedPayrollType"></app-payroll-process-approved>
         </div>
 
         <div *ngIf="activeTab === 'tab4'">

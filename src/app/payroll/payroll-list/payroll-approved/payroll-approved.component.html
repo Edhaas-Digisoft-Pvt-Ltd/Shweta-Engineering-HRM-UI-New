@@ -50,7 +50,7 @@
             <div class="col-12 mt-4">
                 <ag-grid-angular class="ag-theme-alpine" [rowData]="rowData" (gridReady)="onGridReady($event)"
                     (selectionChanged)="onSelectionChanged($event)" rowSelection="multiple"
-                    [rowMultiSelectWithClick]="true" [columnDefs]="columnDefs" [gridOptions]="gridOptions"
+                    [rowMultiSelectWithClick]="true" [columnDefs]="payrollType === 'job' ? jobColumnDefs : columnDefs" [gridOptions]="gridOptions"
                     [pagination]="false" [domLayout]="'autoHeight'" [defaultColDef]="defaultColDef">
                 </ag-grid-angular>
 

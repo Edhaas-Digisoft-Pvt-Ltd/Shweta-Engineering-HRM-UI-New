@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, Input, SimpleChanges } from '@angular/core';
 import { ColDef } from 'ag-grid-community';
 import { Router } from '@angular/router';
 import { HrmserviceService } from 'src/app/hrmservice.service';
@@ -6,6 +6,7 @@ import { ToastrService } from 'ngx-toastr';
 import { IRowNode } from 'ag-grid-community';
 import * as ExcelJS from 'exceljs';
 import * as FileSaver from 'file-saver';
+import { exportJobPayrollExcel } from '../../shared/job-payroll-excel';
 declare var jspdf: any;
 declare var html2canvas: any;
 
@@ -37,6 +38,17 @@ export class PayrollApprovedComponent {
   pdfExportRows: any[] = [];
   pdfMonthLabel: string = '';
   isPdfExporting: boolean = false;
+
+  // 'time' = attendance based payroll, 'job' = job (die rate) based operators (is_non_time_based)
+  @Input() payrollType: 'time' | 'job' = 'time';
+  // columns of the job based (die rate) approved list
+  jobColumnDefs: ColDef[] = [
+    { headerName: 'Emp Code', field: 'employee_code', sortable: true, filter: true, minWidth: 150 },
+    { headerName: 'Emp name', field: 'emp_name', sortable: true, filter: true },
+    { headerName: 'Job Amount', field: 'job_amount', sortable: true, filter: true, minWidth: 140 },
+    { headerName: 'Adv Salary', field: 'advance_salary', sortable: true, filter: true, minWidth: 140 },
+    { headerName: 'Net Salary', field: 'net_salary', sortable: true, filter: true, minWidth: 140 },
+  ];
 
   constructor(private router: Router, private service: HrmserviceService, private toastr: ToastrService) { }
 
@@ -129,7 +141,8 @@ export class PayrollApprovedComponent {
       year: this.selectedYear,
       month: this.selectedMonth,
       page: page,
-      isexport: false
+      isexport: false,
+      payroll_type: this.payrollType
     }).subscribe(
       (res: any) => {
         try {
@@ -221,13 +234,6 @@ export class PayrollApprovedComponent {
     {
       headerName: 'Bonus',
       field: 'bonus_amount',
-      sortable: true,
-      filter: true,
-      minWidth: 120,
-    },
-    {
-      headerName: 'Job Amount',
-      field: 'job_amount',
       sortable: true,
       filter: true,
       minWidth: 120,
@@ -389,9 +395,51 @@ export class PayrollApprovedComponent {
     }
   }
 
+  // the Time Based / Job Based (Die Rate) tab lives in the parent screen, reload when it changes
+  ngOnChanges(changes: SimpleChanges) {
+    if (changes['payrollType'] && !changes['payrollType'].firstChange) {
+      this.currentPage = 1;
+      this.pagesToShow = [];
+      this.rowData = [];
+      this.ApprovePayrollList(1);
+    }
+  }
+
+  // job (die rate) based approved payroll has its own excel (same sheet as Manage Payroll / Approve Payroll)
+  private exportJobExcel() {
+    this.isPdfExporting = true;
+
+    this.service.post('fetch/approved/payroll', {
+      company_id: this.selectedCompanyId,
+      year: this.selectedYear,
+      month: this.selectedMonth,
+      isexport: true,
+      payroll_type: 'job'
+    }).subscribe((res: any) => {
+      this.isPdfExporting = false;
+      if (res.status === 'success' && res.data?.length > 0) {
+        exportJobPayrollExcel(res.data, Number(this.selectedYear), Number(this.selectedMonth));
+      } else {
+        this.toastr.warning('No data to export');
+      }
+    }, (error) => {
+      this.isPdfExporting = false;
+      if (error.status === 404) {
+        this.toastr.warning('No data to export');
+      } else {
+        this.toastr.error('Failed to fetch payroll data for export');
+      }
+    });
+  }
+
   exportPdf() {
     if (!this.selectedCompanyId || !this.selectedYear || !this.selectedMonth) {
       this.toastr.warning('Select company, year and month first');
+      return;
+    }
+
+    if (this.payrollType === 'job') {
+      this.exportJobExcel();
       return;
     }
 
@@ -401,7 +449,8 @@ export class PayrollApprovedComponent {
       company_id: this.selectedCompanyId,
       year: this.selectedYear,
       month: this.selectedMonth,
-      isexport: true
+      isexport: true,
+      payroll_type: 'time'
     }).subscribe((res: any) => {
       if (res.status === 'success' && res.data?.length > 0) {
         this.dataToExportExcel = res.data;

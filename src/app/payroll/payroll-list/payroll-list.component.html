@@ -28,6 +28,16 @@
 
                 <div class="tab-content mt-3">
                     <div *ngIf="activeTab === 'tab1'">
+                        <!-- payroll type: time based / job (die rate) based -->
+                        <ul class="nav nav-pills ms-2 payroll-type-pills">
+                            <li class="nav-item" (click)="setPayrollType('time')">
+                                <a class="nav-link fw-bold" [ngClass]="{ 'active': payrollType === 'time' }">Time Based</a>
+                            </li>
+                            <li class="nav-item" (click)="setPayrollType('job')">
+                                <a class="nav-link fw-bold" [ngClass]="{ 'active': payrollType === 'job' }">Job Based (Die Rate)</a>
+                            </li>
+                        </ul>
+
                         <div class="row gx-3  align-items-center  p-2 rounded-2">
                             <div class="col-12  mt-2">
                                 <div class="row justify-content-end">
@@ -69,7 +79,7 @@
 
                         <div class="row">
                             <div class="col-12 mt-4">
-                                <ag-grid-angular style="width: 100%; height: 60vh;" class="ag-theme-alpine" [rowData]="rowData" [columnDefs]="columnDefs"
+                                <ag-grid-angular style="width: 100%; height: 60vh;" class="ag-theme-alpine" [rowData]="rowData" [columnDefs]="payrollType === 'job' ? jobColumnDefs : columnDefs"
                                      [gridOptions]="gridOptions"
                                     (selectionChanged)="onSelectionChanged($event)" rowSelection="multiple"
                                     [rowMultiSelectWithClick]="true" [defaultColDef]="defaultColDef"
@@ -107,7 +117,17 @@
 
         <div *ngIf="activeTab === 'tab2'">
             <div class="container ">
-                <app-payroll-approved></app-payroll-approved>
+                <!-- payroll type: time based / job (die rate) based -->
+                <ul class="nav nav-pills ms-1 payroll-type-pills">
+                    <li class="nav-item" (click)="approvedPayrollType = 'time'">
+                        <a class="nav-link fw-bold" [ngClass]="{ 'active': approvedPayrollType === 'time' }">Time Based</a>
+                    </li>
+                    <li class="nav-item" (click)="approvedPayrollType = 'job'">
+                        <a class="nav-link fw-bold" [ngClass]="{ 'active': approvedPayrollType === 'job' }">Job Based (Die Rate)</a>
+                    </li>
+                </ul>
+
+                <app-payroll-approved [payrollType]="approvedPayrollType"></app-payroll-approved>
             </div>
         </div>
 
@@ -184,7 +204,7 @@
             <form>
                 <div class="modal-body">
 
-                    <div class="row mb-3">
+                    <div class="row mb-3" *ngIf="payrollType !== 'job'">
                         <div class="col-md-7">
                             <label class="form-label">Reject Reason</label>
                             <select class="form-select" [(ngModel)]="selectedRejectedReason" name="rejectReason"
@@ -196,10 +216,10 @@
                         </div>
                     </div>
 
-                    <div class="row mb-3" *ngIf="selectedRejectedReason?.rejection_reason === 'Other'">
+                    <div class="row mb-3" *ngIf="payrollType === 'job' || selectedRejectedReason?.rejection_reason === 'Other'">
                         <div class="col-md-7">
                             <label class="form-label">Enter Reason</label>
-                            <input type="text" class="form-control" [(ngModel)]="otherReason" name="otherReason"
+                            <input type="text" class="form-control" [(ngModel)]="otherReason" name="otherReason" maxlength="255"
                                 [ngClass]="{ 'is-invalid': showOtherReasonError }" placeholder="Enter reason" />
                         </div>
                     </div>

@@ -6,6 +6,7 @@ import { ToastrService } from 'ngx-toastr';
 import { PayrollActionBtnComponent } from '../payroll-list/payroll-action-btn/payroll-action-btn.component';
 import * as ExcelJS from 'exceljs';
 import * as FileSaver from 'file-saver';
+import { exportJobPayrollExcel } from '../shared/job-payroll-excel';
 
 @Component({
   selector: 'app-payroll-process',
@@ -30,6 +31,8 @@ export class PayrollProcessComponent {
 
   // 'time' = attendance based payroll, 'job' = job (die rate) based operators (is_non_time_based)
   payrollType: 'time' | 'job' = 'time';
+  // same choice for the Approved tab (the approved list reloads when it changes)
+  approvedPayrollType: 'time' | 'job' = 'time';
   genAll: any[] = [];    // all employees ready to generate (both types)
   tempAll: any[] = [];   // all generated (temp) payrolls (both types)
   columnDefs: ColDef[] = [];
@@ -608,9 +611,16 @@ export class PayrollProcessComponent {
 
       if (res.status === 'success' && typeRows.length > 0) {
         this.dataToExportExcel = typeRows;
-        this.dataToExportExcel_totals = this.calcTotals(typeRows);
+        // backend totals cover every employee: use them as is when nothing was filtered out (existing behaviour)
+        this.dataToExportExcel_totals = typeRows.length === res.data.length
+          ? (res.totals ?? {})
+          : this.calcTotals(typeRows);
 
         if (this.payrollType === 'job') {
+          if (!this.isProcess) {
+            this.toastr.warning('Generate the payroll first, the job based excel is created from generated payroll.');
+            return;
+          }
           this.generateJobExcel();
         } else if (this.isProcess) {
           // FULL payroll excel (existing)
@@ -647,50 +657,9 @@ export class PayrollProcessComponent {
     };
   }
 
-  // job (die rate) based operators excel
+  // job (die rate) based operators excel (same sheet as Approve Payroll)
   generateJobExcel() {
-    const workbook = new ExcelJS.Workbook();
-    const ws = workbook.addWorksheet('Job Payroll');
-    const monthName = new Date(this.selectedYear, this.selectedMonth - 1).toLocaleString('en-US', { month: 'long' });
-
-    ws.addRow([`Job based payroll - ${monthName} ${this.selectedYear}`]);
-    ws.getRow(1).font = { bold: true };
-    ws.addRow([
-      'Employee Code', 'Employee Name', 'Job Amount', 'Miscellaneous Expenses', 'Total Salary',
-      'Professional Tax', 'Employee contri. PF', 'Employer contri. PF', 'ESIC',
-      'Advance Salary', 'Miscellaneous Deductions', 'Net Salary'
-    ]);
-    ws.getRow(2).font = { bold: true };
-
-    this.dataToExportExcel.forEach((emp: any) => {
-      ws.addRow([
-        emp.employee_code, emp.emp_name, emp.job_amount ?? 0, emp.misc_expense ?? 0, emp.total_salary ?? 0,
-        emp.total_tax_deduction ?? 0, emp.pf_employee_deduction ?? 0, emp.pf_employer_contribution ?? 0,
-        emp.esic_deduction ?? 0, emp.adv_deduction ?? 0, emp.misc_deduction ?? 0, emp.net_salary ?? 0
-      ]);
-    });
-
-    const t = this.dataToExportExcel_totals;
-    ws.addRow(['TOTAL', '', '', '', t.total_salary, t.total_tax, t.total_pf_employee, t.total_pf_employer,
-      t.total_esic, t.total_adv_salary, '', t.total_net_salary]);
-    ws.lastRow!.font = { bold: true };
-    ws.columns.forEach(col => col.width = 20);
-
-    // die wise breakup (only once payroll is generated)
-    const dieSheet = workbook.addWorksheet('Die Details');
-    dieSheet.addRow(['Employee Code', 'Employee Name', 'Die No', 'Jobs Done', 'Die Rate', 'Amount']);
-    dieSheet.getRow(1).font = { bold: true };
-    this.dataToExportExcel.forEach((emp: any) => {
-      (emp.die_details ?? []).forEach((d: any) => {
-        dieSheet.addRow([emp.employee_code, emp.emp_name, d.die_number, Number(d.jobs_done), Number(d.die_rate), Number(d.amount)]);
-      });
-    });
-    dieSheet.columns.forEach(col => col.width = 18);
-
-    workbook.xlsx.writeBuffer().then(buffer => {
-      const blob = new Blob([buffer], { type: 'application/octet-stream' });
-      FileSaver.saveAs(blob, 'Payroll_job_based.xlsx');
-    });
+    exportJobPayrollExcel(this.dataToExportExcel, Number(this.selectedYear), Number(this.selectedMonth));
   }
 
   //process

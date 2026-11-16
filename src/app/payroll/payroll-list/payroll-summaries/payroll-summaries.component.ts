@@ -479,7 +479,41 @@ export class PayrollSummariesComponent {
     }
   }
 
+  // job (die rate) based: user types the reason, backend treats it like reason "Other"
+  private rejectJobPayroll() {
+    this.showOtherReasonError = false;
+
+    if (!this.otherReason || this.otherReason.trim() === '') {
+      this.showOtherReasonError = true;
+      return;
+    }
+
+    const otherReasonId = this.rejectreasons?.find((r: any) => r.rejection_reason === 'Other')?.rejection_id ?? 3;
+
+    const payload = {
+      temp_payroll_id: Array.isArray(this.tempPayrollId) ? this.tempPayrollId : [this.tempPayrollId],
+      rejection_id: otherReasonId,
+      other_reason: this.otherReason.trim(),
+    };
+
+    this.service.post('rejected/payroll', payload).subscribe((res: any) => {
+      const failed = (res?.results ?? []).filter((r: any) => r.status !== 'success');
+      if (res.status == 'success' && failed.length === 0) {
+        this.toastr.success('Payroll rejected successfully');
+        this.modalService.closeModal();
+        this.router.navigate(['/authPanal/payrollList']);
+      } else {
+        this.toastr.error(failed[0]?.message ?? 'Something went wrong');
+      }
+    });
+  }
+
   rejectPayroll() {
+    if (this.isJobBased) {
+      this.rejectJobPayroll();
+      return;
+    }
+
     this.showReasonError = false;
     this.showOtherReasonError = false;
 
