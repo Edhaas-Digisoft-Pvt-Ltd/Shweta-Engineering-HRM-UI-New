@@ -101,7 +101,7 @@
                                     <div
                                         class="d-flex flex-column align-items-center justify-content-center p-2 py-2 attandance-summary">
                                         <p class="mb-1"><i class="bi bi-clock me-2"></i>Over Time</p>
-                                        <h4 class="m-0">{{employeeDetails.total_overtime}}</h4>
+                                        <h4 class="m-0">{{finalOvertimeHrs}}</h4>
                                     </div>
                                 </div>
                                 <div class="col-12 col-sm-6">
@@ -150,11 +150,101 @@
                                 </div>
                             </div>
 
+                            <!-- Miscellaneous Overtime (manually added OT, time based operators only) -->
+                            <div class="row m-0 p-0 px-2 mt-3" *ngIf="showMiscOvertime">
+                                <div class="add-advance-salary-wrapper mb-3 p-3 border rounded">
+                                    <div class="row m-0 p-0">
+                                        <h5 class="section-header">
+                                            <i class="bi bi-clock-history me-2"></i>
+                                            Miscellaneous Overtime
+                                        </h5>
+                                        <form [formGroup]="miscOtForm" (ngSubmit)="addMiscOvertime()">
+                                            <div class="row m-0 p-0 px-2 mt-2">
+
+                                                <div class="col-md-4 mb-3">
+                                                    <label>Date <span class="text-danger">*</span></label>
+                                                    <input type="date" class="form-control" formControlName="otDate"
+                                                        [min]="otMinDate" [max]="otMaxDate"
+                                                        [ngClass]="{'is-invalid': isMiscOtSubmitted && miscOtForm.get('otDate')?.invalid}">
+                                                    <div class="invalid-feedback">Please select a date.</div>
+                                                </div>
+
+                                                <div class="col-md-8 mb-3">
+                                                    <label>Reason <span class="text-danger">*</span></label>
+                                                    <input type="text" class="form-control" formControlName="reason"
+                                                        maxlength="200" placeholder="Enter reason"
+                                                        [ngClass]="{'is-invalid': isMiscOtSubmitted && miscOtForm.get('reason')?.invalid}">
+                                                    <div class="invalid-feedback">Please enter a reason.</div>
+                                                </div>
+
+                                                <div class="col-md-4 mb-3">
+                                                    <label>OT Hours <span class="text-danger">*</span></label>
+                                                    <input type="text" inputmode="decimal" class="form-control"
+                                                        formControlName="otHours" placeholder="Enter hours"
+                                                        [ngClass]="{'is-invalid': isMiscOtSubmitted && miscOtForm.get('otHours')?.invalid}"
+                                                        (keypress)="allowOnlyNumbers($event)"
+                                                        (paste)="onAmountPaste($event)">
+                                                    <div class="invalid-feedback">Enter valid hours (0.01 to 24, up to 2 decimals).</div>
+                                                </div>
+
+                                                <div class="col-md-4 mb-3">
+                                                    <label>Amount (₹)</label>
+                                                    <input type="text" class="form-control readOnlyInput"
+                                                        [value]="formattedMoney(miscOtPreviewAmount)" readonly>
+                                                </div>
+
+                                                <div class="col-md-4 d-flex align-items-end mb-3">
+                                                    <button class="btn comBtn w-100 text-white" type="submit"
+                                                        [disabled]="isSavingMiscOt">
+                                                        Add
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </form>
+
+                                        <table class="table table-bordered table-striped mt-2 misc-ot-table">
+                                            <colgroup>
+                                                <col style="width: 21%">
+                                                <col style="width: 37%">
+                                                <col style="width: 12%">
+                                                <col style="width: 22%">
+                                                <col style="width: 8%">
+                                            </colgroup>
+                                            <thead>
+                                                <tr>
+                                                    <th>Date</th>
+                                                    <th>Reason</th>
+                                                    <th>Hrs</th>
+                                                    <th>Amount (₹)</th>
+                                                    <th></th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr *ngIf="miscOtList.length === 0">
+                                                    <td colspan="5" class="text-center text-muted">No overtime added.</td>
+                                                </tr>
+                                                <tr *ngFor="let item of miscOtList">
+                                                    <td>{{ item.ot_date | date:'dd-MM-yyyy' }}</td>
+                                                    <td class="reason-cell" [title]="item.reason">{{ item.reason }}</td>
+                                                    <td>{{ item.ot_hours }}</td>
+                                                    <td>{{ formattedMoney(item.amount) }}</td>
+                                                    <td class="text-center">
+                                                        <i class="bi bi-trash text-danger fs-5 cursor-pointer"
+                                                            (click)="deleteMiscOvertime(item.misc_ot_id)">
+                                                        </i>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+
                             <div class="row m-0 p-0 px-2 mt-3">
                                 <div class="add-advance-salary-wrapper mb-3 p-3 border rounded">
                                     <div class="row m-0 p-0">
-                                        <h5 class="pb-2 border-bottom border-primary-light">
-                                            <i class="bi bi-wallet2 me-2 text-primary "></i>
+                                        <h5 class="section-header">
+                                            <i class="bi bi-wallet2 me-2"></i>
                                             Miscellaneous Expenses / Deductions
                                         </h5>
                                         <form [formGroup]="expenseForm" (ngSubmit)="addExpenseInSalary()">

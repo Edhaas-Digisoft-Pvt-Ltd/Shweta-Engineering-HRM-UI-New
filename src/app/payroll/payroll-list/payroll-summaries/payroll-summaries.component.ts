@@ -59,6 +59,12 @@ export class PayrollSummariesComponent {
   isJobBased: boolean = false;   // job (die rate) based operator
   dieDetails: any[] = [];
 
+  // Miscellaneous Overtime (manually added OT, time based operators only)
+  miscOtForm: FormGroup;
+  miscOtList: any[] = [];
+  isMiscOtSubmitted: boolean = false;
+  isSavingMiscOt: boolean = false;
+
   constructor(private route: ActivatedRoute, private router: Router, private formBuilder: FormBuilder, private modalService: ModalServiceService, private service: HrmserviceService, private toastr: ToastrService) {
     this.payrollDetails = this.formBuilder.group({
       id: ['', [Validators.required]],
@@ -72,6 +78,47 @@ export class PayrollSummariesComponent {
       expenseDescription: ['', [Validators.required, Validators.pattern(/^[A-Za-z0-9\s]+$/)]],
       expenseAmount: ['', [Validators.required, Validators.pattern(/^\d+(\.\d{1,2})?$/), Validators.min(0.01)]]
     });
+
+    this.miscOtForm = this.formBuilder.group({
+      otDate: ['', [Validators.required]],
+      reason: ['', [Validators.required, Validators.maxLength(200)]],
+      otHours: ['', [Validators.required, Validators.pattern(/^\d+(\.\d{1,2})?$/), Validators.min(0.01), Validators.max(24)]]
+    });
+  }
+
+  // payroll month as YYYY-MM
+  get payrollYearMonth(): string {
+    return `${this.selectedYear}-${String(this.selectedMonth).padStart(2, '0')}`;
+  }
+
+  // misc overtime only for time based operators (role 2), not for die rate / job based operators
+  get showMiscOvertime(): boolean {
+    return !this.isJobBased && Number(this.employeeDetails?.role_id) === 2;
+  }
+
+  // date limits of the payroll month for the date picker
+  get otMinDate(): string {
+    return `${this.payrollYearMonth}-01`;
+  }
+
+  get otMaxDate(): string {
+    const lastDay = new Date(Number(this.selectedYear), Number(this.selectedMonth), 0).getDate();
+    return `${this.payrollYearMonth}-${String(lastDay).padStart(2, '0')}`;
+  }
+
+  // amount for the entered hours = hours * per hour rate
+  get miscOtPreviewAmount(): number {
+    const hours = Number(this.miscOtForm.value.otHours);
+    const rate = Number(this.calculationData?.per_hours_amount ?? 0);
+    if (!hours || !rate) return 0;
+    return Math.round(hours * rate * 100) / 100;
+  }
+
+  // final overtime hours = attendance overtime + manually added overtime
+  get finalOvertimeHrs(): number {
+    const attendanceOt = Number(this.employeeDetails?.total_overtime ?? 0);
+    const miscOt = Number(this.calculationData?.misc_ot_hours ?? 0);
+    return Math.round((attendanceOt + miscOt) * 100) / 100;
   }
 
   months = [
@@ -159,7 +206,7 @@ export class PayrollSummariesComponent {
         this.hasAdvanceSalary = this.AdvanceSalaryDetails.length > 0;;
         this.calculationData = res.data.calculation;
         this.expensesList = res.data.expenses || [];
-        console.log(this.calculationData);
+        this.miscOtList = res.data.misc_overtime || [];
 
 
         this.payrollDetails.patchValue({
@@ -174,7 +221,7 @@ export class PayrollSummariesComponent {
             A: (attendanceData.absent_days),
             H: (attendanceData.holiday_days),
             HD: (attendanceData.half_day),
-            OT: (attendanceData.total_overtime),
+            OT: this.finalOvertimeHrs,
             LT: (attendanceData.late_mark),
             TD: (attendanceData.total_days),
             W: (attendanceData.weekend),
@@ -314,6 +361,73 @@ export class PayrollSummariesComponent {
       } else {
         this.toastr.error("Something went wrong");
         this.isLoading = false;
+      }
+    });
+  }
+
+  // ---- Miscellaneous Overtime ----
+  addMiscOvertime() {
+    this.isMiscOtSubmitted = true;
+    if (this.miscOtForm.invalid || !String(this.miscOtForm.value.reason ?? '').trim()) {
+      this.toastr.error('Please enter required fields');
+      return;
+    }
+    if (this.isSavingMiscOt) return;
+
+    // same date already has overtime: ask before adding one more entry
+    const selectedDate = this.miscOtForm.value.otDate;
+    const sameDateExists = this.miscOtList.some((x: any) => String(x.ot_date).substring(0, 10) === selectedDate);
+    if (sameDateExists && !confirm('Overtime is already added for this date. Do you want to add one more entry for the same date?')) {
+      return;
+    }
+
+    this.isSavingMiscOt = true;
+    this.isLoading = true;
+    this.service.post('add/misc-overtime', {
+      employee_id: this.employee_id,
+      year_month: this.payrollYearMonth,
+      ot_date: this.miscOtForm.value.otDate,
+      reason: String(this.miscOtForm.value.reason).trim(),
+      ot_hours: this.miscOtForm.value.otHours
+    }).subscribe({
+      next: (res: any) => {
+        if (res.status === 'success') {
+          this.toastr.success('Overtime added successfully');
+          this.miscOtForm.reset({ otDate: '', reason: '', otHours: '' });
+          this.isMiscOtSubmitted = false;
+          this.getSinglePayroll();
+        } else {
+          this.isLoading = false;
+          this.toastr.error(res.message || 'Something went wrong');
+        }
+        this.isSavingMiscOt = false;
+      },
+      error: () => {
+        this.isLoading = false;
+        this.isSavingMiscOt = false;
+        this.toastr.error('Something went wrong');
+      }
+    });
+  }
+
+  deleteMiscOvertime(misc_ot_id: number) {
+    if (!confirm('Are you sure you want to delete this overtime?')) {
+      return;
+    }
+    this.isLoading = true;
+    this.service.post('delete/misc-overtime', { misc_ot_id }).subscribe({
+      next: (res: any) => {
+        if (res.status === 'success') {
+          this.toastr.success('Overtime deleted successfully');
+          this.getSinglePayroll();
+        } else {
+          this.isLoading = false;
+          this.toastr.error(res.message || 'Something went wrong');
+        }
+      },
+      error: () => {
+        this.isLoading = false;
+        this.toastr.error('Something went wrong');
       }
     });
   }

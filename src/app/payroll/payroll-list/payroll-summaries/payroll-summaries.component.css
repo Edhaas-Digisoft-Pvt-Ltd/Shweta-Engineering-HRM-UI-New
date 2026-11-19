@@ -62,3 +62,34 @@
   padding-right: 6px;  /* space for scrollbar */
 }
 
+
+/* blue section header (same blue as the View Attendance Details button) */
+.section-header {
+  background-color: var(--primary-color);
+  color: #fff;
+  padding: 0.55rem 0.9rem;
+  border-radius: 6px;
+  border-bottom: none !important;
+  margin-bottom: 0.5rem;
+}
+
+.section-header i {
+  color: #fff !important;
+}
+
+/* Miscellaneous Overtime list: fixed columns, long reason is cut with ... (full text in tooltip) */
+.misc-ot-table {
+  table-layout: fixed;
+  width: 100%;
+}
+
+.misc-ot-table th,
+.misc-ot-table td {
+  vertical-align: middle;
+}
+
+.misc-ot-table .reason-cell {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
