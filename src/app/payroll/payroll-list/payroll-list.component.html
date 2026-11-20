@@ -7,7 +7,7 @@
         <div class="main-content">
             <div class="row gx-3  align-items-center p-2 rounded-2 mt-3">
                 <div class="col-12 d-flex">
-                    <h2 class="fw-bold"> <i class="bi bi-currency-rupee me-2"></i>Payroll List</h2>
+                    <h2 class="fw-bold"> <i class="bi bi-currency-rupee me-2"></i>Payroll Approval</h2>
                 </div>
             </div>
             <div class="tabs-container m-2">
@@ -16,15 +16,28 @@
                         <a class="nav-link fw-bold" [ngClass]="{'active': activeTab === 'tab1'}">Payroll List</a>
                     </li>
                     <li class="nav-item" (click)="selectTab('tab2')">
-                        <a class="nav-link fw-bold" [ngClass]="{'active': activeTab === 'tab2'}">Payroll Approved</a>
+                        <a class="nav-link fw-bold" [ngClass]="{'active': activeTab === 'tab2'}">Approved</a>
                     </li>
                     <li class="nav-item" (click)="selectTab('tab3')">
-                        <a class="nav-link fw-bold" [ngClass]="{'active': activeTab === 'tab3'}">Payroll Rejected</a>
+                        <a class="nav-link fw-bold" [ngClass]="{'active': activeTab === 'tab3'}">Rejected</a>
+                    </li>
+                    <li class="nav-item" (click)="selectTab('tab4')">
+                        <a class="nav-link fw-bold" [ngClass]="{'active': activeTab === 'tab4'}">Generate CMS</a>
                     </li>
                 </ul>
 
                 <div class="tab-content mt-3">
                     <div *ngIf="activeTab === 'tab1'">
+                        <!-- payroll type: time based / job (die rate) based -->
+                        <ul class="nav nav-pills ms-2 payroll-type-pills">
+                            <li class="nav-item" (click)="setPayrollType('time')">
+                                <a class="nav-link fw-bold" [ngClass]="{ 'active': payrollType === 'time' }">Time Based</a>
+                            </li>
+                            <li class="nav-item" (click)="setPayrollType('job')">
+                                <a class="nav-link fw-bold" [ngClass]="{ 'active': payrollType === 'job' }">Job Based (Die Rate)</a>
+                            </li>
+                        </ul>
+
                         <div class="row gx-3  align-items-center  p-2 rounded-2">
                             <div class="col-12  mt-2">
                                 <div class="row justify-content-end">
@@ -48,7 +61,14 @@
                                     </div>
 
                                     <div class="col-auto d-flex align-items-end">
-                                        <button class="btn btn-primary exportExcelBtn me-1" (click)="exportExcel()">
+                                        <button class="btn btn-success text-white"
+                                            (click)="approvePayrollList()">Approve</button>
+                                        <button class="btn btn-danger text-white rejectBtn ms-3" (click)="openModal()">Reject
+                                            </button>
+                                    </div>
+
+                                    <div class="col-auto d-flex align-items-end">
+                                        <button class="btn exportExcelBtn me-1" (click)="exportExcel()">
                                             <i class="bi bi-file-earmark-text-fill"></i>
                                         </button>
                                     </div>
@@ -59,14 +79,14 @@
 
                         <div class="row">
                             <div class="col-12 mt-4">
-                                <ag-grid-angular style="width: 100%; height: 60vh;" class="ag-theme-alpine"
-                                    [rowData]="rowData" [columnDefs]="columnDefs" [pagination]="false"
+                                <ag-grid-angular style="width: 100%; height: 60vh;" class="ag-theme-alpine" [rowData]="rowData" [columnDefs]="payrollType === 'job' ? jobColumnDefs : columnDefs"
+                                     [gridOptions]="gridOptions"
                                     (selectionChanged)="onSelectionChanged($event)" rowSelection="multiple"
                                     [rowMultiSelectWithClick]="true" [defaultColDef]="defaultColDef"
                                     (gridReady)="onGridReady($event)">
                                 </ag-grid-angular>
 
-                                <div class="d-flex align-items-center justify-content-end flex-wrap mt-3 gap-2">
+                                <!-- <div class="d-flex align-items-center justify-content-end flex-wrap mt-3 gap-2">
                                     <button class="btn btn-sm btn-primary rounded" (click)="prevPage()"
                                         [disabled]="currentPage === 1">Prev</button>
                                     <button class="btn btn-sm btn-primary rounded" (click)="nextPage()"
@@ -82,14 +102,14 @@
                                         </span>
                                         <ng-template #ellipsis><span class="mx-1">...</span></ng-template>
                                     </ng-container>
-                                </div>
+                                </div> -->
                             </div>
                         </div>
-                        <div class="text-center">
+                        <!-- <div class="text-center">
                             <button class="btn comBtn text-white" (click)="approvePayrollList()">Approve</button>
-                            <button class="btn btn-danger text-white rejectBtn ms-2" data-bs-toggle="modal"
+                            <button *ngIf="false" class="btn btn-danger text-white rejectBtn ms-2" data-bs-toggle="modal"
                                 data-bs-target="#RejectAllModal" (click)="onRejectAllClick()">Reject All</button>
-                        </div>
+                        </div> -->
                     </div>
                 </div>
             </div>
@@ -97,13 +117,29 @@
 
         <div *ngIf="activeTab === 'tab2'">
             <div class="container ">
-                <app-payroll-approved></app-payroll-approved>
+                <!-- payroll type: time based / job (die rate) based -->
+                <ul class="nav nav-pills ms-1 payroll-type-pills">
+                    <li class="nav-item" (click)="approvedPayrollType = 'time'">
+                        <a class="nav-link fw-bold" [ngClass]="{ 'active': approvedPayrollType === 'time' }">Time Based</a>
+                    </li>
+                    <li class="nav-item" (click)="approvedPayrollType = 'job'">
+                        <a class="nav-link fw-bold" [ngClass]="{ 'active': approvedPayrollType === 'job' }">Job Based (Die Rate)</a>
+                    </li>
+                </ul>
+
+                <app-payroll-approved [payrollType]="approvedPayrollType"></app-payroll-approved>
             </div>
         </div>
 
         <div *ngIf="activeTab === 'tab3'">
             <div class="container ">
                 <app-payroll-rejected></app-payroll-rejected>
+            </div>
+        </div>
+
+        <div *ngIf="activeTab === 'tab4'">
+            <div class="container ">
+                <app-generate-cms></app-generate-cms>
             </div>
         </div>
 
@@ -151,5 +187,54 @@
             </div>
         </div>
 
+    </div>
+</div>
+
+<!-- reject modal -->
+<div class="modal fade" id="RejectPayrollModal" tabindex="-1" aria-labelledby="applyLeaveLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content rounded-4">
+
+            <div class="modal-header text-white rounded-top-4">
+                <h5 class="modal-title" id="applyLeaveLabel">Reject Payroll</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                    aria-label="Close"></button>
+            </div>
+
+            <form>
+                <div class="modal-body">
+
+                    <div class="row mb-3" *ngIf="payrollType !== 'job'">
+                        <div class="col-md-7">
+                            <label class="form-label">Reject Reason</label>
+                            <select class="form-select" [(ngModel)]="selectedRejectedReason" name="rejectReason"
+                                [ngClass]="{ 'is-invalid': showReasonError }">
+                                <option [ngValue]="null" disabled>-- Choose reason --</option>
+                                <option *ngFor="let item of rejectreasons" [ngValue]="item">{{
+                                    item.rejection_reason }}</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3" *ngIf="payrollType === 'job' || selectedRejectedReason?.rejection_reason === 'Other'">
+                        <div class="col-md-7">
+                            <label class="form-label">Enter Reason</label>
+                            <input type="text" class="form-control" [(ngModel)]="otherReason" name="otherReason" maxlength="255"
+                                [ngClass]="{ 'is-invalid': showOtherReasonError }" placeholder="Enter reason" />
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-12 d-flex justify-content-end">
+                            <button type="button" class="btn BtnColor" (click)="rejectPayroll()">
+                                Reject
+                            </button>
+                        </div>
+                    </div>
+
+                </div>
+            </form>
+
+        </div>
     </div>
 </div>

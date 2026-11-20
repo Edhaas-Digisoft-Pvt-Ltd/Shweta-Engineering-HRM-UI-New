@@ -63,7 +63,21 @@ import { LeaveConfigComponent } from './configuration/leave-config/leave-config.
 import { BonusConfigComponent } from './configuration/bonus-config/bonus-config.component';
 import { IncentiveConfigComponent } from './configuration/incentive-config/incentive-config.component';
 import { SettingsConfigComponent } from './configuration/settings-config/settings-config.component';
-
+import { EmpLeaveAdvsalaryReportComponent } from './emp-leave-advsalary-report/emp-leave-advsalary-report.component';
+import { LeaveApprovedRejectedComponent } from './leave/leave-approved-rejected/leave-approved-rejected.component';
+import { AdvanceSalaryAllempReportComponent } from './advance-payment/advance-salary-allemp-report/advance-salary-allemp-report.component';
+import { GenerateCmsComponent } from './payroll/payroll-list/generate-cms/generate-cms.component';
+import { UpdateEmployeeComponent } from './employee/update-employee/update-employee.component';
+import { InsufficientLeavesComponent } from './leave/insufficient-leaves/insufficient-leaves.component';
+import { AbsenteesComponent } from './leave/absentees/absentees.component';
+import { HolidayCalendarComponent } from './configuration/holiday-calendar/holiday-calendar.component';
+import { LiveAttendanceComponent } from './attendance/live-attendance/live-attendance.component';
+import { VerifyAttendanceComponent } from './attendance/verify-attendance/verify-attendance.component';
+import { DepartmentDesignationComponent } from './compnay-setup/department-designation/department-designation.component';
+import { SalaryIncrementComponent } from './salary-increment/salary-increment.component';
+import { UpcomingLeavesComponent } from './leave/upcoming-leaves/upcoming-leaves.component';
+import { EmployeeVerifiedAttendanceComponent } from './employee-verified-attendance/employee-verified-attendance.component';
+import { DieRateConfigComponent } from './configuration/die-rate-config/die-rate-config.component';
 // FullCalendarModule.registerPlugins([dayGridPlugin]);
 
 //onkar
@@ -120,6 +134,21 @@ import { SettingsConfigComponent } from './configuration/settings-config/setting
     BonusConfigComponent,
     IncentiveConfigComponent,
     SettingsConfigComponent,
+    EmpLeaveAdvsalaryReportComponent,
+    LeaveApprovedRejectedComponent,
+    AdvanceSalaryAllempReportComponent,
+    GenerateCmsComponent,
+    UpdateEmployeeComponent,
+    InsufficientLeavesComponent,
+    AbsenteesComponent,
+    HolidayCalendarComponent,
+    LiveAttendanceComponent,
+    VerifyAttendanceComponent,
+    DepartmentDesignationComponent,
+    SalaryIncrementComponent,
+    UpcomingLeavesComponent,
+    EmployeeVerifiedAttendanceComponent,
+    DieRateConfigComponent,
 
   ],
   imports: [

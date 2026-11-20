@@ -20,14 +20,27 @@ export class HrmserviceService {
   // url: string = 'http://127.0.0.1:8000/api/v1/';
 
   // url: string = 'https://edhaasdigisoft.co.in/shwetapayroll/api/v1/';
+  // url: string = 'https://shwetaengineers.co.in/hr/payroll/payroll/Shweta_Payroll_rest/api/v1/';
+  //live link
+  // url: string = 'https://shwetaengineers.co.in/seplpayroll/api/v1/';  
+
+  // new test link
+  // url: string = 'https://edhaasdigisoftpl.co.in/rutuja/payroll/Shweta_Payroll_rest/public/api/v1/';  
+
+  //shweta local   
+  // url: string = 'http://192.168.1.2:8080/hr/seplpayroll/public/api/v1/';  
+
+  //om local
+  //  url: string = 'http://localhost/payroll/seplpayroll/public/api/v1/';
+
+  //local
   url: string = 'http://127.0.0.1:8000/api/v1/';
 
-
-  // url: string = 'http://localhost/CRM_rest/index.php/';
-//   url: string = 'https://edhaasdigisoft.co.in/website1/Hrishi/CRM_rest/index.php/';
-  // url:  string =  'http://localhost/CRM_Portal_API/index.php';
-
-  constructor(private router: Router, private httpClient: HttpClient) { }
+  constructor(private router: Router, private httpClient: HttpClient) {
+    this.loadRoleFromStorage();
+    this.loadPermissionsFromStorage();
+    this.loadCompanyIdFromStorage();
+  }
 
   get(endpoint: string, params?: any, reqOpts?: any) {
     if (!reqOpts) {
@@ -71,8 +84,7 @@ export class HrmserviceService {
     if (!reqOpts) {
       reqOpts = {
         headers: new HttpHeaders({
-          'Authorization': jwtToken,  // Setting up the Authorization Header
-
+          'Authorization': 'Bearer ' + jwtToken,
         }),
         params: new HttpParams(),
       };
@@ -108,18 +120,33 @@ export class HrmserviceService {
     return this.httpClient.delete(this.url + '/' + endpoint, reqOpts);
   }
 
+  deleteWithAuth(endpoint: string) {
+    const jwtToken = sessionStorage.getItem('AUTH') || '';
+    return this.httpClient.delete(this.url + endpoint, {
+      headers: new HttpHeaders({
+        'Authorization': 'Bearer ' + jwtToken,
+      }),
+    });
+  }
+
   patch(endpoint: string, body: any, reqOpts?: any) {
     return this.httpClient.patch(this.url + '/' + endpoint, body, reqOpts);
   }
 
-  private roleKey = 'logIn';
+  // private roleKey = 'logIn';
 
+  private roleKey = 'role';
   setRole(role: string): void {
     sessionStorage.setItem(this.roleKey, role);
+    this._role = role;
   }
-
+  private _role: string = '';
   getRole(): string {
-    return sessionStorage.getItem(this.roleKey) || '';
+    return this._role || '';
+  }
+  private loadRoleFromStorage() {
+    const role = sessionStorage.getItem(this.roleKey);
+    if (role) this._role = role;
   }
 
   clearRole(): void {
@@ -127,22 +154,120 @@ export class HrmserviceService {
   }
 
   //signal =========================================================================================
-  private _selectedCompanyId = signal<number>(1); //storing company id 
+  private _selectedCompanyId = signal<number | string | any[] | null>(null); //storing company id 
 
-  setCompanyId(id: number) {
+  setCompanyId(id: number | string | any[]) {
     this._selectedCompanyId.set(id);   //temp store company id
+    sessionStorage.setItem('selectedCompanyId', JSON.stringify(id));
   }
 
   selectedCompanyId = this._selectedCompanyId.asReadonly(); //display company id
+
+  loadCompanyIdFromStorage() {
+    const storedId = sessionStorage.getItem('selectedCompanyId');
+    if (storedId) {
+      try {
+        const parsed = JSON.parse(storedId);
+        this._selectedCompanyId.set(parsed);
+      } catch {
+        // fallback for old non-JSON values stored before this change
+        this._selectedCompanyId.set(storedId === 'all' ? 'all' : Number(storedId));
+      }
+    }
+  }
 
   //signal - store employee id =====================================================================
   private _EmployeeId = signal<number | null>(null);
 
   setEmployeeId(id: number) {
     this._EmployeeId.set(id);
-    console.log('service',this._EmployeeId);
+    console.log('service', this._EmployeeId);
   }
 
   EmployeeId = this._EmployeeId.asReadonly();
+
+  // Fetch roles
+  fetchRoles() {
+    return this.post('fetch/roles', {});
+  }
+
+  // Fetch modules
+  fetchModules() {
+    return this.post('modules', {});
+  }
+
+  // Fetch permissions
+  fetchPermissions() {
+    return this.post('permissions', {});
+  }
+
+  // Fetch role-permissions
+  fetchRolePermissions(role_id: number) {
+    return this.post('role/permissions', { role_id });
+  }
+
+  // Assign role-permissions
+  assignRolePermissions(role_id: number, permissions: any) {
+    return this.post('assign-role-permissions', { role_id, permissions });
+  }
+
+  // Fetch employee permissions
+  // fetchEmployeePermissions(employee_id: number) {
+  //   return this.post('employee/permissions', { employee_id });
+  // }
+
+  // Permission cache
+  private permissions: { [module: string]: string[] } = {};
+  setPermissions(data: any[]) {
+    this.permissions = {};
+    data.forEach(item => {
+      const moduleName = item.module?.module_name;
+      const permissionName = item.permission?.permission_name?.toLowerCase();
+      if (moduleName && permissionName) {
+        if (!this.permissions[moduleName]) this.permissions[moduleName] = [];
+        this.permissions[moduleName].push(permissionName);
+      }
+    });
+    sessionStorage.setItem('permissions', JSON.stringify(this.permissions));
+  }
+
+  private loadPermissionsFromStorage() {
+    const stored = sessionStorage.getItem('permissions');
+    if (stored) this.permissions = JSON.parse(stored);
+  }
+
+  hasPermission(module: string, permission: string): boolean {
+    module = module.trim();
+    permission = permission.trim().toLowerCase();
+    return this.permissions[module]?.includes(permission) || false;
+  }
+
+  getPermissions() {
+    return this.permissions;
+  }
+
+  fetchEmployeePermissions(employee_id: number) { return this.post('employee/permissions', { employee_id }); }
+
+  clearPermissions() {
+    this.permissions = {};
+    sessionStorage.removeItem('permissions');
+  }
+
+  formatToDDMMYYYY(value: any): string {
+    if (!value) return '';
+    if (/^\d{2}-\d{2}-\d{4}$/.test(value)) return value;
+
+    const d = new Date(value);
+    if (isNaN(d.getTime())) return value;
+
+    const day = String(d.getDate()).padStart(2, '0');
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const year = d.getFullYear();
+
+    return `${day}-${month}-${year}`;
+  }
+
+  // AG Grid valueFormatter as an arrow function bound to service
+  dateFormatter = (params: any): string => this.formatToDDMMYYYY(params.value);
 
 }

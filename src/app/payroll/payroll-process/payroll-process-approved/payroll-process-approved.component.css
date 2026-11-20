@@ -11,3 +11,15 @@ label{
     font-weight: 500;
     margin-bottom:5px;
 }
+
+.pdf-th, .pdf-td {
+  border: 1px solid #333;
+  padding: 6px 10px;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.pdf-th {
+  background-color: #d9d9d9;
+  font-weight: bold;
+}

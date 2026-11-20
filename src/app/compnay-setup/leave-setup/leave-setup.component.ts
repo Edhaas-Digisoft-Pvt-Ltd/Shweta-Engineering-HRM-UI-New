@@ -48,7 +48,7 @@ export class LeaveSetupComponent {
   initializeColumns() {
     this.columnDefs = [
       { headerName: 'Name', field: 'leave_name', sortable: true, filter: true, maxWidth: 250, },
-      { headerName: 'Leave Type', field: 'leave_type', sortable: true, filter: true, maxWidth: 220, },
+      { headerName: 'Leave Type', field: 'leave_type_id', sortable: true, filter: true, maxWidth: 220, },
       { headerName: 'No. of Leaves', field: 'leave_count', sortable: true, filter: true, maxWidth: 200 },
       { headerName: 'Is Carry Forward', field: 'leave_carryforwad', sortable: true, filter: true },
     ];
@@ -161,16 +161,6 @@ export class LeaveSetupComponent {
     this.getCompanyNames();
     this.getAllLeaves();
     this.initializeColumns();
-
-    if (sessionStorage.getItem('roleName') == 'admin') {
-      this.router.navigate(['/authPanal/LeaveSetup']);
-      return;
-    } else {
-      alert('Please Login To Proceed');
-      sessionStorage.clear();
-      this.router.navigate(['']);
-      return;
-    }
   }
 
   getAllLeaves() {
@@ -180,7 +170,7 @@ export class LeaveSetupComponent {
       if (res.status === 'success') {
         this.rowData = res.data.map((item: any) => ({
           leave_name: item.leave_name,
-          leave_type: item.leave_type,
+          leave_type_id: item.leave_type_id,
           leave_count: item.leave_count,
           leave_carryforwad: item.leave_carryforwad,
           leave_id: item.leave_id
@@ -191,7 +181,7 @@ export class LeaveSetupComponent {
       (error) => {
         this.isLoading = false;
         if (error.status === 400) {
-          this.toastr.warning('Data Not Found');
+          // this.toastr.warning('Data Not Found');
         } else {
           console.error(error);
         }
@@ -314,7 +304,7 @@ export class LeaveSetupComponent {
     if (this.LeaveRule.valid) {
       let current_data: any = {
         "company_id": this.LeaveRule.value.companyid,
-        "leave_type": this.LeaveRule.value.leavetype,
+        "leave_type_id": this.LeaveRule.value.leavetype,
         "leave_name": this.LeaveRule.value.leavename,
         "leave_count": this.LeaveRule.value.leavenumber,
       }
@@ -346,7 +336,7 @@ export class LeaveSetupComponent {
         this.leaveId = res.data.leave_id
         this.companyId = res.data.company_id
         this.EditLeaveRule.patchValue({
-          leavetype: res.data.leave_type,
+          leavetype: res.data.leave_type_id,
           leavename: res.data.leave_name,
           leavenumber: res.data.leave_count,
         })
@@ -365,7 +355,7 @@ export class LeaveSetupComponent {
       let current_data: any = {
         "leave_id": this.leaveId,
         "company_id": this.companyId,
-        "leave_type": this.EditLeaveRule.value.leavetype,
+        "leave_type_id": this.EditLeaveRule.value.leavetype,
         "leave_name": this.EditLeaveRule.value.leavename,
         "leave_count": this.EditLeaveRule.value.leavenumber,
       };

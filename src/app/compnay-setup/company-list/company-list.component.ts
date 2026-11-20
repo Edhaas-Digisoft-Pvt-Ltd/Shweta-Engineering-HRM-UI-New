@@ -1,8 +1,10 @@
 import { Component } from '@angular/core';
 import { AbstractControl, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
+import { ColDef } from 'ag-grid-community';
 import { ToastrService } from 'ngx-toastr';
 import { HrmserviceService } from 'src/app/hrmservice.service';
+import { ModalServiceService } from 'src/app/modal-service.service';
 declare var bootstrap: any;
 @Component({
   selector: 'app-company-list',
@@ -29,19 +31,26 @@ export class CompanyListComponent {
   isEditSubmitted = false;
   selectedId: any;
   textInputControl: any;
+  rowData: any = [];
+  columnDefs: ColDef[] = [];
+  gridApiActive: any;
+  selectedCompany: any = null;
+  existingLogoUrl: string | null = null;
+  removeExistingLogo = false;
 
-  constructor(private router: Router, private fb: FormBuilder, private service: HrmserviceService, private toastr: ToastrService) {
+  constructor(private router: Router, private fb: FormBuilder, private service: HrmserviceService, private modalService: ModalServiceService, private toastr: ToastrService) {
     this.companyForm = this.fb.group({
       companyName: ['', [Validators.required, Validators.pattern(/^[A-Za-z\s]+$/)]],
       companyLogo: ['', Validators.required],
-      radioChoice: ['yes', Validators.required],
-      masterCompanyList: [{ value: '', disabled: true, }, Validators.required],
+      radioChoice: ['no', Validators.required],
+      masterCompanyList: ['', Validators.required],
+      // masterCompanyList: [{ value: '', disabled: true, }, Validators.required],
       IncorporationDate: ['', Validators.required],
       companyDescription: ['', [Validators.required, Validators.pattern(/^[A-Za-z0-9,\s]+$/)]],
       companyAddress: ['', [Validators.required, Validators.pattern(/^[A-Za-z0-9,\s]+$/)]],
     });
+
     this.EditcompanyForm = this.fb.group({
-      // Company Name: Only letters, numbers, spaces, dots, and ampersands (e.g., TCS, Infosys Ltd., H&M)
       EditcompanyName: [
         '',
         [
@@ -50,13 +59,9 @@ export class CompanyListComponent {
           Validators.pattern(this.NoWhitespaceRegExp)
         ]
       ],
-
-      // Company Logo: Required (file/image input)
-      EditcompanyLogo: [null, Validators.required],
       EditcompanyAddress: ['', Validators.required],
-      EditmasterCompanyList: [{ value: '', disabled: true, }, Validators.required],
+      EditmasterCompanyList: ['', Validators.required],
       radioChoice: ['yes'],
-
       EditcompanyDescription: [
         '',
         [
@@ -64,19 +69,17 @@ export class CompanyListComponent {
           Validators.pattern(/^[A-Za-z ]{2,}$/)
         ]
       ],
-
-      // Incorporation Date: Required (can use custom date validator for past dates only)
-      EditIncorporationDate: ['', Validators.required, Validators.max]
+      EditIncorporationDate: ['', Validators.required]
     });
 
-    this.companyForm.get('radioChoice')?.valueChanges.subscribe(value => {
-      this.textInputControl = this.companyForm.get('masterCompanyList');
-      if (value === 'yes') {
-        this.textInputControl?.disable();
-      } else {
-        this.textInputControl?.enable();
-      }
-    });
+    // this.companyForm.get('radioChoice')?.valueChanges.subscribe(value => {
+    //   this.textInputControl = this.companyForm.get('masterCompanyList');
+    //   if (value === 'yes') {
+    //     this.textInputControl?.disable();
+    //   } else {
+    //     this.textInputControl?.enable();
+    //   }
+    // });
   }
   CompanyNameList = [
     {
@@ -97,17 +100,85 @@ export class CompanyListComponent {
     this.today = currentDate.toISOString().split('T')[0]; // Format YYYY-MM-DD
     this.getCompanyData();
     this.getCompanyNames();
+    this.initializeCompanyColumns();
+  }
 
+  initializeCompanyColumns() {
+    this.columnDefs = [
+      // {
+      //   headerName: 'Logo',
+      //   field: 'company_logo_url',
+      //   cellRenderer: (params: any) => {
+      //     if (!params.value) return '';
+      //     return `<img src="${params.value}" style="height:40px;width:40px;border-radius:5px;" />`;
+      //   },
+      //   maxWidth: 100
+      // },
+      {
+        headerName: 'Company Name',
+        field: 'company_name',
+        sortable: true,
+        filter: true
+      },
+      {
+        headerName: 'Description',
+        field: 'company_desc',
+        sortable: true,
+        filter: true
+      },
+      {
+        headerName: 'Location',
+        field: 'company_location',
+        sortable: true,
+        filter: true
+      },
+      {
+        headerName: 'Founded',
+        field: 'company_founded',
+        sortable: true,
+        filter: true
+      },
+      {
+        headerName: 'Action',
+        field: 'action',
+        sortable: false,
+        filter: false,
+        editable: false,
+        suppressMovable: true,
+        maxWidth: 120,
+        cellRenderer: (params: any) => {
+          const wrapper = document.createElement('div');
+          wrapper.classList.add('d-flex', 'gap-2', 'align-items-center', 'h-100');
 
-    if (sessionStorage.getItem('roleName') == 'admin') {
-      this.router.navigate(['/authPanal/companyList']);
-      return;
-    } else {
-      alert('Please Login To Proceed');
-      sessionStorage.clear();
-      this.router.navigate(['']);
-      return;
-    }
+          const editBtn = document.createElement('button');
+          editBtn.type = 'button';
+          editBtn.classList.add('btn', 'btn-sm', 'action-btn-grid', 'edit-btn-grid', 'me-2');
+          editBtn.style.backgroundColor = '#C8E3FF';
+          editBtn.innerHTML = '<i class="bi bi-pencil"></i>';
+          editBtn.addEventListener('click', (e: Event) => {
+            e.stopPropagation();
+            this.onEditCompany(params.data);
+          });
+
+          wrapper.appendChild(editBtn);
+          return wrapper;
+        }
+      }
+    ];
+  }
+
+  onGridReady(params: { api: any }) {
+    this.gridApiActive = params.api;
+  }
+
+  public defaultColDef: ColDef = {
+    editable: true,
+    flex: 1,
+    resizable: true,
+  };
+
+  openModal() {
+    this.modalService.openModal('exampleModal')
   }
 
   onMasterCompanyChange(event: Event): void {
@@ -120,25 +191,29 @@ export class CompanyListComponent {
     return isWhitespace ? { whitespace: true } : null;
   }
 
-
   getCompanyData() {
     this.service.post("fetch/company", {}).subscribe((res: any) => {
-      this.CompanyDetails = res.Data;
+      if (res.status === 'success') {
+        this.rowData = res.data;
+      }
     });
   }
 
   getCompanyNames() {
     this.service.post('master-companies', {}).subscribe((res: any) => {
       if (res.status == "success") {
-        this.MasterCompanyNames = res.Data
+        this.MasterCompanyNames = res.Data;
+        // Auto-select first master company
+        if (this.MasterCompanyNames?.length > 0) {
+          const firstId = this.MasterCompanyNames[0].master_id;
+          this.selectedId = firstId;
+          this.companyForm.patchValue({ masterCompanyList: firstId });
+        }
       }
-    },
-      (error) => {
-        console.error('Error fetching companies:', error);
-      }
-    );
+    }, (error) => {
+      console.error('Error fetching companies:', error);
+    });
   }
-
 
   onFileSelected(event: any) {
     const file = event.target.files[0];
@@ -206,77 +281,82 @@ export class CompanyListComponent {
 
   addCompany() {
     this.isSubmitted = true;
-    if (this.companyForm.value.radioChoice == 'no') {
-      if (this.companyForm.valid && this.selectedLogoFile) {
-        const current_data = {
-          master_id: this.selectedId,
-          company_name: this.companyForm.value.companyName,
-          tax_id: this.selectedId,
-          payroll_id: this.selectedId,
-          company_desc: this.companyForm.value.companyDescription,
-          company_location: this.companyForm.value.companyAddress,
-          company_logo: this.selectedLogoFile.name,
-          company_founded: this.companyForm.value.IncorporationDate,
-        };
 
-        console.log("Company Data to Submit:", current_data);
+    const isMaster = this.companyForm.value.radioChoice === 'yes';
 
-        this.service.post("create/company", current_data).subscribe({
-          next: (res) => {
-            this.toastr.success('Form Submitted Successfully!');
-            this.closeAllModals();
-            this.getCompanyData();
-            this.companyForm.reset();
-            this.isSubmitted = false;
-            this.selectedLogoFile = null;
-          },
-          error: (err) => {
-            console.error("API Error:", err);
-            this.toastr.error('Failed to add company.');
-          }
-        });
-      } else {
-        if (!this.selectedLogoFile) {
-          this.toastr.error('Please select a company logo!');
-        }
-
-        const invalidControls = Object.keys(this.companyForm.controls).filter(control =>
-          this.companyForm.get(control)?.invalid
-        );
-
-        console.warn("Invalid Fields:", invalidControls);
-        this.toastr.error('Please fill all required fields correctly!');
-      }
-    }
-    else {
-      if (this.companyForm.valid && this.selectedLogoFile) {
-        const current_data = {
-          master_company_name: this.companyForm.value.companyName,
-          company_initials: "xyz",
-        };
-
-        console.log("Company Data to Submit:", current_data);
-
-        this.service.post("create/master-companie", current_data).subscribe({
-          next: (res) => {
-            this.toastr.success('Form Submitted Successfully!');
-            this.closeAllModals();
-            this.getCompanyData();
-            this.companyForm.reset();
-            this.isSubmitted = false;
-            this.selectedLogoFile = null;
-          },
-          error: (err) => {
-            console.error("API Error:", err);
-            this.toastr.error('Failed to add company.');
-          }
-        });
-      }
-      console.log("Form Values on Submit Attempt:", this.companyForm.value);
-
-
+    if (this.companyForm.invalid) {
+      this.toastr.error('Please fill all required fields correctly!');
+      return;
     }
 
+    if (!this.selectedLogoFile) {
+      this.toastr.error('Please select a company logo!');
+      return;
+    }
+
+    const formData = new FormData();
+
+    if (!isMaster) {
+      formData.append('master_id', this.selectedId);
+      formData.append('tax_id', this.selectedId);
+      formData.append('payroll_id', this.selectedId);
+      formData.append('company_name', this.companyForm.value.companyName);
+      formData.append('company_desc', this.companyForm.value.companyDescription);
+      formData.append('company_location', this.companyForm.value.companyAddress);
+      formData.append('company_founded', this.companyForm.value.IncorporationDate);
+      formData.append('company_logo', this.selectedLogoFile);
+    } else {
+      formData.append('master_company_name', this.companyForm.value.companyName);
+      const initials = this.generateCompanyInitials(this.companyForm.value.companyName);
+      formData.append('company_initials', initials);
+      formData.append('company_logo', this.selectedLogoFile);
+    }
+
+    const url = isMaster ? "create/master-companie" : "create/company";
+
+    this.service.post(url, formData).subscribe({
+      next: (res) => {
+        this.toastr.success('Form Submitted Successfully!');
+        this.modalService.closeModal();
+        this.getCompanyData();
+        this.getCompanyNames();
+        this.companyForm.reset();
+        this.isSubmitted = false;
+        this.selectedLogoFile = null;
+      },
+      error: (err) => {
+        console.error("API Error:", err);
+        this.toastr.error('Failed to add company.');
+      }
+    });
+
+  }
+
+  resetCompanyForm() {
+    this.companyForm.reset({
+      companyName: '',
+      companyLogo: '',
+      radioChoice: 'yes',
+      masterCompanyList: { value: '', disabled: true },
+      IncorporationDate: '',
+      companyDescription: '',
+      companyAddress: ''
+    });
+    this.companyForm.get('masterCompanyList')?.disable();
+  }
+
+  generateCompanyInitials(name: string): string {
+    if (!name) return '';
+
+    const words = name.trim().split(/\s+/);
+
+    const initials = words
+      .map(word => word[0])
+      .filter(char => /[A-Za-z]/.test(char))
+      .join('')
+      .toUpperCase();
+
+    return initials;
   }
 
   allowOnlyLetters(event: KeyboardEvent) {
@@ -302,5 +382,94 @@ export class CompanyListComponent {
     if (!pattern.test(char)) {
       event.preventDefault();
     }
+  }
+
+  onEditCompany(company: any) {
+    this.selectedCompany = company;
+    this.selectedId = company.master_id;
+    this.selectedLogoFile = null;
+    this.removeExistingLogo = false;
+    this.existingLogoUrl = company.company_logo_url || null;
+
+    this.EditcompanyForm.patchValue({
+      EditcompanyName: company.company_name,
+      EditcompanyAddress: company.company_location,
+      EditcompanyDescription: company.company_desc,
+      EditIncorporationDate: company.company_founded,
+      EditmasterCompanyList: company.master_id
+    });
+
+    const modalEl = document.getElementById('EditCompanyDetails');
+    if (modalEl) {
+      const modal = new bootstrap.Modal(modalEl);
+      modal.show();
+    }
+  }
+
+  onDeleteExistingLogo(): void {
+    this.removeExistingLogo = true;
+    this.existingLogoUrl = null;
+  }
+
+  onEditFileSelected(event: any) {
+    const file = event.target.files[0];
+    if (file) {
+      this.selectedLogoFile = file;
+    }
+  }
+
+  onEditMasterCompanyChange(event: Event): void {
+    this.selectedId = (event.target as HTMLSelectElement).value;
+  }
+
+  updateCompany() {
+    this.isEditSubmitted = true;
+
+    if (this.EditcompanyForm.invalid) {
+      this.toastr.error('Please fill all required fields correctly!');
+      return;
+    }
+
+    const id = this.selectedCompany?.company_id ?? this.selectedCompany?.id;
+    if (!id) {
+      this.toastr.error('Could not determine which company to update.');
+      return;
+    }
+
+    // If user deleted the old logo but didn't pick a new one, block submit
+    if (this.removeExistingLogo && !this.selectedLogoFile) {
+      this.toastr.error('Please upload a new logo or keep the existing one.');
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append('master_id', this.EditcompanyForm.value.EditmasterCompanyList);
+    formData.append('company_name', this.EditcompanyForm.value.EditcompanyName);
+    formData.append('company_desc', this.EditcompanyForm.value.EditcompanyDescription);
+    formData.append('company_location', this.EditcompanyForm.value.EditcompanyAddress);
+    formData.append('company_founded', this.EditcompanyForm.value.EditIncorporationDate);
+
+    if (this.selectedLogoFile) {
+      formData.append('company_logo', this.selectedLogoFile);
+    }
+    // if neither removed nor a new file picked, we simply don't send company_logo,
+    // so backend leaves the existing one untouched
+
+    this.service.post(`update/company/${id}`, formData).subscribe({
+      next: (res) => {
+        this.toastr.success('Company updated successfully!');
+        this.closeAllModals();
+        this.getCompanyData();
+        this.isEditSubmitted = false;
+        this.selectedCompany = null;
+        this.selectedLogoFile = null;
+        this.removeExistingLogo = false;
+        this.existingLogoUrl = null;
+      },
+      error: (err) => {
+        console.error('Update Error:', err);
+        this.toastr.error('Failed to update company.');
+      }
+    });
   }
 }

@@ -115,3 +115,54 @@ canvas {
     grid-template-columns: repeat(4, 1fr);
     gap: 20px; 
 }
+
+.badge {
+  font-size: 0.65rem;
+  padding: 0.25em 0.45em;
+}
+
+.notification-dropdown {
+  animation: fadeIn 0.2s ease-in-out;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-5px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.notification-dropdown::-webkit-scrollbar {
+  width: 4px;
+}
+.notification-dropdown::-webkit-scrollbar-thumb {
+  background-color: #ccc;
+  border-radius: 2px;
+}
+
+.company-logo {
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  object-fit: cover;
+  border: 1px solid #ddd;
+}
+
+.logo-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f8f9fa;
+  border-radius: 8px;
+  width: 45px;
+  height: 45px;
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.4; transform: scale(1.15); }
+}
+
+.blink-badge {
+  animation: blink 1s infinite;
+}

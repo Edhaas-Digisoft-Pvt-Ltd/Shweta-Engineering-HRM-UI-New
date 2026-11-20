@@ -13,45 +13,70 @@
       <div class="tabs-container m-2">
         <ul class="nav nav-tabs">
           <li class="nav-item" (click)="selectTab('tab1')">
-            <a class="nav-link fw-bold" [ngClass]="{'active': activeTab === 'tab1'}">All Salary Request</a>
+            <a class="nav-link fw-bold" [ngClass]="{'active': activeTab === 'tab1'}">Requests</a>
           </li>
           <li class="nav-item" (click)="selectTab('tab2')">
-            <a class="nav-link fw-bold" [ngClass]="{'active': activeTab === 'tab2'}">Approved Salary</a>
+            <a class="nav-link fw-bold" [ngClass]="{'active': activeTab === 'tab2'}">Approved</a>
           </li>
           <li class="nav-item" (click)="selectTab('tab3')">
-            <a class="nav-link fw-bold" [ngClass]="{'active': activeTab === 'tab3'}">Report</a>
+            <a class="nav-link fw-bold" [ngClass]="{'active': activeTab === 'tab3'}">Details</a>
+          </li>
+          <li class="nav-item" (click)="selectTab('tab4')">
+            <a class="nav-link fw-bold" [ngClass]="{'active': activeTab === 'tab4'}">Report</a>
           </li>
         </ul>
         <div class="tab-content mt-3">
           <div *ngIf="activeTab === 'tab1'">
             <div class="row gx-3  align-items-center  p-2 rounded-2">
-              <div class="col-12  mt-2">
+              <div class="col-12">
                 <div class="row justify-content-end">
+                  <div class="col-auto d-flex align-items-end">
+                    <input type="text" class="form-control" placeholder="Search"
+                      [(ngModel)]="searchValue" (ngModelChange)="onFilterBoxChange()" />
+                  </div>
                   <div class="col-3">
-                    <label for="">Select Company</label>
-                    <select class="form-select" [(ngModel)]="selectedCompanyId" (change)="onCompanyChange($event)">
-                      <option *ngFor="let item of CompanyNames" [value]="item.company_id">{{ item.company_name }}
-                      </option>
-                    </select>
+                    <label>Select Company</label>
+                    <div class="custom-select-dropdown w-100">
+                      <button type="button" class="btn btn-outline-secondary dropdown-toggle-btn"
+                        (click)="toggleCompanyDropdown()">
+                        <span class="text-truncate">{{ companyDropdownLabel }}</span>
+                        <i class="bi bi-chevron-down ms-2"></i>
+                      </button>
+
+                      <div class="dropdown-menu" [class.show]="companyDropdownOpen">
+                        <div class="form-check dropdown-divider-item">
+                          <input class="form-check-input" type="checkbox" id="company-all-advpay"
+                            [checked]="isAllSelected()" (change)="toggleAll($event)">
+                          <label class="form-check-label" for="company-all-advpay">All</label>
+                        </div>
+
+                        <div class="form-check" *ngFor="let item of CompanyNames">
+                          <input class="form-check-input" type="checkbox" [id]="'company-advpay-' + item.company_id"
+                            [checked]="isCompanySelected(item.company_id)"
+                            (change)="toggleCompany(item.company_id, $event)">
+                          <label class="form-check-label" [for]="'company-advpay-' + item.company_id">{{
+                            item.company_name }}</label>
+                        </div>
+                      </div>
+                    </div>
                   </div>
 
-                  <div class="col-2 dotted-line">
-                    <label for="">Select Year</label>
-                    <select class="form-select" [(ngModel)]="selectedYear" (change)="onYearMonthChange()">
-                      <option *ngFor="let year of financialYears">{{ year }}</option>
-                    </select>
+                  <div class="col-auto">
+                    <label class="form-label mb-1">From Date</label>
+                    <input class="form-control" type="date" [(ngModel)]="startDate" (change)="onDateRangeChange()" />
                   </div>
-                  <!-- <div class="col vector">
-                        <span class="mt-4"></span>
-                    </div> -->
-                  <div class="col-2">
-                    <label for="">Select Month</label>
-                    <select class="form-select" [(ngModel)]="selectedMonth" (change)="onYearMonthChange()">
-                      <option *ngFor="let month of months" [value]="month.id">{{ month.value }}</option>
-                    </select>
+
+                  <div class="col-auto">
+                    <label class="form-label mb-1">To Date</label>
+                    <input class="form-control" type="date" [(ngModel)]="endDate" (change)="onDateRangeChange()" />
                   </div>
 
                   <div class="col-auto d-flex align-items-end">
+                    <!-- WITH THIS: -->
+                    <button class="btn btn-success me-2" *ngIf="hasAccess('Advance Payment', 'ApproveOrReject')"
+                      (click)="submitBulkActions()">
+                      Submit
+                    </button>
                     <button class="btn btn-primary exportExcelBtn me-2" (click)="exportExcel()">
                       <i class="bi bi-file-earmark-text-fill"></i>
                     </button>
@@ -61,14 +86,15 @@
               </div>
             </div>
 
-            <div class="row gap-4 row-wrap my-3 ">
+            <div class="row gap-4 row-wrap">
               <div class="container  ">
 
                 <div class="row g-3">
                   <div class="col-12">
-                    <ag-grid-angular class="ag-theme-alpine" style="width: 100%; height: 60vh;" [rowData]="rowData"
+                    <ag-grid-angular class="ag-theme-alpine" [rowData]="rowData" [domLayout]="'autoHeight'"
                       [columnDefs]="columnDefs" [gridOptions]="gridOptions" [pagination]="false"
-                      [defaultColDef]="defaultColDef" (gridReady)="onGridReady($event)">
+                      [defaultColDef]="defaultColDef" (gridReady)="onGridReady($event)"
+                      (selectionChanged)="onSelectionChanged($event)">
                     </ag-grid-angular>
 
                     <div class="d-flex align-items-center justify-content-end flex-wrap mt-3 gap-2">
@@ -118,6 +144,11 @@
       </div>
     </div>
 
+    <div *ngIf="activeTab === 'tab4'">
+      <div class="container ">
+        <app-advance-salary-allemp-report></app-advance-salary-allemp-report>
+      </div>
+    </div>
 
     <div class="modal fade" id="advanceRequestModal" tabindex="-1" aria-labelledby="advanceRequestModalLabel"
       aria-hidden="true">
@@ -170,24 +201,37 @@
                 Pending
               </div> -->
                 </div>
-                <div class="col-md-2">
-                  <strong>Tenure</strong>
-                  <input class="form-control" formControlName="tenure" />
-                </div>
                 <div class="col-md-2"><strong>Amount (in ₹)</strong><input class="form-control" value="10,000"
                     formControlName="amount" /></div>
-
+                <div class="col-md-3"><strong>Installment Amount (in ₹)</strong><input class="form-control bg-light"
+                    formControlName="installmentAmount" readonly /></div>
               </div>
 
               <div class="row mb-4">
                 <!-- <div class="col-md-3"><strong>EMI Start Date</strong><input class="form-control"
                     formControlName="EMIStartDate" readonly /></div> -->
-                <div class="col-md-4">
+                <div class="col-md-5">
                   <strong>Reason <small class="text-muted">(In Case of Rejection)</small></strong>
                   <textarea class="form-control" formControlName="reason" rows="3" readonly></textarea>
                 </div>
-                <div class="col-md-3"><strong>Installment Amount (in ₹)</strong><input class="form-control bg-light"
-                    formControlName="installmentAmount" readonly /></div>
+
+                <div class="col-md-4">
+                  <strong>Tenure</strong>
+                  <div class="d-flex gap-2">
+                    <select class="form-control" formControlName="tenure"
+                      (change)="onTenureChange($any($event.target).value)">
+                      <option value="">-- Select Tenure --</option>
+                      <option *ngFor="let m of [1,2,3,4,5,6,7,8,9,10,11,12]" [value]="m">
+                        {{ m }} Month{{ m > 1 ? 's' : '' }}
+                      </option>
+                    </select>
+
+                    <button *ngIf="!EditAdvancePayment.get('tenure')?.disabled" type="button"
+                      class="btn btn-primary text-nowrap" (click)="updateTenure()">
+                      Update Tenure
+                    </button>
+                  </div>
+                </div>
               </div>
             </div>
           </form>
@@ -204,5 +248,135 @@
       </div>
     </div>
 
+  </div>
+</div>
+
+<!-- Salary Tracker Modal -->
+<div class="modal fade" id="advanceSalaryTrackerModal" tabindex="-1">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content">
+
+      <div class="modal-header">
+        <h5 class="modal-title">Salary Tracker</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+
+      <div class="modal-body">
+
+        <form [formGroup]="salaryTrackerForm">
+
+          <div class="row">
+
+            <div class="col-md-4 mb-3">
+              <label>Employee Name</label>
+              <input type="text" class="form-control" formControlName="emp_name" readonly>
+            </div>
+
+            <div class="col-md-4 mb-3">
+              <label>Advance Amount</label>
+              <input type="text" class="form-control" formControlName="amount" readonly>
+            </div>
+
+            <div class="col-md-4 mb-3">
+              <label>Tenure</label>
+              <input type="text" class="form-control" formControlName="tenure" readonly>
+            </div>
+
+          </div>
+
+          <div class="row">
+
+            <div class="col-md-6 mb-3">
+              <label>Payment Mode <span class="text-danger">*</span></label>
+              <select class="form-control" formControlName="payment_mode"
+                [ngClass]="{'is-invalid': isSubmitted && salaryTrackerForm.get('payment_mode')?.invalid}">
+                <option value="">-- Select Payment Mode --</option>
+                <option value="Cash">Cash</option>
+                <option value="Bank Transfer">Bank Transfer</option>
+                <option value="UPI">UPI</option>
+                <option value="Cheque">Cheque</option>
+              </select>
+            </div>
+
+            <div class="col-md-6 mb-3">
+              <label>Transfer Data <span class="text-danger">*</span></label>
+              <input type="text" class="form-control" placeholder="Enter reference / UTR / Cheque No."
+                formControlName="transfer_data"
+                [ngClass]="{'is-invalid': isSubmitted && salaryTrackerForm.get('transfer_data')?.invalid}">
+            </div>
+
+          </div>
+
+        </form>
+
+      </div>
+
+      <div class="modal-footer">
+        <button *ngIf="!hideSubmitButton" class="btn text-white exportExcelBtn"
+          (click)="accountantConfiramationAdvSalary()">Submit</button>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- Advance Salary History Modal -->
+<div class="modal fade" id="advanceHistoryModal" tabindex="-1">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content">
+
+      <div class="modal-header text-white">
+        <h5 class="modal-title">Advance Salary History</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+
+      <div class="modal-body">
+        <div class="row align-items-end mb-3 g-2">
+          <div class="col-md-5">
+            <div><strong>Emp Code:</strong> {{ historyEmp?.employee_code }}</div>
+            <div><strong>Name:</strong> {{ historyEmp?.emp_name }}</div>
+          </div>
+          <div class="col-md-3">
+            <label class="form-label mb-1">From Date</label>
+            <input type="date" class="form-control" [(ngModel)]="historyStartDate" (change)="loadHistory()" />
+          </div>
+          <div class="col-md-3">
+            <label class="form-label mb-1">To Date</label>
+            <input type="date" class="form-control" [(ngModel)]="historyEndDate" (change)="loadHistory()" />
+          </div>
+        </div>
+
+        <div class="table-responsive">
+          <table class="table table-bordered table-sm align-middle text-center mb-0">
+            <thead class="table-primary">
+              <tr>
+                <th>Apply Date</th>
+                <th>Amount (₹)</th>
+                <th>Tenure</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngIf="historyLoading">
+                <td colspan="4">Loading...</td>
+              </tr>
+              <tr *ngIf="!historyLoading && historyRows.length === 0">
+                <td colspan="4" class="text-muted">No advance salary records in this date range.</td>
+              </tr>
+              <tr *ngFor="let r of historyRows">
+                <td>{{ r.apply_date | date:'dd-MM-yyyy' }}</td>
+                <td>{{ r.advance_amount }}</td>
+                <td>{{ r.tenure }} Month{{ r.tenure > 1 ? 's' : '' }}</td>
+                <td><span class="badge rounded-pill" [ngClass]="historyStatusClass(r)">{{ historyStatusLabel(r) }}</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline-dark" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
   </div>
 </div>

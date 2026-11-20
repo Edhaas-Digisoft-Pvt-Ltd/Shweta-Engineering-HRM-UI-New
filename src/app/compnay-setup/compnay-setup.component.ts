@@ -310,8 +310,6 @@ export class CompnaySetupComponent {
         "IsCarryForward": "Yes"
       };
 
-      console.log('Form Data:', current_data);  // Log to verify form data
-
       // Make the PUT request with LeaveID
       this.service.put(`updateleavesetup/${LeaveID}`, current_data).subscribe(
         (res: any) => {

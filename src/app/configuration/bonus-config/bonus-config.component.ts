@@ -12,8 +12,8 @@ import * as bootstrap from 'bootstrap';
 })
 export class BonusConfigComponent {
   addBonusForm!: FormGroup;
-  CompanyNames: any = [];
-  selectedCompanyId: any = 1;
+  CompanyNames: any[] = [];
+  selectedCompanyId: any;
   rowData: any = [];
   columnDefs: ColDef[] = [];
   bonus_id: any;
@@ -101,18 +101,48 @@ export class BonusConfigComponent {
       { headerName: 'From Date', field: 'from_date', sortable: true, filter: true, maxWidth: 140, },
       { headerName: 'To Date', field: 'to_date', sortable: true, filter: true, maxWidth: 140, },
       { headerName: 'Rate', field: 'bonus_rate', sortable: true, filter: true, maxWidth: 120, },
-      { headerName: 'Bonus-Month', field: 'bonus_month', sortable: true, filter: true },
+      {
+        headerName: 'Bonus-Month', field: 'bonus_month', sortable: true, filter: true,
+        valueGetter: (params) => this.formatBonusMonth(params.data.bonus_month)
+      },
       { headerName: 'Status', field: 'bonus_status', sortable: true, filter: true, maxWidth: 100, },
     ];
   }
 
+  formatBonusMonth(bonusMonth: string): string {
+    if (!bonusMonth) return '-';
+
+    const [year, month] = bonusMonth.split('-').map(Number);
+    if (!year || !month) return bonusMonth;
+
+    const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const monthName = monthNames[month - 1];
+
+    return `${monthName} - ${year}`;
+  }
+
   getCompanyNames() {
-    this.service.post('fetch/company', {}).subscribe((res: any) => {
-      if (res.status === "success") {
-        this.CompanyNames = res.data;
+    this.service.post('fetch/company', {}).subscribe({
+      next: (res: any) => {
+        if (res.status === "success" && res.data.length > 0) {
+          this.CompanyNames = res.data;
+
+          // auto-select first company
+          this.selectedCompanyId = this.CompanyNames[0].company_id;
+
+          // set default in form (if form is ready)
+          if (this.addBonusForm) {
+            this.addBonusForm.patchValue({ company_id: this.selectedCompanyId });
+          }
+
+          // load bonus list for selected company
+          this.getBonusList();
+        }
+      },
+      error: (err) => {
+        console.error('Error fetching companies:', err);
       }
-    }, error => {
-      console.error('Error fetching companies:', error);
     });
   }
 
@@ -179,7 +209,7 @@ export class BonusConfigComponent {
           bonus_rate: bonus_data.bonus_rate,
           bonus_month: bonus_data.bonus_month,
           bonus_flag: bonus_data.bonus_flag,
-          bonus_rate_display : bonus_data.bonus_rate,
+          bonus_rate_display: bonus_data.bonus_rate,
         });
         this.active_company_id = Number(bonus_data.company_id);
 
@@ -189,7 +219,7 @@ export class BonusConfigComponent {
           this.addBonusForm.get('to_date')?.disable();
         }
 
-         this.getPresentDays();
+        this.getPresentDays();
       }
     }, error => {
       console.error('Error fetching active bonus:', error);
@@ -301,24 +331,58 @@ export class BonusConfigComponent {
       bonus_flag: this.addBonusForm.value.bonus_flag
     };
 
-    this.service.post("add/bonus", payload).subscribe((res: any) => {
-      if (res.status === "success") {
-        this.toastr.success("Bonus Submitted Successfully!");
+    // this.service.post("add/bonus", payload).subscribe((res: any) => {
+    //   if (res.status === "success") {
+    //     this.toastr.success("Bonus Submitted Successfully!");
 
-        const modalElement = document.getElementById('SubmitConfirmModal');
-        if (modalElement) {
-          const modalInstance = bootstrap.Modal.getInstance(modalElement);
-          modalInstance?.hide();
+    //     const modalElement = document.getElementById('SubmitConfirmModal');
+    //     if (modalElement) {
+    //       const modalInstance = bootstrap.Modal.getInstance(modalElement);
+    //       modalInstance?.hide();
+    //     }
+
+    //     this.isSaveClicked = false;
+    //     this.isSubmitClicked = false;
+    //     this.getActiveBonus();
+    //     this.getBonusList();
+
+    //     if (payload.bonus_flag) {
+    //       this.resetBonusForm();
+    //     }
+    //   }
+    // });
+
+    this.service.post("add/bonus", payload).subscribe({
+      next: (res: any) => {
+        if (res.status === 'success') {
+          this.toastr.success("Bonus Submitted Successfully!");
+          const modalElement = document.getElementById('SubmitConfirmModal');
+          if (modalElement) {
+            const modalInstance = bootstrap.Modal.getInstance(modalElement);
+            modalInstance?.hide();
+          }
+
+          this.isSaveClicked = false;
+          this.isSubmitClicked = false;
+          this.getActiveBonus();
+          this.getBonusList();
+
+          if (payload.bonus_flag) {
+            this.resetBonusForm();
+          }
         }
+      },
+      error: (err) => {
+        console.error('Error:', err);
 
+        if (err.status === 422) {
+          this.toastr.error(err.error.message || "Validation failed!");
+        } else if (err.status === 409) {
+          this.toastr.error(err.error.message || "Duplicate entry!");
+        } else {
+          this.toastr.error("Something went wrong!");
+        }
         this.isSaveClicked = false;
-        this.isSubmitClicked = false;
-        this.getActiveBonus();
-        this.getBonusList();
-
-        if (payload.bonus_flag) {
-          this.resetBonusForm();
-        }
       }
     });
   }

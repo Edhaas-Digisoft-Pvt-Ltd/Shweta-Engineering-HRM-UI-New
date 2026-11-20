@@ -10,11 +10,17 @@
 
                     <div class="col-3">
                         <label class="mb-1 fw-semibold">Select Company</label>
-                        <select class="form-select" (change)="onCompanyChange($event)">
+                        <select class="form-select" [value]="selectedCompanyId" (change)="onCompanyChange($event)">
                             <option *ngFor="let item of CompanyNames" [value]="item.company_id">
                                 {{ item.company_name }}
                             </option>
                         </select>
+                    </div>
+
+                    <div class="col-auto">
+                        <button type="button" class="btn text-white mb-1 px-4 BtnColor" (click)="openModalLWP()">
+                            LWP
+                        </button>
                     </div>
 
                     <div class="col-auto">
@@ -37,7 +43,7 @@
         </div>
 
         <!-- Modal Content -->
-        <div class="modal fade modal-xl text-left" id="addLeaveModal" tabindex="-1" aria-labelledby="exampleModalLabel"
+        <div class="modal fade modal-lg text-left" id="addLeaveModal" tabindex="-1" aria-labelledby="exampleModalLabel"
             aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered">
                 <div class="modal-content">
@@ -51,7 +57,7 @@
                             <div class="row">
 
                                 <!-- Company -->
-                                <div class="col-md-3 text-start select-company">
+                                <div class="col-md-4 text-start select-company">
                                     <label class="fw-bold" disabled selected>Select Company<span
                                             class="text-danger">*</span></label>
                                     <select class="form-select" formControlName="companyid" [ngClass]="{
@@ -69,49 +75,79 @@
                                     </small>
                                 </div>
 
-                                <!-- Leave Type -->
-                                <div class="col-md-3">
-                                    <label for="leavetype">Leave Type<span class="text-danger">*</span></label>
+                                <!-- leave type -->
+                                <div class="col-md-4">
+                                    <label for="leavetype">
+                                        Leave Type <span class="text-danger">*</span>
+                                    </label>
+
                                     <select id="leavetype" class="form-select" formControlName="leavetype" [ngClass]="{
-          'input-error': isSubmitted && LeaveRule.get('leavetype')?.invalid,
-          'is-invalid': isSubmitted && LeaveRule.get('leavetype')?.invalid
-        }">
-                                        <option [value]="null" disabled selected>Select Leave Type</option>
-                                        <option value="Every Month">Every Month</option>
-                                        <option value="Every Year">Every Year</option>
+      'input-error': isSubmitted && LeaveRule.get('leavetype')?.invalid,
+      'is-invalid': isSubmitted && LeaveRule.get('leavetype')?.invalid
+    }">
+
+                                        <option value="" disabled>Select Leave Type</option>
+
+                                        <option *ngFor="let leave of leaveTypes" [value]="leave.leave_type_id">
+                                            {{ leave.leave_types }}
+                                        </option>
+
                                     </select>
+
                                     <small class="text-danger"
-                                        *ngIf="isSubmitted && LeaveRule.get('leavetype')?.invalid && LeaveRule.get('leavetype')?.value">
-                                        Please select a valid leave type.
+                                        *ngIf="isSubmitted && LeaveRule.get('leavetype')?.invalid">
+                                        Please select a leave type.
                                     </small>
                                 </div>
 
-                                <!-- Leave Name -->
-                                <div class="col-md-3">
-                                    <label for="leavename">Leave Name<span class="text-danger">*</span></label>
-                                    <input type="text" class="form-control" id="leavename" formControlName="leavename"
-                                        placeholder="Please Enter Leave Name" [ngClass]="{
-          'input-error': isSubmitted && LeaveRule.get('leavename')?.invalid,
-          'is-invalid': isSubmitted && LeaveRule.get('leavename')?.invalid
-        }">
-                                    <small class="text-danger"
-                                        *ngIf="isSubmitted && LeaveRule.get('leavename')?.invalid && LeaveRule.get('leavename')?.value">
-                                        Please enter a valid leave name.
-                                    </small>
+                                <div class="col-md-4">
+                                    <label for="year">Financial Year</label>
+                                    <input type="text" id="financial_year" class="form-control"
+                                        [value]="financialYearCode" disabled />
                                 </div>
 
-                                <!-- No. Of Leaves -->
-                                <div class="col-md-3">
-                                    <label for="leavenumber">No. of leaves<span class="text-danger">*</span></label>
-                                    <input type="number" class="form-control" id="leavenumber"
-                                        formControlName="leavenumber" placeholder="Please Enter Leave number" [ngClass]="{
-          'input-error': isSubmitted && LeaveRule.get('leavenumber')?.invalid,
-          'is-invalid': isSubmitted && LeaveRule.get('leavenumber')?.invalid
-        }">
-                                    <small class="text-danger"
-                                        *ngIf="isSubmitted && LeaveRule.get('leavenumber')?.invalid && LeaveRule.get('leavenumber')?.value">
-                                        Please enter a valid number of leaves.
-                                    </small>
+                                <div class="row mt-3">
+                                    <!-- No. Of Leaves -->
+                                    <div class="col-md-4">
+                                        <label for="leavenumber">No. of leaves<span class="text-danger">*</span></label>
+                                        <input type="number" class="form-control" id="leavenumber"
+                                            formControlName="leavenumber" placeholder="Please Enter Leave number"
+                                            [ngClass]="{
+                            'input-error': isSubmitted && LeaveRule.get('leavenumber')?.invalid,
+                            'is-invalid': isSubmitted && LeaveRule.get('leavenumber')?.invalid
+                            }">
+                                        <small class="text-danger"
+                                            *ngIf="LeaveRule.get('leavenumber')?.errors?.['min']">
+                                            Number of leaves never less than 0.
+                                        </small>
+                                        <small class="text-danger"
+                                            *ngIf="LeaveRule.get('leavenumber')?.errors?.['max']">
+                                            Number of leaves cannot exceed 365.
+                                        </small>
+                                    </div>
+
+                                    <div class="col-md-4">
+                                        <label for="carryForward">Carry Forward</label>
+
+                                        <select id="carryForward" class="form-select" formControlName="carry_forward">
+
+                                            <option value="" disabled>Select</option>
+                                            <option value="TRUE">TRUE</option>
+                                            <option value="FALSE">FALSE</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="col-md-4" *ngIf="LeaveRule.get('carry_forward')?.value !== 'FALSE'">
+                                        <label>Max Carry Forward <span class="text-danger">*</span></label>
+                                        <input type="number" formControlName="max_carry_forward" class="form-control"
+                                            [ngClass]="{
+      'is-invalid': isSubmitted && LeaveRule.get('max_carry_forward')?.invalid
+    }" />
+                                        <small class="text-danger"
+                                            *ngIf="isSubmitted && LeaveRule.get('max_carry_forward')?.errors?.['required']">
+                                            Max Carry Forward is required.
+                                        </small>
+                                    </div>
                                 </div>
 
                             </div>
@@ -128,7 +164,6 @@
             </div>
         </div>
 
-
         <!-- Modal Content for edit -->
         <!-- Modal -->
         <div class="modal fade modal-lg" id="exampleModal2" tabindex="-1" aria-labelledby="exampleModalLabel">
@@ -142,42 +177,100 @@
                         <form [formGroup]="EditLeaveRule" (ngSubmit)="editLeaveData()">
                             <div class="row">
                                 <!-- Leave Type -->
-                                <div class="col-4">
+                                <div class="col-3">
                                     <label for="leavetype">Leave Type<span class="text-danger">*</span></label>
                                     <select id="leavetype" class="form-select" formControlName="leavetype"
                                         [ngClass]="{'input-error': isEditSubmitted && EditLeaveRule.get('leavetype')?.invalid}">
-                                        <option>Every Month</option>
-                                        <option>Every Year</option>
+                                        <option value="" disabled>Select Leave Type</option>
+                                        <option *ngFor="let leave of leaveTypes" [value]="leave.leave_type_id">
+                                            {{ leave.leave_types }}
+                                        </option>
                                     </select>
                                 </div>
 
-                                <!-- Leave Name -->
-                                <div class="col-4">
-                                    <label for="leavename">Leave Name<span class="text-danger">*</span></label>
-                                    <input type="text" class="form-control" id="leavename" formControlName="leavename"
-                                        placeholder="Please Enter Leave Name" [ngClass]="{
-                                        'input-error': isEditSubmitted && EditLeaveRule.get('leavename')?.invalid,
-                                        'is-invalid': isEditSubmitted && EditLeaveRule.get('leavename')?.invalid
-                                    }">
+                                <!-- Year (disabled) -->
+                                <div class="col-3">
+                                    <label for="year">Year</label>
+                                    <input type="text" id="year" class="form-control" formControlName="year">
                                 </div>
 
-                                <!-- No. Of Leaves -->
-                                <div class="col-4">
+                                <!-- No. of Leaves -->
+                                <div class="col-3">
                                     <label for="leavenumber">No. of leaves<span class="text-danger">*</span></label>
                                     <input type="number" class="form-control" id="leavenumber"
-                                        formControlName="leavenumber" placeholder="Please Enter Leave number"
+                                        formControlName="leavenumber"
                                         [ngClass]="{'input-error': isEditSubmitted && EditLeaveRule.get('leavenumber')?.invalid}">
+                                </div>
+
+                                <!-- Carry Forward -->
+                                <div class="col-3">
+                                    <label for="carryForward">Carry Forward</label>
+                                    <select id="carryForward" class="form-select" formControlName="carry_forward"
+                                        [ngClass]="{'input-error': isEditSubmitted && EditLeaveRule.get('carry_forward')?.invalid}">
+                                        <option value="TRUE">TRUE</option>
+                                        <option value="FALSE">FALSE</option>
+                                    </select>
                                 </div>
                             </div>
 
-                            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-                                <button type="submit" class="btn BtnColor mt-3 ml-auto btn-end">Update</button>
+                            <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-3">
+                                <button type="submit" class="btn BtnColor btn-end">Update</button>
                             </div>
                         </form>
+
                     </div>
 
                 </div>
             </div>
         </div>
+
+        <!-- LWP modal -->
+        <div class="modal fade modal-lg text-left" id="LWPModal" tabindex="-1" aria-labelledby="exampleModalLabel"
+            aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLabel">Leave Without Pay</h5>
+                        <button type="button text-white" class="btn-close" data-bs-dismiss="modal"
+                            aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body text-left">
+                        <form [formGroup]="lwpForm" (ngSubmit)="addleaveWithoutPay()">
+                            <div class="row">
+                                <div class="col-12 mb-3">
+                                    <label class="form-label fw-bold">Should extra leaves be treated as Leave Without
+                                        Pay?</label><br />
+                                    <small class="text-danger">
+                                        (Salary will be deducted annually for leaves taken beyond the allowed limit.)
+                                    </small><br />
+
+                                    <div class="form-check form-check-inline ms-3 mt-2">
+                                        <input class="form-check-input" type="radio" formControlName="leave_without_pay"
+                                            [value]="true" id="lwpYes" />
+                                        <label class="form-check-label" for="lwpYes">
+                                            Yes
+                                        </label>
+                                    </div>
+
+                                    <div class="form-check form-check-inline ms-3 mt-2">
+                                        <input class="form-check-input" type="radio" formControlName="leave_without_pay"
+                                            [value]="false" id="lwpNo" />
+                                        <label class="form-check-label" for="lwpNo">
+                                            No
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                                <button type="submit"
+                                    class="btn BtnColor mt-3 ml-auto btn-end submit-btn">Submit</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
     </div>
 </div>

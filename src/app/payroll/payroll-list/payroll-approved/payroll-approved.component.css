@@ -12,5 +12,20 @@ label{
     margin-bottom:5px;
 }
 
+.pdf-th, .pdf-td {
+  border: 1px solid #333;
+  padding: 14px 18px;      /* was 6px 10px — much bigger */
+  text-align: center;
+  white-space: nowrap;
+  font-size: 20px;         /* was inheriting 12px — much bigger */
+}
 
+.pdf-th {
+  background-color: #d9d9d9;
+  font-weight: bold;
+}
+
+#pdfExportTable caption {
+  font-size: 22px;
+}
 

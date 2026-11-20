@@ -14,23 +14,28 @@
             <div class="card-header  border-0 bg-white p-0">
                 <ul class="nav nav-tabs">
                     <li class="nav-item">
-                        <a class="nav-link xyz" [class.active]="currentStep === 1"> Personal Info</a>
+                        <a class="nav-link xyz" [class.active]="currentStep === 1" (click)="goToStep(1)"
+                            style="cursor:pointer;"> Personal Info</a>
                     </li>
                     <span class="abc"></span>
                     <li class="nav-item">
-                        <a class="nav-link xyz" [class.active]="currentStep === 2"> Professional Info</a>
+                        <a class="nav-link xyz" [class.active]="currentStep === 2" (click)="goToStep(2)"
+                            style="cursor:pointer;"> Professional Info</a>
                     </li>
                     <span class="abc"></span>
                     <li class="nav-item">
-                        <a class="nav-link xyz" [class.active]="currentStep === 3"> Bank Details</a>
+                        <a class="nav-link xyz" [class.active]="currentStep === 3" (click)="goToStep(3)"
+                            style="cursor:pointer;"> Details</a>
                     </li>
                     <span class="abc"></span>
                     <li class="nav-item ">
-                        <a class="nav-link xyz" [class.active]="currentStep === 4">Statutory Info</a>
+                        <a class="nav-link xyz" [class.active]="currentStep === 4" (click)="goToStep(4)"
+                            style="cursor:pointer;">Statutory Info</a>
                     </li>
                     <span class="abc"></span>
                     <li class="nav-item active">
-                        <a class="nav-link xyz" [class.active]="currentStep === 5"> Salary Structure</a>
+                        <a class="nav-link xyz" [class.active]="currentStep === 5" (click)="goToStep(5)"
+                            style="cursor:pointer;"> Salary Structure</a>
                     </li>
                     <!-- <span class="abc"></span> -->
                     <!-- <li class="nav-item">
@@ -41,7 +46,7 @@
             </div>
 
             <div class="card-body  border-1 mt-3">
-                <div class="row">
+                <div class="row" *ngIf="currentStep !== 4">
                     <div class="col mb-3">
                         <span class="text-danger ">* </span>
                         Please Fill All Required Fields.
@@ -73,36 +78,17 @@
                                 </div>
 
                                 <div class="col-lg">
-
-                                    <label>First Name <span class="text-danger">*</span></label>
-
-                                    <input type="text" formControlName="fname" class="form-control"
-                                        [ngClass]="{'input-error': nextCheck && multiStepForm.get('fname')?.invalid}"
-                                        placeholder="Enter First Name" required (keypress)="allowOnlyLetters($event)"
-                                        (paste)="blockPaste($event)">
-                                    <!-- <div *ngIf="multiStepForm.controls['fname'].invalid && multiStepForm.controls['fname'].touched"
-                                        class="text-danger">
-                                        Please enter first name.
-                                    </div> -->
-
-                                </div>
-                                <div class="col-lg">
-                                    <div class="mb-3">
-                                        <label>Last Name <span class="text-danger">*</span></label>
-                                        <input type="text" formControlName="lname" class="form-control"
-                                            [ngClass]="{'input-error': nextCheck && multiStepForm.get('lname')?.invalid}"
-                                            placeholder="Enter last name" (keypress)="allowOnlyLetters($event)"
-                                            (paste)="blockPaste($event)">
-                                        <!-- <div *ngIf="multiStepForm.controls['lname'].invalid && multiStepForm.controls['lname'].touched"
-                                            class="text-danger">
-                                            Please enter last name.
-                                        </div> -->
-                                    </div>
+                                    <label>Employee Name <span class="text-danger">*</span></label>
+                                    <input type="text" formControlName="emp_name" class="form-control"
+                                        [ngClass]="{'input-error': nextCheck && multiStepForm.get('emp_name')?.invalid}"
+                                        placeholder="Enter Full Name" (keypress)="allowOnlyLettersAndSpace($event)"
+                                        (blur)="cleanEmployeeName()">
+                                    <small class="text-danger"
+                                        *ngIf="multiStepForm.get('emp_name')?.touched && multiStepForm.get('emp_name')?.invalid">
+                                        Please enter a valid full name (letters only).
+                                    </small>
                                 </div>
 
-
-                            </div>
-                            <div class="row">
                                 <div class="col-lg-2">
                                     <label>Gender <span class="text-danger">*</span></label>
                                     <div class="d-flex gap-3">
@@ -127,7 +113,9 @@
                                     </small> -->
                                 </div>
 
-                                <div class="col-lg-3 mb-3">
+                            </div>
+                            <div class="row mt-2">
+                                <div class="col-lg-3">
                                     <label>Email <span class="text-danger">*</span></label>
                                     <input type="text" formControlName="email" class="form-control"
                                         [ngClass]="{'input-error': nextCheck && multiStepForm.get('email')?.invalid}"
@@ -141,7 +129,7 @@
                                         Please Enter @gmail.com
                                     </div>
                                 </div>
-                                <div class="col-lg-2 mb-3">
+                                <div class="col-lg-3">
                                     <label>contact <span class="text-danger">*</span></label>
                                     <input type="tel" maxlength="10" formControlName="contact" class="form-control"
                                         [ngClass]="{'input-error': nextCheck && multiStepForm.get('contact')?.invalid}"
@@ -160,7 +148,7 @@
                                         Please enter valid email address.
                                     </div> -->
                                 </div>
-                                <div class="col-lg mb-3">
+                                <div class="col-lg">
                                     <label>Address <span class="text-danger">*</span></label>
                                     <textarea name="" class="form-control" placeholder="Enter Address"
                                         formControlName="address" id=""
@@ -184,6 +172,63 @@
 
 
                             </div>
+                            <div class="row">
+
+                                <!-- Password -->
+                                <div class="col-lg-3">
+                                    <label>Password <span class="text-danger">*</span></label>
+
+                                    <div class="position-relative">
+                                        <input [type]="showPassword ? 'text' : 'password'" class="form-control pe-5"
+                                            formControlName="password" placeholder="Enter password">
+
+                                        <i class="bi" [ngClass]="showPassword ? 'bi-eye-slash' : 'bi-eye'"
+                                            (click)="showPassword = !showPassword"
+                                            style="position:absolute; right:10px; top:50%; transform:translateY(-50%); cursor:pointer;">
+                                        </i>
+                                    </div>
+
+                                    <small class="text-danger"
+                                        *ngIf="multiStepForm.get('password')?.touched && multiStepForm.get('password')?.errors">
+                                        <span *ngIf="multiStepForm.get('password')?.errors?.['required']">
+                                            Password is required
+                                        </span>
+                                        <span *ngIf="multiStepForm.get('password')?.errors?.['minlength']">
+                                            Minimum 6 characters required
+                                        </span>
+                                        <span *ngIf="multiStepForm.get('password')?.errors?.['pattern']">
+                                            Must include uppercase, lowercase, number & special character
+                                        </span>
+                                    </small>
+                                </div>
+
+                                <!-- Confirm Password -->
+                                <div class="col-lg-3">
+                                    <label>Confirm Password <span class="text-danger">*</span></label>
+
+                                    <div class="position-relative">
+                                        <input [type]="showConfirmPassword ? 'text' : 'password'"
+                                            class="form-control pe-5" formControlName="confirm_password"
+                                            placeholder="Confirm password">
+
+                                        <i class="bi" [ngClass]="showConfirmPassword ? 'bi-eye-slash' : 'bi-eye'"
+                                            (click)="showConfirmPassword = !showConfirmPassword"
+                                            style="position:absolute; right:10px; top:50%; transform:translateY(-50%); cursor:pointer;">
+                                        </i>
+                                    </div>
+
+                                    <small class="text-danger"
+                                        *ngIf="multiStepForm.get('confirm_password')?.touched && multiStepForm.get('confirm_password')?.errors">
+                                        Confirm password is required
+                                    </small>
+
+                                    <small class="text-danger"
+                                        *ngIf="multiStepForm.get('confirm_password')?.touched && multiStepForm.errors?.['mismatch']">
+                                        Passwords do not match
+                                    </small>
+                                </div>
+
+                            </div>
                         </div>
                         <div class="d-flex justify-content-center mt-4">
                             <!-- <button type="button" class="btn btn-primary rounded-2 my-3" (click)="nextStep()"
@@ -202,7 +247,7 @@
                             <div class="row ">
 
                                 <div class="col-lg-4">
-                                    <label class="fw-bold">Select Company </label>
+                                    <label class="fw-bold">Select Company <span class="text-danger">*</span></label>
                                     <br>
                                     <select class="form-select" formControlName="company"
                                         (click)="onCompanyChange($event)"
@@ -225,7 +270,7 @@
                                     </select>
                                 </div>
                                 <div class="col-lg-4">
-                                    <label>Date Of Joinning</label>
+                                    <label>Date Of Joinning <span class="text-danger">*</span></label>
                                     <input type="date" formControlName="join_date" class="form-control"
                                         [ngClass]="{'input-error': nextCheck && multiStepForm.get('join_date')?.invalid}">
                                 </div>
@@ -255,7 +300,7 @@
                                     </select>
                                 </div>
 
-                                <div class="col-lg-4 my-3">
+                                <!-- <div class="col-lg-4 my-3">
                                     <label>Working Pattern</label>
                                     <select id="roleSelect" formControlName="work_pattern" class="form-select"
                                         [ngClass]="{'input-error': nextCheck && multiStepForm.get('work_pattern')?.invalid}">
@@ -264,7 +309,7 @@
                                         <option value="6">6 Days Week</option>
                                         <option value="7">7 Days Week</option>
                                     </select>
-                                </div>
+                                </div> -->
                             </div>
                         </div>
 
@@ -280,12 +325,12 @@
                     <div *ngIf="currentStep === 3">
                         <div class="content border" style="border-radius: 10px;padding: 30px;">
                             <div class="row">
-                                <div class="col-lg-6">
+                                <div class="col-lg-4">
                                     <label>Account Holder Name <span class="text-danger">*</span></label>
                                     <input type="text" formControlName="accountHolderName" class="form-control"
                                         [ngClass]="{'input-error': nextCheck && multiStepForm.get('accountHolderName')?.invalid}"
-                                        placeholder="Enter Account Holder Name" (keypress)="allowOnlyLetters($event)"
-                                        (paste)="blockPaste($event)">
+                                        placeholder="Enter Account Holder Name"
+                                        (keypress)="allowOnlyLettersAndSpace($event)" (paste)="blockPaste($event)">
                                     <!--
                                     <small class="text-danger mb-4"
                                            *ngIf="multiStepForm.get('accountHolderName')?.invalid && multiStepForm.get('accountHolderName')?.touched">
@@ -294,11 +339,11 @@
                                     -->
                                 </div>
 
-                                <div class="col-lg-6">
+                                <div class="col-lg-4">
                                     <label>Bank Name <span class="text-danger">*</span></label>
                                     <input type="text" formControlName="bankName" class="form-control"
                                         [ngClass]="{'input-error': nextCheck && multiStepForm.get('bankName')?.invalid}"
-                                        placeholder="Enter Bank Name" (keypress)="allowOnlyLetters($event)"
+                                        placeholder="Enter Bank Name" (keypress)="allowOnlyLettersAndSpace($event)"
                                         (paste)="blockPaste($event)">
                                     <!--
                                     <small class="text-danger mb-4"
@@ -307,33 +352,64 @@
                                     </small>
                                     -->
                                 </div>
-                            </div>
 
-                            <div class="row my-3">
-                                <div class="col-lg-6">
+                                <div class="col-lg-4">
                                     <label>Account Number <span class="text-danger">*</span></label>
-                                    <input type="text" formControlName="accountNumber" maxlength="12"
-                                        class="form-control"
+                                    <input type="text" formControlName="accountNumber" class="form-control"
+                                        maxlength="18"
                                         [ngClass]="{'input-error': nextCheck && multiStepForm.get('accountNumber')?.invalid}"
                                         placeholder="Enter Account Number" (keypress)="allowOnlyNumbers($event)">
 
                                     <div *ngIf="multiStepForm.get('accountNumber')?.invalid && multiStepForm.get('accountNumber')"
                                         style="color: red; text-transform: none;">
                                         <small *ngIf="multiStepForm.get('accountNumber')?.errors?.['pattern']">
-                                            please only numbers only
+                                            please enter numbers only
                                         </small>
-                                        <small *ngIf="multiStepForm.get('accountNumber')?.errors?.['minlength']">
-                                            maximum length is 12 digits
+                                        <small *ngIf="
+                                      multiStepForm.get('accountNumber')?.errors?.['minlength'] ||
+                                      multiStepForm.get('accountNumber')?.errors?.['maxlength']
+                                    ">
+                                            Account number must be between 9 and 18 digits.
                                         </small>
                                     </div>
+                                </div>
+                            </div>
 
+                            <div class="row my-3">
+                                <div class="col-lg-3">
+                                    <label>Aadhaar Number <span class="text-danger">*</span></label>
+                                    <input type="text" formControlName="aadhaarNumber" class="form-control"
+                                        [ngClass]="{'input-error': nextCheck && multiStepForm.get('aadhaarNumber')?.invalid}"
+                                        placeholder="Enter Aadhaar Number" (input)="formatAadhaar($event)"
+                                        (keypress)="allowOnlyNumbersAndSpace($event)">
+
+                                    <small class="text-danger mb-4"
+                                        *ngIf="multiStepForm.get('aadhaarNumber')?.touched && multiStepForm.get('aadhaarNumber')?.invalid">
+                                        <span *ngIf="multiStepForm.get('aadhaarNumber')?.errors?.['pattern']">
+                                            Enter a valid Aadhaar number.
+                                        </span>
+                                    </small>
                                 </div>
 
-                                <div class="col-lg-4">
+                                <div class="col-lg-3 ">
+                                    <label>PAN Number <span class="text-danger">*</span></label>
+                                    <input type="text" formControlName="panNumber" class="form-control"
+                                        [ngClass]="{'input-error': nextCheck && multiStepForm.get('panNumber')?.invalid}"
+                                        placeholder="Enter Pan Number" (input)="formatPAN($event)"
+                                        (keypress)="allowNumbersCharacters($event)">
+                                    <small class="text-danger mb-4"
+                                        *ngIf="multiStepForm.get('panNumber')?.touched && multiStepForm.get('panNumber')?.invalid">
+                                        <span *ngIf="multiStepForm.get('panNumber')?.errors?.['pattern']">
+                                            Enter a valid PAN number.
+                                        </span>
+                                    </small>
+                                </div>
+
+                                <div class="col-lg-3">
                                     <label>IFSC <span class="text-danger">*</span></label>
                                     <input type="text" formControlName="ifsc" class="form-control"
                                         [ngClass]="{'input-error': nextCheck && multiStepForm.get('ifsc')?.invalid}"
-                                        placeholder="Enter IFSC Code" (input)="removeSpaces()"
+                                        placeholder="Enter IFSC Code" (input)="formatIFSC($event)"
                                         (keypress)="allowNumbersCharacters($event)">
                                     <!--
                                     <small class="text-danger mb-4"
@@ -342,10 +418,209 @@
                                     </small>
                                     -->
                                 </div>
+
+                                <div class="col-lg-3">
+                                    <label>Transfer Type <span class="text-danger">*</span></label><br>
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input" type="radio" formControlName="transfer_type"
+                                            id="radioDefault1" value="NEFT">
+                                        <label class="form-check-label" for="radioDefault1">NEFT</label>
+                                    </div>
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input" type="radio" formControlName="transfer_type"
+                                            id="radioDefault2" value="IFT">
+                                        <label class="form-check-label" for="radioDefault2">IFT</label>
+                                    </div>
+                                </div>
+
+
                             </div>
+
+                            <!-- ── Document Upload ─────────────────────────────── -->
+                            <div class="row mt-2">
+                                <div class="col-12 mb-2">
+                                    <span class="fw-semibold small" style="color:#555;">
+                                        <i class="bi bi-paperclip me-1"></i> Upload Documents
+                                        <span class="fw-normal text-muted">(JPG / PNG / PDF · Max 2MB)</span>
+                                    </span>
+                                    <hr class="mt-1 mb-2">
+                                </div>
+
+                                <!-- Aadhaar Upload -->
+                                <div class="col-lg-4">
+                                    <label class="form-label small fw-semibold mb-1">Aadhaar Card</label>
+
+                                    <ng-container *ngIf="!docUploads['aadhaar'].file; else aadhaarPreview">
+                                        <label for="upload_aadhaar"
+                                            class="d-flex align-items-center gap-2 border rounded px-3 py-2 text-muted"
+                                            style="cursor:pointer; border-style:dashed !important; border-color:#ced4da !important;">
+                                            <i class="bi bi-upload" style="font-size:1rem;"></i>
+                                            <span class="small">Click to upload Aadhaar &nbsp;<span class="text-muted"
+                                                    style="font-size:11px;">JPG, PNG, PDF</span></span>
+                                        </label>
+                                        <input type="file" id="upload_aadhaar" class="d-none"
+                                            accept=".jpg,.jpeg,.png,.pdf"
+                                            (change)="onDocFileSelected($event, 'aadhaar')">
+                                    </ng-container>
+
+                                    <ng-template #aadhaarPreview>
+                                        <div class="d-flex align-items-center gap-2 border rounded px-3 py-2 bg-light">
+                                            <!-- image thumbnail -->
+                                            <img *ngIf="docUploads['aadhaar'].preview"
+                                                [src]="docUploads['aadhaar'].preview" class="rounded"
+                                                style="height:36px; width:50px; object-fit:cover; cursor:pointer;"
+                                                alt="Aadhaar" title="Click to view" (click)="openDocPreview('aadhaar')">
+                                            <i *ngIf="!docUploads['aadhaar'].preview"
+                                                class="bi bi-file-earmark-pdf-fill text-danger"
+                                                style="font-size:1.4rem; cursor:pointer;" title="Click to view"
+                                                (click)="openDocPreview('aadhaar')"></i>
+
+                                            <div class="flex-grow-1 overflow-hidden">
+                                                <div class="small text-truncate fw-semibold" style="max-width:180px;">
+                                                    {{ docUploads['aadhaar'].file?.name }}
+                                                </div>
+                                                <span class="text-muted" style="font-size:11px;">
+                                                    {{ ((docUploads['aadhaar'].file?.size || 0) / 1024) | number:'1.0-0'
+                                                    }} KB
+                                                </span>
+                                                &nbsp;
+                                                <span *ngIf="docUploads['aadhaar'].uploading"
+                                                    class="badge bg-warning text-dark"
+                                                    style="font-size:10px;">Uploading...</span>
+                                                <span *ngIf="docUploads['aadhaar'].uploaded" class="badge bg-success"
+                                                    style="font-size:10px;"><i class="bi bi-check2"></i> Done</span>
+                                            </div>
+
+                                            <button type="button" class="btn btn-sm btn-outline-danger py-0 px-1"
+                                                (click)="removeDocFile('aadhaar')"
+                                                [disabled]="docUploads['aadhaar'].uploading">
+                                                <i class="bi bi-x" style="font-size:1rem;"></i>
+                                            </button>
+                                        </div>
+                                    </ng-template>
+
+                                    <small class="text-danger" *ngIf="docUploads['aadhaar'].error">
+                                        <i class="bi bi-exclamation-circle me-1"></i>{{ docUploads['aadhaar'].error }}
+                                    </small>
+                                </div>
+
+                                <!-- PAN Upload -->
+                                <div class="col-lg-4">
+                                    <label class="form-label small fw-semibold mb-1">PAN Card</label>
+
+                                    <ng-container *ngIf="!docUploads['pan_card'].file; else panPreview">
+                                        <label for="upload_pan"
+                                            class="d-flex align-items-center gap-2 border rounded px-3 py-2 text-muted"
+                                            style="cursor:pointer; border-style:dashed !important; border-color:#ced4da !important;">
+                                            <i class="bi bi-upload" style="font-size:1rem;"></i>
+                                            <span class="small">Click to upload PAN Card &nbsp;<span class="text-muted"
+                                                    style="font-size:11px;">JPG, PNG, PDF</span></span>
+                                        </label>
+                                        <input type="file" id="upload_pan" class="d-none" accept=".jpg,.jpeg,.png,.pdf"
+                                            (change)="onDocFileSelected($event, 'pan_card')">
+                                    </ng-container>
+
+                                    <ng-template #panPreview>
+                                        <div class="d-flex align-items-center gap-2 border rounded px-3 py-2 bg-light">
+                                            <img *ngIf="docUploads['pan_card'].preview"
+                                                [src]="docUploads['pan_card'].preview" class="rounded"
+                                                style="height:36px; width:50px; object-fit:cover; cursor:pointer;"
+                                                alt="PAN" title="Click to view" (click)="openDocPreview('pan_card')">
+                                            <i *ngIf="!docUploads['pan_card'].preview"
+                                                class="bi bi-file-earmark-pdf-fill text-danger"
+                                                style="font-size:1.4rem; cursor:pointer;" title="Click to view"
+                                                (click)="openDocPreview('pan_card')"></i>
+
+                                            <div class="flex-grow-1 overflow-hidden">
+                                                <div class="small text-truncate fw-semibold" style="max-width:180px;">
+                                                    {{ docUploads['pan_card'].file?.name }}
+                                                </div>
+                                                <span class="text-muted" style="font-size:11px;">
+                                                    {{ ((docUploads['pan_card'].file?.size || 0) / 1024) |
+                                                    number:'1.0-0' }} KB
+                                                </span>
+                                                &nbsp;
+                                                <span *ngIf="docUploads['pan_card'].uploading"
+                                                    class="badge bg-warning text-dark"
+                                                    style="font-size:10px;">Uploading...</span>
+                                                <span *ngIf="docUploads['pan_card'].uploaded" class="badge bg-success"
+                                                    style="font-size:10px;"><i class="bi bi-check2"></i> Done</span>
+                                            </div>
+
+                                            <button type="button" class="btn btn-sm btn-outline-danger py-0 px-1"
+                                                (click)="removeDocFile('pan_card')"
+                                                [disabled]="docUploads['pan_card'].uploading">
+                                                <i class="bi bi-x" style="font-size:1rem;"></i>
+                                            </button>
+                                        </div>
+                                    </ng-template>
+
+                                    <small class="text-danger" *ngIf="docUploads['pan_card'].error">
+                                        <i class="bi bi-exclamation-circle me-1"></i>{{ docUploads['pan_card'].error }}
+                                    </small>
+                                </div>
+
+                                <div class="col-lg-4">
+                                    <label class="form-label small fw-semibold mb-1">QR Code</label>
+
+                                    <ng-container *ngIf="!docUploads['qr_code'].file; else qrPreview">
+                                        <label for="upload_qr"
+                                            class="d-flex align-items-center gap-2 border rounded px-3 py-2 text-muted"
+                                            style="cursor:pointer; border-style:dashed !important; border-color:#ced4da !important;">
+                                            <i class="bi bi-qr-code" style="font-size:1rem;"></i>
+                                            <span class="small">Click to upload QR Code &nbsp;<span class="text-muted"
+                                                    style="font-size:11px;">JPG, PNG, PDF</span></span>
+                                        </label>
+                                        <input type="file" id="upload_qr" class="d-none" accept=".jpg,.jpeg,.png,.pdf"
+                                            (change)="onDocFileSelected($event, 'qr_code')">
+                                    </ng-container>
+
+                                    <ng-template #qrPreview>
+                                        <div class="d-flex align-items-center gap-2 border rounded px-3 py-2 bg-light">
+                                            <img *ngIf="docUploads['qr_code'].preview"
+                                                [src]="docUploads['qr_code'].preview" class="rounded"
+                                                style="height:36px; width:50px; object-fit:cover; cursor:pointer;"
+                                                alt="QR Code" title="Click to view" (click)="openDocPreview('qr_code')">
+                                            <i *ngIf="!docUploads['qr_code'].preview"
+                                                class="bi bi-file-earmark-pdf-fill text-danger"
+                                                style="font-size:1.4rem; cursor:pointer;" title="Click to view"
+                                                (click)="openDocPreview('qr_code')"></i>
+
+                                            <div class="flex-grow-1 overflow-hidden">
+                                                <div class="small text-truncate fw-semibold" style="max-width:180px;">
+                                                    {{ docUploads['qr_code'].file?.name }}
+                                                </div>
+                                                <span class="text-muted" style="font-size:11px;">
+                                                    {{ ((docUploads['qr_code'].file?.size || 0) / 1024) | number:'1.0-0'
+                                                    }} KB
+                                                </span>
+                                                &nbsp;
+                                                <span *ngIf="docUploads['qr_code'].uploading"
+                                                    class="badge bg-warning text-dark"
+                                                    style="font-size:10px;">Uploading...</span>
+                                                <span *ngIf="docUploads['qr_code'].uploaded" class="badge bg-success"
+                                                    style="font-size:10px;"><i class="bi bi-check2"></i> Done</span>
+                                            </div>
+
+                                            <button type="button" class="btn btn-sm btn-outline-danger py-0 px-1"
+                                                (click)="removeDocFile('qr_code')"
+                                                [disabled]="docUploads['qr_code'].uploading">
+                                                <i class="bi bi-x" style="font-size:1rem;"></i>
+                                            </button>
+                                        </div>
+                                    </ng-template>
+
+                                    <small class="text-danger" *ngIf="docUploads['qr_code'].error">
+                                        <i class="bi bi-exclamation-circle me-1"></i>{{ docUploads['qr_code'].error }}
+                                    </small>
+                                </div>
+
+                            </div>
+                            <!-- ── End Document Upload ──────────────────────────── -->
+
                         </div>
 
-                        <div class="d-flex justify-content-center mt-4">
+                        <div class="d-flex justify-content-center">
                             <button type="button" class="btn previous-btn me-2"
                                 (click)="previousStep()">Previous</button>
                             <button type="button" class="btn next-btn rounded-2" (click)="nextStep()">Next</button>
@@ -432,7 +707,7 @@
                                         </tr> -->
 
                                         <tr>
-                                            <td>Basic Salary</td>
+                                            <td>Basic Salary Package</td>
                                             <td>
                                                 <div class="w-100 d-flex align-items-center gap-2 fw-bold">
                                                     <input type="number" placeholder="Basic Salary"
@@ -530,7 +805,7 @@
                             </div>
                         </div>
 
-                        <div class="d-flex justify-content-center gap-2 mt-4">
+                        <div class="d-flex justify-content-center gap-2 mt-2">
                             <div>
                                 <button type="button" class="btn previous-btn me-2"
                                     (click)="previousStep()">Previous</button>

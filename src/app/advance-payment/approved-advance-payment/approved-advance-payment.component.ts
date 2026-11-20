@@ -1,10 +1,11 @@
-import { Component } from '@angular/core';
+import { Component, ElementRef, HostListener } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ColDef, GridApi } from 'ag-grid-community';
 import { EmployeeActionComponent } from 'src/app/employee/employee-action/employee-action.component';
 import { HrmserviceService } from 'src/app/hrmservice.service';
 import { ToastrService } from 'ngx-toastr';
 import * as bootstrap from 'bootstrap';
+import { debounceTime, distinctUntilChanged, Subject } from 'rxjs';
 
 @Component({
   selector: 'app-approved-advance-payment',
@@ -19,10 +20,9 @@ export class ApprovedAdvancePaymentComponent {
   role: string = '';
   columnDefs: ColDef[] = [];
   rowData: any = [];
-  CompanyNames: any = [];
-  selectedCompanyId: any = 1;
-  selectedYear: any;
-  selectedMonth: any;
+  CompanyNames: any[] = [];
+  selectedCompanyId: any[] = ['all'];
+  companyDropdownOpen: boolean = false;
   displayApprovedData!: FormGroup;
   approvedData!: any;
   isLoading: boolean = false;
@@ -32,21 +32,27 @@ export class ApprovedAdvancePaymentComponent {
   isSkipConfirmed: boolean = false;
   skipEmiReason: any;
   isSkipFormSubmitted = false;
-
   totalRows: number = 0;
   currentPage: number = 1;
   lastPage: number = 1;
   pagesToShow: (number | string)[] = [];
   paginationvalue: any;
 
-  constructor(private fb: FormBuilder, private service: HrmserviceService, private toastr: ToastrService) { }
+  startDate: string = this.getFirstDayOfMonth();
+  endDate: string = this.getLastDayOfMonth();
+  private searchSubject = new Subject<string>();
+
+  constructor(private fb: FormBuilder, private service: HrmserviceService, private toastr: ToastrService, private elementRef: ElementRef) { }
 
   ngOnInit() {
-    this.selectedCompanyId = this.service.selectedCompanyId();
+    // const savedCompanyId = this.service.selectedCompanyId();
+    // this.selectedCompanyId = savedCompanyId
+    //   ? (Array.isArray(savedCompanyId) ? savedCompanyId : [savedCompanyId])
+    //   : ['all'];
+    this.selectedCompanyId = ['all'];
 
     const currentDate = new Date();
-    this.selectedYear = new Date().getFullYear();
-    this.selectedMonth = new Date().getMonth() + 1;
+
     this.today = currentDate.toISOString().split('T')[0]; // Format YYYY-MM-DD
     // this.initializeGrids();
     this.role = this.service.getRole();
@@ -54,6 +60,14 @@ export class ApprovedAdvancePaymentComponent {
     this.getCompanyNames();
     // this.getAllApprovedRequest();
     this.getPagination();
+
+    this.searchSubject.pipe(
+      debounceTime(400),
+      distinctUntilChanged()
+    ).subscribe(() => {
+      this.currentPage = 1;
+      this.getAllApprovedRequest();
+    });
 
     this.displayApprovedData = this.fb.group({
       id: [{ value: '', disabled: true }],
@@ -70,6 +84,9 @@ export class ApprovedAdvancePaymentComponent {
       installmentDueDate: [{ value: '', disabled: true }],
       remainingBalance: [{ value: '', disabled: true }],
       advanceAmount: [{ value: '', disabled: true }],
+      payment_mode: [{ value: '', disabled: true }],
+      transfer_data: [{ value: '', disabled: true }],
+      accountant_confirmation: [''],
       skipEmi: [false],
       skipreason: ['', Validators.required]
     })
@@ -107,26 +124,94 @@ export class ApprovedAdvancePaymentComponent {
     document.body.style.removeProperty('padding-right');
   }
 
-  onCompanyChange(event: Event): void {
-    this.selectedCompanyId = (event.target as HTMLSelectElement).value;
-    console.log('Selected Company ID:', this.selectedCompanyId);
-    this.getAllApprovedRequest();
-  }
-
-  onYearMonthChange() {
+  onDateRangeChange(): void {
+    this.currentPage = 1;
     this.getAllApprovedRequest();
   }
 
   getCompanyNames() {
     this.service.post('fetch/company', {}).subscribe((res: any) => {
       if (res.status == "success") {
-        this.CompanyNames = res.data
+        this.CompanyNames = res.data;
       }
     },
       (error) => {
         console.error('Error fetching companies:', error);
       }
     );
+  }
+
+  toggleCompanyDropdown() {
+    this.companyDropdownOpen = !this.companyDropdownOpen;
+  }
+
+  closeCompanyDropdown() {
+    this.companyDropdownOpen = false;
+  }
+
+  isAllSelected(): boolean {
+    return this.selectedCompanyId.includes('all');
+  }
+
+  isCompanySelected(companyId: any): boolean {
+    return this.isAllSelected() || this.selectedCompanyId.includes(companyId);
+  }
+
+  toggleAll(event: Event) {
+    const checked = (event.target as HTMLInputElement).checked;
+    this.selectedCompanyId = checked ? ['all'] : [this.CompanyNames[0]?.company_id].filter(Boolean);
+    this.applyCompanyFilter();
+  }
+
+  toggleCompany(companyId: any, event: Event) {
+    const checked = (event.target as HTMLInputElement).checked;
+
+    let ids = this.isAllSelected()
+      ? this.CompanyNames.map((c: any) => c.company_id)
+      : [...this.selectedCompanyId];
+
+    if (checked) {
+      if (!ids.includes(companyId)) {
+        ids.push(companyId);
+      }
+    } else {
+      ids = ids.filter((id: any) => id !== companyId);
+    }
+
+    if (ids.length === this.CompanyNames.length) {
+      ids = ['all'];
+    }
+    this.selectedCompanyId = ids.length ? ids : [];
+
+    this.applyCompanyFilter();
+  }
+
+  applyCompanyFilter() {
+    this.currentPage = 1;
+    this.getAllApprovedRequest();
+  }
+
+  get companyDropdownLabel(): string {
+    if (this.isAllSelected()) return 'All Companies';
+    if (this.selectedCompanyId.length === 0) return 'Select Company';
+    if (this.selectedCompanyId.length === 1) {
+      const match = this.CompanyNames.find(c => c.company_id === this.selectedCompanyId[0]);
+      return match ? match.company_name : '1 Selected';
+    }
+    return `${this.selectedCompanyId.length} Companies Selected`;
+  }
+
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: MouseEvent): void {
+    if (this.companyDropdownOpen) {
+      const clickedInside = this.elementRef.nativeElement
+        .querySelector('.custom-select-dropdown')
+        ?.contains(event.target);
+
+      if (!clickedInside) {
+        this.companyDropdownOpen = false;
+      }
+    }
   }
 
   getPaidEmiCount(): number {
@@ -139,9 +224,11 @@ export class ApprovedAdvancePaymentComponent {
     this.rowData = [];
     this.service.post('all/companyapprovedrequest', {
       company_id: this.selectedCompanyId,
-      year: this.selectedYear,
-      month: this.selectedMonth,
-      page:page
+      start_date: this.startDate,
+      end_date: this.endDate,
+      page: page,
+      isexport: false,
+      search: this.searchValue || null,
     }).subscribe((res: any) => {
       try {
         if (res.status === 'success') {
@@ -163,7 +250,7 @@ export class ApprovedAdvancePaymentComponent {
           this.lastPage = res.pagination.last_page;
           this.generatePageNumbers(this.paginationvalue);
         } else {
-          this.toastr.warning('Data Not Found');
+          // this.toastr.warning('Data Not Found');
         }
       } catch (error) {
         console.log(error);
@@ -171,7 +258,7 @@ export class ApprovedAdvancePaymentComponent {
       this.isLoading = false;
     }, (error) => {
       if (error.status === 400) {
-        this.toastr.warning('Data Not Found');
+        // this.toastr.warning('Data Not Found');
       } else {
         console.error(error);
       }
@@ -194,7 +281,8 @@ export class ApprovedAdvancePaymentComponent {
 
   // gridApiActive: any;
 
-  financialYears = [2022, 2023, 2024, 2025];
+  // financialYears = [2022, 2023, 2024, 2025];
+
   months = [
     { id: 1, value: 'January' },
     { id: 2, value: 'February' },
@@ -233,9 +321,7 @@ export class ApprovedAdvancePaymentComponent {
   }
 
   onFilterBoxChange() {
-    if (this.gridApiActive) {
-      this.gridApiActive.setQuickFilter(this.searchValue);
-    }
+    this.searchSubject.next(this.searchValue);
   }
 
   // search code
@@ -259,7 +345,7 @@ export class ApprovedAdvancePaymentComponent {
         filter: true,
         maxWidth: 200
       },
-      { headerName: 'Apply Date', field: 'apply_date', sortable: true, filter: true, maxWidth: 150 },
+      { headerName: 'Apply Date', field: 'apply_date', sortable: true, filter: true, maxWidth: 150, valueFormatter: this.service.dateFormatter },
       {
         headerName: 'Adv. Amount',
         field: 'advance_amount',
@@ -302,6 +388,13 @@ export class ApprovedAdvancePaymentComponent {
 
   getSingleApprovedData(data: any) {
     this.selectedAdvpayid = data;
+    this.displayApprovedData.patchValue({
+      skipEmi: false,
+      skipreason: ''
+    });
+    this.displayApprovedData.get('skipreason')?.markAsPristine();
+    this.displayApprovedData.get('skipreason')?.markAsUntouched();
+
     this.service.post('single/report/advancesaraly', { adv_pay_id: data }).subscribe((res: any) => {
       if (res.status === 'success') {
         const advanceInfo = res.data.advance_info;
@@ -313,7 +406,7 @@ export class ApprovedAdvancePaymentComponent {
           company: advanceInfo?.company_name,
           department: advanceInfo?.department_name,
           role: advanceInfo?.designation_name,
-          requestDate: advanceInfo?.apply_date,
+          requestDate: this.service.formatToDDMMYYYY(advanceInfo?.apply_date,),
           status: advanceInfo?.status,
           tenure: advanceInfo?.tenure,
           amount: advanceInfo?.advance_amount,
@@ -323,6 +416,9 @@ export class ApprovedAdvancePaymentComponent {
           remainingBalance: advanceInfo?.remaining_balance,
           advanceAmount: advanceInfo?.advance_amount,
           firstInstallmentDate: advanceInfo?.deducted_on,
+          accountant_confirmation: advanceInfo?.accountant_confirmation,
+          payment_mode: advanceInfo?.payment_mode,
+          transfer_data: advanceInfo?.transfer_data
         }
         this.displayApprovedData.patchValue(this.approvedData);
 
@@ -432,6 +528,8 @@ export class ApprovedAdvancePaymentComponent {
               this.toastr.error(err.error.message);
             } else if (err.status === 409) {
               this.toastr.error(err.error.message);
+            } else if (err.status === 403) {
+              this.toastr.error(err.error.message);
             } else {
               this.toastr.error("Something went wrong!");
             }
@@ -447,11 +545,70 @@ export class ApprovedAdvancePaymentComponent {
     }
   }
 
-
   exportExcel() {
-    if (this.gridApiActive) {
-      this.gridApiActive.exportDataAsCsv();
-    }
+    this.isLoading = true;
+    this.service.post('all/companyapprovedrequest', {
+      company_id: this.selectedCompanyId,
+      start_date: this.startDate,
+      end_date: this.endDate,
+      isexport: true,
+    }).subscribe({
+      next: (res: any) => {
+        if (res.status === 'success' && res.data.length) {
+          const rows = res.data.map((r: any) => [
+            r.employee_code,
+            r.emp_name,
+            r.apply_date,
+            r.advance_amount,
+            r.tenure,
+            r.emi,
+            r.status
+          ]);
+
+          const csvArray: string[][] = [
+            ['Employee Code', 'Employee Name', 'Apply Date', 'Advance Amount', 'Tenure', 'Emi', 'Status'],
+            ...rows
+          ];
+
+          const csv = csvArray
+            .map((row: string[]) => row.map((v: string | number | null) => `"${v ?? ''}"`).join(','))
+            .join('\n');
+
+          const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+          const link = Object.assign(document.createElement('a'), {
+            href: URL.createObjectURL(blob),
+            download: 'ApprovedAdvPayment.csv'
+          });
+          link.click();
+
+          this.toastr.success('Data exported successfully!');
+        }
+        this.isLoading = false;
+      },
+      error: (err) => {
+        if (err.status === 400) {
+          this.toastr.warning('No data found to export');
+        } else {
+          this.toastr.error('Error while exporting data');
+        }
+        this.isLoading = false;
+      }
+    });
+  }
+
+  getFirstDayOfMonth(): string {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    return `${year}-${month}-01`;
+  }
+
+  getLastDayOfMonth(): string {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = now.getMonth() + 1;
+    const lastDay = new Date(year, month, 0).getDate();
+    return `${year}-${String(month).padStart(2, '0')}-${String(lastDay).padStart(2, '0')}`;
   }
 
   getPagination() {

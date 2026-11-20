@@ -1,10 +1,11 @@
-import { Component } from '@angular/core';
+import { Component, ElementRef, HostListener } from '@angular/core';
 import { FormGroup, FormBuilder, Validators } from '@angular/forms';
-import { ColDef, GridApi } from 'ag-grid-community';
+import { ColDef, GridApi, GridOptions } from 'ag-grid-community';
 import { HrmserviceService } from '../hrmservice.service';
 import { ToastrService } from 'ngx-toastr';
 import { Router } from '@angular/router';
 import { ModalServiceService } from '../modal-service.service';
+import { debounceTime, distinctUntilChanged, Subject } from 'rxjs';
 declare var bootstrap: any;
 @Component({
   selector: 'app-advance-payment',
@@ -12,7 +13,7 @@ declare var bootstrap: any;
   styleUrls: ['./advance-payment.component.css'],
 })
 export class AdvancePaymentComponent {
-  constructor(private fb: FormBuilder, private service: HrmserviceService, private modalService: ModalServiceService, private toastr: ToastrService, private router: Router,) { }
+  constructor(private fb: FormBuilder, private service: HrmserviceService, private modalService: ModalServiceService, private toastr: ToastrService, private router: Router, private elementRef: ElementRef) { }
   today: string = new Date().toISOString().split('T')[0];
   title: String = 'Company Demo';
   role: string = '';
@@ -21,10 +22,9 @@ export class AdvancePaymentComponent {
 
   activeTab: string = 'tab1';
   gridApiActive!: GridApi;
-  CompanyNames: any = [];
-  selectedCompanyId: any;
-  selectedYear: any;
-  selectedMonth: any;
+  CompanyNames: any[] = [];
+  selectedCompanyId: any[] = ['all'];
+  companyDropdownOpen: boolean = false;
   rowData: any = [];
   columnDefs: ColDef[] = [];
   advPayId: any;
@@ -32,6 +32,9 @@ export class AdvancePaymentComponent {
   monthlyRowData: any[] = [];
   EditAdvancePaymentData!: any;
   isLoading: boolean = false;
+  salaryTrackerForm!: FormGroup;
+  isSubmitted = false;
+  hideSubmitButton: boolean = false;
 
   // Pagination & grid APIs
   gridApi!: GridApi;
@@ -42,16 +45,45 @@ export class AdvancePaymentComponent {
   lastPage: number = 1;
   pagesToShow: (number | string)[] = [];
 
+  startDate: string = this.getFirstDayOfMonth();
+  endDate: string = this.getLastDayOfMonth();
+  loggedInUser: any;
+  private searchSubject = new Subject<string>();
+  originalTenure: any;
+
+  // ===== NEW: multiselect + per-row action dropdown state =====
+  selectedRows: any[] = [];
+  rowActions: { [advPayId: string]: string } = {}; // 'none' | 'Approved' | 'Rejected'
+
+  // ===== Advance salary history popup =====
+  historyEmp: { employee_id: any; employee_code: string; emp_name: string } | null = null;
+  historyStartDate: string = this.getFirstDayOfMonth();
+  historyEndDate: string = this.getLastDayOfMonth();
+  historyRows: any[] = [];
+  historyLoading = false;
+
   ngOnInit() {
-    this.selectedCompanyId = this.service.selectedCompanyId();
+    // const savedCompanyId = this.service.selectedCompanyId();
+    // this.selectedCompanyId = savedCompanyId
+    //   ? (Array.isArray(savedCompanyId) ? savedCompanyId : [savedCompanyId])
+    //   : ['all'];
+    this.selectedCompanyId = ['all'];
 
     this.getCompanyNames();
-    this.selectedYear = new Date().getFullYear();
-    this.selectedMonth = new Date().getMonth() + 1;
     this.getAllAdvSalary();
+
+    this.searchSubject.pipe(
+      debounceTime(400),
+      distinctUntilChanged()
+    ).subscribe(() => {
+      this.currentPage = 1;
+      this.getAllAdvSalary();
+    });
+
     const currentDate = new Date();
     this.today = currentDate.toISOString().split('T')[0]; // Format YYYY-MM-DD
     // this.initializeGrids();
+    this.loggedInUser = sessionStorage.getItem('employeeId')
 
     this.role = this.service.getRole();
     this.initializeColumns();
@@ -69,17 +101,28 @@ export class AdvancePaymentComponent {
       reason: [{ value: '', disabled: true }, Validators.required],
       EMIStartDate: [{ value: '', disabled: true }, Validators.required],
       installmentAmount: [{ value: '', disabled: true }, Validators.required],
-    })
+    });
 
-    if (sessionStorage.getItem('roleName') == 'admin' || sessionStorage.getItem('roleName') == 'accountant') {
-      this.router.navigate(['/authPanal/AdvancePayment']);
-      return;
-    } else {
-      alert('Please Login To Proceed');
-      sessionStorage.clear();
-      this.router.navigate(['']);
-      return;
-    }
+    this.salaryTrackerForm = this.fb.group({
+      emp_name: [{ value: '', disabled: true }],
+      amount: [{ value: '', disabled: true }],
+      tenure: [{ value: '', disabled: true }],
+
+      payment_mode: ['', Validators.required],
+      transfer_data: ['', Validators.required]
+    });
+  }
+
+  openModel() {
+    this.modalService.openModal('advanceRequestModal')
+  }
+
+  openSalaryTrackerModel() {
+    this.modalService.openModal('advanceSalaryTrackerModal')
+  }
+
+  hasAccess(module: string, permission: string): boolean {
+    return this.service.hasPermission(module, permission);
   }
 
   selectTab(tab: string) {
@@ -89,32 +132,101 @@ export class AdvancePaymentComponent {
   getCompanyNames() {
     this.service.post('fetch/company', {}).subscribe((res: any) => {
       if (res.status == "success") {
-        this.CompanyNames = res.data
+        this.CompanyNames = res.data;
       }
-    },
-      (error) => {
-        console.error('Error fetching companies:', error);
-      }
-    );
+    });
   }
 
-  onCompanyChange(event: Event): void {
-    this.selectedCompanyId = (event.target as HTMLSelectElement).value;
+  toggleCompanyDropdown() {
+    this.companyDropdownOpen = !this.companyDropdownOpen;
+  }
+
+  closeCompanyDropdown() {
+    this.companyDropdownOpen = false;
+  }
+
+  isAllSelected(): boolean {
+    return this.selectedCompanyId.includes('all');
+  }
+
+  isCompanySelected(companyId: any): boolean {
+    return this.isAllSelected() || this.selectedCompanyId.includes(companyId);
+  }
+
+  toggleAll(event: Event) {
+    const checked = (event.target as HTMLInputElement).checked;
+    this.selectedCompanyId = checked ? ['all'] : [this.CompanyNames[0]?.company_id].filter(Boolean);
+    this.applyCompanyFilter();
+  }
+
+  toggleCompany(companyId: any, event: Event) {
+    const checked = (event.target as HTMLInputElement).checked;
+
+    let ids = this.isAllSelected()
+      ? this.CompanyNames.map((c: any) => c.company_id)
+      : [...this.selectedCompanyId];
+
+    if (checked) {
+      if (!ids.includes(companyId)) {
+        ids.push(companyId);
+      }
+    } else {
+      ids = ids.filter((id: any) => id !== companyId);
+    }
+
+    if (ids.length === this.CompanyNames.length) {
+      ids = ['all'];
+    }
+    this.selectedCompanyId = ids.length ? ids : [];
+
+    this.applyCompanyFilter();
+  }
+
+  applyCompanyFilter() {
+    this.currentPage = 1;
     this.getAllAdvSalary();
+  }
+
+  get companyDropdownLabel(): string {
+    if (this.isAllSelected()) return 'All Companies';
+    if (this.selectedCompanyId.length === 0) return 'Select Company';
+    if (this.selectedCompanyId.length === 1) {
+      const match = this.CompanyNames.find(c => c.company_id === this.selectedCompanyId[0]);
+      return match ? match.company_name : '1 Selected';
+    }
+    return `${this.selectedCompanyId.length} Companies Selected`;
+  }
+
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: MouseEvent): void {
+    if (this.companyDropdownOpen) {
+      const clickedInside = this.elementRef.nativeElement
+        .querySelector('.custom-select-dropdown')
+        ?.contains(event.target);
+
+      if (!clickedInside) {
+        this.companyDropdownOpen = false;
+      }
+    }
   }
 
   getAllAdvSalary(page: number = 1) {
     this.isLoading = true;
     this.rowData = [];
+    this.selectedRows = [];
+    this.rowActions = {};
     this.service.post('fetch/allcompanyrequest', {
       company_id: this.selectedCompanyId,
-      year: this.selectedYear,
-      month: this.selectedMonth,
-      page: page
+      start_date: this.startDate,
+      end_date: this.endDate,
+      page: page,
+      isexport: false,
+      search: this.searchValue || null,
     }).subscribe((res: any) => {
       try {
         if (res.status === 'success' && res.data.length > 0) {
           this.rowData = res.data.map((item: any) => ({
+            employee_id: item.employee_id,
             employee_code: item.employee_code,
             apply_date: item.apply_date,
             emp_name: item.emp_name,
@@ -123,7 +235,10 @@ export class AdvancePaymentComponent {
             advance_amount: item.advance_amount,
             tenure: item.tenure,
             status: item.status,
-            adv_pay_id: item.adv_pay_id
+            adv_pay_id: item.adv_pay_id,
+            accountant_confirmation: item.accountant_confirmation,
+            transfer_data: item.transfer_data,
+            payment_mode: item.payment_mode,
           }))
           this.totalRows = res.pagination.total;
           this.currentPage = res.pagination.page;
@@ -131,7 +246,7 @@ export class AdvancePaymentComponent {
 
           this.generatePageNumbers();
         } else {
-          this.toastr.warning('Data Not Found');
+          // this.toastr.warning('Data Not Found');
         }
       } catch (error) {
         console.log(error);
@@ -140,7 +255,7 @@ export class AdvancePaymentComponent {
     },
       (error) => {
         if (error.status === 404) {
-          this.toastr.warning('Data Not Found');
+          // this.toastr.warning('Data Not Found');
         } else {
           console.error(error);
         }
@@ -151,24 +266,6 @@ export class AdvancePaymentComponent {
   onFileSelected(event: any) {
     const file = event.target.files[0];
   }
-
-  // gridApiActive: any;
-
-  financialYears = [2022, 2023, 2024, 2025];
-  months = [
-    { id: 1, value: 'January' },
-    { id: 2, value: 'February' },
-    { id: 3, value: 'March' },
-    { id: 4, value: 'April' },
-    { id: 5, value: 'May' },
-    { id: 6, value: 'June' },
-    { id: 7, value: 'July' },
-    { id: 8, value: 'August' },
-    { id: 9, value: 'September' },
-    { id: 10, value: 'October' },
-    { id: 11, value: 'November' },
-    { id: 12, value: 'December' }
-  ];
 
   days = Array.from({ length: 31 }, (_, i) => i + 1);
 
@@ -199,9 +296,7 @@ export class AdvancePaymentComponent {
   }
 
   onFilterBoxChange() {
-    if (this.gridApiActive) {
-      this.gridApiActive.setQuickFilter(this.searchValue);
-    }
+    this.searchSubject.next(this.searchValue);
   }
 
   // search code
@@ -209,62 +304,251 @@ export class AdvancePaymentComponent {
     this.searchValue = '';
     window.location.reload();
   }
-  onYearMonthChange() {
+
+  onDateRangeChange(): void {
+    this.currentPage = 1;
     this.getAllAdvSalary();
   }
 
   public defaultColDef: ColDef = {
-    editable: true,
+    editable: false,
     // flex: 1,
     resizable: true,
   };
 
-  initializeColumns() {
-    this.columnDefs = [
-      { headerName: 'Emp Code', field: 'employee_code', sortable: true, filter: true, maxWidth: 150, },
-      { headerName: 'Apply Date', field: 'apply_date', sortable: true, filter: true, maxWidth: 150, },
-      {
-        headerName: 'Employee Name',
-        field: 'emp_name',
-        sortable: true,
-        filter: true,
-      },
-      {
-        headerName: 'Department',
-        field: 'department_name',
-        sortable: true,
-        filter: true,
-        maxWidth: 150,
-      },
-      { headerName: 'Role', field: 'designation_name', maxWidth: 130, sortable: true, filter: true },
-      { headerName: 'Amount', field: 'advance_amount', maxWidth: 110, sortable: true, filter: true },
-      { headerName: 'Tenure', field: 'tenure', sortable: true, filter: true, maxWidth: 110 },
-      {
-        headerName: 'Status',
-        field: 'status',
-        sortable: true,
-        filter: true,
-        maxWidth: 140,
-        cellRenderer: this.statusButtonRenderer,
-      },
-    ];
-    if (this.role === 'admin') {
-      this.columnDefs.push({
-        headerName: 'Actions',
-        maxWidth: 120,
-        cellStyle: { border: '1px solid #ddd' },
-        cellRenderer: (params: any) => {
-          return `<button type="button" class="btn btn-sm mb-1" data-bs-toggle="modal" data-bs-target="#advanceRequestModal" style="background-color:#C8E3FF">
-              <i class="bi bi-pencil"></i>
-            </button>`;
-        },
-        onCellClicked: (event: any) => {
-          this.getSingleAdvanceSalary(event.data.adv_pay_id);
-          console.log(event);
+  // ===== NEW: fires whenever ag-grid row checkbox selection changes =====
+  onSelectionChanged(event?: any) {
+    if (!this.gridApi) { return; }
+    this.selectedRows = this.gridApi.getSelectedRows();
+  }
 
+  // ===== NEW: fires when a row's action dropdown value changes =====
+  onRowActionChange(data: any, value: string) {
+    this.rowActions[data.adv_pay_id] = value;
+  }
+
+  // ===== NEW: Submit button handler =====
+  // Only rows whose checkbox is ticked are considered.
+  // - dropdown = "No selection" -> that row is skipped, nothing happens
+  // - dropdown = "Approve"      -> row gets approved
+  // - dropdown = "Reject"       -> row gets rejected
+  submitBulkActions() {
+    if (!this.gridApi) { return; }
+
+    const checkedRows = this.gridApi.getSelectedRows();
+
+    if (!checkedRows.length) {
+      this.toastr.warning('Please select at least one row using the checkbox.');
+      return;
+    }
+
+    const toProcess = checkedRows
+      .map((row: any) => ({ row, action: this.rowActions[row.adv_pay_id] || 'none' }))
+      .filter((entry) => entry.action === 'Approved' || entry.action === 'Rejected');
+
+    if (!toProcess.length) {
+      // every checked row has "No selection" -> nothing to do
+      this.toastr.info('No action selected for the checked rows.');
+      return;
+    }
+
+    const approveCount = toProcess.filter((e) => e.action === 'Approved').length;
+    const rejectCount = toProcess.filter((e) => e.action === 'Rejected').length;
+
+    if (!confirm(`Approve ${approveCount} and reject ${rejectCount} request(s)?`)) {
+      return;
+    }
+
+    this.isLoading = true;
+    let remaining = toProcess.length;
+    let failed = 0;
+
+    toProcess.forEach(({ row, action }) => {
+      this.service.post('update/advancesaraly', { adv_pay_id: row.adv_pay_id, status: action }).subscribe(
+        () => {
+          remaining--;
+          if (remaining === 0) {
+            if (failed) {
+              this.toastr.warning(`Done with ${failed} failure(s). Refreshing list.`);
+            } else {
+              this.toastr.success('Selected requests updated successfully');
+            }
+            this.getAllAdvSalary(this.currentPage);
+          }
         },
+        () => {
+          remaining--;
+          failed++;
+          if (remaining === 0) {
+            this.toastr.warning(`Done with ${failed} failure(s). Refreshing list.`);
+            this.getAllAdvSalary(this.currentPage);
+          }
+        }
+      );
+    });
+  }
+
+  initializeColumns() {
+    // WITH THIS:
+    this.columnDefs = [];
+
+    if (this.hasAccess('Advance Payment', 'ApproveOrReject')) {
+      this.columnDefs.push({
+        headerName: '',
+        colId: 'checkboxCol',
+        checkboxSelection: (params: any) => params.data && params.data.status !== 'Approved',
+        headerCheckboxSelection: true,
+        headerCheckboxSelectionFilteredOnly: true,
+        width: 50,
+        minWidth: 50,
+        maxWidth: 50,
+        pinned: 'left',
+        sortable: false,
+        filter: false,
+        resizable: false,
+        suppressMenu: true,
       });
     }
+
+    this.columnDefs.push(
+      { headerName: 'Emp Code', field: 'employee_code', sortable: true, filter: true, flex: 1, minWidth: 125 },
+      { headerName: 'Employee Name', field: 'emp_name', sortable: true, filter: true, width: 175 },
+      { headerName: 'Apply Date', field: 'apply_date', sortable: true, filter: true, flex: 1, minWidth: 135, valueFormatter: this.service.dateFormatter },
+      { headerName: 'Amount', field: 'advance_amount', sortable: true, filter: true, flex: 1, minWidth: 110 },
+      { headerName: 'Tenure', field: 'tenure', sortable: true, filter: true, flex: 0.8, minWidth: 60 },
+      { headerName: 'Status', field: 'status', sortable: true, filter: true, width: 150, cellRenderer: this.statusButtonRenderer },
+    );
+
+    this.columnDefs.push({
+      headerName: 'Actions',
+      colId: 'actionDropdownCol',
+      width: 260,
+      minWidth: 260,
+      maxWidth: 260,
+      resizable: false,
+      cellStyle: { border: '1px solid #ddd' },
+
+      cellRenderer: (params: any) => {
+        const container = document.createElement('div');
+        container.style.display = 'flex';
+        container.style.alignItems = 'center';
+        container.style.gap = '6px';
+        container.style.flexWrap = 'nowrap';   // was 'wrap'
+        container.style.height = '100%';
+
+        // ===== Approve/Reject dropdown (only relevant for pending rows) =====
+        if (
+          params.data.status === 'pending' &&
+          this.hasAccess('Advance Payment', 'ApproveOrReject')
+        ) {
+          const select = document.createElement('select');
+          select.className = 'form-select form-select-sm';
+          select.style.width = '110px';
+          select.style.flexShrink = '0';
+          select.style.display = 'inline-block';
+
+          const options = [
+            { value: 'none', label: 'No selection' },
+            { value: 'Approved', label: 'Approve' },
+            { value: 'Rejected', label: 'Reject' },
+          ];
+
+          options.forEach((opt) => {
+            const optionEl = document.createElement('option');
+            optionEl.value = opt.value;
+            optionEl.text = opt.label;
+            select.appendChild(optionEl);
+          });
+
+          // Dropdown works independently of the checkbox — admin can pick the
+          // action first and check the row after, or check first and pick after.
+          const currentValue = this.rowActions[params.data.adv_pay_id] || 'none';
+          select.value = currentValue;
+
+          select.addEventListener('change', (event: any) => {
+            this.onRowActionChange(params.data, event.target.value);
+          });
+
+          container.appendChild(select);
+        }
+
+        // ===== View (eye) button - replaces the pencil, same click behaviour =====
+        if (
+          params.data.status === 'pending' &&
+          this.hasAccess('Advance Payment', 'ApproveOrReject')
+        ) {
+          const eyeBtn = document.createElement('button');
+          eyeBtn.type = 'button';
+          eyeBtn.className = 'btn btn-sm edit-btn';
+          eyeBtn.style.backgroundColor = '#C8E3FF';
+          eyeBtn.innerHTML = `<i class="bi bi-eye"></i>`;
+          container.appendChild(eyeBtn);
+        }
+
+        // ===== Salary Tracker button (unchanged logic) =====
+        if (
+          (params.data.status === 'Approved' || params.data.status === 'pending') &&
+          this.hasAccess('Advance Payment', 'SalaryTracker')
+        ) {
+          if (params.data.status === 'pending') {
+            const disabledBtn = document.createElement('button');
+            disabledBtn.type = 'button';
+            disabledBtn.className = 'btn btn-sm';
+            disabledBtn.style.backgroundColor = '#d3d3d3';
+            disabledBtn.style.cursor = 'not-allowed';
+            disabledBtn.disabled = true;
+            disabledBtn.innerHTML = `<i class="bi bi-cash"></i>`;
+            container.appendChild(disabledBtn);
+          }
+
+          if (params.data.status === 'Approved') {
+            const stBtn = document.createElement('button');
+            stBtn.type = 'button';
+            stBtn.className = 'btn btn-sm st-btn';
+            stBtn.style.backgroundColor = '#C8E3FF';
+            stBtn.innerHTML = `<i class="bi bi-cash"></i>`;
+            container.appendChild(stBtn);
+          }
+        }
+
+        // ===== History button (all rows) =====
+        if (this.hasAccess('Advance Payment', 'ApproveOrReject')) {
+          const historyBtn = document.createElement('button');
+          historyBtn.type = 'button';
+          historyBtn.className = 'btn btn-sm history-btn';
+          historyBtn.title = 'Advance salary history';
+          historyBtn.style.backgroundColor = '#C8E3FF';
+          historyBtn.innerHTML = `<i class="bi bi-clock-history"></i>`;
+          container.appendChild(historyBtn);
+        }
+
+        return container;
+      },
+
+      onCellClicked: (event: any) => {
+
+        // 🔹 Open Approve Modal (view request details)
+        if (event.event.target.closest('.edit-btn')) {
+          this.getSingleAdvanceSalary(event.data.adv_pay_id);
+          this.openModel();
+          return;
+        }
+
+        // 🔹 Open Salary Tracker
+        if (event.event.target.closest('.st-btn')) {
+          this.setSalaryTrackerData(event.data);
+          this.openSalaryTrackerModel();
+          return;
+        }
+
+        // 🔹 Open Advance Salary History
+        if (event.event.target.closest('.history-btn')) {
+          if (!this.hasAccess('Advance Payment', 'ApproveOrReject')) { return; }
+          this.openHistory(event.data);
+          return;
+        }
+      }
+    });
   }
 
   getSingleAdvanceSalary(data: any) {
@@ -280,7 +564,7 @@ export class AdvancePaymentComponent {
           company: singleAdvanceSalary?.company_name,
           department: singleAdvanceSalary?.department_name,
           role: singleAdvanceSalary?.designation_name,
-          requestData: singleAdvanceSalary?.apply_date,
+          requestData: this.service.formatToDDMMYYYY(singleAdvanceSalary?.apply_date),
           status: singleAdvanceSalary?.status,
           tenure: singleAdvanceSalary?.tenure,
           amount: singleAdvanceSalary?.advance_amount,
@@ -289,78 +573,280 @@ export class AdvancePaymentComponent {
           installmentAmount: singleAdvanceSalary?.emi,
         }
         this.EditAdvancePayment.patchValue(this.EditAdvancePaymentData);
+        this.originalTenure = singleAdvanceSalary?.tenure;
+        if (singleAdvanceSalary?.status === 'pending') {
+          this.EditAdvancePayment.get('tenure')?.enable();
+        } else {
+          this.EditAdvancePayment.get('tenure')?.disable();
+        }
+        this.isLoading = false;
       }
+      this.isLoading = false;
     })
-    this.isLoading = false;
+  }
+
+  onTenureChange(newTenure: any) {
+    const amount = this.EditAdvancePaymentData?.amount;
+    const tenure = Number(newTenure);
+    if (amount && tenure) {
+      this.EditAdvancePayment.get('installmentAmount')?.setValue(Math.floor(amount / tenure));
+    }
+  }
+
+  updateTenure() {
+    const tenure = this.EditAdvancePayment.get('tenure')?.value;
+    if (!tenure) { return; }
+
+    const payload = {
+      adv_pay_id: this.advPayId,
+      tenure: tenure,
+      updated_by: this.loggedInUser
+    };
+
+    this.isLoading = true;
+    this.service.post('update/advancetenure', payload).subscribe((res: any) => {
+      if (res.status === 'success') {
+        this.toastr.success('Tenure updated successfully');
+        this.EditAdvancePayment.patchValue({ installmentAmount: res.data.emi });
+        this.getAllAdvSalary(this.currentPage);
+      } else {
+        this.toastr.error('Failed to update tenure');
+      }
+      this.isLoading = false;
+    }, () => {
+      this.toastr.error('Server error');
+      this.isLoading = false;
+    });
+  }
+
+  setSalaryTrackerData(data: any) {
+    console.log(data)
+    this.advPayId = data.adv_pay_id;
+
+    this.salaryTrackerForm.patchValue({
+      emp_name: data.emp_name,
+      amount: data.advance_amount,
+      tenure: data.tenure,
+      payment_mode: data.payment_mode ?? '',
+      transfer_data: data.transfer_data ?? ''
+    });
+
+    if (data.accountant_confirmation === 'Confirmed') {
+      this.salaryTrackerForm.disable();
+      this.hideSubmitButton = true;
+    } else {
+      this.salaryTrackerForm.enable();
+      this.salaryTrackerForm.get('emp_name')?.disable();
+      this.salaryTrackerForm.get('amount')?.disable();
+      this.salaryTrackerForm.get('tenure')?.disable();
+      this.hideSubmitButton = false;
+    }
+  }
+
+  accountantConfiramationAdvSalary() {
+    this.isSubmitted = true;
+
+    if (this.salaryTrackerForm.invalid) {
+      this.toastr.error("Please select payment mode and enter transfer data");
+      return;
+    }
+
+    this.isLoading = true;
+
+    const payload = {
+      adv_pay_id: this.advPayId,
+      payment_mode: this.salaryTrackerForm.get('payment_mode')?.value,
+      transfer_data: this.salaryTrackerForm.get('transfer_data')?.value
+    };
+
+    this.service.post('accountant/confirm-advance-salary', payload)
+      .subscribe({
+        next: (res: any) => {
+          if (res.status === 'success') {
+            this.toastr.success("Accountant confirmation saved successfully");
+
+            this.getAllAdvSalary(this.currentPage);
+
+            this.salaryTrackerForm.reset();
+            this.isSubmitted = false;
+            this.modalService.closeModal();
+          } else {
+            this.toastr.error("Something went wrong");
+          }
+
+          this.isLoading = false;
+        },
+
+        error: (err) => {
+          this.toastr.error("Server error");
+          console.error(err);
+          this.isLoading = false;
+        }
+      });
   }
 
   statusButtonRenderer(params: any) {
     const status = params.value;
+
     const button = document.createElement('button');
-
-    button.innerText = status;
-
-    // Common styles
-    button.style.padding = '6px 12px';
     button.style.borderRadius = '20px';
     button.style.cursor = 'default';
-    button.style.height = '30px'; // ✅ Match AG Grid row height
-    button.style.lineHeight = '20px';
-    button.style.fontSize = '14px';
+    button.style.height = '34px';
+    button.style.width = '100%';
+    button.style.marginTop = '4px';
+    button.style.padding = '0 8px';
     button.style.display = 'flex';
     button.style.alignItems = 'center';
     button.style.justifyContent = 'center';
-    button.style.width = '97%';
-    button.style.marginTop = '6px';
+    button.style.whiteSpace = 'nowrap';
 
-    // Conditional styling
-    if (status === 'pending') {
-      button.style.backgroundColor = '#FFF291'; // light red
-      button.style.color = '#721c24'; // dark red text
-      button.style.border = '1px solid #f5c6cb';
-      button.style.borderRadius = '20px';
-    } else if (status === 'Approved') {
-      button.style.backgroundColor = '#B2FFE1B0'; // light green
+    if (status === 'Approved') {
+      // UI only: Approved is shown as Confirmation / Pending (two lines)
+      button.innerHTML =
+        `<span style="display:flex;flex-direction:column;align-items:center;line-height:1.15;">
+         <span style="font-size:12px;font-weight:600;">Confirmation</span>
+         <span style="font-size:10px;">Pending</span>
+       </span>`;
+      button.style.backgroundColor = '#B2FFE1B0';
       button.style.color = 'black';
       button.style.border = '1px solid #B2FFE1B0';
-      button.style.borderRadius = '20px';
-    } else if (status === 'Rejected') {
-      button.style.backgroundColor = '#FFAFAF'; // light green
-      button.style.color = 'black';
-      button.style.border = '1px solid #FFAFAF';
-      button.style.borderRadius = '20px';
+    } else {
+      button.innerText = status;
+      button.style.fontSize = '14px';
+
+      if (status === 'pending') {
+        button.style.backgroundColor = '#FFF291';
+        button.style.color = '#721c24';
+        button.style.border = '1px solid #f5e36b';
+      } else if (status === 'Rejected') {
+        button.style.backgroundColor = '#FFAFAF';
+        button.style.color = 'black';
+        button.style.border = '1px solid #FFAFAF';
+      }
     }
 
     return button;
   }
 
-  gridOptions = {
+  gridOptions: GridOptions = {
     pagination: false,
     paginationPageSize: 10,
+    rowSelection: 'multiple',
+    suppressRowClickSelection: true,
+    isRowSelectable: (rowNode: any) => rowNode.data && rowNode.data.status !== 'Approved',
   };
 
   updateStatus(data: any) {
-    if (confirm("Do you want to update Status?") == true) {
-      const payload = {
-        adv_pay_id: this.advPayId,
-        status: data
+    const currentTenure = this.EditAdvancePayment.get('tenure')?.value;
+    const tenureChanged = data === 'Approved' && currentTenure && Number(currentTenure) !== Number(this.originalTenure);
+
+    const confirmMsg = tenureChanged
+      ? `You have changed the tenure from ${this.originalTenure} to ${currentTenure} month(s). Are you sure you want to approve this request with the changed tenure?`
+      : "Do you want to update Status?";
+
+    if (confirm(confirmMsg) == true) {
+      if (tenureChanged) {
+        const tenurePayload = {
+          adv_pay_id: this.advPayId,
+          tenure: currentTenure,
+          updated_by: this.loggedInUser
+        };
+
+        this.isLoading = true;
+        this.service.post('update/advancetenure', tenurePayload).subscribe(() => {
+          this.proceedStatusUpdate(data);
+        }, () => {
+          this.toastr.error('Failed to update tenure before approval');
+          this.isLoading = false;
+        });
+      } else {
+        this.proceedStatusUpdate(data);
       }
-      this.service.post(`update/advancesaraly`, payload).subscribe((res: any) => {
-        if (res.status === 'success') {
-          this.toastr.success("Advance salary status updated successfully");
-          this.getAllAdvSalary();
-          this.modalService.closeModal();
-        }
-      }, (error) => {
-        console.error('Error:', error);
-      });
     }
   }
 
-  exportExcel() {
-    if (this.gridApiActive) {
-      this.gridApiActive.exportDataAsCsv();
+  proceedStatusUpdate(data: any) {
+    const payload = {
+      adv_pay_id: this.advPayId,
+      status: data
     }
+    this.service.post(`update/advancesaraly`, payload).subscribe((res: any) => {
+      if (res.status === 'success') {
+        this.toastr.success("Advance salary status updated successfully");
+        this.getAllAdvSalary();
+        this.modalService.closeModal();
+      }
+      this.isLoading = false;
+    }, (error) => {
+      console.error('Error:', error);
+      this.isLoading = false;
+    });
+  }
+
+  getFirstDayOfMonth(): string {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    return `${year}-${month}-01`;
+  }
+
+  getLastDayOfMonth(): string {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = now.getMonth() + 1;
+    const lastDay = new Date(year, month, 0).getDate();
+    return `${year}-${String(month).padStart(2, '0')}-${String(lastDay).padStart(2, '0')}`;
+  }
+
+  exportExcel() {
+    this.isLoading = true;
+    this.service.post('fetch/allcompanyrequest', {
+      company_id: this.selectedCompanyId,
+      start_date: this.startDate,
+      end_date: this.endDate,
+      isexport: true,
+    }).subscribe({
+      next: (res: any) => {
+        if (res.status === 'success' && res.data.length) {
+          const rows = res.data.map((r: any) => [
+            r.employee_code,
+            r.emp_name,
+            r.apply_date,
+            r.advance_amount,
+            r.tenure,
+            r.emi,
+            r.status
+          ]);
+
+          const csvArray: string[][] = [
+            ['Employee Code', 'Employee Name', 'Apply Date', 'Advance Amount', 'Tenure', 'Emi', 'Status'],
+            ...rows
+          ];
+
+          const csv = csvArray
+            .map((row: string[]) => row.map((v: string | number | null) => `"${v ?? ''}"`).join(','))
+            .join('\n');
+
+          const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+          const link = Object.assign(document.createElement('a'), {
+            href: URL.createObjectURL(blob),
+            download: 'AdvPayment.csv'
+          });
+          link.click();
+
+          this.toastr.success('Data exported successfully!');
+        }
+        this.isLoading = false;
+      },
+      error: (err) => {
+        if (err.status === 404) {
+          this.toastr.warning('No data found to export');
+        } else {
+          this.toastr.error('Error while exporting data');
+        }
+        this.isLoading = false;
+      }
+    });
   }
 
   generatePageNumbers() {
@@ -418,5 +904,60 @@ export class AdvancePaymentComponent {
       this.getAllAdvSalary(this.currentPage);
       this.generatePageNumbers();
     }
+  }
+
+  openHistory(row: any) {
+    this.historyEmp = {
+      employee_id: row.employee_id,
+      employee_code: row.employee_code,
+      emp_name: row.emp_name,
+    };
+    // default = current month
+    this.historyStartDate = this.getFirstDayOfMonth();
+    this.historyEndDate = this.getLastDayOfMonth();
+    this.historyRows = [];
+    this.loadHistory();
+    this.modalService.openModal('advanceHistoryModal');
+  }
+
+  loadHistory() {
+    if (!this.historyEmp) { return; }
+
+    if (!this.historyStartDate || !this.historyEndDate || this.historyStartDate > this.historyEndDate) {
+      this.toastr.warning('Please select a valid date range');
+      return;
+    }
+
+    this.historyLoading = true;
+    this.service.post('emp/advancesaraly/history', {
+      employee_id: this.historyEmp.employee_id,
+      start_date: this.historyStartDate,
+      end_date: this.historyEndDate,
+    }).subscribe({
+      next: (res: any) => {
+        this.historyRows = res.status === 'success' ? res.data : [];
+        this.historyLoading = false;
+      },
+      error: () => {
+        this.historyRows = [];
+        this.toastr.error('Unable to load advance salary history');
+        this.historyLoading = false;
+      },
+    });
+  }
+
+  // Same wording the main grid uses: Approved but not confirmed by accountant = "Confirmation Pending"
+  historyStatusLabel(r: any): string {
+    if (r.status === 'Approved' && r.accountant_confirmation !== 'Confirmed') {
+      return 'Confirmation Pending';
+    }
+    return r.status;
+  }
+
+  historyStatusClass(r: any): string {
+    const s = this.historyStatusLabel(r);
+    if (s === 'pending') return 'bg-warning text-dark';
+    if (s === 'Rejected') return 'bg-danger';
+    return 'bg-success'; // Approved / Confirmation Pending
   }
 }

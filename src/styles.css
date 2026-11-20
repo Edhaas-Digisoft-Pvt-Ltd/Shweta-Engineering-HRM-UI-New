@@ -4,10 +4,10 @@
 
 
 /* font link */
-@import url('https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100..900;1,100..900&display=swap');
+/* @import url('https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100..900;1,100..900&display=swap'); */
 
 body {
-  font-family: "Roboto", sans-serif !important;
+  font-family: Arial, Helvetica, sans-serif !important;
   text-transform: capitalize !important;
 }
 
@@ -16,6 +16,19 @@ body {
   --agGrid-Header: #578FCA;
   --readOnlyInput: #EDEDED;
   --agGrid-evenRow: #F3F9FF;
+
+  --role-admin: #3674B5;
+  --role-accountant: #0E9F6E;
+  --role-employee: #f48634;
+
+  --admin-agGrid-Header: #578FCA;
+  --accountant-agGrid-Header: #51d6aa;
+  --employee-agGrid-Header: #e4a87a;
+
+}
+
+.accordion-item {
+  background-color: transparent !important;
 }
 
 label {
@@ -27,6 +40,84 @@ label {
 button {
   font-size: 1rem !important;
 }
+
+.sideNav.closed .nav-name {
+  display: none;
+}
+
+.collapsIcons {
+  display: none;
+  position: relative;
+
+}
+
+.com-side {
+  position: absolute;
+  background-color: #0253aa;
+  box-sizing: border-box;
+  border-radius: 10px;
+}
+
+.com-side::before {
+  content: "";
+  position: absolute;
+  width: 15px;
+  height: 15px;
+  background-color: #0253aa;
+  left: -5px;
+  transform: rotate(45deg);
+  top: 12px;
+
+}
+
+.sideList {
+    right: -169px;
+    top: 14%;
+
+
+}
+
+.sideList2 {
+    right: -195px;
+    top: 3%;
+
+
+}
+
+.sideList li,
+.sideList2 li {
+  color: white;
+  text-align: start;
+}
+
+.sideList li a,
+.sideList2 li a {
+  color: white;
+}
+
+.sideNav.closed .accordion-sec {
+  display: none;
+}
+
+.sideNav.closed .collapsIcons {
+  display: block;
+}
+
+.sideNav.open .sideList {
+  display: none !important;
+}
+
+.sideNav.open .sideList2 {
+  display: none !important;
+}
+
+.sideNav.closed .company_heading {
+  display: none;
+}
+.sideNav.closed .userName {
+  display: none;
+}
+
 
 /* .modal-lg, .modal-xl {
   --bs-modal-width: 800px;
@@ -278,27 +369,33 @@ tr td:not(:last-of-type) {
   .table thead {
     display: none;
   }
-  .table .table tbody,.table tr, .table td{
+
+  .table .table tbody,
+  .table tr,
+  .table td {
     display: block;
     width: 100%;
   }
-  .table tbody tr td{
+
+  .table tbody tr td {
     text-align: right;
     padding-left: 50%;
     position: relative;
   }
-  .table tbody tr td.tableHeading{
+
+  .table tbody tr td.tableHeading {
     text-align: center !important;
-     padding-left: 0%;
+    padding-left: 0%;
   }
 
-  .table td::before{
+  .table td::before {
     content: attr(data-label);
     position: absolute;
     left: 0;
     padding-left: 15px;
   }
-  .comBtn{
+
+  .comBtn {
     width: 100%;
   }
 }
@@ -455,11 +552,6 @@ tr td:not(:last-of-type) {
 
 .border-primary-light {
   border-bottom: 1px solid rgb(200, 200, 232);
-}
-
-app-sidebar {
-  position: sticky;
-  top: 20px;
 }
 
 .custom-box-shadow {
@@ -649,7 +741,9 @@ h2 {
 @media(min-width: 1025px) and (max-width:1440px) {}
 
 @media (min-width: 768px) and (max-width:1025px) {
-  .modal-lg, .modal-xl {
+
+  .modal-lg,
+  .modal-xl {
     --bs-modal-width: 700px;
     margin: auto !important;
   }
@@ -764,4 +858,126 @@ h2 {
   pointer-events: none;
   filter: blur(1px);
   opacity: 0.6;
+}
+
+.sideNav.open .userName {
+  display: flex;
+}
+
+/* dropdown multiselect css */
+.custom-select-dropdown .form-check {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 10px;
+  margin: 0;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.custom-select-dropdown .form-check-input[type="checkbox"] {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  box-sizing: border-box;
+  margin: 0;
+  width: 16px;
+  height: 16px;
+  min-width: 16px;
+  flex-shrink: 0;
+  border: 1.5px solid #adb5bd;
+  border-radius: 3px;
+  background-color: #fff;
+  cursor: pointer;
+  position: relative;
+}
+
+.custom-select-dropdown .form-check-input[type="checkbox"]:checked {
+  background-color: #0d6efd;
+  border-color: #0d6efd;
+}
+
+.custom-select-dropdown .form-check-input[type="checkbox"]:checked::after {
+  content: "";
+  position: absolute;
+  left: 4px;
+  top: 1px;
+  width: 5px;
+  height: 9px;
+  border: solid #fff;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+
+.custom-select-dropdown .form-check-label {
+  font-weight: 400 !important;
+  color: #212529 !important;
+  cursor: pointer;
+  width: 100%;
+  font-size: 14px;
+  margin: 0 !important;
+}
+
+.custom-select-dropdown .dropdown-toggle-btn {
+  width: 100%;
+  padding: 6px 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #fff;
+  color: #212529;
+  line-height: 1.5;
+}
+
+.custom-select-dropdown {
+  position: relative;
+  width: 100%;
+}
+
+.custom-select-dropdown .dropdown-menu {
+  display: none;
+  position: absolute;
+  z-index: 1050;
+  top: 100%;
+  left: 0;
+  right: 0;
+  margin-top: 4px;
+  width: 100%;
+  box-sizing: border-box;
+  max-height: 260px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  background: #fff;
+  border: 1px solid #dee2e6;
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  padding: 4px;
+}
+
+/* Time Based / Job Based (Die Rate) pills on the payroll screens (Process, Approved, Payroll List) */
+ul.payroll-type-pills .nav-link {
+  cursor: pointer;
+  position: relative;
+  color: #9e9e9e;
+}
+
+ul.payroll-type-pills .nav-link:hover {
+  border: none;
+}
+
+ul.payroll-type-pills .nav-link.active {
+  border: none;
+  padding-bottom: 20px !important;
+  color: #fff !important;
+}
+
+ul.payroll-type-pills .nav-link.active::after {
+  position: absolute;
+  content: "";
+  width: 100%;
+  height: 10px;
+  background: #94C8FF;
+  bottom: 0px;
+  left: 0px;
+  border-radius: 10px 10px 0px 0px;
 }

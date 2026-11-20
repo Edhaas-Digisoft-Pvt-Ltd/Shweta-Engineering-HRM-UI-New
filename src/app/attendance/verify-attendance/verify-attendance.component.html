@@ -1,0 +1,144 @@
+<div class="position-relative">
+
+  <div class="loader-overlay" *ngIf="isLoading">
+    <app-loader></app-loader>
+  </div>
+
+  <div [class.loading]="isLoading">
+    <div class="container-fluid">
+
+      <!-- Toolbar -->
+      <div class="d-flex flex-wrap justify-content-end align-items-center gap-3 mt-3 mb-3">
+
+        <!-- Search -->
+        <input class="form-control form-control-sm" type="text" placeholder="Search" [(ngModel)]="searchInputValue"
+          (ngModelChange)="onSearchChange()" style="min-width:180px; max-width:220px;" />
+
+        <!-- Start Date -->
+        <div class="d-flex align-items-center gap-1">
+          <label class="fw-semibold mb-0 text-nowrap">From Date</label>
+          <input type="date" class="form-control form-control-sm" style="width:150px;" [(ngModel)]="startDate"
+            (change)="onDateRangeChange()" />
+        </div>
+
+        <!-- End Date -->
+        <div class="d-flex align-items-center gap-1">
+          <label class="fw-semibold mb-0 text-nowrap">To Date</label>
+          <input type="date" class="form-control form-control-sm" style="width:150px;" [(ngModel)]="endDate"
+            (change)="onDateRangeChange()" />
+        </div>
+
+        <!-- Verify Selected Button -->
+        <button class="btn btn-success btn-sm rounded-3" (click)="verifySelected()" [disabled]="isLoading">
+          <i class="bi bi-check2-square"></i>&nbsp;Verify
+          <span *ngIf="selectedCount > 0" class="badge bg-dark ms-1">{{ selectedCount }}</span>
+        </button>
+
+      </div>
+
+      <!-- AG Grid -->
+      <div class="row">
+        <div class="col-12">
+          <ag-grid-angular class="ag-theme-alpine" style="width:100%; height:60vh;" [rowData]="rowData"
+            [columnDefs]="columnDefs" [defaultColDef]="defaultColDef" [gridOptions]="gridOptions"
+            (gridReady)="onGridReady($event)">
+          </ag-grid-angular>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════════════════════════
+     EDIT ATTENDANCE MODAL
+     Matches the "Approved Salary Request Info" modal style in the app
+     ═══════════════════════════════════════════════════════════════════════════ -->
+<div class="modal-backdrop-custom" *ngIf="showEditModal" (click)="closeEditModal()"></div>
+
+<!-- EDIT ATTENDANCE MODAL -->
+<div class="modal fade" id="editAttendanceModal" tabindex="-1" aria-labelledby="editAttModalTitle"
+  [class.show]="showEditModal" [style.display]="showEditModal ? 'block' : 'none'"
+  [style.background]="showEditModal ? 'rgba(0,0,0,0.45)' : ''">
+  <div class="modal-dialog modal-dialog-centered modal-xl">
+    <div class="modal-content">
+
+      <!-- Header -->
+      <div class="modal-header">
+        <h1 class="modal-title fs-5" id="editAttModalTitle">Edit Attendance Info</h1>
+        <button type="button" class="btn-close btn-close-white" (click)="closeEditModal()" aria-label="Close"></button>
+      </div>
+
+      <!-- Body -->
+      <div class="modal-body" style="padding: 10px 40px;">
+
+        <!-- Row 1: read-only info fields -->
+        <div class="row my-3">
+          <div class="col-md-2">
+            <label>Employee Code</label>
+            <input type="text" class="form-control" [value]="editRecord.employee_code" disabled />
+          </div>
+          <div class="col-md-4">
+            <label>Employee Name</label>
+            <input type="text" class="form-control" [value]="editRecord.emp_name" disabled />
+          </div>
+          <div class="col-md-3">
+            <label>Date</label>
+            <input type="text" class="form-control" [value]="editRecord.currentdate" disabled />
+          </div>
+          <div class="col-md-3">
+            <label>Shift</label>
+            <input type="text" class="form-control" [value]="editRecord.shiftLabel" disabled />
+          </div>
+        </div>
+
+        <!-- Row 2: editable time fields -->
+        <div class="row my-3">
+          <div class="col-md-6">
+            <label>Login Time <span class="text-danger">*</span></label>
+            <input type="text" class="form-control" [class.is-invalid]="loginTimeError || loginShiftError"
+              [(ngModel)]="editRecord.logged_in_time" placeholder="HH:MM:SS AM/PM"
+              [disabled]="editRecord.admin_marked_absent" />
+            <div class="invalid-feedback" *ngIf="loginTimeError">Required. Enter time as HH:MM AM/PM</div>
+            <div class="invalid-feedback" *ngIf="loginShiftError" style="display:block">{{ loginShiftError }}</div>
+          </div>
+
+          <div class="col-md-6">
+            <label>Logout Time <span class="text-danger">*</span></label>
+            <input type="text" class="form-control" [class.is-invalid]="logoutTimeError || logoutShiftError"
+              [(ngModel)]="editRecord.logged_out_time" placeholder="HH:MM:SS AM/PM"
+              [disabled]="editRecord.admin_marked_absent" />
+            <div class="invalid-feedback" *ngIf="logoutTimeError">Required. Enter time as HH:MM AM/PM</div>
+            <div class="invalid-feedback" *ngIf="logoutShiftError" style="display:block">{{ logoutShiftError }}</div>
+          </div>
+        </div>
+
+        <div class="row my-2">
+          <div class="col-12">
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" id="markAbsentCheck"
+                [(ngModel)]="editRecord.admin_marked_absent" (ngModelChange)="onAbsentToggleChange()" />
+              <label class="form-check-label fw-semibold" for="markAbsentCheck">
+                Mark as Absent
+              </label>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Footer -->
+      <div class="modal-footer">
+        <button type="button" class="btn approveBtn" (click)="saveEditRecord()" [disabled]="isSaving">
+          <span *ngIf="isSaving" class="spinner-border spinner-border-sm me-1" role="status"></span>
+          {{ isSaving ? 'Saving…' : 'Save Changes' }}
+        </button>
+        <button type="button" class="btn declineBtn" (click)="closeEditModal()" [disabled]="isSaving">
+          Cancel
+        </button>
+      </div>
+
+    </div>
+  </div>
+</div>

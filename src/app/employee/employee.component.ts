@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ElementRef, HostListener } from '@angular/core';
 import { ColDef, GridApi } from 'ag-grid-community';
 import { EmployeeActionComponent } from './employee-action/employee-action.component';
 import { Router } from '@angular/router';
@@ -7,6 +7,7 @@ import { ToastrService } from 'ngx-toastr';
 import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
 import { ModalServiceService } from '../modal-service.service';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 
 declare var bootstrap: any;
 @Component({
@@ -18,40 +19,53 @@ export class EmployeeComponent {
 
   gridApiActive!: GridApi;
   searchValue: string = '';
-  CompanyNames: any;
-  selectedValue: string = 'Company A';
   employee: any = [];
   Employee_Data: any;
-  selectedCompanyId: any;
+  CompanyNames: any[] = [];
+  selectedCompanyId: any[] = ['all'];
+  companyDropdownOpen: boolean = false;
   rowData: any = [];
   importExcelCompanyId: string = '';
   isLoading: boolean = false;
+  searchTimeout: any;
 
   totalRows: number = 0;
   currentPage: number = 1;
   lastPage: number = 1;
   pagesToShow: (number | string)[] = [];
   paginationvalue: any;
+  changePasswordForm!: FormGroup;
+  submitted = false;
+  showPassword = false;
+  showConfirmPassword = false;
+  employee_id: any;
 
-  constructor(private router: Router, private service: HrmserviceService, private modalService: ModalServiceService, private toastr: ToastrService) { }
+  constructor(private router: Router, private fb: FormBuilder, private service: HrmserviceService, private modalService: ModalServiceService, private toastr: ToastrService, private elementRef: ElementRef) { }
 
   ngOnInit() {
     // this.selectedCompanyId = this.CompanyIdService.selectedCompanyId();
-    this.selectedCompanyId = this.service.selectedCompanyId();
+    // const savedCompanyId = this.service.selectedCompanyId();
+    this.selectedCompanyId = ['all'];
+    // this.selectedCompanyId = savedCompanyId
+    //   ? (Array.isArray(savedCompanyId) ? savedCompanyId : [savedCompanyId])
+    //   : ['all'];
+
+    this.changePasswordForm = this.fb.group({
+      password: ['', [
+        Validators.required,
+        Validators.minLength(6),
+        Validators.pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&]).+$/)
+      ]],
+      confirm_password: ['', Validators.required]
+    }, { validators: this.passwordMatchValidator });
 
     // this.getEmployee();
     this.getPagination();
     this.getCompanyNames();
+  }
 
-    if (sessionStorage.getItem('roleName') == 'admin') {
-      this.router.navigate(['/authPanal/Employee']);
-      return;
-    } else {
-      alert('Please Login To Proceed');
-      sessionStorage.clear();
-      this.router.navigate(['']);
-      return;
-    }
+  hasAccess(module: string, permission: string): boolean {
+    return this.service.hasPermission(module, permission);
   }
 
   openImportModal(): void {
@@ -61,7 +75,6 @@ export class EmployeeComponent {
   getCompanyNames() {
     this.service.post('fetch/company', {}).subscribe((res: any) => {
       if (res.status == "success") {
-        // this.optionsArray = res.map((company: any) => company.CompanyName); // <-- only CompanyName
         this.CompanyNames = res.data;
       }
     },
@@ -71,10 +84,78 @@ export class EmployeeComponent {
     );
   }
 
-  onCompanyChange(event: Event): void {
-    this.selectedCompanyId = (event.target as HTMLSelectElement).value;
-    console.log('Selected Company ID:', this.selectedCompanyId);
+  toggleCompanyDropdown() {
+    this.companyDropdownOpen = !this.companyDropdownOpen;
+  }
+
+  closeCompanyDropdown() {
+    this.companyDropdownOpen = false;
+  }
+
+  isAllSelected(): boolean {
+    return this.selectedCompanyId.includes('all');
+  }
+
+  isCompanySelected(companyId: any): boolean {
+    return this.isAllSelected() || this.selectedCompanyId.includes(companyId);
+  }
+
+  toggleAll(event: Event) {
+    const checked = (event.target as HTMLInputElement).checked;
+    this.selectedCompanyId = checked ? ['all'] : [this.CompanyNames[0]?.company_id].filter(Boolean);
+    this.applyCompanyFilter();
+  }
+
+  toggleCompany(companyId: any, event: Event) {
+    const checked = (event.target as HTMLInputElement).checked;
+
+    let ids = this.isAllSelected()
+      ? this.CompanyNames.map((c: any) => c.company_id)
+      : [...this.selectedCompanyId];
+
+    if (checked) {
+      if (!ids.includes(companyId)) {
+        ids.push(companyId);
+      }
+    } else {
+      ids = ids.filter((id: any) => id !== companyId);
+    }
+
+    if (ids.length === this.CompanyNames.length) {
+      ids = ['all'];
+    }
+    this.selectedCompanyId = ids.length ? ids : [];
+
+    this.applyCompanyFilter();
+  }
+
+  applyCompanyFilter() {
+    this.service.setCompanyId(this.selectedCompanyId);
+    this.currentPage = 1;
     this.getEmployee();
+  }
+
+  get companyDropdownLabel(): string {
+    if (this.isAllSelected()) return 'All Companies';
+    if (this.selectedCompanyId.length === 0) return 'Select Company';
+    if (this.selectedCompanyId.length === 1) {
+      const match = this.CompanyNames.find(c => c.company_id === this.selectedCompanyId[0]);
+      return match ? match.company_name : '1 Selected';
+    }
+    return `${this.selectedCompanyId.length} Companies Selected`;
+  }
+
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: MouseEvent): void {
+    if (this.companyDropdownOpen) {
+      const clickedInside = this.elementRef.nativeElement
+        .querySelector('.custom-select-dropdown')
+        ?.contains(event.target);
+
+      if (!clickedInside) {
+        this.companyDropdownOpen = false;
+      }
+    }
   }
 
   public defaultColDef: ColDef = {
@@ -86,8 +167,9 @@ export class EmployeeComponent {
   columnDefs: ColDef[] = [
     { headerName: 'Emp Code', field: 'employee_code', sortable: true, filter: true, minWidth: 160, },
     { headerName: 'Employee Name', field: 'emp_name', sortable: true, filter: true, minWidth: 180, },
-    { headerName: 'Department', field: 'department_name', sortable: true, filter: true },
-    { headerName: 'Role', field: 'designation_name', sortable: true, filter: true },
+    // { headerName: 'Department', field: 'department_name', sortable: true, filter: true },
+    // { headerName: 'Designation', field: 'designation_name', sortable: true, filter: true },
+    { headerName: 'Role', field: 'role_name', sortable: true, filter: true },
     { headerName: 'Contact', field: 'emp_contact', sortable: true, filter: true },
     { headerName: 'Joining Date', field: 'doj', sortable: true, filter: true },
     // { headerName: 'Status', field: 'status', sortable: true, filter: true, cellRenderer: (params: { value: any; }) => {
@@ -146,6 +228,7 @@ export class EmployeeComponent {
       cellRenderer: EmployeeActionComponent,
       cellRendererParams: {
         viewEmployee: (field: any) => this.editApp(field),
+        openChangePassword: (empId: any) => this.openChangePasswordModal(empId)
       },
     }
   ];
@@ -158,10 +241,13 @@ export class EmployeeComponent {
   downloadTemplate(): void {
     const userConfirmed = confirm("Do you want to download the employee template?");
     if (userConfirmed) {
-      const headers = ['role_id', 'emp_title', 'emp_name', 'emp_email', 'emp_gender', 'department_id', 'designation_id', 'statutory_list', 'bank_name', 'account_num', 'ifsc_code', 'doj', 'emp_contact', 'emp_address', 'basic_salary', 'house_rent_allowances', 'conveyance_allowances', 'medical_allowances', 'special_allowances'];
+      const headers = ['role_id', 'emp_title', 'emp_name', 'emp_email', 'emp_gender', 'department_id',
+        'designation_id', 'bank_name', 'account_num', 'ifsc_code', 'doj', 'emp_contact', 'emp_address', 'aadhaar_number', 'pan_number',
+        'basic_salary', 'house_rent_allowances', 'conveyance_allowances', 'medical_allowances',
+        'special_allowances', 'PF Employee Applicable', 'PF Employer Applicable', 'ESIC Employee APPlicable', 'Transfer Type'];
       const exampleRow = [
-        '3', 'mr', 'abc', 'abc@gmail.com', 'male', '1', '2', 'xyz', 'SBI', '458438236526', 'SBIN0005088', '2/1/2022', '9999999999', 'Pune', '200000', '18000', '1000', '1000', '1000'
-      ];
+        '3', 'mr', 'abc', 'abc@gmail.com', 'male', '1', '2', 'SBI', '458438236526', 'SBIN0005088', '2/1/2022', '9999999999',
+        'Pune', '8245 1245 4587', 'DHTFG5432R', '200000', '18000', '1000', '1000', '1000', 'Yes/No', 'Yes/No', 'Yes/No', 'NEFT/ IFT'];
 
       const worksheet: XLSX.WorkSheet = XLSX.utils.aoa_to_sheet([headers, exampleRow]);
       const workbook: XLSX.WorkBook = { Sheets: { 'Template': worksheet }, SheetNames: ['Template'] };
@@ -177,9 +263,12 @@ export class EmployeeComponent {
     this.gridApiActive = params.api;
   }
 
-
-  onFilterBoxChange() {
-    this.gridApiActive.setQuickFilter(this.searchValue);
+  onSearchChange() {
+    clearTimeout(this.searchTimeout);
+    this.searchTimeout = setTimeout(() => {
+      this.currentPage = 1;
+      this.getEmployee();
+    }, 500);
   }
 
   create_user() {
@@ -190,7 +279,7 @@ export class EmployeeComponent {
   getEmployee(page: number = 1): void {
     this.isLoading = true;
     let company_id = this.selectedCompanyId;
-    this.service.post("company/employee", { company_id, page:page }).subscribe((res: any) => {
+    this.service.post("company/employee", { company_id, page: page, isexport: false, search: this.searchValue || '' }).subscribe((res: any) => {
       if (res.status == 'success') {
         this.rowData = res.data.map((item: any) => ({
           employee_id: item.employe_id,
@@ -200,6 +289,7 @@ export class EmployeeComponent {
           doj: item.doj,
           department_name: item.department_name,
           designation_name: item.designation_name,
+          role_name: item.role_name,
           status: item.status === "Active" ? "active" : "Inactive",
         }))
         this.totalRows = res.pagination.total;
@@ -250,13 +340,8 @@ export class EmployeeComponent {
     });
   }
 
-
   // const skippedInfo = res.skipped?.map((row: any) => `Row ${row.row}: ${row.reason}`).join('\n');
   // this.toastr.warning(`${message}\n${skippedInfo}`, 'Upload Notice');
-
-  onOptionSelected() {
-    console.log('Selected option:', this.selectedValue);
-  }
 
   editApp(params: any) {
 
@@ -270,23 +355,61 @@ export class EmployeeComponent {
   }
 
   exportExcel() {
-    this.gridApiActive.exportDataAsCsv({
-      fileName: 'Employee_List.csv',
-      columnKeys: [
-        'employee_code',
-        'emp_name',
-        'emp_contact',
-        'doj',
-        'department_name',
-        'designation_name',
-        'status'
-      ],
-      allColumns: false,
-      onlySelected: false,
+    this.isLoading = true;
+    let company_id = this.selectedCompanyId;
+    this.service.post('company/employee', { company_id, isexport: true, }).subscribe({
+      next: (res: any) => {
+        if (res.status === 'success' && res.data.length) {
+          const rows = res.data.map((r: any) => [
+            r.employee_code,
+            r.emp_name,
+            r.emp_email,
+            r.role_id,
+            r.bank_name,
+            r.account_num,
+            r.ifsc_code,
+            r.doj,
+            r.basic_salary,
+            r.house_rent_allowances,
+            r.conveyance_allowances,
+            r.special_allowances,
+            r.annual_gross_salary,
+            r.monthly_gross_salary,
+          ]);
+
+          const csvArray: string[][] = [
+            ['Employee Code', 'Employee Name', 'Employee Email', 'Role Id', 'Bank Name', 'Account Number', 'IFSC Code',
+              'Doj', 'Basic Salary', 'House Rent Allowances', 'Conveyance Allowances', 'Special Allowances', 'Annual Gross Salary', 'Monthly Gross Salary'],
+            ...rows
+          ];
+
+          const csv = csvArray
+            .map((row: string[]) => row.map((v: string | number | null) => `"${v ?? ''}"`).join(','))
+            .join('\n');
+
+          const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+          const link = Object.assign(document.createElement('a'), {
+            href: URL.createObjectURL(blob),
+            download: 'Employee.csv'
+          });
+          link.click();
+
+          this.toastr.success('Data exported successfully!');
+        }
+        this.isLoading = false;
+      },
+      error: (err) => {
+        if (err.status === 400) {
+          this.toastr.warning('No data found to export');
+        } else {
+          this.toastr.error('Error while exporting data');
+        }
+        this.isLoading = false;
+      }
     });
   }
 
-   getPagination() {
+  getPagination() {
     this.service.post('get-pagination', {}).subscribe((res: any) => {
       if (res.status === 'success') {
         this.paginationvalue = res.data;
@@ -316,8 +439,8 @@ export class EmployeeComponent {
     let endPage = current + pageWindow - 1;
 
     if (endPage >= total) {
-      endPage = total - 1; 
-      startPage = Math.max(2, total - pageWindow); 
+      endPage = total - 1;
+      startPage = Math.max(2, total - pageWindow);
     }
 
     if (current === 1) {
@@ -368,4 +491,66 @@ export class EmployeeComponent {
     }
   }
 
+  //password change
+  openChangePasswordModal(empId: any) {
+    this.employee_id = empId;
+
+    this.changePasswordForm.reset();
+    this.submitted = false;
+
+    this.showPassword = false;
+    this.showConfirmPassword = false;
+
+    const modal = new bootstrap.Modal(
+      document.getElementById('changePasswordModal')
+    );
+    modal.show();
+  }
+
+  get f() {
+    return this.changePasswordForm.controls;
+  }
+  passwordMatchValidator(form: FormGroup) {
+    const pass = form.get('password')?.value;
+    const confirm = form.get('confirm_password')?.value;
+
+    return pass === confirm ? null : { mismatch: true };
+  }
+
+  changePassword() {
+    this.submitted = true;
+
+    if (this.changePasswordForm.invalid) {
+      this.toastr.error('Please fix validation errors');
+      return;
+    }
+
+    // Confirm dialog
+    if (!confirm('Are you sure you want to change password?')) {
+      return;
+    }
+
+    const payload = {
+      emp_id: this.employee_id,
+      new_password: this.changePasswordForm.value.password
+    };
+
+    this.service.post('update/password', payload).subscribe({
+      next: (res: any) => {
+        if (res.status === 'success') {
+          this.toastr.success('Password updated successfully');
+
+          this.changePasswordForm.reset();
+          this.submitted = false;
+
+          this.modalService.closeModal(); // or bootstrap close
+        } else {
+          this.toastr.error(res.message || 'Failed to update password');
+        }
+      },
+      error: () => {
+        this.toastr.error('Server error');
+      }
+    });
+  }
 }

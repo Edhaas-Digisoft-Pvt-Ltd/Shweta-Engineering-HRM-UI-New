@@ -1,7 +1,7 @@
 import { EmployeeActionComponent } from '../employee/employee-action/employee-action.component';
 import { ColDef } from 'ag-grid-community';
 import { Chart, ChartConfiguration, ChartData, ChartOptions, ChartType } from 'chart.js';
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, HostListener } from '@angular/core';
 import DataLabelsPlugin from 'chartjs-plugin-datalabels';
 import { Router } from '@angular/router';
 import { HrmserviceService } from '../hrmservice.service';
@@ -19,10 +19,8 @@ export class DashboardComponent {
   financialYears: any[] = [];
   selectedYear: any = '';
   selectedCompany: string = '';
-  CompanyNames: any = [];
-  selectedCompanyId: any;
-  optionsArray: string[] = ['Company A', 'Company B', 'Company C'];
-  selectedValue: string = 'Company A';
+  CompanyNames: any[] = [];
+  selectedCompanyId: any[] = ['all'];
   searchValue: string = '';
   gridApiActive: any;
   leaveCards: any = [];
@@ -32,12 +30,22 @@ export class DashboardComponent {
   lastMonthSalaryExpense: any = 0;
   pendingPayrollApprovals: any = 0;
   pendingLeaves: any = 0;
+  activeRequests = 0;
+  notificationCount = 0;
+  showNotifications = false;
+  leavesNotification: any[] = [];
+  advSalaryNotification: any[] = [];
+  incrementNotification: any[] = [];
+  shouldBlink = false;
 
   constructor(private router: Router, private service: HrmserviceService) {
   }
 
   ngOnInit() {
-    this.selectedCompanyId = this.service.selectedCompanyId();
+    const savedCompanyId = this.service.selectedCompanyId();
+    this.selectedCompanyId = savedCompanyId
+      ? (Array.isArray(savedCompanyId) ? savedCompanyId : [savedCompanyId])
+      : ['all'];
 
     // const currentYear = new Date().getFullYear();
     // for (let i = 0; i < 4; i++) {
@@ -53,163 +61,316 @@ export class DashboardComponent {
       this.financialYears.push(currentYear - i);
     }
 
-
-    // this.selectedYear = this.financialYears[0]; // default selected
-    this.selectedYear = currentYear.toString(); // default selected
+    this.selectedYear = currentYear.toString();
+    this.selectedCompany = 'All Companies';
     this.getCompanyNames();
+  }
 
-    if (sessionStorage.getItem('roleName') == 'admin') {
-      this.router.navigate(['/authPanal/Dashboard']);
-      return;
-    } else {
-      alert('Please Login To Proceed');
-      sessionStorage.clear();
-      this.router.navigate(['']);
-      return;
+  startRequest() {
+    this.activeRequests++;
+    this.isLoading = true; // show loader
+  }
+
+  finishRequest() {
+    this.activeRequests--;
+    if (this.activeRequests <= 0) {
+      this.isLoading = false; // hide loader when all requests finished
     }
-  }
-
-  selectCompany(company: any) {
-    this.selectedCompany = company.company_name;
-    this.selectedCompanyId = company.company_id;
-    this.service.setCompanyId(this.selectedCompanyId);
-
-    this.payrollStatistics();
-    this.loadLeaveCards();
-    this.loadAttendanceSummary();
-    this.getDashboardSummary();
-  }
-
-  onYearChange() {
-    this.payrollStatistics();
   }
 
   getCompanyNames() {
     this.service.post('fetch/company', {}).subscribe((res: any) => {
       if (res.status === 'success') {
         this.CompanyNames = res.data;
-        const defaultCompany = this.CompanyNames.find((comp: any) => comp.company_id === this.selectedCompanyId);
-        if (defaultCompany) {
-          this.selectCompany(defaultCompany);
-        }
+
+        // Default: first company selected (not 'all'), only on first load
+        // const savedCompanyId = this.service.selectedCompanyId();
+        // if (savedCompanyId) {
+        //   this.selectedCompanyId = Array.isArray(savedCompanyId) ? savedCompanyId : [savedCompanyId];
+        // } else if (this.CompanyNames.length > 0) {
+        //   this.selectedCompanyId = [this.CompanyNames[0].company_id];
+        // } else {
+        //   this.selectedCompanyId = ['all'];
+        // }
+        this.selectedCompanyId = ['all'];
+
+        this.service.setCompanyId(this.selectedCompanyId);
+        this.updateSelectedCompanyLabel();
+
+        this.payrollStatistics();
+        this.loadLeaveCards();
+        this.loadAttendanceSummary();
+        this.getDashboardSummary();
+        this.getNotifications();
       }
     });
   }
 
+  isAllSelected(): boolean {
+    return this.selectedCompanyId.includes('all');
+  }
+
+  isCompanySelected(companyId: any): boolean {
+    return this.isAllSelected() || this.selectedCompanyId.includes(companyId);
+  }
+
+  selectCompany(company: any) {
+    if (company === 'all') {
+      // Clicking "All" toggles: select all, or if already all, revert to first company
+      this.selectedCompanyId = this.isAllSelected()
+        ? [this.CompanyNames[0]?.company_id].filter(Boolean)
+        : ['all'];
+    } else {
+      const companyId = company.company_id;
+
+      // If "all" was active, start fresh with just this company
+      let ids = this.isAllSelected() ? [] : [...this.selectedCompanyId];
+
+      if (ids.includes(companyId)) {
+        ids = ids.filter((id: any) => id !== companyId);
+      } else {
+        ids.push(companyId);
+      }
+
+      if (ids.length === this.CompanyNames.length) {
+        ids = ['all'];
+      }
+
+      // Never allow zero selection — fall back to first company
+      this.selectedCompanyId = ids.length ? ids : [this.CompanyNames[0]?.company_id].filter(Boolean);
+    }
+
+    this.service.setCompanyId(this.selectedCompanyId);
+    this.updateSelectedCompanyLabel();
+
+    this.payrollStatistics();
+    this.loadLeaveCards();
+    this.loadAttendanceSummary();
+    this.getDashboardSummary();
+    this.getNotifications();
+  }
+
+  updateSelectedCompanyLabel() {
+    if (this.isAllSelected()) {
+      this.selectedCompany = 'All Companies';
+    } else if (this.selectedCompanyId.length === 1) {
+      const match = this.CompanyNames.find((c: any) => c.company_id === this.selectedCompanyId[0]);
+      this.selectedCompany = match ? match.company_name : 'Select Company';
+    } else {
+      this.selectedCompany = `${this.selectedCompanyId.length} Companies Selected`;
+    }
+  }
+
+  onYearChange() {
+    this.payrollStatistics();
+  }
+
   payrollStatistics() {
-    this.isLoading = true;
     if (!this.selectedCompanyId || !this.selectedYear) return;
+
+    this.startRequest();
 
     this.service.post('payroll-statistics', {
       company_id: this.selectedCompanyId,
       year: this.selectedYear
-    }).subscribe((res: any) => {
-      if (res.status === 'success') {
-        this.barChartData.labels = res.data.months;
-        this.barChartData.datasets[0].data = res.data.values;
-
-        this.barChartData = { ...this.barChartData };
+    }).subscribe({
+      next: (res: any) => {
+        if (res.status === 'success') {
+          this.barChartData.labels = res.data.months;
+          this.barChartData.datasets[0].data = res.data.values;
+          this.barChartData = { ...this.barChartData };
+        }
+        this.finishRequest();
+      },
+      error: (err) => {
+        console.error(err);
+        this.finishRequest();
       }
-      this.isLoading = false;
-    }, err => {
-      console.error("Failed to fetch payroll statistics:", err);
     });
+  }
+
+  toggleNotificationDropdown() {
+    this.showNotifications = !this.showNotifications;
+  }
+
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: MouseEvent) {
+    const target = event.target as HTMLElement;
+    // Close dropdown when clicking outside
+    if (!target.closest('.position-relative.d-inline-block')) {
+      this.showNotifications = false;
+    }
+  }
+
+  getNotifications() {
+    this.startRequest();
+    this.service.post('dashboard-notifications', {
+      company_id: this.selectedCompanyId,
+    }).subscribe({
+      next: (res: any) => {
+        if (res.status === 'success') {
+          this.notificationCount = res.data.Count || 0;
+          this.leavesNotification = res.data.leavesNotification || [];
+          this.advSalaryNotification = res.data.advSalaryNotification || [];
+          this.incrementNotification = res.data.incrementNotification || [];
+        }
+        this.finishRequest();
+      },
+      error: (err) => {
+        this.notificationCount = 0;
+        this.finishRequest();
+      }
+    });
+  }
+
+  viewAdvanceRequests() {
+    this.router.navigate(['authPanal/AdvancePayment']);
   }
 
   loadLeaveCards() {
-    this.isLoading = true;
     if (!this.selectedCompanyId) return;
 
-    this.service.post('leave-statistics', {
-      company_id: this.selectedCompanyId,
-    }).subscribe((res: any) => {
-      if (res.status === 'success') {
-        this.leaveCards = [
-          { title: 'Total Leave Request', count: res.data.total, icon: 'bi-calendar-event', bgColor: '#3674B5' },
-          { title: 'Approved Leaves', count: res.data.approved, icon: 'bi-calendar2-check', bgColor: '#006D42' },
-          { title: 'Pending Leaves', count: res.data.pending, icon: 'bi-calendar2-week', bgColor: '#C8B100' },
-          { title: 'Rejected Leaves', count: res.data.rejected, icon: 'bi-calendar-x', bgColor: '#880021' },
-        ];
-        this.isLoading = false;
-      }
-      else {
-        this.leaveCards = [
-          { title: 'Total Leave Request', icon: 'bi-calendar-event', bgColor: '#3674B5' },
-          { title: 'Approved Leaves', icon: 'bi-calendar2-check', bgColor: '#006D42' },
-          { title: 'Pending Leaves', icon: 'bi-calendar2-week', bgColor: '#C8B100' },
-          { title: 'Rejected Leaves', icon: 'bi-calendar-x', bgColor: '#880021' },
-        ]
-      }
-    });
+    this.startRequest();
+
+    this.service.post('leave-statistics', { company_id: this.selectedCompanyId })
+      .subscribe({
+        next: (res: any) => {
+          if (res.status === 'success') {
+            this.leaveCards = [
+              // { title: 'Total Leave Request', count: res.data.total, icon: 'bi-calendar-event', bgColor: '#3674B5' },
+              { title: 'Approved Leaves', count: res.data.approved, icon: 'bi-calendar2-check', bgColor: '#006D42' },
+              { title: 'Pending Leaves', count: res.data.pending, icon: 'bi-calendar2-week', bgColor: '#C8B100' },
+              { title: 'Rejected Leaves', count: res.data.rejected, icon: 'bi-calendar-x', bgColor: '#880021' },
+            ];
+          }
+          this.finishRequest();
+        },
+        error: (err) => {
+          console.error(err);
+          this.finishRequest();
+        }
+      });
   }
 
   public doughnutChartData!: ChartData<'doughnut'>;
-  public doughnutChartOptions!: ChartOptions<'doughnut'>;
+  public doughnutChartOptions: ChartOptions<'doughnut'> = {
+    responsive: true,
+    cutout: '70%',
+    plugins: {
+      legend: {
+        position: 'bottom',
+        labels: {
+          boxWidth: 12,
+          font: { size: 12 }
+        }
+      },
+      tooltip: {
+        callbacks: {
+          label: (context) => `${context.parsed}%`
+        }
+      },
+      datalabels: {
+        display: false
+      }
+    }
+  };
+
 
   loadAttendanceSummary() {
-    this.isLoading = true;
     if (!this.selectedCompanyId) return;
 
-    this.service.post('attendance-summary', {
-      company_id: this.selectedCompanyId
-    }).subscribe((res: any) => {
-      if (res.status === 'success') {
-        const attendancePercentages = res.data.percentages;
+    this.startRequest();
 
-        const present = Number(attendancePercentages.present);
-        const absent = Number(attendancePercentages.absent);
-        const lateMarks = Number(attendancePercentages.late_marks);
+    this.service.post('attendance-summary', { company_id: this.selectedCompanyId })
+      .subscribe({
+        next: (res: any) => {
+          if (res.status === 'success' && res.data) {
+            const attendancePercentages = res.data.percentages;
 
-        this.doughnutChartData = {
-          labels: ['Present days', 'Absent days', 'Late Marks'],
-          datasets: [
-            {
-              data: [present, absent, lateMarks],
-              backgroundColor: ['#3A79D1', '#7C0A02', '#FFC107'],
-              hoverOffset: 10,
+            if (
+              !attendancePercentages ||
+              (attendancePercentages.present == 0 &&
+                attendancePercentages.absent == 0 &&
+                attendancePercentages.late_marks == 0)
+            ) {
+              this.doughnutChartData = {
+                labels: ['No Attendance Data'],
+                datasets: [
+                  {
+                    data: [100],
+                    backgroundColor: ['#D3D3D3'],
+                    hoverOffset: 10,
+                  },
+                ],
+              };
+              this.totalAttendanceValue = 0;
+            } else {
+              const present = Number(attendancePercentages.present);
+              const absent = Number(attendancePercentages.absent);
+              const lateMarks = Number(attendancePercentages.late_marks);
+
+              this.doughnutChartData = {
+                labels: ['Present days', 'Absent days'],
+                datasets: [
+                  {
+                    data: [present, absent, lateMarks],
+                    backgroundColor: ['#3A79D1', '#7C0A02'],
+                    hoverOffset: 10,
+                  },
+                ],
+              };
+
+              this.totalAttendanceValue = present + absent + lateMarks;
             }
-          ]
-        };
-
-        this.doughnutChartOptions = {
-          responsive: true,
-          cutout: '70%',
-          plugins: {
-            legend: {
-              position: 'bottom',
-              labels: {
-                boxWidth: 12,
-                font: {
-                  size: 12,
-                }
-              }
-            },
-            datalabels: {
-              display: false
-            }
+          } else {
+            this.doughnutChartData = {
+              labels: ['No Attendance Data'],
+              datasets: [
+                {
+                  data: [100],
+                  backgroundColor: ['#D3D3D3'],
+                  hoverOffset: 10,
+                },
+              ],
+            };
+            this.totalAttendanceValue = 0;
           }
-        };
 
-        // this.totalAttendanceValue = total;
-        this.isLoading = false;
-      }
-    });
+          this.finishRequest();
+        },
+        error: (err) => {
+          console.error(err);
+          this.doughnutChartData = {
+            labels: ['No Attendance Data'],
+            datasets: [
+              {
+                data: [100],
+                backgroundColor: ['#D3D3D3'],
+                hoverOffset: 10,
+              },
+            ],
+          };
+          this.totalAttendanceValue = 0;
+
+          this.finishRequest();
+        }
+      });
   }
 
   leaveRequest() {
-    this.router.navigate(['/authPanal/Leave']); // replace with your actual route
+    this.router.navigate(['/authPanal/Leave']);
   }
 
   totalAttendance() {
-    this.router.navigate(['/authPanal/Attendance']); // replace with your actual route
+    this.router.navigate(['/authPanal/Attendance']);
   }
 
   paymentStatistics() {
-    this.router.navigate(['/authPanal/payrollList']); // replace with your actual route
+    this.router.navigate(['/authPanal/payrollList']);
   }
 
   viewEmployee() {
-    this.router.navigate(['/authPanal/Employee']); // replace with your actual route
+    this.router.navigate(['/authPanal/Employee']);
   }
 
   public defaultColDef: ColDef = {
@@ -262,10 +423,6 @@ export class DashboardComponent {
   emptyInput() {
     this.searchValue = '';
     window.location.reload();
-  }
-  // company selection
-  onOptionSelected() {
-    console.log('Selected option:', this.selectedValue);
   }
 
   // Chart for payroll statistics
@@ -331,21 +488,36 @@ export class DashboardComponent {
   };
 
   getDashboardSummary() {
-    this.isLoading = true;
     if (!this.selectedCompanyId) return;
 
-    this.service.post('dashboard-summary', {
-      company_id: this.selectedCompanyId
-    }).subscribe((res: any) => {
-      if (res.status === 'success') {
-        const summary = res.data;
-        this.totalEmployee = summary.total_active_employees;
-        this.lastMonthSalaryExpense = Number(summary.last_month_salary_expense).toLocaleString('en-IN');
-        this.pendingPayrollApprovals = summary.pending_payroll_approvals;
-        this.pendingLeaves = summary.pending_leaves;
-      }
-    });
+    this.startRequest(); // start loader
+
+    this.service.post('dashboard-summary', { company_id: this.selectedCompanyId })
+      .subscribe({
+        next: (res: any) => {
+          if (res.status === 'success') {
+            const summary = res.data;
+            this.totalEmployee = summary.total_active_employees;
+            this.lastMonthSalaryExpense = Number(summary.last_month_salary_expense).toLocaleString('en-IN');
+            this.pendingPayrollApprovals = summary.pending_payroll_approvals;
+            this.pendingLeaves = summary.pending_leaves;
+          }
+          this.finishRequest(); // finish loader
+        },
+        error: (err) => {
+          console.error(err);
+          this.finishRequest(); // finish loader
+        }
+      });
   }
 
+  viewSalaryIncrement() {
+    this.router.navigate(['authPanal/salary_increment']);
+  }
 
+  startBlinkAfterDelay(delayMs: number = 10) {
+    setTimeout(() => {
+      this.shouldBlink = true;
+    }, delayMs);
+  }
 }

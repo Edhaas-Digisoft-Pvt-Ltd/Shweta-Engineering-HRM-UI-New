@@ -1,26 +1,26 @@
-import { Renderer2 } from '@angular/core';
+import { ElementRef, HostListener, Renderer2, ViewChild } from '@angular/core';
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-auth-panel',
   templateUrl: './auth-panel.component.html',
-  styleUrls: ['./auth-panel.component.css']
+  styleUrls: ['./auth-panel.component.css'],
 })
 export class AuthPanelComponent {
   isDarkTheme = false;
   empName: any;
   roleName: any;
 
-  constructor(private router: Router, private renderer: Renderer2) { }
+  constructor(private router: Router, private renderer: Renderer2) {}
 
   ngOnInit(): void {
     const theme = localStorage.getItem('theme');
     this.isDarkTheme = theme === 'dark';
     this.applyTheme();
 
-    this.empName = sessionStorage.getItem('employeeName')
-    this.roleName = sessionStorage.getItem('roleName')
+    this.empName = sessionStorage.getItem('employeeName');
+    this.roleName = sessionStorage.getItem('roleName');
 
     console.log(this.roleName);
 
@@ -51,13 +51,14 @@ export class AuthPanelComponent {
     }
   }
   collpase() {
-    alert("worked")
+    alert('worked');
   }
 
   isSideNavOpen = true; // Initially at 20%
 
   toggleSideNav() {
     this.isSideNavOpen = !this.isSideNavOpen;
+    this.getWidth();
   }
 
   rolewiseSidebarColor(role: string) {
@@ -76,5 +77,26 @@ export class AuthPanelComponent {
     }
   }
 
+  @ViewChild('sideNav') box1!: ElementRef;
+  @ViewChild('box2') box2!: ElementRef;
 
+  ngAfterViewInit(): void {
+    this.getWidth();
+  }
+
+  getWidth() {
+    // Wait a tiny bit for width transition
+    setTimeout(() => {
+      const box1Width = this.box1.nativeElement.offsetWidth;
+      this.box2.nativeElement.style.marginLeft = box1Width + 20 + 'px';
+    }, 300);
+  }
+
+  // Initially at 20%
+
+  
+  @HostListener('window:resize')
+  onResize() {
+    this.getWidth();
+  }
 }

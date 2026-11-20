@@ -3,6 +3,7 @@ import { AgGridAngular } from 'ag-grid-angular';
 import { ColDef, GridApi, ColumnApi, ColGroupDef } from 'ag-grid-community';
 import { HrmserviceService } from 'src/app/hrmservice.service';
 import * as XLSX from 'xlsx';
+import { ToastrService } from 'ngx-toastr';
 
 @Component({
   selector: 'app-consolidate-attendance-summary',
@@ -27,9 +28,17 @@ export class ConsolidateAttendanceSummaryComponent {
 
   fromDate: string = '';
   toDate: string = '';
+  attendanceData: any;
+
+  totalRows: number = 0;
+  currentPage: number = 1;
+  lastPage: number = 1;
+  pagesToShow: (number | string)[] = [];
+  paginationvalue: any;
+  columnApi!: ColumnApi;
 
 
-  constructor(private service: HrmserviceService) { }
+  constructor(private toastr: ToastrService, private service: HrmserviceService) { }
 
   months = [
     { name: 'Jan', value: 0 },
@@ -46,26 +55,26 @@ export class ConsolidateAttendanceSummaryComponent {
     { name: 'Dec', value: 11 },
   ];
 
-  years = [2023, 2024, 2025];
+  // years = [2023, 2024, 2025,2026];
 
   // Header map with dot color
   HEADERS = [
     { key: 'P', color: '#11FFA1' },
     { key: 'A', color: '#F90004' },
-    { key: 'W', color: '#EDD000' },
-    { key: 'W/od', color: '#9FFF04' },
-    { key: 'H', color: '#04BCFF' },
-    { key: 'WFH/2', color: '#0066EB' },
-    { key: 'HD', color: '#0066EB' },
-    { key: 'HR', color: '#005936' },
-    { key: 'OT', color: '#FFA704' },
-    { key: 'LT', color: '#880021' },
-    { key: 'Th', color: '#BD7B00' },
+    { key: 'W/O', color: '#EDD000' },
+    // { key: 'W/od', color: '#9FFF04' },
+    { key: 'H', color: '#9FFF04' },
+    // { key: 'WFH', color: '#0066EB' },
+    // { key: 'HD', color: '#0066EB' },
+    { key: 'OT', color: '#0066EB' },
+    { key: 'LT', color: '#BD7B00' },
+    // { key: 'Th', color: '#BD7B00' },
   ];
 
   ngOnInit() {
     this.loadData();
-    this.fetchConsolidateSummary();
+    // this.fetchConsolidateSummary();
+    this.getPaginationValueAndFetchAttendance();
   }
 
   onMonthYearChange() {
@@ -76,13 +85,18 @@ export class ConsolidateAttendanceSummaryComponent {
 
   onGridReady(params: any) {
     this.gridApi = params.api;
+    this.columnApi = params.columnApi;
     setTimeout(() => this.scrollToSelectedMonth(), 200);
   }
 
+  searchTimeout: any;
+
   onFilterBoxChange() {
-    if (this.gridApi) {
-      this.gridApi.setQuickFilter(this.searchValue);
-    }
+    clearTimeout(this.searchTimeout);
+    this.searchTimeout = setTimeout(() => {
+      this.currentPage = 1;
+      this.fetchConsolidateSummary();
+    }, 500);
   }
 
   onSelectionChange() {
@@ -139,102 +153,93 @@ export class ConsolidateAttendanceSummaryComponent {
               </div>`;
   }
 
-  // fetchConsolidateSummary() {
-  //   this.isLoading = true;
-  //   this.service.post('fetch/ConsolidatedSummary', {}).subscribe((res: any) => {
-  //     if (res.status === 'success') {
-  //       const result = res.data;
-  //       const employeeMap = new Map();
-
-  //       Object.keys(result).forEach((monthKey) => {
-  //         const monthIndex = parseInt(monthKey.split('-')[1]) - 1; // e.g., '2025-06' -> 5
-
-  //         result[monthKey].forEach((item: any) => {
-  //           const empId = item.employee_code;
-
-  //           if (!employeeMap.has(empId)) {
-  //             employeeMap.set(empId, {
-  //               id: empId,
-  //               employeeName: item.emp_name,
-  //             });
-  //           }
-
-  //           const row = employeeMap.get(empId);
-
-  //           row[`month-${monthIndex}-P`] = item.present_days || '';
-  //           row[`month-${monthIndex}-A`] = item.absent_days || '';
-  //           row[`month-${monthIndex}-W`] = item.weekend || '';
-  //           row[`month-${monthIndex}-W/od`] = item.weekend_od || '';
-  //           row[`month-${monthIndex}-H`] = item.holiday_days || '';
-  //           row[`month-${monthIndex}-WFH/2`] = item.work_from_home_half_day || '';
-  //           row[`month-${monthIndex}-HD`] = item.half_day || '';
-  //           row[`month-${monthIndex}-LT`] = item.late || '';
-  //           row[`month-${monthIndex}-HR`] = ''; // Add logic if needed
-  //           row[`month-${monthIndex}-OT`] = item.total_overtime || '';
-  //           row[`month-${monthIndex}-Th`] = ''; // Add logic if needed
-
-  //           employeeMap.set(empId, row);
-  //         });
-  //       });
-
-  //       this.rowData = Array.from(employeeMap.values());
-  //       setTimeout(() => this.scrollToSelectedMonth(), 200);
-  //     } else {
-  //       this.rowData = [];
-  //       console.error(res.error);
-  //     }
-  //   });
-  //   this.isLoading = false;
-  // }
-
-  fetchConsolidateSummary() {
+  fetchConsolidateSummary(page: number = 1): void {
     if (!this.fromDate || !this.toDate) return;
+    const payload = {
+      from_date: this.fromDate,
+      to_date: this.toDate,
+      page: this.currentPage,
+      search: this.searchValue.trim() || '',
+    };
 
     this.isLoading = true;
-    this.service.post('fetch/ConsolidatedSummary', { from_date: this.fromDate, to_date: this.toDate })
-      .subscribe((res: any) => {
-        if (res.status === 'success') {
-          const result = res.data;
-          const employeeMap = new Map<string, any>();
+    this.service.post('fetch/ConsolidatedSummary', payload)
+      .subscribe({
+        next: (res: any) => {
+          this.isLoading = false;
 
-          Object.keys(result).forEach((monthKey) => {
-            result[monthKey].forEach((item: any) => {
-              const empId = item.employee_code;
+          if (res.status === 'success' && (!res.data || Object.keys(res.data).length === 0)) {
+            this.rowData = [];
+            this.toastr.warning(res.message || 'No employees found for the selected date range.');
+            return;
+          }
 
-              if (!employeeMap.has(empId)) {
-                employeeMap.set(empId, {
-                  employeeCode: empId,
-                  employeeName: item.emp_name
-                });
-              }
+          if (res.status === 'success') {
+            const result = res.data;
+            this.totalRows = res.pagination.total;
+            this.currentPage = res.pagination.page;
+            this.lastPage = res.pagination.last_page;
+            this.generatePageNumbers(this.paginationvalue);
+            this.attendanceData = res.data;
+            const employeeMap = new Map<string, any>();
 
-              const row = employeeMap.get(empId);
+            Object.keys(result).forEach((monthKey) => {
+              result[monthKey].forEach((item: any) => {
+                const empId = item.employee_code;
 
-              // safe field names
-              row[`${monthKey}-P`] = item.present_days || '';
-              row[`${monthKey}-A`] = item.absent_days || '';
-              row[`${monthKey}-W`] = item.weekend || '';
-              row[`${monthKey}-WOD`] = item.weekend_od || '';
-              row[`${monthKey}-H`] = item.holiday_days || '';
-              row[`${monthKey}-WFH2`] = item.work_from_home_half_day || '';
-              row[`${monthKey}-HD`] = item.half_day || '';
-              row[`${monthKey}-LT`] = item.late || '';
-              row[`${monthKey}-OT`] = item.total_overtime || '';
-              row[`${monthKey}-Period`] = `${item.period_start} - ${item.period_end}`;
+                if (!employeeMap.has(empId)) {
+                  employeeMap.set(empId, {
+                    employeeCode: empId,
+                    employeeName: item.emp_name
+                  });
+                }
 
-              employeeMap.set(empId, row);
+                const row = employeeMap.get(empId);
+
+                // safe field names
+                row[`${monthKey}-P`] = item.present_days || '';
+                row[`${monthKey}-A`] = item.absent_days || '';
+                row[`${monthKey}-W/O`] = item.weekend || '';
+                row[`${monthKey}-H`] = item.holiday_days || '';
+                row[`${monthKey}-LT`] = item.late || '';
+                row[`${monthKey}-OT`] = item.total_overtime || '';
+                row[`${monthKey}-Period`] = `${item.period_start} - ${item.period_end}`;
+
+                employeeMap.set(empId, row);
+              });
             });
-          });
 
-          this.rowData = Array.from(employeeMap.values());
+            this.rowData = Array.from(employeeMap.values());
+            this.loadDynamicMonthColumns(result);
+            setTimeout(() => {
+              if (this.gridApi && this.columnApi) {
+                const totalColumns = this.columnApi.getAllDisplayedColumns().length;
 
-          // rebuild columns to match safe field names
-          this.loadDynamicMonthColumns(result);
-
-        } else {
+                // one month
+                if (totalColumns <= 15) {
+                  this.gridApi.sizeColumnsToFit();
+                }
+                // multiple months
+                else {
+                  this.columnApi.resetColumnState();
+                  this.columnApi.autoSizeAllColumns();
+                }
+              }
+            }, 100);
+          } else {
+            this.rowData = [];
+            this.toastr.warning(res.message || 'Error fetching consolidated summary.');
+          }
+        },
+        error: (err) => {
+          this.isLoading = false;
           this.rowData = [];
+
+          // Laravel validation error comes in err.error.message
+          const msg = err?.error?.message || 'Error fetching consolidated summary.';
+          this.toastr.warning(msg);
+          console.error('Error:', err);
         }
-        this.isLoading = false;
       });
   }
 
@@ -261,13 +266,11 @@ export class ConsolidateAttendanceSummaryComponent {
         children: [
           { headerName: this.getHeaderWithDot('P', '#11FFA1'), field: `${monthKey}-P`, width: 70, valueFormatter: this.showDashIfEmpty, headerComponentParams: { template: this.getHeaderWithDot('P', '#11FFA1') } },
           { headerName: this.getHeaderWithDot('A', '#F90004'), field: `${monthKey}-A`, width: 70, valueFormatter: this.showDashIfEmpty, headerComponentParams: { template: this.getHeaderWithDot('A', '#F90004') } },
-          { headerName: this.getHeaderWithDot('W', '#EDD000'), field: `${monthKey}-W`, width: 70, valueFormatter: this.showDashIfEmpty, headerComponentParams: { template: this.getHeaderWithDot('W', '#EDD000') } },
-          { headerName: this.getHeaderWithDot('W/OD', '#9FFF04'), field: `${monthKey}-WOD`, width: 70, valueFormatter: this.showDashIfEmpty, headerComponentParams: { template: this.getHeaderWithDot('W/OD', '#9FFF04') } },
-          { headerName: this.getHeaderWithDot('H', '#04BCFF'), field: `${monthKey}-H`, width: 70, valueFormatter: this.showDashIfEmpty, headerComponentParams: { template: this.getHeaderWithDot('H', '#04BCFF') } },
-          { headerName: this.getHeaderWithDot('WFH/2', '#0066EB'), field: `${monthKey}-WFH2`, width: 70, valueFormatter: this.showDashIfEmpty, headerComponentParams: { template: this.getHeaderWithDot('WFH/2', '#0066EB') } },
-          { headerName: this.getHeaderWithDot('HD', '#0066EB'), field: `${monthKey}-HD`, width: 70, valueFormatter: this.showDashIfEmpty, headerComponentParams: { template: this.getHeaderWithDot('HD', '#0066EB') } },
-          { headerName: this.getHeaderWithDot('LT', '#880021'), field: `${monthKey}-LT`, width: 70, valueFormatter: this.showDashIfEmpty, headerComponentParams: { template: this.getHeaderWithDot('LT', '#880021') } },
-          { headerName: this.getHeaderWithDot('OT', '#FFA704'), field: `${monthKey}-OT`, width: 70, valueFormatter: this.showDashIfEmpty, headerComponentParams: { template: this.getHeaderWithDot('OT', '#FFA704') } },
+          { headerName: this.getHeaderWithDot('W/O', '#EDD000'), field: `${monthKey}-W/O`, width: 70, valueFormatter: this.showDashIfEmpty, headerComponentParams: { template: this.getHeaderWithDot('W/O', '#EDD000') } },
+          { headerName: this.getHeaderWithDot('H', '#9FFF04'), field: `${monthKey}-H`, width: 70, valueFormatter: this.showDashIfEmpty, headerComponentParams: { template: this.getHeaderWithDot('H', '#9FFF04') } },
+          // { headerName: this.getHeaderWithDot('HD', '#0066EB'), field: `${monthKey}-HD`, width: 70, valueFormatter: this.showDashIfEmpty, headerComponentParams: { template: this.getHeaderWithDot('HD', '#0066EB') } },
+          { headerName: this.getHeaderWithDot('LT', '#BD7B00'), field: `${monthKey}-LT`, width: 70, valueFormatter: this.showDashIfEmpty, headerComponentParams: { template: this.getHeaderWithDot('LT', '#BD7B00') } },
+          { headerName: this.getHeaderWithDot('OT', '#0066EB'), field: `${monthKey}-OT`, width: 70, valueFormatter: this.showDashIfEmpty, headerComponentParams: { template: this.getHeaderWithDot('OT', '#0066EB') } },
         ]
       };
 
@@ -307,57 +310,147 @@ export class ConsolidateAttendanceSummaryComponent {
   }
 
   exportToExcel() {
-    const wsData: any[][] = [];
-    const monthLabels = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-    const statuses = ['P', 'A', 'W', 'W/Od', 'H', 'WFH/2', 'HD', 'HR', 'OT', 'LT'];
-
-    const year = this.selectedYear;
-    const startMonth = 0;
-    const endMonth = 11;
-
-    const headerRow1 = ['ID', 'Employee Name'];
-    for (let m = startMonth; m <= endMonth; m++) {    
-      const cleanLabel = monthLabels[m].split('(')[0].trim();
-      headerRow1.push(`${cleanLabel} ${year}`, ...Array(statuses.length - 1).fill(''));
+    if (!this.rowData?.length) {
+      this.toastr.warning('No data to export');
+      return;
     }
 
-    const headerRow2 = ['', ''];
-    for (let m = startMonth; m <= endMonth; m++) {
-      headerRow2.push(...statuses);
-    }
+    const statuses = ['P', 'A', 'W/O', 'H', 'WFH2', 'HD', 'HR', 'OT', 'LT'];
 
-    wsData.push(headerRow1);
-    wsData.push(headerRow2);
-
-    this.rowData.forEach((row: any) => {
-      const dataRow = [row.id, row.employeeName];
-      for (let m = startMonth; m <= endMonth; m++) {
-        statuses.forEach(status => {
-          dataRow.push(row[`month-${m}-${status}`] || '');
-        });
-      }
-      wsData.push(dataRow);
+    // Collect all months dynamically from rowData
+    const monthKeys = new Set<string>();
+    this.rowData.forEach(emp => {
+      Object.keys(emp).forEach(key => {
+        const match = key.match(/^(\d{4}-\d{2})-/); // matches YYYY-MM-STATUS
+        if (match) monthKeys.add(match[1]);
+      });
     });
 
-    const merges: XLSX.Range[] = [
-      { s: { r: 0, c: 0 }, e: { r: 1, c: 0 } },
-      { s: { r: 0, c: 1 }, e: { r: 1, c: 1 } },
-    ];
+    const months = Array.from(monthKeys).sort(); // sorted months
 
-    for (let i = 0, col = 2; i <= endMonth - startMonth; i++) {
-      merges.push({ s: { r: 0, c: col }, e: { r: 0, c: col + statuses.length - 1 } });
-      col += statuses.length;
+    // Build headers
+    const header1 = ['EmployeeCode', 'EmployeeName'];
+    const header2 = ['', ''];
+
+    months.forEach(month => {
+      // Add merged cell for month spanning statuses
+      header1.push(...Array(statuses.length).fill(month));
+      // Second row: statuses
+      header2.push(...statuses);
+    });
+
+    // Prepare sheet data
+    const sheetData: any[][] = [];
+    sheetData.push(header1);
+    sheetData.push(header2);
+
+    this.rowData.forEach(emp => {
+      const row = [emp.employeeCode, emp.employeeName];
+      months.forEach(month => {
+        statuses.forEach(status => {
+          const field = `${month}-${status}`;
+          row.push(emp[field] !== undefined ? emp[field] : 0);
+        });
+      });
+      sheetData.push(row);
+    });
+
+    const ws: XLSX.WorkSheet = XLSX.utils.aoa_to_sheet(sheetData);
+
+    // Merge first row for month labels
+    let colIndex = 2;
+    months.forEach(() => {
+      if (!ws['!merges']) ws['!merges'] = [];
+      ws['!merges'].push({ s: { r: 0, c: colIndex }, e: { r: 0, c: colIndex + statuses.length - 1 } });
+      colIndex += statuses.length;
+    });
+
+    const wb: XLSX.WorkBook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Attendance');
+
+    XLSX.writeFile(wb, `Attendance_${this.fromDate}_to_${this.toDate}.xlsx`);
+  }
+
+  getPaginationValueAndFetchAttendance() {
+    this.service.post('get-pagination', {}).subscribe((res: any) => {
+      if (res.status === 'success') {
+        this.paginationvalue = res.data;
+
+        this.fetchConsolidateSummary();
+      } else {
+        this.paginationvalue = 10;
+        this.fetchConsolidateSummary();
+      }
+    });
+  }
+
+  getpaginationvalue() {
+    this.service.post('get-pagination', {}).subscribe((res: any) => {
+      if (res.status === 'success') {
+        this.paginationvalue = res.data
+        this.generatePageNumbers(this.paginationvalue)
+      }
+    });
+  }
+
+  generatePageNumbers(pageWindow: number) {
+    const total = this.lastPage;
+    const current = this.currentPage;
+
+    let startPage = current;
+    let endPage = current + pageWindow - 1;
+
+    if (endPage >= total) {
+      endPage = total - 1;
+      startPage = Math.max(2, total - pageWindow);
     }
 
-    const worksheet = XLSX.utils.aoa_to_sheet(wsData);
-    worksheet['!merges'] = merges;
+    if (current === 1) {
+      startPage = 2;
+      endPage = Math.min(total - 1, pageWindow);
+    }
 
-    const workbook: XLSX.WorkBook = {
-      Sheets: { 'Attendance Summary': worksheet },
-      SheetNames: ['Attendance Summary'],
-    };
+    const pages: (number | string)[] = [];
+    pages.push(1);
 
-    XLSX.writeFile(workbook, `Attendance_Summary_${year}.xlsx`);
+    if (startPage > 2) {
+      pages.push('...');
+    }
+
+    for (let i = startPage; i <= endPage; i++) {
+      pages.push(i);
+    }
+
+    if (endPage < total - 1) {
+      pages.push('...');
+    }
+
+    if (total > 1) pages.push(total);
+
+    this.pagesToShow = pages;
+  }
+
+
+  goToPage(page: number | string) {
+    if (page === '...') return;
+    if (page !== this.currentPage) {
+      this.currentPage = page as number;
+      this.fetchConsolidateSummary(this.currentPage);
+    }
+  }
+
+  prevPage() {
+    if (this.currentPage > 1) {
+      this.currentPage--;
+      this.fetchConsolidateSummary(this.currentPage);
+    }
+  }
+
+  nextPage() {
+    if (this.currentPage < this.lastPage) {
+      this.currentPage++;
+      this.fetchConsolidateSummary(this.currentPage);
+    }
   }
 
 }

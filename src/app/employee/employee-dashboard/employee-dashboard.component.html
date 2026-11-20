@@ -9,9 +9,11 @@
                 <div class="row gx-3  align-items-center" style="border-radius: 10px;">
                     <div class="col-12 ps-3 d-flex flex-column">
                         <!-- <img src="assets/img/Animation - 1743094888648.gif" alt=""> -->
-                    
-                        <h2> <i class="bi bi-currency-rupee me-2"></i> Employee</h2>
-                        <p class="ms-3 mb-1 fw-bold" style="color: #3674B5;" *ngIf="role === 'admin'"><span (click)="backtoEmployeeList()" style="cursor: pointer;"><i class="bi bi-arrow-left-circle"></i>
+
+                        <h2> <i class="bi bi-person me-2"></i> Employee</h2>
+                        <p class="ms-3 mb-1 fw-bold" style="color: #3674B5;" *ngIf="role === 'admin'"><span
+                                (click)="backtoEmployeeList()" style="cursor: pointer;"><i
+                                    class="bi bi-arrow-left-circle"></i>
                                 Employees</span> </p>
                     </div>
                     <div class="col-md-4 text-end p-0">
@@ -33,8 +35,14 @@
                         <div class="col border p-4" style="border-radius: 10px;">
 
                             <div class="d-flex flex-column">
-                                <div class="row align-items-center border-bottom border-primary border-2 mb-4 ">
-                                    <div class="col-3 ">
+                                <div class="row  mb-2 ">
+                                    <div class="row gx-0">
+                                        <div class="col  border-bottom border-primary border-2  mb-2">
+                                            <h5 class="pb-2"> <i class="bi bi-person-circle me-2 text-primary"></i>
+                                                {{Employee_Data.employee.emp_name}}</h5>
+                                        </div>
+                                    </div>
+                                    <!-- <div class="col-3 ">
                                         <img src="assets/img/user_img.png" class="profile-img img-fluid rounded-circle "
                                             alt="">
                                     </div>
@@ -48,10 +56,10 @@
                                                 <p class="pb-2 userInfo">{{this.Employee_Data.designation}}</p>
                                             </div>
                                         </div>
-                                    </div>
+                                    </div> -->
                                 </div>
 
-                                <div class="row justify-content-between my-3">
+                                <div class="row justify-content-between my-1">
                                     <div class="col-lg-7">
                                         <div class="d-flex">
                                             <div class=""><i class="bi bi-envelope-fill me-2 text-primary"></i></div>
@@ -76,10 +84,10 @@
                                     </div>
                                 </div>
 
-                                <div class="row mt-3">
-                                    <div class="col-md-4">
+                                <div class="row mt-2">
+                                    <div class="col-md-6">
                                         <div class="d-flex">
-                                            <div class=""><i class="bi bi-envelope-fill me-2 text-primary"></i></div>
+                                            <div class=""><i class="bi bi-calendar me-2 text-primary"></i></div>
                                             <div class="">
                                                 <p class="mb-0 employeeData">Join Date</p>
                                                 <p class="fw-bold employeeDetail">
@@ -87,7 +95,7 @@
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="col-md-4">
+                                    <div class="col-md-6">
                                         <div class="d-flex">
                                             <div class="">
                                                 <i class="bi bi-bell me-2 text-primary "></i>
@@ -99,8 +107,31 @@
                                             </div>
                                         </div>
                                     </div>
+                                </div>
 
-                                    <div class="col-md-4">
+                                <div class="row mt-2">
+                                    <div class="col-md-6">
+                                        <div class="d-flex">
+                                            <div class=""><i class="bi bi-cash-stack me-2 text-primary"></i></div>
+                                            <div class="">
+                                                <p class="mb-0 employeeData">Yearly Package</p>
+                                                <p class="fw-bold employeeDetail">
+                                                    {{Employee_Data.employee.annual_gross_salary}}</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="d-flex">
+                                            <div class=""><i class="bi bi-currency-rupee me-2 text-primary"></i></div>
+                                            <div class="">
+                                                <p class="mb-0 employeeData">Monthly Salary</p>
+                                                <p class="fw-bold employeeDetail">
+                                                    {{Employee_Data.employee.monthly_gross_salary}}</p>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-12">
                                         <div class="d-flex">
                                             <div class="">
                                                 <i class="bi bi-geo-alt-fill me-2 text-primary "></i>
@@ -112,27 +143,17 @@
                                             </div>
                                         </div>
                                     </div>
-
-                                    <!-- <div class="col-md-6">
-                                        <div class="d-flex">
-                                            <div class="">
-                                                <i class="bi-check-circle-fill me-2 text-primary "></i>
-                                            </div>
-                                            <div class="">
-                                                <p class="mb-0 employeeData ">Present Days</p>
-                                                <p class="fw-bold employeeDetail">
-                                                    {{Employee_Data.present_days}}</p>
-                                            </div>
-                                        </div>
-                                    </div> -->
                                 </div>
 
+                                <!-- <div class="row mt-4">
+                                    <button *ngIf="hasAccess('Employee', 'update')" type="button"
+                                        class="btn dashboard-btn w-100" (click)="updateData()">
+                                        Edit
+                                    </button>
+                                </div> -->
                                 <div class="row mt-4">
-                                    <!-- <div class="btn w-100 dashboard-btn">
-                                Edit
-                            </div> -->
-                                    <button *ngIf="role === 'admin'" type="button" class="btn dashboard-btn w-100"
-                                        (click)="updateData()">
+                                    <button *ngIf="hasAccess('Employee', 'update')" type="button"
+                                        class="btn dashboard-btn w-100" (click)="goToUpdateEmployee()">
                                         Edit
                                     </button>
                                 </div>
@@ -147,56 +168,47 @@
                                 </div>
                             </div>
                             <!-- leave details -->
-                            <div class="row mt-3  ">
-                                <div class="col leaveWrapper">
-                                    <div class=" border-right-dashed pe-2">
-                                        <div class="d-flex justify-content-center ">
-                                            <div class=""><i class="bi bi-clock me-2"></i></div>
-                                            <div class="">
-                                                <h6 class="mb-1">Total</h6>
+                            <div class="row mt-3">
+                                <div class="col-12">
+                                    <!-- <div class="card shadow-sm rounded-4">
 
+                                        <div class="card-body"> -->
+
+                                    <!-- <ng-container *ngFor="let leave of Employee_Data?.leave_data?.leave_types">
+                                        <div class="d-flex flex-wrap align-items-center justify-content-between gap-2">
+                                            <div class="fw-semibold text-dark">
+                                                {{ leave.leave_name }}
+                                            </div>
+                                            <div class="d-flex gap-2">
+                                                <span class="badge bg-primary fs-6">
+                                                    Total: {{ leave.total_leave }}
+                                                </span>
+
+                                                <span class="badge fs-6"
+                                                    [ngClass]="leave.available_leave > 0 ? 'bg-success' : 'bg-danger'">
+                                                    Available: {{ leave.available_leave }}
+                                                </span>
                                             </div>
                                         </div>
-                                        <h2 class="mb-0 text-center">{{Employee_Data.total_leave_count}}</h2>
-                                    </div>
-                                    <div class=" border-right-dashed pe-2">
-                                        <div class="d-flex justify-content-center">
-                                            <div class=""><i class="bi bi-clock me-2"></i></div>
-                                            <div class="">
-                                                <h6 class="mb-1">Taken</h6>
+                                        <div class="row" *ngIf="leave.carry_fwd > 0">
+                                            <div class="col-12 text-start">
+                                                <small class="text-muted fst-italic mt-1">
+                                                    <i class="bi bi-arrow-repeat"></i>
+                                                    {{ leave.carry_fwd }} carry-forwarded leave included in total
+                                                </small>
                                             </div>
                                         </div>
-                                        <h2 class="mb-0 text-center">10</h2>
+                                        <hr class="my-2" />
+                                    </ng-container> -->
 
-                                    </div>
-
-                                    <div class=" border-right-dashed pe-2 gx-2 gap-2">
-                                        <div class="d-flex justify-content-center">
-                                            <div class=""><i class="bi bi-clock me-2"></i></div>
-                                            <div class="">
-                                                <h6 class="mb-1">Available</h6>
-
-                                            </div>
-                                        </div>
-                                        <h2 class="mb-0 text-center">10</h2>
-
-                                    </div>
-                                    <div class="  gx-2 rounded-1 gap-2">
-                                        <div class="d-flex justify-content-center">
-                                            <div class=""><i class="bi bi-clock me-2"></i></div>
-                                            <div class="">
-                                                <h6 class="mb-1">Request</h6>
-                                            </div>
-                                        </div>
-                                        <h2 class="mb-0 text-center">{{Employee_Data.total_request}}</h2>
-
-                                    </div>
+                                    <!-- </div>
+                                    </div> -->
                                 </div>
                             </div>
 
                             <!-- leave request status -->
-                            <div class="row ">
-                                <div class="card p-0 shadow-sm rounded-4 overflow-hidden mt-2">
+                            <div class="row">
+                                <div class="card p-0 shadow-sm rounded-4 overflow-hidden">
                                     <div class=" text-white px-4 py-2 " style="background-color: #578FCA;">
                                         <h5 class="mb-0">Leave Request Status</h5>
                                     </div>
@@ -204,20 +216,23 @@
                                     <div class="d-flex justify-content-around py-2 text-center">
                                         <!-- Accept -->
                                         <div>
-                                            <div class="fw-bold text-success">Accept</div>
-                                            <div class="fs-3">{{ leaveStatus.accept }}</div>
+                                            <div class="fw-bold text-success">Approved</div>
+                                            <div class="fs-3"> {{ Employee_Data?.leave_data?.leave_requests?.approved }}
+                                            </div>
+                                        </div>
+
+                                        <!-- Reject -->
+                                        <div>
+                                            <div class="fw-bold text-danger" style="color: #70002a;">Rejected</div>
+                                            <div class="fs-3">{{ Employee_Data?.leave_data?.leave_requests?.rejected }}
+                                            </div>
                                         </div>
 
                                         <!-- Pending -->
                                         <div>
                                             <div class="fw-bold" style="color: #806000;">Pending</div>
-                                            <div class="fs-3">{{ leaveStatus.pending }}</div>
-                                        </div>
-
-                                        <!-- Reject -->
-                                        <div>
-                                            <div class="fw-bold text-danger" style="color: #70002a;">Reject</div>
-                                            <div class="fs-3">{{ leaveStatus.reject }}</div>
+                                            <div class="fs-3"> {{ Employee_Data?.leave_data?.leave_requests?.pending }}
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -225,16 +240,23 @@
 
                             </div>
                             <div class="row">
-                                <div class="col-lg-12  gx-2 mt-4 rounded-1 gap-2">
-                                    <div class="" *ngIf="role === 'employee'">
-
-                                        <button type="button" class="btn dashboard-btn w-100" (click)="openLeaveModal()">
+                                <div class="col-lg-8  gx-2 mt-4 rounded-1 gap-2">
+                                    <div class="" *ngIf="hasAccess('Leave', 'insert')">
+                                        <button type="button" class="btn dashboard-btn w-100"
+                                            (click)="openLeaveModal()">
                                             Apply For Leave
                                         </button>
                                     </div>
-
+                                </div>
+                                <div class="col-lg-4  gx-2 mt-4 rounded-1 gap-2">
+                                    <div class="" *ngIf="hasAccess('Leave', 'insert')">
+                                        <button type="button" class="btn dashboard-btn w-100" (click)="viewLeave()">
+                                            View Leave
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
+
                         </div>
                         <div class=" col p-0">
                             <div class="border p-4 " style="border-radius: 10px;">
@@ -243,13 +265,13 @@
                                             class="bi bi-file-earmark-text me-3 text-primary "></i></span>Payslip</h5>
                                 <div class=" mx-auto ">
                                     <form class="w-100">
-                                        <div class="row  justify-content-between flex-row mt-4">
+                                        <div class="row  justify-content-between flex-row mt-3">
 
                                             <!-- Select Year -->
                                             <div class="col-6"> <label for="yearSelect" class="form-label">Select
                                                     Year</label>
-                                                <select id="yearSelect" class="form-select" name="selectedYear" [(ngModel)]="selectedYear"
-                                                    (change)="checkSelection()">
+                                                <select id="yearSelect" class="form-select" name="selectedYear"
+                                                    [(ngModel)]="selectedYear" (change)="checkSelection()">
                                                     <option *ngFor="let year of years" [value]="year">{{ year }}
                                                     </option>
                                                 </select>
@@ -267,177 +289,178 @@
                                             </div>
 
                                         </div>
-                                        <button
-                                            class="btn dashboard-btn w-100 mt-5 text-center btn-center">Download</button>
+                                        <button class="btn dashboard-btn w-100 mt-3 text-center btn-center"
+                                            type="button" (click)="getPayrollData()">Download</button>
                                     </form>
                                 </div>
                             </div>
 
-                            <div class="col d-flex align-items-center border px-4 mt-4"
-                                style="border-radius: 10px; height: 122px;" *ngIf="role === 'employee'">
-                                <button class="btn dashboard-btn w-100" (click)="openAdvanceSalaryModal()">
-                                    Apply for Advance Salary
-                                </button>
+                            <div class="col d-flex align-items-center border px-4 mt-2"
+                                style="border-radius: 10px; height: 100px;"
+                                *ngIf="hasAccess('Advance Payment', 'insert')">
+                                <div class="col-lg-10  gx-2 rounded-1 gap-2">
+                                    <div class="" *ngIf="hasAccess('Leave', 'insert')">
+                                        <button class="btn dashboard-btn w-100" (click)="openAdvanceSalaryModal()">
+                                            Apply for Advance Salary
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="col-lg-2  gx-2 rounded-1 gap-2 ms-2">
+                                    <div class="" *ngIf="hasAccess('Leave', 'insert')">
+                                        <button type="button" class="btn dashboard-btn w-100" (click)="viewAll()">
+                                            View
+                                        </button>
+                                    </div>
+                                </div>
                             </div>
 
                         </div>
                     </div>
                 </div>
 
+                <!-- BONUS FULL WIDTH BELOW -->
+                <div class="row mt-3 mb-3 justify-content-center" *ngIf="bonusData && bonusData.bonus_rate">
 
-                <div class="row">
-                    <div class="col attendaceWrapper">
-                        <div class=" attendenceCard p-3 border text-center" style="border-radius: 10px;">
+                    <div class="col-lg-10">
 
-                            <h6> <i class="bi bi-clock me-2 " style="color:#3674B5"></i> Total Hours Today</h6>
-                            <h5 class="pb-0 text-center">5.5/6</h5>
+                        <div class="bonus-strip d-flex justify-content-center align-items-center px-3 py-2">
+
+                            <div class="fw-bold me-5">
+                                <i class="bi bi-coin text-warning me-2"></i> Bonus :
+                            </div>
+
+                            <div class="d-flex gap-5 flex-wrap">
+
+                                <span><b>Bonus Rate:</b> ₹{{ bonusData.bonus_rate }}</span>
+                                <span><b>Present Days:</b> {{ bonusData.present_days }}</span>
+                                <span class="text-success">
+                                    <b>Amount:</b> ₹{{ bonusData.bonus_amount }}
+                                </span>
+
+                            </div>
+
                         </div>
-                        <div class=" attendenceCard p-3 border text-center" style="border-radius: 10px;">
-                            <h6> <i class="bi bi-clock me-2" style="color:#3674B5"></i> Total Hours Week</h6>
-                            <h5 class="pb-0 text-center">10/40</h5>
-                        </div>
-                        <div class=" attendenceCard p-3 border text-center" style="border-radius: 10px;">
-                            <h6> <i class="bi bi-clock me-2" style="color:#3674B5"></i> Total Hours Month</h6>
-                            <h5 class="pb-0 text-center">75/98</h5>
-                        </div>
-                        <div class=" attendenceCard p-3 border text-center" style="border-radius: 10px;">
-                            <h6> <i class="bi bi-clock me-2" style="color:#3674B5"></i> Total Overtime</h6>
-                            <h5 class="pb-0 text-center">16(Hours)</h5>
-                        </div>
+
                     </div>
                 </div>
 
+                <!-- EMPTY -->
+                <!-- <ng-template #noBonus>
+                    <div class="row mt-3 justify-content-center">
+                        <div class="col-lg-6">
+                            <div class="bonus-empty text-center py-2">
+                                Bonus is not declared yet
+                            </div>
+                        </div>
+                    </div>
+                </ng-template> -->
 
-                <div class="row my-2 gap-2 row-gap-3 ">
+                <!-- attendnace 4 block -->
+                <!-- <div class="row mt-2">
+                    <div class="col attendaceWrapper">
+                        <div class=" attendenceCard p-3 border text-center" style="border-radius: 10px;">
+
+                            <h6> <i class="bi bi-clock me-2 " style="color:#3674B5"></i>Last Week Total Hours</h6>
+                            <h5 class="pb-0 text-center">{{Employee_Data.last_hours_data.lastWeekTotalHours}}</h5>
+                        </div>
+                        <div class=" attendenceCard p-3 border text-center" style="border-radius: 10px;">
+                            <h6> <i class="bi bi-clock me-2" style="color:#3674B5"></i>Last Month Total Hours</h6>
+                            <h5 class="pb-0 text-center">{{Employee_Data.last_hours_data.lastMonthTotalHours}}</h5>
+                        </div>
+                        <div class=" attendenceCard p-3 border text-center" style="border-radius: 10px;">
+                            <h6> <i class="bi bi-clock me-2" style="color:#3674B5"></i>Last Week Overtime</h6>
+                            <h5 class="pb-0 text-center">{{Employee_Data.last_hours_data.lastWeekOvertimeHour}}</h5>
+                        </div>
+                        <div class=" attendenceCard p-3 border text-center" style="border-radius: 10px;">
+                            <h6> <i class="bi bi-clock me-2" style="color:#3674B5"></i>Last Month Overtime</h6>
+                            <h5 class="pb-0 text-center">{{Employee_Data.last_hours_data.lastMonthOvertimeHour}}</h5>
+                        </div>
+                    </div>
+                </div> -->
+
+
+                <div class="row my-2 gap-2 row-gap-3">
                     <div class="col attendanceAdvanceSalaryWrapper">
                         <div class=" p-3  border " style="border-radius: 10px;">
 
 
                             <div class="row gx-0">
                                 <div class="col-12  border-bottom border-primary-light mb-2">
-                                    <h5 class="pb-2"> <i class="bi bi-calendar-check me-2 text-primary "></i> Attendance
+                                    <h5 class="pb-2"> <i class="bi bi-calendar-check me-2 text-primary "></i>Last Month
+                                        Attendance
                                     </h5>
                                 </div>
-                                <div class="d-flex ">
-                                    <div class="col col-md-7 ">
-                                        <div class="chart-container p-0">
-                                            <h6 class="text-center"> {{ currentDateTime | date:
-                                                'HH:mm' }} , {{ currentDateTime | date: 'dd-MM-yyyy' }} </h6>
-
-                                            <!-- attendance chart  -->
-                                            <div class="chart">
-                                                <div style="position: relative; width: 200px; margin: auto;">
-                                                    <canvas baseChart [data]="doughnutChartData" [type]="'doughnut'"
-                                                        [options]="doughnutChartOptions">
-                                                    </canvas>
-                                                    <!-- Centered Text -->
-                                                    <div
-                                                        style="position:absolute;top:36%;left:51%;transform:translate(-50%,-50%);font-size:20px;font-weight:bold;text-align:center">
-                                                        <div>Total Attendance</div>
-                                                        <div>500</div>
-                                                    </div>
-                                                </div>
-                                            </div>
-
-                                        </div>
-                                    </div>
-                                    <div class="col col-md-5 mt-3 d-flex flex-column justify-content-between w-50">
-                                        <div class="text-center"><i class="bi bi-box-arrow-in-right text-primary"></i>
-                                            Punch In
-                                            At
-                                            <br>
-                                            <span style="font-size: 18px; font-weight: bold;">
-                                                10 AM
-                                            </span>
-                                        </div>
-                                        <div class="text-center"><i class="bi bi-box-arrow-in-left  text-primary"></i>
-                                            Punch Out
-                                            At
-                                            <br><span style="font-size: 18px; font-weight: bold;">
-                                                Not Yet
-                                            </span>
-                                        </div>
-                                    </div>
-                                </div>
-
-
-                            </div>
-                        </div>
-                        <div class=" p-3 border advanceSalaryTracking" style="border-radius: 10px;">
-                            <!-- Performnce chart -->
-                            <!-- <div class="chart-container">
-                    <canvas baseChart [data]="chartData" [options]="chartOptions">
-                    </canvas>
-                </div> -->
-                            <div class="card rounded-4 border-0">
-                                <div class="d-flex justify-content-between align-items-center mb-2">
-                                    <h5 class="fw-bold">
-                                        ₹ <span class="ms-2">Advance Salary Tracking</span>
-                                    </h5>
-                                    <select class="form-select w-auto" [(ngModel)]="selectedYear">
-                                        <option *ngFor="let year of years" [value]="year">{{ year }}</option>
-                                    </select>
-                                </div>
-
-                                <!-- Progress Bar -->
-                                <div class="progress mb-2" style="height: 8px;">
-                                    <div class="progress-bar bg-success"
-                                        [style.width.%]="(salaryTracking.paidAmount / salaryTracking.totalAmount) * 100">
-                                    </div>
-                                </div>
-                                <div class="d-flex justify-content-between small mb-4 px-1">
-                                    <div style="color:gray">
-                                        <span class="text-success"> ● </span> Paid<br />
-                                        <h5 class="text-dark">₹ {{ salaryTracking.paidAmount }}</h5>
-                                    </div>
-                                    <div class="text-muted text-end">
-                                        ● Remaining<br />
-                                        <h5 class="text-dark">₹ {{ salaryTracking.totalAmount -
-                                            salaryTracking.paidAmount }}
-                                        </h5>
-                                    </div>
-                                </div>
-
-                                <!-- Info Grid -->
-                                <div class="row g-3 row-gap-2">
-                                    <div class="col-md-2">
-                                        <label>Total Amount <span class="rupee-text">(in ₹)</span> </label>
-                                        <input class="form-control" readonly [value]="salaryTracking.totalAmount" />
-                                    </div>
-                                    <div class="col-md-4">
-                                        <label>Installment Amount <span class="rupee-text">(in ₹)</span> </label>
-                                        <input class="form-control" readonly
-                                            [value]="salaryTracking.installmentAmount" />
-                                    </div>
-                                    <div class="col-md-2">
-                                        <label>Tenure</label> <br>
-                                        <input class="form-control" readonly [value]="salaryTracking.tenure" />
-                                    </div>
-                                    <div class="col-md-4">
-                                        <label>First Installment Paid Date</label>
-                                        <input class="form-control" readonly
-                                            [value]="salaryTracking.firstInstallmentDate" />
-                                    </div>
-                                    <div class="col-md-4">
-                                        <label>Next Installment Due Date</label>
-                                        <input class="form-control" readonly
-                                            [value]="salaryTracking.nextInstallmentDueDate" />
-                                    </div>
-                                    <div class="col-md-4">
-                                        <label>Last Installment Paid Date</label>
-                                        <input class="form-control" readonly
-                                            [value]="salaryTracking.lastInstallmentPaidDate" />
-                                    </div>
-                                    <div class="col-md-3 ">
-                                        <label>Installment End Date</label>
-                                        <input class="form-control" readonly
-                                            [value]="salaryTracking.installmentEndDate" />
+                                <div style="position: relative; width: 250px; margin: auto;">
+                                    <canvas baseChart [data]="doughnutChartData" [options]="doughnutChartOptions"
+                                        [type]="'doughnut'">
+                                    </canvas>
+                                    <div style="position:absolute;top:42%;left:50%;transform:translate(-50%,-50%);
+                                            font-size:20px;font-weight:bold;text-align:center">
+                                        <div>Total Days</div>
+                                        <div>{{ totalAttendance }}</div>
                                     </div>
                                 </div>
                             </div>
-
-
                         </div>
+
+                        <div class="p-3 border advanceSalaryTracking" style="border-radius: 10px;">
+
+                            <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap">
+
+                                <h5 class="mb-0">
+                                    <i class="bi bi-calendar me-2 text-primary"></i>
+                                    Daily Attendance
+                                </h5>
+
+                                <div class="d-flex gap-2 align-items-end">
+
+                                    <div>
+                                        <!-- <label class="form-label mb-1 small">Month</label> -->
+                                        <select class="form-select form-select-sm" [(ngModel)]="selectedMonthAttendance"
+                                            (change)="onMonthYearChange()">
+                                            <option *ngFor="let month of months" [value]="month.value">
+                                                {{ month.name }}
+                                            </option>
+                                        </select>
+                                    </div>
+
+                                    <div>
+                                        <!-- <label class="form-label mb-1 small">Year</label> -->
+                                        <select class="form-select form-select-sm" [(ngModel)]="selectedYearAttendance"
+                                            (change)="onMonthYearChange()">
+                                            <option *ngFor="let year of years" [value]="year">
+                                                {{ year }}
+                                            </option>
+                                        </select>
+                                    </div>
+
+                                </div>
+                            </div>
+
+                            <ag-grid-angular class="ag-theme-alpine attendance-grid" [rowData]="attendanceRowData"
+                                [columnDefs]="attendanceColumnDefs" [pagination]="true" [paginationPageSize]="10"
+                                (gridReady)="onAttendanceGridReady($event)">
+                            </ag-grid-angular>
+
+                            <!-- <div class="d-flex align-items-center justify-content-end flex-wrap mt-3 gap-2">
+                                <button class="btn btn-sm btn-primary rounded" (click)="prevPage()"
+                                    [disabled]="currentPage === 1">Prev</button>
+                                <button class="btn btn-sm btn-primary rounded" (click)="nextPage()"
+                                    [disabled]="currentPage === lastPage">Next</button>
+
+                                <ng-container *ngFor="let page of pagesToShow">
+                                    <span *ngIf="page !== '...'; else ellipsis" (click)="goToPage(page)"
+                                        [class.current]="page === currentPage" class="page-text">
+                                        <ng-container *ngIf="page === currentPage">[{{ page
+                                            }}]</ng-container>
+                                        <ng-container *ngIf="page !== currentPage">{{ page
+                                            }}</ng-container>
+                                    </span>
+                                    <ng-template #ellipsis><span class="mx-1">...</span></ng-template>
+                                </ng-container>
+                            </div> -->
+                        </div>
+
                     </div>
                 </div>
             </div>
@@ -570,7 +593,7 @@
                         </div> -->
 
                                 <!-- From Date -->
-                                <div class="col-md-4">
+                                <div class="col-md-3">
                                     <label class="form-label">From Date<span class="text-danger">*</span></label>
                                     <input type="date" class="form-control" formControlName="start_date" [ngClass]="{'input-error': isLeaveSubmitted && leaveForm.get('start_date')?.invalid,
                                 'is-invalid': isLeaveSubmitted && leaveForm.get('start_date')?.invalid }" />
@@ -578,11 +601,21 @@
                                 </div>
 
                                 <!-- To Date -->
-                                <div class="col-md-4">
+                                <div class="col-md-3">
                                     <label class="form-label">To Date<span class="text-danger">*</span></label>
                                     <input type="date" class="form-control" formControlName="end_date" [ngClass]="{'input-error': isLeaveSubmitted && leaveForm.get('end_date')?.invalid,
                                 'is-invalid': isLeaveSubmitted && leaveForm.get('end_date')?.invalid }" />
 
+                                </div>
+
+                                <div class="col-md-2 d-flex align-items-end">
+                                    <div class="form-check mt-4">
+                                        <input type="checkbox" class="form-check-input" id="halfDay"
+                                            formControlName="is_half_day">
+                                        <label class="form-check-label" for="halfDay">
+                                            Half Day
+                                        </label>
+                                    </div>
                                 </div>
                             </div>
 
@@ -640,9 +673,10 @@
                                 <div class="col-md-3">
                                     <label class="form-label">Amount (in ₹)<span class="text-danger">*</span></label>
                                     <input type="text" class="form-control" formControlName="advance_amount"
-                                        (input)="calculateInstallment()" [ngClass]="{'input-error': isAdvanceSalary && advanceSalaryForm.get('advance_amount')?.invalid,
+                                        (input)="calculateInstallment()"
+                                        [ngClass]="{'input-error': isAdvanceSalary && advanceSalaryForm.get('advance_amount')?.invalid,
                                         'is-invalid': isAdvanceSalary && advanceSalaryForm.get('advance_amount')?.invalid }"
-                                        placeholder="Enter Amount"/>
+                                        placeholder="Enter Amount" />
                                     <div *ngIf="isAdvanceSalary && advanceSalaryForm.get('advance_amount')?.errors?.['leadingZero']"
                                         class="text-danger">
                                         Amount should not start with 0.
@@ -685,5 +719,84 @@
             </div>
         </div>
 
+    </div>
+</div>
+
+<!-- change password modal -->
+<div class="modal fade" id="changePasswordModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content p-3">
+
+            <h5 class="mb-3">Change Password</h5>
+
+            <form [formGroup]="changePasswordForm">
+
+                <!-- New Password -->
+                <div class="mb-3">
+                    <label>New Password</label>
+
+                    <div class="position-relative">
+                        <input [type]="showPassword ? 'text' : 'password'" class="form-control pe-5"
+                            formControlName="password" placeholder="Enter new password">
+
+                        <!-- Eye Icon -->
+                        <i class="bi" [ngClass]="showPassword ? 'bi-eye-slash' : 'bi-eye'"
+                            (click)="showPassword = !showPassword">
+                        </i>
+                    </div>
+
+                    <!-- Validation -->
+                    <small class="text-danger" *ngIf="submitted && f['password'].errors">
+                        <span *ngIf="f['password'].errors?.['required']">
+                            Password is required
+                        </span>
+                        <span *ngIf="f['password'].errors?.['minlength']">
+                            Minimum 6 characters required
+                        </span>
+                        <span *ngIf="f['password'].errors?.['pattern']">
+                            Must include uppercase, lowercase, number & special character
+                        </span>
+                    </small>
+                </div>
+
+                <!-- Confirm Password -->
+                <div class="mb-3">
+                    <label>Confirm Password</label>
+
+                    <div class="position-relative">
+                        <input [type]="showConfirmPassword ? 'text' : 'password'" class="form-control pe-5"
+                            formControlName="confirm_password" placeholder="Confirm password">
+
+                        <!-- Eye Icon -->
+                        <i class="bi position-absolute top-50 end-0 translate-middle-y me-3"
+                            [ngClass]="showConfirmPassword ? 'bi-eye-slash' : 'bi-eye'" style="cursor: pointer;"
+                            (click)="showConfirmPassword = !showConfirmPassword">
+                        </i>
+                    </div>
+
+                    <small class="text-danger" *ngIf="submitted && f['confirm_password'].errors">
+                        <span *ngIf="f['confirm_password'].errors?.['required']">
+                            Confirm password is required
+                        </span>
+                    </small>
+
+                    <small class="text-danger" *ngIf="submitted && changePasswordForm.errors?.['mismatch']">
+                        Passwords do not match
+                    </small>
+                </div>
+
+                <div class="text-end">
+                    <button type="button" class="btn btn-secondary me-2" data-bs-dismiss="modal">
+                        Cancel
+                    </button>
+
+                    <button type="button" class="btn btn-primary" (click)="changePassword()">
+                        Update Password
+                    </button>
+                </div>
+
+            </form>
+
+        </div>
     </div>
 </div>

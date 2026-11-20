@@ -1,0 +1,221 @@
+<div class="form-border p-4 rounded shadow-sm bg-white">
+    <form [formGroup]="cmsForm" (ngSubmit)="generateCMS()">
+        <div class="row">
+
+            <div class="col-md-4 mb-3">
+                <label for="companyId">Select Company <span class="text-danger">*</span></label>
+                <div class="position-relative">
+                    <select id="companyId" class="form-control" formControlName="companyId"
+                        [ngClass]="{'is-invalid': isSubmitted && cmsForm.get('companyId')?.invalid}">
+                        <option value="">-- Select Company --</option>
+                        <option *ngFor="let company of companyList" [value]="company.company_id">
+                            {{ company.company_name }}
+                        </option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="col-md-4 mb-3">
+                <label for="yearMonth">Select Year & Month <span class="text-danger">*</span></label>
+                <div class="position-relative">
+                    <input type="month" id="yearMonth" class="form-control" formControlName="yearMonth"
+                        [attr.max]="maxMonth" placeholder="Select Month"
+                        [ngClass]="{'is-invalid': isSubmitted && cmsForm.get('yearMonth')?.invalid}" />
+                </div>
+            </div>
+
+            <div class="col-md-4 mb-3">
+                <label for="companyCode">Company Code <span class="text-danger">*</span></label>
+                <div class="position-relative">
+                    <input type="text" id="companyCode" class="form-control" formControlName="companyCode"
+                        placeholder="Enter Company Code" (keypress)="allowAlphanumeric($event)"
+                        [ngClass]="{'is-invalid': isSubmitted && cmsForm.get('companyCode')?.invalid}">
+                </div>
+            </div>
+
+            <div class="col-md-4 mb-3">
+                <label for="paymentType">Payment Type<span class="text-danger">*</span></label>
+                <div class="position-relative">
+                    <input type="text" id="paymentType" class="form-control" formControlName="paymentType"
+                        placeholder="Enter Company Code" (keypress)="allowAlphanumeric($event)"
+                        [ngClass]="{'is-invalid': isSubmitted && cmsForm.get('paymentType')?.invalid}">
+                </div>
+            </div>
+
+            <div class="col-md-4 mb-3">
+                <label for="paymentDate">Payment Date <span class="text-danger">*</span></label>
+                <div class="position-relative">
+                    <input type="date" id="paymentDate" class="form-control" formControlName="paymentDate" [max]="today"
+                        [ngClass]="{'is-invalid': isSubmitted && cmsForm.get('paymentDate')?.invalid}">
+                </div>
+            </div>
+
+            <div class="col-md-4 mb-3">
+                <label for="accountNumber">Account Number <span class="text-danger">*</span></label>
+                <div class="position-relative">
+                    <input type="text" id="accountNumber" class="form-control" formControlName="accountNumber"
+                        placeholder="Enter Account Number" maxlength="20" (keypress)="allowOnlyNumbers($event)"
+                        [ngClass]="{'is-invalid': isSubmitted && cmsForm.get('accountNumber')?.invalid}">
+                </div>
+            </div>
+
+        </div>
+
+        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+            <!-- <button type="button" class="btn btn-secondary mt-3" data-bs-toggle="modal"
+                data-bs-target="#addExpenseModal">
+                Add Expense
+            </button> -->
+            <button type="submit" class="btn btnColor mt-3 ml-auto btn-end submit-btn">
+                Generate CMS
+            </button>
+        </div>
+    </form>
+
+    <div *ngIf="savedExpenses.length > 0" class="mt-4">
+        <h5>Added Expenses</h5>
+        <table class="table table-bordered table-sm text-center align-middle">
+            <thead class="table-light">
+                <tr>
+                    <th>#</th>
+                    <th>Transfer Type</th>
+                    <th>Amount</th>
+                    <th>Gender</th>
+                    <th>Name</th>
+                    <th>IFSC</th>
+                    <th>Account No.</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let exp of savedExpenses; let i = index">
+                    <td>{{ i + 1 }}</td>
+                    <td>{{ exp.transferType }}</td>
+                    <td>{{ exp.amount }}</td>
+                    <td>{{ exp.gender }}</td>
+                    <td>{{ exp.name }}</td>
+                    <td>{{ exp.ifsc }}</td>
+                    <td>{{ exp.accountNumber }}</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+</div>
+<!-- <div class="col-md-3 mb-3">
+            <label for="paymentType">Payment Type <span class="text-danger">*</span></label>
+            <div class="position-relative">
+                <select id="paymentType" class="form-control" formControlName="paymentType"
+                    [ngClass]="{'is-invalid': isSubmitted && cmsForm.get('paymentType')?.invalid}">
+                    <option value="">-- Select Payment Type --</option>
+                    <option value="RPAY">RPAY</option>
+                    <option value="SAL">SAL</option>
+                    <option value="OTH">OTH</option>
+                </select>
+            </div>
+        </div> -->
+
+<!-- Add Expense Modal -->
+<div class="modal fade" id="addExpenseModal" tabindex="-1" aria-labelledby="addExpenseLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header text-white">
+                <h5 class="modal-title" id="addExpenseLabel">Add Expense</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                    aria-label="Close"></button>
+            </div>
+
+            <div class="modal-body">
+                <form [formGroup]="expenseForm">
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label>Name</label>
+                            <input type="text" class="form-control" formControlName="name" placeholder="Enter Name">
+                        </div>
+
+                        <div class="col-md-4 mb-3">
+                            <label>Amount</label>
+                            <input type="number" class="form-control" formControlName="amount"
+                                placeholder="Enter Amount">
+                        </div>
+
+                        <div class="col-md-4 mb-3">
+                            <label>Gender</label>
+                            <select class="form-control" formControlName="gender">
+                                <option value="">Select</option>
+                                <option value="M">M</option>
+                                <option value="F">F</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-4 mb-3">
+                            <label>IFSC Code</label>
+                            <input type="text" class="form-control" formControlName="ifsc"
+                                placeholder="Enter IFSC Code">
+                        </div>
+
+                        <div class="col-md-4 mb-3">
+                            <label>Account Number</label>
+                            <input type="text" class="form-control" formControlName="accountNumber"
+                                placeholder="Enter Account Number">
+                        </div>
+
+                        <div class="col-md-4 mb-3">
+                            <label>Transfer Type</label><br>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" value="NEFT"
+                                    formControlName="transferType">
+                                <label class="form-check-label">NEFT</label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" value="IFT" formControlName="transferType">
+                                <label class="form-check-label">IFT</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                        <button type="button" class="btn btnColor justify-content-md-end" (click)="addExpense()">Add</button>
+                    </div>
+                </form>
+
+                <!-- Added Expenses Table -->
+                <div *ngIf="expenseList.length > 0" class="mt-4">
+                    <h6>Added Expenses</h6>
+                    <table class="table table-bordered table-sm text-center align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th>#</th>
+                                <th>Transfer Type</th>
+                                <th>Amount</th>
+                                <th>Gender</th>
+                                <th>Name</th>
+                                <th>IFSC</th>
+                                <th>Account No.</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr *ngFor="let exp of expenseList; let i = index">
+                                <td>{{ i + 1 }}</td>
+                                <td>{{ exp.transferType }}</td>
+                                <td>{{ exp.amount }}</td>
+                                <td>{{ exp.gender }}</td>
+                                <td>{{ exp.name }}</td>
+                                <td>{{ exp.ifsc }}</td>
+                                <td>{{ exp.accountNumber }}</td>
+                                <td>
+                                    <i class="bi bi-trash text-danger" style="cursor: pointer;"
+                                        (click)="removeExpense(i)"></i>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <div class="text-end">
+                        <button class="btn btn-success" (click)="saveExpenses()" data-bs-dismiss="modal">Save</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

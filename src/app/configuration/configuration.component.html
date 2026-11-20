@@ -3,7 +3,7 @@
     <div class="main-content">
         <div class="row gx-3  align-items-center p-2 rounded-2 mt-3">
             <div class="col-12 d-flex">
-                <h2 class="fw-bold"> <i class="bi bi-currency-rupee me-2"></i>Configurtion</h2>
+                <h2 class="fw-bold"> <i class="bi bi-currency-rupee me-2"></i>Configuration</h2>
             </div>
         </div>
         <div class="tabs-container m-2">
@@ -14,11 +14,17 @@
                 <li class="nav-item" (click)="selectTab('tab2')">
                     <a class="nav-link fw-bold" [ngClass]="{'active': activeTab === 'tab2'}">Annual Bonus Config</a>
                 </li>
-                <li class="nav-item" (click)="selectTab('tab3')">
+                <li *ngIf="false" class="nav-item" (click)="selectTab('tab3')">
                     <a class="nav-link fw-bold" [ngClass]="{'active': activeTab === 'tab3'}">Incentive Config</a>
                 </li>
                 <li class="nav-item" (click)="selectTab('tab4')">
                     <a class="nav-link fw-bold" [ngClass]="{'active': activeTab === 'tab4'}">Settings</a>
+                </li>
+                <li class="nav-item" (click)="selectTab('tab5')">
+                    <a class="nav-link fw-bold" [ngClass]="{'active': activeTab === 'tab5'}">Holiday Calender</a>
+                </li>
+                <li class="nav-item" (click)="selectTab('tab6')">
+                    <a class="nav-link fw-bold" [ngClass]="{'active': activeTab === 'tab6'}">Die Rate</a>
                 </li>
             </ul>
         </div>
@@ -45,6 +51,18 @@
     <div *ngIf="activeTab === 'tab4'">
         <div class="container ">
             <app-settings-config></app-settings-config>
+        </div>
+    </div>
+
+    <div *ngIf="activeTab === 'tab5'">
+        <div class="container ">
+            <app-holiday-calendar></app-holiday-calendar>
+        </div>
+    </div>
+
+    <div *ngIf="activeTab === 'tab6'">
+        <div class="container ">
+            <app-die-rate-config></app-die-rate-config>
         </div>
     </div>
 

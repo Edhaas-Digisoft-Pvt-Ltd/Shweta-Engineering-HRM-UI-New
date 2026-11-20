@@ -1,9 +1,14 @@
-import { Component, ElementRef, ViewChild } from '@angular/core';
+import { Component, ElementRef, Input, SimpleChanges, ViewChild } from '@angular/core';
 import { ColDef, GridApi } from 'ag-grid-community';
 import { Router } from '@angular/router';
 import { HrmserviceService } from 'src/app/hrmservice.service';
 import { ToastrService } from 'ngx-toastr';
 import { IRowNode } from 'ag-grid-community';
+import * as ExcelJS from 'exceljs';
+import * as FileSaver from 'file-saver';
+import { exportJobPayrollExcel } from '../../shared/job-payroll-excel';
+declare var jspdf: any;
+declare var html2canvas: any;
 
 @Component({
   selector: 'app-payroll-process-approved',
@@ -13,7 +18,7 @@ import { IRowNode } from 'ag-grid-community';
 export class PayrollProcessApprovedComponent {
 
   CompanyNames: any = [];
-  selectedCompanyId: any = 1;
+  selectedCompanyId: any;
   selectedYear: any;
   selectedMonth: any;
   rowData: any = [];
@@ -22,6 +27,17 @@ export class PayrollProcessApprovedComponent {
   activeTab: string = 'tab1';
   isProcess: any = false;
   columnDefs: ColDef[] = [];
+
+  // 'time' = attendance based payroll, 'job' = job (die rate) based operators (is_non_time_based)
+  @Input() payrollType: 'time' | 'job' = 'time';
+  // columns of the job based (die rate) approved list
+  jobColumnDefs: ColDef[] = [
+    { headerName: 'Emp Code', field: 'employee_code', sortable: true, filter: true, minWidth: 150 },
+    { headerName: 'Emp name', field: 'emp_name', sortable: true, filter: true },
+    { headerName: 'Job Amount', field: 'job_amount', sortable: true, filter: true, minWidth: 140 },
+    { headerName: 'Adv Salary', field: 'advance_salary', sortable: true, filter: true, minWidth: 140 },
+    { headerName: 'Net Salary', field: 'net_salary', sortable: true, filter: true, minWidth: 140 },
+  ];
   selectedEmployee: any = null;
   selectedEmployeesForModal: any[] = [];
   consolidatedSummary: { [monthYear: string]: any[] } = {};
@@ -32,6 +48,11 @@ export class PayrollProcessApprovedComponent {
   lastPage: number = 1;
   pagesToShow: (number | string)[] = [];
   paginationvalue: any;
+  years: number[] = [];
+  dataToExportExcel: any[] = [];
+  pdfExportRows: any[] = [];
+  pdfMonthLabel: string = '';
+  isPdfExporting: boolean = false;
 
   today: string = new Date().toISOString().split('T')[0];
   constructor(private router: Router, private service: HrmserviceService, private toastr: ToastrService) { }
@@ -63,10 +84,23 @@ export class PayrollProcessApprovedComponent {
   }
 
   ngOnInit() {
-    this.selectedYear = new Date().getFullYear();
-    this.selectedMonth = new Date().getMonth();
-    const currentDate = new Date();
-    this.today = currentDate.toISOString().split('T')[0];
+    this.selectedCompanyId = this.service.selectedCompanyId();
+    // this.selectedYear = new Date().getFullYear();
+    // this.selectedMonth = new Date().getMonth();
+    // const currentDate = new Date();
+    // this.today = currentDate.toISOString().split('T')[0];
+
+    const today = new Date();
+
+    //last month
+    const lastMonthDate = new Date(today.getFullYear(), today.getMonth() - 1, 1);
+
+    this.selectedYear = lastMonthDate.getFullYear();
+    this.selectedMonth = lastMonthDate.getMonth() + 1;
+
+    this.today = today.toISOString().split('T')[0];
+
+    this.generateYears();
     this.getCompanyNames();
     // this.getApprovedPayroll();
     this.getPagination();
@@ -90,9 +124,18 @@ export class PayrollProcessApprovedComponent {
       }
     );
   }
+
+  generateYears(range: number = 5) {
+    const currentYear = new Date().getFullYear();
+    this.years = [];
+
+    for (let i = currentYear - range; i <= currentYear + 1; i++) {
+      this.years.push(i);
+    }
+  }
+
   onCompanyChange(event: Event): void {
     this.selectedCompanyId = (event.target as HTMLSelectElement).value;
-    console.log('Selected Company ID:', this.selectedCompanyId);
     this.getApprovedPayroll();
   }
 
@@ -106,50 +149,61 @@ export class PayrollProcessApprovedComponent {
 
   getApprovedPayroll(page: number = 1): void {
     this.isLoading = true;
-    this.rowData = [];
     this.service.post('fetch/approved/payroll', {
       company_id: this.selectedCompanyId,
       year: this.selectedYear,
       month: this.selectedMonth,
-      page:page,
-    }).subscribe((res: any) => {
-      try {
-        if (res.status === 'success') {
-          this.rowData = res.data.map((item: any) => ({
-            employee_code: item.employee_code,
-            emp_name: item.emp_name,
-            department: item.department_name,
-            role: item.role_name,
-            presentDays: item.present_days,
-            absentDays: item.absent_days,
-            hours: item.total_hours,
-            overTime: item.total_overtime + ' hrs',
-            employe_id: item.employe_id,
-            bonus_incentive_amount: item.bonus_incentive_amount ? `₹ ${item.bonus_incentive_amount}` : 'NA',
-            advance_salary: item.advance_salary ? `₹ ${item.advance_salary}` : 'NA',
-            net_salary: item.net_salary ? `₹ ${item.net_salary}` : 'NA',
-          }));
-          this.totalRows = res.pagination.total;
-          this.currentPage = res.pagination.page;
-          this.lastPage = res.pagination.last_page;
-          this.generatePageNumbers(this.paginationvalue);
+      page: page,
+      isexport: false,
+      payroll_type: this.payrollType
+    }).subscribe(
+      (res: any) => {
+        try {
+          if (res.status === 'success' && res.data && res.data.length > 0) {
+            this.rowData = res.data.map((item: any) => ({
+              employee_code: item.employee_code,
+              emp_name: item.emp_name,
+              department: item.department_name,
+              role: item.role_name,
+              presentDays: item.present_days,
+              absentDays: item.absent_days,
+              hours: item.total_hours,
+              overTime: item.total_overtime + ' hrs',
+              employe_id: item.employe_id,
+              bonus_amount: item.bonus_amount ? `₹ ${item.bonus_amount}` : 'NA',
+              job_amount: Number(item.is_non_time_based) === 1 ? `₹ ${item.job_amount}` : '-',
+              advance_salary: item.adv_deduction ? `₹ ${item.adv_deduction}` : 'NA',
+              net_salary: item.net_salary ? `₹ ${item.net_salary}` : 'NA',
+            }));
+            this.totalRows = res.pagination.total;
+            this.currentPage = res.pagination.page;
+            this.lastPage = res.pagination.last_page;
+            this.generatePageNumbers(this.paginationvalue);
+          } else {
+            this.rowData = [];
+            // this.toastr.warning('Data Not Found');
+          }
+        } catch (error) {
+          console.log(error);
+          this.rowData = [];
         }
         this.isLoading = false;
-      } catch (error) {
-        console.log(error);
-        this.isLoading = false;
+      },
+      (error) => {
+        this.rowData = [];
+        if (error.status === 404) {
+          // this.toastr.warning('Data Not Found');
+          this.isLoading = false;
+        } else {
+          console.error(error);
+          this.isLoading = false;
+        }
       }
-    })
+    );
   }
 
   initializeColumns() {
     this.columnDefs = [
-      {
-        headerName: '',
-        maxWidth: 50,
-        checkboxSelection: true,
-        headerCheckboxSelection: true,
-      },
       {
         headerName: 'Emp Code',
         field: 'employee_code',
@@ -158,18 +212,11 @@ export class PayrollProcessApprovedComponent {
         minWidth: 150,
       },
       {
-        headerName: 'Department',
-        field: 'department',
+        headerName: 'Emp Name',
+        field: 'emp_name',
         sortable: true,
         filter: true,
-        minWidth: 140,
       },
-      // {
-      //   headerName: 'Role',
-      //   field: 'role',
-      //   sortable: true,
-      //   filter: true,
-      // },
       {
         headerName: 'P',
         field: 'presentDays',
@@ -184,13 +231,13 @@ export class PayrollProcessApprovedComponent {
         filter: true,
         maxWidth: 70,
       },
-      {
-        headerName: 'OT(hrs)',
-        field: 'overTime',
-        sortable: true,
-        filter: true,
-        minWidth: 100,
-      },
+      // {
+      //   headerName: 'OT(hrs)',
+      //   field: 'overTime',
+      //   sortable: true,
+      //   filter: true,
+      //   minWidth: 100,
+      // },
       {
         headerName: 'hours',
         field: 'hours',
@@ -199,11 +246,11 @@ export class PayrollProcessApprovedComponent {
         minWidth: 100,
       },
       {
-        headerName: 'B & I',
-        field: 'bonus_incentive_amount',
+        headerName: 'Bonus',
+        field: 'bonus_amount',
         sortable: true,
         filter: true,
-        minWidth: 120,
+        minWidth: 100,
       },
       {
         headerName: 'Adv Salary',
@@ -254,67 +301,7 @@ export class PayrollProcessApprovedComponent {
     });
   }
 
-  exportSelectedRowsToCSV() {
-    const selectedNodes: IRowNode<any>[] = this.gridApiActive.getSelectedNodes();
-    const selectedData = selectedNodes.map((node: IRowNode<any>) => node.data);
-
-    if (selectedData.length === 0) {
-      this.toastr.warning('Please select at least one row to export.');
-      return;
-    }
-
-    const monthYear = `${this.selectedYear}-${this.selectedMonth.toString().padStart(2, '0')}`;
-    const consolidatedData = this.consolidatedSummary[monthYear] || [];
-
-    const mergedData = selectedData.map((row: any) => {
-      const attendance = consolidatedData.find((att: any) => att.employee_code === row.employee_code);
-
-      return {
-        'Employee Code': row.employee_code,
-        'Employee Name': row.emp_name || attendance?.emp_name,
-        'Department': row.department,
-        'Present Days': row.presentDays,
-        'Absent Days': row.absentDays,
-        'WFH/2': attendance?.work_from_home_half_day || '0',
-        'Half Day': attendance?.half_day || '0',
-        'Late': attendance?.late || '0',
-        'Total OT': row.overTime,
-        'Total Hrs': row.hours,
-        'Bonus&Incentive': row.bonus_incentive_amount,
-        'Net Salary': row.net_salary,
-      };
-    });
-
-    this.downloadAsCSV(mergedData, `Payroll_  ${monthYear}.csv`);
-  }
-
-downloadAsCSV(data: any[], filename: string) {
-  if (!data || !data.length) return;
-
-  const separator = ',';
-  const keys = Object.keys(data[0]);
-
-  const csvContent = [
-    keys.join(separator),
-    ...data.map(row =>
-      keys.map(k => `"${(row[k] ?? '').toString().replace(/"/g, '""')}"`).join(separator)
-    )
-  ].join('\n');
-
-  const BOM = '\uFEFF';
-  const blob = new Blob([BOM + csvContent], { type: 'text/csv;charset=utf-8;' });
-
-  const link = document.createElement('a');
-  const url = URL.createObjectURL(blob);
-  link.setAttribute('href', url);
-  link.setAttribute('download', filename);
-  link.style.visibility = 'hidden';
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
-}
-
-getPagination() {
+  getPagination() {
     this.service.post('get-pagination', {}).subscribe((res: any) => {
       if (res.status === 'success') {
         this.paginationvalue = res.data;
@@ -343,7 +330,7 @@ getPagination() {
     let startPage = current;
     let endPage = current + pageWindow - 1;
     if (endPage >= total) {
-      endPage = total - 1; 
+      endPage = total - 1;
       startPage = Math.max(2, total - pageWindow);
     }
 
@@ -391,4 +378,155 @@ getPagination() {
     }
   }
 
+  // the Time Based / Job Based (Die Rate) tab lives in the parent screen, reload when it changes
+  ngOnChanges(changes: SimpleChanges) {
+    if (changes['payrollType'] && !changes['payrollType'].firstChange) {
+      this.currentPage = 1;
+      this.pagesToShow = [];
+      this.rowData = [];
+      this.getApprovedPayroll(1);
+    }
+  }
+
+  // job (die rate) based approved payroll has its own excel (same sheet as Manage Payroll / Approve Payroll)
+  private exportJobExcel() {
+    this.isPdfExporting = true;
+
+    this.service.post('fetch/approved/payroll', {
+      company_id: this.selectedCompanyId,
+      year: this.selectedYear,
+      month: this.selectedMonth,
+      isexport: true,
+      payroll_type: 'job'
+    }).subscribe((res: any) => {
+      this.isPdfExporting = false;
+      if (res.status === 'success' && res.data?.length > 0) {
+        exportJobPayrollExcel(res.data, Number(this.selectedYear), Number(this.selectedMonth));
+      } else {
+        this.toastr.warning('No data to export');
+      }
+    }, (error) => {
+      this.isPdfExporting = false;
+      if (error.status === 404) {
+        this.toastr.warning('No data to export');
+      } else {
+        this.toastr.error('Failed to fetch payroll data for export');
+      }
+    });
+  }
+
+  exportPdf() {
+    if (!this.selectedCompanyId || !this.selectedYear || !this.selectedMonth) {
+      this.toastr.warning('Select company, year and month first');
+      return;
+    }
+
+    if (this.payrollType === 'job') {
+      this.exportJobExcel();
+      return;
+    }
+
+    this.isPdfExporting = true;
+
+    this.service.post('fetch/approved/payroll', {
+      company_id: this.selectedCompanyId,
+      year: this.selectedYear,
+      month: this.selectedMonth,
+      isexport: true,
+      payroll_type: 'time'
+    }).subscribe((res: any) => {
+      if (res.status === 'success' && res.data?.length > 0) {
+        this.dataToExportExcel = res.data;
+        this.buildPdfTableData();
+        setTimeout(() => this.generatePDF(), 100);
+      } else {
+        this.isPdfExporting = false;
+        this.toastr.warning('No data to export');
+      }
+    }, (error) => {
+      this.isPdfExporting = false;
+      if (error.status === 404) {
+        this.toastr.warning('No data to export');
+      } else {
+        this.toastr.error('Failed to fetch payroll data for export');
+      }
+    });
+  }
+
+  // Adjust this to your real "Operator" role_id
+  private isOperator(emp: any): boolean {
+    return emp.role_id === 2;
+  }
+
+  buildPdfTableData() {
+    const year = this.selectedYear;
+    const month = this.selectedMonth;
+    const daysInMonth = new Date(year, month, 0).getDate();
+    const monthName = new Date(year, month - 1).toLocaleString('en-US', { month: 'long' });
+    const hoursOfMonth = daysInMonth * 8;
+
+    this.pdfMonthLabel = `${monthName} ${year}`;
+
+    this.pdfExportRows = this.dataToExportExcel.map((emp: any) => ({
+      emp_name: emp.emp_name,
+      present_days: emp.present_days ?? 0,
+      present_day_hrs: emp.total_hours ?? 0,
+      ot_hrs: emp.total_overtime ?? 0,
+      fixed_salary: emp.basic_salary ?? 0,
+      hours_of_month: hoursOfMonth,
+      ot_per_hrs: emp.per_hours_amount ?? 0,
+      late_in: emp.late_in ?? 0,
+      late_mark_ded: emp.every_4_late_mark_4_hrs_deduction ?? 0,
+      total_gross_salary: emp.total_salary ?? 0,
+      pt: emp.total_tax_deduction ?? 0,
+      pf_employer: emp.pf_employer_contribution ?? '',
+      pf_employee: emp.pf_employee_deduction ?? '',
+      esic: emp.esic_deduction ?? '',
+      incentive: emp.incentive_amount ?? '',
+      salary_advance: emp.adv_deduction ?? '',
+      misc_expense: emp.misc_expense ?? 0,
+      misc_deduction: emp.misc_deduction ?? 0,
+      net_salary: emp.net_salary ?? 0,
+    }));
+  }
+
+  generatePDF() {
+    const tableEl = document.getElementById('pdfExportTable');
+    if (!tableEl) {
+      this.isLoading = false;
+      this.toastr.error('Could not generate PDF');
+      return;
+    }
+
+    html2canvas(tableEl, { scale: 2 }).then((canvas: HTMLCanvasElement) => {
+      const imgData = canvas.toDataURL('image/png');
+      const { jsPDF } = jspdf;
+      const doc = new jsPDF('l', 'pt', 'a4');
+
+      const pageWidth = doc.internal.pageSize.getWidth();
+      const pageHeight = doc.internal.pageSize.getHeight();
+      const imgWidth = pageWidth - 40;
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+      let heightLeft = imgHeight;
+      let position = 20;
+
+      doc.addImage(imgData, 'PNG', 20, position, imgWidth, imgHeight);
+      heightLeft -= pageHeight;
+
+      while (heightLeft > 0) {
+        position = heightLeft - imgHeight + 20;
+        doc.addPage();
+        doc.addImage(imgData, 'PNG', 20, position, imgWidth, imgHeight);
+        heightLeft -= pageHeight;
+      }
+
+      doc.save('ApprovedPayroll.pdf');
+      this.isPdfExporting = false;
+    }).catch((err: any) => {
+      console.error(err);
+      this.isPdfExporting = false;
+      this.toastr.error('Failed to generate PDF');
+    });
+  }
 }

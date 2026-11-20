@@ -11,9 +11,10 @@
 
                         <h2> <i class="bi bi-currency-rupee me-2"></i> Payroll</h2>
                         <p style="color: #3674B5;">
-                            <span (click)="backtoPayroll()" style="cursor: pointer;">
+                            <span (click)="backtoPayroll()" style="cursor:pointer;">
                                 <i class="bi bi-arrow-left-circle ms-2"></i>
-                                <span class="fw-bolder ms-2">Payroll List</span>
+                                <span class="fw-bolder ms-2">{{ source === 'process' ? 'Payroll Process' : 'Payroll
+                                    List' }}</span>
                             </span>
                             /
                             <span>
@@ -22,65 +23,62 @@
                         </p>
                     </div>
 
-                    <div class="col-12 mb-2">
+                    <!-- <div class="col-12 mb-2">
                         <div class="col-md-2 float-end me-3">
-                            <button class="btn comBtn text-white float-end" data-bs-toggle="modal"
-                                data-bs-target="#RejectPayrollModal" (click)="getRejectReasons()">Reject Payroll
+                            <button class="btn comBtn text-white float-end" (click)="openModal()">Reject Payroll
                             </button>
                         </div>
-                    </div>
+                    </div> -->
 
-                    <div class="col-12  mt-2">
+                    <div class="col-12 mt-2">
                         <div>
-                            <form class="row m-0 p-0" action="" [formGroup]="payrollDetails">
-                                <div class="col-12 col-sm-2">
-                                    <div class="payrollSummaryDetails">
-                                        <label for="payrollId"><i class="bi bi-hash me-2"></i>ID</label>
-                                        <input class="form-control readOnlyInput" formControlName="id" type="text"
-                                            name="" id="">
-                                    </div>
-                                </div>
-                                <div class="col-12 col-sm-4">
-                                    <div class="payrollSummaryDetails">
-                                        <label for="payrollId"><i class="bi bi-people me-2"></i>Employee Name</label>
-                                        <input class="form-control readOnlyInput" formControlName="employeeName"
-                                            type="text" name="" id="">
-                                    </div>
-                                </div>
-                                <div class="col-12 col-sm-3">
-                                    <div class="payrollSummaryDetails">
-                                        <label for="payrollId"><i class="bi bi-buildings me-2"></i>Company Name</label>
-                                        <input class="form-control readOnlyInput" formControlName="companyName"
-                                            type="text" name="" id="">
-                                    </div>
-                                </div>
-                                <div class="col-12 col-sm-1">
-                                    <div class="payrollSummaryDetails">
-                                        <label for="">Year</label>
-                                        <input class="form-control readOnlyInput" [value]="selectedYear" />
-                                    </div>
+                            <form class="row m-0 p-0 align-items-end g-3" action="" [formGroup]="payrollDetails">
 
-                                    <!-- <div class="payrollSummaryDetails">
-                                <label for="payrollId"><i class="bi bi-calendar3 me-2"></i>Date</label>
-                                <input class="form-control readOnlyInput" formControlName="date" type="text" name=""
-                                    id="">
-                            </div> -->
+                                <div class="col-12 col-md-2">
+                                    <label><i class="bi bi-hash me-2"></i>ID</label>
+                                    <input class="form-control readOnlyInput" formControlName="id" type="text">
                                 </div>
-                                <div class="col-12 col-sm-2">
-                                    <div class="payrollSummaryDetails">
-                                        <label for="">Month</label>
-                                        <input class="form-control readOnlyInput"
-                                            [value]="getMonthName(selectedMonth)" />
+
+                                <div class="col-12 col-md-3">
+                                    <label><i class="bi bi-people me-2"></i>Employee Name</label>
+                                    <input class="form-control readOnlyInput" formControlName="employeeName"
+                                        type="text">
+                                </div>
+
+                                <div class="col-12 col-md-3">
+                                    <label><i class="bi bi-buildings me-2"></i>Company Name</label>
+                                    <input class="form-control readOnlyInput" formControlName="companyName" type="text">
+                                </div>
+
+                                <div class="col-12 col-md-4">
+                                    <div class="row g-2 align-items-end">
+
+                                        <div class="col-md-4">
+                                            <label>Month</label>
+                                            <input class="form-control readOnlyInput"
+                                                [value]="getMonthName(selectedMonth)">
+                                        </div>
+
+                                        <div class="col-md-4">
+                                            <label>Year</label>
+                                            <input class="form-control readOnlyInput" [value]="selectedYear">
+                                        </div>
+
+                                        <div *ngIf="source === 'list' && hasAccess('Payroll List', 'view')"
+                                            class="col-md-4">
+                                            <button class="btn btn-danger text-white" (click)="openModal()">Reject
+                                                Payroll</button>
+                                        </div>
+
                                     </div>
                                 </div>
                             </form>
                         </div>
-                        <!-- <input type="text" name="" class="form-control" placeholder="Search Employee" id=""> -->
                     </div>
 
                     <div class="col-12 row m-0 p-0 mt-4">
                         <div class="col-12 col-md">
-                            <div class="row m-0 p-0">
+                            <div class="row m-0 p-0" *ngIf="!isJobBased">
                                 <div class="col-12 col-sm-6">
                                     <div
                                         class="d-flex flex-column align-items-center justify-content-center p-2 py-2 attandance-summary">
@@ -97,19 +95,20 @@
                                 </div>
 
                             </div>
-                            <div class="row m-0 p-0 mt-3">
+                            <div *ngIf="!isJobBased && (employeeDetails.role_id == 2 || employeeDetails.role_id == 12 ||employeeDetails.role_id == 13)"
+                                class="row m-0 p-0 mt-3">
                                 <div class="col-12 col-sm-6">
                                     <div
                                         class="d-flex flex-column align-items-center justify-content-center p-2 py-2 attandance-summary">
                                         <p class="mb-1"><i class="bi bi-clock me-2"></i>Over Time</p>
-                                        <h4 class="m-0">{{employeeDetails.total_overtime}}</h4>
+                                        <h4 class="m-0">{{finalOvertimeHrs}}</h4>
                                     </div>
                                 </div>
                                 <div class="col-12 col-sm-6">
                                     <div
                                         class="d-flex flex-column align-items-center justify-content-center p-2 py-2 attandance-summary">
                                         <p class="mb-1"><i class="bi bi-clock me-2"></i>Total hours</p>
-                                        <h4 class="m-0">{{employeeDetails.total_hours}}</h4>
+                                        <h4 class="m-0">{{calculationData.total_hours}}</h4>
                                     </div>
                                     <!-- <div
                                 class="d-flex flex-column align-items-center justify-content-center p-2 py-2 attandance-summary">
@@ -119,7 +118,228 @@
                                 </div>
                             </div>
 
+                            <!-- job (die rate) based operator: die wise breakup -->
+                            <div class="row m-0 p-0 px-2 mt-3" *ngIf="isJobBased">
+                                <div class="mb-3 p-3 border rounded">
+                                    <h5 class="pb-2 border-bottom border-primary-light">Job Details (Die wise)</h5>
+                                    <div *ngIf="dieDetails.length === 0" class="text-muted">No jobs found for this month.</div>
+                                    <div class="table-responsive" *ngIf="dieDetails.length > 0">
+                                        <table class="table table-sm table-bordered mb-0">
+                                            <thead>
+                                                <tr>
+                                                    <th>Die No</th>
+                                                    <th class="text-end">Jobs Done</th>
+                                                    <th class="text-end">Die Rate (₹)</th>
+                                                    <th class="text-end">Amount (₹)</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr *ngFor="let d of dieDetails">
+                                                    <td>{{ d.die_number }}</td>
+                                                    <td class="text-end">{{ formatted(d.jobs_done) }}</td>
+                                                    <td class="text-end">{{ formattedMoney(d.die_rate) }}</td>
+                                                    <td class="text-end">{{ formattedMoney(d.amount) }}</td>
+                                                </tr>
+                                                <tr class="fw-bold">
+                                                    <td colspan="3" class="text-end">Total Job Amount</td>
+                                                    <td class="text-end">{{ formattedMoney(calculationData?.job_amount) }}</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Miscellaneous Overtime (manually added OT, time based operators only) -->
+                            <div class="row m-0 p-0 px-2 mt-3" *ngIf="showMiscOvertime">
+                                <div class="add-advance-salary-wrapper mb-3 p-3 border rounded">
+                                    <div class="row m-0 p-0">
+                                        <h5 class="section-header">
+                                            <i class="bi bi-clock-history me-2"></i>
+                                            Miscellaneous Overtime
+                                        </h5>
+                                        <form [formGroup]="miscOtForm" (ngSubmit)="addMiscOvertime()">
+                                            <div class="row m-0 p-0 px-2 mt-2">
+
+                                                <div class="col-md-4 mb-3">
+                                                    <label>Date <span class="text-danger">*</span></label>
+                                                    <input type="date" class="form-control" formControlName="otDate"
+                                                        [min]="otMinDate" [max]="otMaxDate"
+                                                        [ngClass]="{'is-invalid': isMiscOtSubmitted && miscOtForm.get('otDate')?.invalid}">
+                                                    <div class="invalid-feedback">Please select a date.</div>
+                                                </div>
+
+                                                <div class="col-md-8 mb-3">
+                                                    <label>Reason <span class="text-danger">*</span></label>
+                                                    <input type="text" class="form-control" formControlName="reason"
+                                                        maxlength="200" placeholder="Enter reason"
+                                                        [ngClass]="{'is-invalid': isMiscOtSubmitted && miscOtForm.get('reason')?.invalid}">
+                                                    <div class="invalid-feedback">Please enter a reason.</div>
+                                                </div>
+
+                                                <div class="col-md-4 mb-3">
+                                                    <label>OT Hours <span class="text-danger">*</span></label>
+                                                    <input type="text" inputmode="decimal" class="form-control"
+                                                        formControlName="otHours" placeholder="Enter hours"
+                                                        [ngClass]="{'is-invalid': isMiscOtSubmitted && miscOtForm.get('otHours')?.invalid}"
+                                                        (keypress)="allowOnlyNumbers($event)"
+                                                        (paste)="onAmountPaste($event)">
+                                                    <div class="invalid-feedback">Enter valid hours (0.01 to 24, up to 2 decimals).</div>
+                                                </div>
+
+                                                <div class="col-md-4 mb-3">
+                                                    <label>Amount (₹)</label>
+                                                    <input type="text" class="form-control readOnlyInput"
+                                                        [value]="formattedMoney(miscOtPreviewAmount)" readonly>
+                                                </div>
+
+                                                <div class="col-md-4 d-flex align-items-end mb-3">
+                                                    <button class="btn comBtn w-100 text-white" type="submit"
+                                                        [disabled]="isSavingMiscOt">
+                                                        Add
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </form>
+
+                                        <table class="table table-bordered table-striped mt-2 misc-ot-table">
+                                            <colgroup>
+                                                <col style="width: 21%">
+                                                <col style="width: 37%">
+                                                <col style="width: 12%">
+                                                <col style="width: 22%">
+                                                <col style="width: 8%">
+                                            </colgroup>
+                                            <thead>
+                                                <tr>
+                                                    <th>Date</th>
+                                                    <th>Reason</th>
+                                                    <th>Hrs</th>
+                                                    <th>Amount (₹)</th>
+                                                    <th></th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr *ngIf="miscOtList.length === 0">
+                                                    <td colspan="5" class="text-center text-muted">No overtime added.</td>
+                                                </tr>
+                                                <tr *ngFor="let item of miscOtList">
+                                                    <td>{{ item.ot_date | date:'dd-MM-yyyy' }}</td>
+                                                    <td class="reason-cell" [title]="item.reason">{{ item.reason }}</td>
+                                                    <td>{{ item.ot_hours }}</td>
+                                                    <td>{{ formattedMoney(item.amount) }}</td>
+                                                    <td class="text-center">
+                                                        <i class="bi bi-trash text-danger fs-5 cursor-pointer"
+                                                            (click)="deleteMiscOvertime(item.misc_ot_id)">
+                                                        </i>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+
                             <div class="row m-0 p-0 px-2 mt-3">
+                                <div class="add-advance-salary-wrapper mb-3 p-3 border rounded">
+                                    <div class="row m-0 p-0">
+                                        <h5 class="section-header">
+                                            <i class="bi bi-wallet2 me-2"></i>
+                                            Miscellaneous Expenses / Deductions
+                                        </h5>
+                                        <form [formGroup]="expenseForm" (ngSubmit)="addExpenseInSalary()">
+                                            <div class="row m-0 p-0 px-2 mt-2">
+
+                                                <div class="col-12 mb-3">
+                                                    <label class="me-4">Type <span class="text-danger">*</span></label>
+                                                    <div class="form-check form-check-inline">
+                                                        <input class="form-check-input" type="radio"
+                                                            formControlName="expenseType" id="typeAdd" value="add">
+                                                        <label class="form-check-label" for="typeAdd">Add</label>
+                                                    </div>
+                                                    <div class="form-check form-check-inline">
+                                                        <input class="form-check-input" type="radio"
+                                                            formControlName="expenseType" id="typeDeduct"
+                                                            value="deduct">
+                                                        <label class="form-check-label" for="typeDeduct">Deduct</label>
+                                                    </div>
+                                                </div>
+
+                                                <div class="col-md-6 mb-3">
+                                                    <label>Reason <span class="text-danger">*</span></label>
+                                                    <input type="text" class="form-control"
+                                                        formControlName="expenseDescription" placeholder="Enter reason"
+                                                        [ngClass]="{'is-invalid': isSubmitted && expenseForm.get('expenseDescription')?.invalid}">
+                                                    <div class="invalid-feedback"
+                                                        *ngIf="isSubmitted && expenseForm.get('expenseDescription')?.invalid">
+                                                        Please enter a valid reason.
+                                                    </div>
+                                                </div>
+
+                                                <div class="col-md-4 mb-3">
+                                                    <label>Amount <span class="text-danger">*</span></label>
+                                                    <input type="text" inputmode="decimal" class="form-control"
+                                                        formControlName="expenseAmount" placeholder="Enter amount"
+                                                        [ngClass]="{'is-invalid': isSubmitted && expenseForm.get('expenseAmount')?.invalid}"
+                                                        (keypress)="allowOnlyNumbers($event)"
+                                                        (paste)="onAmountPaste($event)">
+                                                    <div class="invalid-feedback"
+                                                        *ngIf="isSubmitted && expenseForm.get('expenseAmount')?.errors">
+                                                        <span
+                                                            *ngIf="expenseForm.get('expenseAmount')?.errors?.['required']">
+                                                            Amount is required.
+                                                        </span>
+                                                        <span
+                                                            *ngIf="expenseForm.get('expenseAmount')?.errors?.['pattern']">
+                                                            Enter a valid amount (up to 2 decimal places).
+                                                        </span>
+                                                        <span *ngIf="expenseForm.get('expenseAmount')?.errors?.['min']">
+                                                            Amount must be greater than 0.
+                                                        </span>
+                                                    </div>
+                                                </div>
+
+                                                <div class="col-md-2 d-flex align-items-end mb-3">
+                                                    <button class="btn comBtn w-100 text-white" type="submit">
+                                                        Add
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </form>
+
+                                        <table class="table table-bordered table-striped mt-2">
+                                            <thead>
+                                                <tr>
+                                                    <th>Type</th>
+                                                    <th>Reason</th>
+                                                    <th>Amount (₹)</th>
+                                                    <th></th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr *ngFor="let item of expensesList">
+                                                    <td>
+                                                        <span class="badge"
+                                                            [ngClass]="item.expense_amount < 0 ? 'bg-danger' : 'bg-success'">
+                                                            {{ getExpenseType(item.expense_amount) }}
+                                                        </span>
+                                                    </td>
+                                                    <td>{{ item.expense_description }}</td>
+                                                    <td>{{ formattedMoney(getAbsAmount(item.expense_amount)) }}</td>
+                                                    <td class="text-center">
+                                                        <i class="bi bi-trash text-danger fs-5 cursor-pointer"
+                                                            (click)="deleteExpense(item.expense_id)">
+                                                        </i>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div *ngIf="false" class="row m-0 p-0 px-2 mt-1">
                                 <div class="card p-0">
                                     <div class="card-header"> Advance Salary </div>
                                     <div class="card-body">
@@ -232,22 +452,62 @@
                                                 </td>
                                                 <!-- <td>Otto</td> -->
                                             </tr>
-                                            <tr>
+                                            <tr *ngIf="isJobBased">
+                                                <td data-label="Compound">Job Amount</td>
+                                                <td data-label="Calculation">Jobs x Die Rate</td>
+                                                <td data-label="Amount (in ₹)">₹ {{
+                                                    formatted(calculationData?.job_amount) }}</td>
+                                            </tr>
+                                            <tr *ngIf="!isJobBased">
                                                 <td data-label="Compound">Monthly Gross Salary</td>
                                                 <td data-label="Calculation">-</td>
                                                 <td data-label="Amount (in ₹)">₹ {{
                                                     formatted(calculationData?.monthly_gross_salary) }}</td>
                                             </tr>
-                                            <tr>
+                                            <tr *ngIf="!isJobBased">
+                                                <td data-label="Compound">Present Day Hrs Salary</td>
+                                                <td data-label="Calculation">-</td>
+                                                <td data-label="Amount (in ₹)">₹ {{
+                                                    formatted(calculationData?.present_day_hrs_salary) }}</td>
+                                            </tr>
+                                            <tr *ngIf="!isJobBased">
                                                 <td data-label="Compound">Over Time Salary</td>
-                                                <td data-label="Calculation">Over Time * per hour</td>
+                                                <td data-label="Calculation">(OT-LT) * per hr</td>
                                                 <td data-label="Amount (in ₹)">₹ {{
                                                     formatted(calculationData?.overtime_amount)}}
                                                 </td>
                                             </tr>
+                                            <!-- <tr>
+                                                <td data-label="Compound">Extra Expense / Deduction</td>
+                                                <td data-label="Calculation"> - </td>
+                                                <td data-label="Amount (in ₹)">₹ {{
+                                                    formatted(calculationData?.total_expense)}}
+                                                </td>
+                                            </tr> -->
+                                            <tr>
+                                                <td data-label="Compound">Total Miscellaneous Expenses</td>
+                                                <td data-label="Calculation"> - </td>
+                                                <td data-label="Amount (in ₹)">₹ {{
+                                                    formatted(calculationData?.extra_expenses)}}
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td data-label="Compound">Total Miscellaneous Deductions</td>
+                                                <td data-label="Calculation"> - </td>
+                                                <td data-label="Amount (in ₹)">₹ {{
+                                                    formatted(calculationData?.extra_deductions)}}
+                                                </td>
+                                            </tr>
+                                            <tr *ngIf="calculationData?.default_holiday_pay > 0">
+                                                <td data-label="Compound">Default Holiday Pay</td>
+                                                <td data-label="Calculation">-</td>
+                                                <td data-label="Amount (in ₹)">₹ {{
+                                                    formatted(calculationData?.default_holiday_pay)}}
+                                                </td>
+                                            </tr>
                                             <tr>
                                                 <td data-label="Compound">Total Salary</td>
-                                                <td data-label="Calculation">OT amt+P day amt-ded.</td>
+                                                <td data-label="Calculation">Total</td>
                                                 <td data-label="Amount (in ₹)">₹ {{
                                                     formatted(calculationData?.total_salary)}}
                                                 </td>
@@ -271,10 +531,10 @@
                                                 </td>
                                                 <!-- <td>Otto</td> -->
                                             </tr>
-                                            <tr class="deduction" *ngFor="let deductions of deduct">
-                                                <td data-label="Compound">{{formatted(deductions.Compound)}}</td>
-                                                <td data-label="Calculation">{{formatted(deductions.deduction)}}</td>
-                                                <td data-label="Amount (in ₹)">{{formatted(deductions.amount)}}</td>
+                                            <tr class="deduction" *ngFor="let row of deduct">
+                                                <td data-label="Compound">{{ row.Compound }}</td>
+                                                <td data-label="Calculation">{{ row.deduction }}</td>
+                                                <td data-label="Amount (in ₹)">₹ {{ formatted(row.amount) }}</td>
                                             </tr>
                                             <tr>
                                                 <!-- <th  scope="row">1</th> -->
@@ -294,13 +554,14 @@
                                             <tr class="insentive">
                                                 <td data-label="Compound">Incentive</td>
                                                 <td data-label="Calculation">-</td>
-                                                <td data-label="Amount (in ₹)">₹</td>
+                                                <td data-label="Amount (in ₹)">₹ {{
+                                                    formatted(calculationData?.incentive_amount) }}</td>
                                             </tr>
                                             <tr class="total">
                                                 <td data-label="Compound">Total Final Salary</td>
                                                 <td></td>
                                                 <!-- <td data-label="Amount (in ₹)">Rs.0</td> -->
-                                                <td data-label="Amount (in ₹)">Rs. {{
+                                                <td data-label="Amount (in ₹)">₹ {{
                                                     formatted(calculationData?.net_salary)}}
                                                 </td>
                                             </tr>
@@ -313,9 +574,11 @@
                     <div class="col-12">
                         <div class="d-flex justify-content-center flex-column flex-sm-row gap-3">
                             <div>
-                                <button class="btn comBtn w-100  text-white"><i
-                                        class="bi bi-file-earmark-text me-2"></i>Download Payslip</button>
+                                <button class="btn comBtn w-100 text-white" (click)="downloadPayslip()">
+                                    <i class="bi bi-file-earmark-text me-2"></i>Download Payslip
+                                </button>
                             </div>
+
                             <!-- <div>
                         <button class="btn preVieBtn w-100 "><i class="bi bi-file-earmark-text me-2"></i>Email
                             Payslip</button>
@@ -439,6 +702,7 @@
                                 <!-- <li><span class="dot"></span> W - Weekend</li> -->
                                 <!-- <li><span class="dot"></span> W/od - Weekend</li> -->
                                 <li><span class="dot"></span> H - Holiday</li>
+                                <li><span class="dot"></span> W/O - Weekly Off</li>
                                 <!-- <li><span class="dot"></span> WFH/2 - Work From Home Half Day</li> -->
                                 <!-- <li><span class="dot"></span> HD - Half Day</li> -->
                                 <li><span class="dot"></span> OT - Overtime</li>
@@ -453,7 +717,7 @@
             </div>
         </div>
 
-        <!-- modal -->
+        <!-- reject modal -->
         <div class="modal fade" id="RejectPayrollModal" tabindex="-1" aria-labelledby="applyLeaveLabel"
             aria-hidden="true">
             <div class="modal-dialog modal-lg modal-dialog-centered">
@@ -468,22 +732,22 @@
                     <form>
                         <div class="modal-body">
 
-                            <div class="row mb-3">
+                            <div class="row mb-3" *ngIf="!isJobBased">
                                 <div class="col-md-7">
                                     <label class="form-label">Reject Reason</label>
                                     <select class="form-select" [(ngModel)]="selectedRejectedReason" name="rejectReason"
                                         [ngClass]="{ 'is-invalid': showReasonError }">
                                         <option value="" disabled selected>-- Choose reason --</option>
-                                        <option *ngFor="let item of rejectreasons" [value]="item.rejection_id">{{
+                                        <option *ngFor="let item of rejectreasons" [ngValue]="item">{{
                                             item.rejection_reason }}</option>
                                     </select>
                                 </div>
                             </div>
 
-                            <div class="row mb-3" *ngIf="selectedRejectedReason === 'Other'">
+                            <div class="row mb-3" *ngIf="isJobBased || selectedRejectedReason?.rejection_reason === 'Other'">
                                 <div class="col-md-7">
                                     <label class="form-label">Enter Reason</label>
-                                    <input type="text" class="form-control" [(ngModel)]="otherReason" name="otherReason"
+                                    <input type="text" class="form-control" [(ngModel)]="otherReason" name="otherReason" maxlength="255"
                                         [ngClass]="{ 'is-invalid': showOtherReasonError }" placeholder="Enter reason" />
                                 </div>
                             </div>
@@ -500,6 +764,46 @@
                     </form>
 
                 </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Confirm Expense Modal -->
+<div class="modal fade" id="ConfirmExpenseModal" tabindex="-1" aria-labelledby="confirmExpenseLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content rounded-4">
+            <div class="modal-header text-white rounded-top-4">
+                <h5 class="modal-title" id="confirmExpenseLabel">Confirm Expense</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"
+                    (click)="cancelAddExpense()"></button>
+            </div>
+            <div class="modal-body">
+                <p class="mb-2">
+                    <strong>Type:</strong>
+                    {{ expenseForm.value.expenseType === 'deduct' ? 'Deduct' : 'Add' }}
+                </p>
+                <p class="mb-2">
+                    <strong>Reason:</strong> {{ expenseForm.value.expenseDescription }}
+                </p>
+                <p class="mb-2">
+                    <strong>Amount:</strong> ₹ {{ formattedMoney(expenseForm.value.expenseAmount) }}
+                </p>
+                <p class="mb-0">
+                    <strong>Amount in Words:</strong>
+                    <span class="fst-italic">{{ expenseAmountInWords }}</span>
+                </p>
+                <p class="mt-3 mb-0">Are you sure you want to add this expense?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" (click)="cancelAddExpense()"
+                    data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn comBtn text-white" (click)="confirmAddExpense()"
+                    [disabled]="isConfirmingExpense">
+                    <span *ngIf="isConfirmingExpense" class="spinner-border spinner-border-sm me-2" role="status"
+                        aria-hidden="true"></span>
+                    Confirm
+                </button>
             </div>
         </div>
     </div>

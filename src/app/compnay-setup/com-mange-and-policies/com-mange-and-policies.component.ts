@@ -131,16 +131,6 @@ export class ComMangeAndPoliciesComponent {
     this.getCompanyData();
     this.getleaveData(this.selectedValue);
     this.getCompanyNames();
-
-    if (sessionStorage.getItem('roleName') == 'admin') {
-      this.router.navigate(['/authPanal/comMange&Plolicies']);
-      return;
-    } else {
-      alert('Please Login To Proceed');
-      sessionStorage.clear();
-      this.router.navigate(['']);
-      return;
-    }
   }
 
   selectTab(tab: string) {

@@ -13,7 +13,7 @@ declare var bootstrap: any;
 export class PayrollProcessRejectedComponent {
   @ViewChild('fileInput') fileInput!: ElementRef<HTMLInputElement>;
   CompanyNames: any = [];
-  selectedCompanyId: any = 1;
+  selectedCompanyId: any;
   selectedYear: any;
   selectedMonth: any;
   rowData: any = [];
@@ -70,14 +70,30 @@ export class PayrollProcessRejectedComponent {
   }
 
   ngOnInit() {
-    this.selectedYear = new Date().getFullYear();
-    this.selectedMonth = new Date().getMonth();
-    const currentDate = new Date();
-    this.today = currentDate.toISOString().split('T')[0];
+    this.selectedCompanyId = this.service.selectedCompanyId();
+    // this.selectedYear = new Date().getFullYear();
+    // this.selectedMonth = new Date().getMonth();
+    // const currentDate = new Date();
+    // this.today = currentDate.toISOString().split('T')[0];
+
+    const today = new Date();
+
+    //last month
+    const lastMonthDate = new Date(today.getFullYear(), today.getMonth() - 1, 1);
+
+    this.selectedYear = lastMonthDate.getFullYear();
+    this.selectedMonth = lastMonthDate.getMonth() + 1;
+
+    this.today = today.toISOString().split('T')[0];
+
     this.getCompanyNames();
     // this.getRejectedPayroll();
     this.getPagination();
     this.initializeColumns();
+  }
+
+  hasAccess(module: string, permission: string): boolean {
+    return this.service.hasPermission(module, permission);
   }
 
   getMonthName(monthId: number): string {
@@ -96,10 +112,9 @@ export class PayrollProcessRejectedComponent {
       }
     );
   }
-  
+
   onCompanyChange(event: Event): void {
     this.selectedCompanyId = (event.target as HTMLSelectElement).value;
-    console.log('Selected Company ID:', this.selectedCompanyId);
     this.getRejectedPayroll();
   }
 
@@ -113,40 +128,56 @@ export class PayrollProcessRejectedComponent {
 
   getRejectedPayroll(page: number = 1): void {
     this.isLoading = true;
-    this.rowData = [];
     this.service.post('fetch/rejected/payroll', {
       company_id: this.selectedCompanyId,
       year: this.selectedYear,
       month: this.selectedMonth,
-      page:page,
-    }).subscribe((res: any) => {
-      try {
-        if (res.status === 'success') {
-          this.rowData = res.data.map((item: any) => ({
-            employee_code: item.employee_code,
-            emp_name: item.emp_name,
-            department: item.department_name, 
-            role: item.role_name,
-            presentDays: item.present_days,
-            absentDays: item.absent_days,
-            hours: item.total_hours,
-            overTime: item.total_overtime,
-            employe_id: item.employe_id,
-            bonus_amount: item.bonus_amount ? `₹${item.bonus_amount}` : 'NA',
-            adv_deduction: item.adv_deduction ? `₹${item.adv_deduction}` : 'NA',
-            net_salary: item.net_salary ? `₹${item.net_salary}` : 'NA',
-          }));
-          this.totalRows = res.pagination.total;
-          this.currentPage = res.pagination.page;
-          this.lastPage = res.pagination.last_page;
-          this.generatePageNumbers(this.paginationvalue);
+      page: page,
+      isexport: false,
+    }).subscribe(
+      (res: any) => {
+        try {
+          if (res.status === 'success' && res.data && res.data.length > 0) {
+            this.rowData = res.data.map((item: any) => ({
+              employee_code: item.employee_code,
+              emp_name: item.emp_name,
+              department: item.department_name,
+              role: item.role_name,
+              presentDays: item.present_days,
+              absentDays: item.absent_days,
+              hours: item.total_hours,
+              overTime: item.total_overtime,
+              employe_id: item.employe_id,
+              bonus_amount: item.bonus_amount ? `₹${item.bonus_amount}` : 'NA',
+              adv_deduction: item.adv_deduction ? `₹${item.adv_deduction}` : 'NA',
+              net_salary: item.net_salary ? `₹${item.net_salary}` : 'NA',
+            }));
+            this.totalRows = res.pagination.total;
+            this.currentPage = res.pagination.page;
+            this.lastPage = res.pagination.last_page;
+            this.generatePageNumbers(this.paginationvalue);
+          } else {
+            this.rowData = [];
+            // this.toastr.warning('Data Not Found');
+          }
+        } catch (error) {
+          console.error(error);
+          this.rowData = [];
         }
         this.isLoading = false;
-      } catch (error) {
-        console.log(error);
+      },
+      (error) => {
         this.isLoading = false;
+        this.rowData = [];
+        if (error.status === 404) {
+          // this.toastr.warning('Data Not Found');
+          this.isLoading = false;
+        } else {
+          console.error(error);
+          this.isLoading = false;
+        }
       }
-    })
+    );
   }
 
   processAction() {
@@ -176,12 +207,12 @@ export class PayrollProcessRejectedComponent {
 
   initializeColumns() {
     this.columnDefs = [
-      {
-        headerName: '',
-        maxWidth: 50,
-        checkboxSelection: true,
-        headerCheckboxSelection: true,
-      },
+      // {
+      //   headerName: '',
+      //   maxWidth: 50,
+      //   checkboxSelection: true,
+      //   headerCheckboxSelection: true,
+      // },
       {
         headerName: 'Emp Code',
         field: 'employee_code',
@@ -190,40 +221,39 @@ export class PayrollProcessRejectedComponent {
         minWidth: 150,
       },
       {
-        headerName: 'Department',
-        field: 'department',
+        headerName: 'Emp Name',
+        field: 'emp_name',
         sortable: true,
         filter: true,
-        minWidth: 140,
       },
       {
         headerName: 'P',
         field: 'presentDays',
         sortable: true,
         filter: true,
-        minWidth: 80,
+        maxWidth: 80,
       },
       {
         headerName: 'A',
         field: 'absentDays',
         sortable: true,
         filter: true,
-        minWidth: 80,
+        maxWidth: 80,
       },
-      {
-        headerName: 'OT(hrs)',
-        field: 'overTime',
-        sortable: true,
-        filter: true,
-        minWidth: 100,
-      },
-      {
-        headerName: 'hours',
-        field: 'hours',
-        sortable: true,
-        filter: true,
-        minWidth: 100,
-      },
+      // {
+      //   headerName: 'OT(hrs)',
+      //   field: 'overTime',
+      //   sortable: true,
+      //   filter: true,
+      //   minWidth: 100,
+      // },
+      // {
+      //   headerName: 'hours',
+      //   field: 'hours',
+      //   sortable: true,
+      //   filter: true,
+      //   minWidth: 100,
+      // },
       {
         headerName: 'Bonus',
         field: 'bonus_amount',
@@ -266,8 +296,8 @@ export class PayrollProcessRejectedComponent {
       this.toastr.warning('Please select at least one employee.');
       return;
     }
-    console.log('hi   ',this.selectedEmployeesForModal);
-    
+
+
     this.selectedEmployeesForModal = [...this.selectedRowData];
 
     const modalElement = document.getElementById('rejectpayrollModalinfo');
@@ -286,13 +316,19 @@ export class PayrollProcessRejectedComponent {
 
     // console.log('Importing Excel for:', this.selectedEmployee);
 
-    this.service.post('import/attendance', formData).subscribe((res: any) => {
-      if (res.status === 'success') {
-        this.toastr.success(res.data);
-        this.getRejectedPayroll();
-        this.closeAllModals();
-      } else {
-        console.log(res.error);
+    this.service.post('import/attendance', formData).subscribe({
+      next: (res: any) => {
+        if (res.status === 'success') {
+          this.toastr.success(res.data);
+          this.getRejectedPayroll();
+          this.closeAllModals();
+        } else {
+          this.toastr.error(res.data || 'Invalid Excel format');
+        }
+      },
+      error: (err: any) => {
+        const errorMsg = err?.error?.data || err?.message || 'Something went wrong';
+        this.toastr.error(errorMsg);
       }
     });
 
@@ -300,10 +336,62 @@ export class PayrollProcessRejectedComponent {
   }
 
   exportExcel() {
-      this.gridApiActive.exportDataAsCsv({
-        columnKeys: ['employee_code', 'department', 'presentDays', 'absentDays', 'overTime', 'hours', 'bonus_amount', 'adv_deduction', 'net_salary'],
-        fileName: 'payrollRejected.csv',
-      });
+    this.isLoading = true;
+    this.service.post('fetch/rejected/payroll', {
+      company_id: this.selectedCompanyId,
+      year: this.selectedYear,
+      month: this.selectedMonth,
+      isexport: true,
+    }).subscribe({
+      next: (res: any) => {
+        if (res.status === 'success' && res.data.length) {
+          const rows = res.data.map((r: any) => [
+            r.employee_code,
+            r.emp_name,
+            r.role_name,
+            r.present_days,
+            r.absent_days,
+            r.total_overtime,
+            r.total_hours,
+            r.bonus_amount,
+            r.adv_deduction,
+            r.net_salary,
+            r.payroll_status
+          ]);
+
+          const csvArray: string[][] = [
+            ['Employee Code', 'Employee Name', 'Role Name', 'Present Days', 'Absent Days', 'Total Overtime', 'Total HOurs', 'Bonus Amount', 'Adv Deduction', 'Net Salary', 'Payroll Status'],
+            ...rows
+          ];
+
+          const csv = csvArray
+            .map((row: string[]) => row.map((v: string | number | null) => `"${v ?? ''}"`).join(','))
+            .join('\n');
+
+          const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+          const link = Object.assign(document.createElement('a'), {
+            href: URL.createObjectURL(blob),
+            download: 'RejectedPayroll.csv'
+          });
+          link.click();
+
+          this.toastr.success('Data exported successfully!');
+        } else {
+          this.toastr.warning('No data found to export');
+        }
+        this.isLoading = false;
+      },
+      error: (err) => {
+        this.isLoading = false;
+
+        if (err.status === 404) {
+          this.toastr.warning(err.error?.data || 'No data found to export');
+        } else {
+          this.toastr.error('Error while exporting data');
+          console.error(err);
+        }
+      }
+    });
   }
 
   getPagination() {
@@ -336,15 +424,15 @@ export class PayrollProcessRejectedComponent {
     let endPage = current + pageWindow - 1;
 
     if (endPage >= total) {
-      endPage = total - 1; 
-      startPage = Math.max(2, total - pageWindow); 
+      endPage = total - 1;
+      startPage = Math.max(2, total - pageWindow);
     }
     if (current === 1) {
       startPage = 2;
       endPage = Math.min(total - 1, pageWindow);
     }
     const pages: (number | string)[] = [];
-    pages.push(1); 
+    pages.push(1);
     if (startPage > 2) {
       pages.push('...');
     }

@@ -8,7 +8,7 @@
                 <div class="col-md-6  ">
                     <h2 class="fw-bold">
                         <span><i class="bi bi-alarm me-2"></i></span>
-                        Attedances
+                        Attendance
                     </h2>
                 </div>
                 <div class="col-md-6  text-end">
@@ -21,42 +21,81 @@
 
                 <div class="tabs-container">
                     <ul class="nav nav-tabs">
+                        <li class="nav-item" (click)="selectTab('live')" *ngIf="hasAccess('Live_attendance', 'view')">
+                            <a class="nav-link fw-bold" [ngClass]="{'active': activeTab === 'live'}">
+                                Live Attendance
+                            </a>
+                        </li>
+                        <li class="nav-item" (click)="selectTab('verify')" *ngIf="hasAccess('Live_attendance', 'view')">
+                            <a class="nav-link fw-bold" [ngClass]="{'active': activeTab === 'verify'}">
+                                Verify Attendance
+                            </a>
+                        </li>
                         <li class="nav-item" (click)="selectTab('tab1')">
-                            <a class="nav-link fw-bold" [ngClass]="{'active': activeTab === 'tab1'}">List</a>
+                            <a class="nav-link fw-bold" [ngClass]="{'active': activeTab === 'tab1'}">Verified & Imported
+                                Attendance</a>
                         </li>
                         <li class="nav-item" (click)="selectTab('tab2')">
                             <a class="nav-link fw-bold" [ngClass]="{'active': activeTab === 'tab2'}">Monthly Summary</a>
                         </li>
                         <li class="nav-item" (click)="selectTab('tab3')">
-                            <a class="nav-link fw-bold" [ngClass]="{'active': activeTab === 'tab3'}">Consolidate
+                            <a class="nav-link fw-bold" [ngClass]="{'active': activeTab === 'tab3'}">Consolidated
                                 Summary</a>
                         </li>
                     </ul>
 
                     <div class="tab-content mt-3">
+
+                        <div *ngIf="activeTab === 'live' && hasAccess('Live_attendance', 'view')">
+                            <app-live-attendance></app-live-attendance>
+                        </div>
+
+                        <div *ngIf="activeTab === 'verify' && hasAccess('Live_attendance', 'view')">
+                            <app-verify-attendance></app-verify-attendance>
+                        </div>
+
                         <div *ngIf="activeTab === 'tab1'">
                             <div class="company-setup">
                                 <div class="container-fluid ">
-                                    <div class="d-flex flex-wrap justify-content-end align-items-center gap-3 mt-4">
+                                    <div class="d-flex flex-wrap justify-content-end align-items-end gap-2 mt-4">
                                         <!-- Search Box -->
                                         <div>
                                             <input class="form-control" type="text" #searchBox placeholder="Search"
-                                                [(ngModel)]="searchInputValue" (ngModelChange)="onFilterBoxChange()"
+                                                [(ngModel)]="searchInputValue" (ngModelChange)="onSearchChange()"
                                                 style="min-width: 180px;" />
+
                                         </div>
 
                                         <!-- Filter Buttons -->
                                         <div class="d-flex flex-wrap gap-2">
                                             <button class="btn btn-light border-secondary rounded-3"
-                                                (click)="filterByStatus('P')">Present</button>
+                                                (click)="applyFilter('P')">Present</button>
                                             <button class="btn btn-light border-secondary rounded-3"
-                                                (click)="filterByStatus('A')">Absent</button>
+                                                (click)="applyFilter('A')">Absent</button>
                                             <button class="btn btn-light border-secondary rounded-3"
-                                                (click)="clearStatusFilter()">Clear Filter</button>
+                                                (click)="clearFilter()">Clear Filter</button>
+                                        </div>
+
+                                        <!-- Date Range Group -->
+                                        <div class="d-flex align-items-end gap-2">
+
+                                            <div>
+                                                <label class="form-label mb-1" style="font-size: 12px;">From
+                                                    Date</label>
+                                                <input class="form-control form-control-sm" type="date"
+                                                    [(ngModel)]="startDate" (change)="onDateRangeChange()" />
+                                            </div>
+
+                                            <div>
+                                                <label class="form-label mb-1" style="font-size: 12px;">To Date</label>
+                                                <input class="form-control form-control-sm" type="date"
+                                                    [(ngModel)]="endDate" (change)="onDateRangeChange()" />
+                                            </div>
+
                                         </div>
 
                                         <!-- Accountant-only Buttons -->
-                                        <ng-container *ngIf="role === 'accountant'">
+                                        <ng-container *ngIf="hasAccess('Attendance', 'import')">
                                             <button class="btn btn-primary text-white rounded-3 ExcelBtn"
                                                 (click)="downloadTemplate()"><i
                                                     class="bi bi-download"></i>&nbsp;Template</button>
@@ -68,8 +107,15 @@
                                                     (click)="fileInput.click()">Import Excel</button>
                                             </div>
 
-                                            <button class="btn text-white rounded-3 ExcelBtn"
-                                                (click)="exportAttendance()">Export</button>
+                                            <div class="col-auto d-flex align-items-end">
+                                                <button class="btn btn-primary ExcelBtn me-2"
+                                                    (click)="exportVerifiedOrImportedAttendnace()">
+                                                    <i class="bi bi-file-earmark-text-fill"></i>
+                                                </button>
+                                            </div>
+
+                                            <!-- <button class="btn text-white rounded-3 ExcelBtn"
+                                                (click)="exportAttendance()">Export</button> -->
                                         </ng-container>
 
                                     </div>
@@ -79,7 +125,7 @@
                                             <div class="row g-3">
                                                 <div class="col-12">
                                                     <ag-grid-angular *ngIf="rowData.length > 0" #agGrid
-                                                        class="ag-theme-alpine" style="width: 100%; height: 60vh"
+                                                        class="ag-theme-alpine" style="width: 100%; height: 50vh"
                                                         [rowData]="rowData" [columnDefs]="columnDefs"
                                                         [defaultColDef]="defaultColDef" [gridOptions]="gridOptions"
                                                         [pagination]="false" [rowSelection]="'multiple'"

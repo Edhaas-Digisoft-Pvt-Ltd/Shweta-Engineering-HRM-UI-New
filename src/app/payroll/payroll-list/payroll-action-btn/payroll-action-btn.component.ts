@@ -31,13 +31,13 @@ export class PayrollActionBtnComponent implements ICellRendererAngularComp {
 
   viewPayroll() {
     this.router.navigate(['/authPanal/payrollSummary'],{
-      queryParams: { id: this.employeeID, temp_payroll_id: this.tempPayrollID}
+      queryParams: { id: this.employeeID, temp_payroll_id: this.tempPayrollID, source: this.params.source}
     });
   }
 
-  printEmployee() {
-    alert('Employee In details');
-    console.log('Employee In details:', this.params.data);
-    this.router.navigate(['/authPanal/EditEmployee']);
-  }
+  // printEmployee() {
+  //   alert('Employee In details');
+  //   console.log('Employee In details:', this.params.data);
+  //   this.router.navigate(['/authPanal/EditEmployee']);
+  // }
 }

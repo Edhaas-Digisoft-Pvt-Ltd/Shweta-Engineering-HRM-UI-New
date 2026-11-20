@@ -1,0 +1,16 @@
+.approveBtn{
+    background-color: #3674B5;
+    color: white ;
+    border-radius: 5px ;
+    width: 204px ;
+    height: 40px;
+    font-size: 18px;
+}
+.declineBtn{
+    background-color: #88304E;
+    color: white ;
+    border-radius: 5px ;
+    width: 204px ;
+    height: 40px;
+    font-size: 18px;
+}

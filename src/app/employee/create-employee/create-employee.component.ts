@@ -2,6 +2,7 @@ import { ChangeDetectorRef, Component } from '@angular/core';
 import { FormGroup, FormBuilder, Validators } from '@angular/forms';
 import { ToastrService } from 'ngx-toastr';
 import { HrmserviceService } from 'src/app/hrmservice.service';
+import { forkJoin, of, Observable } from 'rxjs';
 
 @Component({
   selector: 'app-create-employee',
@@ -44,6 +45,25 @@ export class CreateEmployeeComponent {
   salaryAmountChange: any;
   ctcChange: any;
   lwf: number = 0;
+  showPassword = false;
+  showConfirmPassword = false;
+  submitted = false;
+
+  // ── Document upload state ─────────────────────────────────────────────────────
+  docUploads: {
+    [key: string]: {
+      file: File | null;
+      preview: string | null;
+      error: string;
+      uploading: boolean;
+      uploaded: boolean;
+      doc_id: number | null;
+    }
+  } = {
+      aadhaar: { file: null, preview: null, error: '', uploading: false, uploaded: false, doc_id: null },
+      pan_card: { file: null, preview: null, error: '', uploading: false, uploaded: false, doc_id: null },
+      qr_code:  { file: null, preview: null, error: '', uploading: false, uploaded: false, doc_id: null },
+    };
 
   constructor(
     private fb: FormBuilder,
@@ -52,21 +72,12 @@ export class CreateEmployeeComponent {
   ) {
     this.multiStepForm = this.fb.group({
       title: ['', Validators.required],
-      fname: [
+      emp_name: [
         '',
         [
           Validators.required,
           Validators.minLength(3),
-          Validators.pattern(this.NoWhitespaceRegExp),
-          Validators.pattern(/^[A-Za-z]+$/),
-        ],
-      ],
-      lname: [
-        '',
-        [
-          Validators.required,
-          Validators.pattern(this.NoWhitespaceRegExp),
-          Validators.pattern(/^[A-Za-z]+$/),
+          Validators.pattern(/^[A-Za-z ]+$/),
         ],
       ],
       // email: ['', [Validators.required, Validators.email, Validators.pattern(/^[a-zA-Z0-9._%+-]+@[a-zA-Z]+\.[a-zA-Z]{2,}(?:\.[a-zA-Z]{2,})?$/)]],
@@ -89,7 +100,7 @@ export class CreateEmployeeComponent {
       designation: ['', Validators.required],
       // ctc: ['', Validators.required],
       join_date: ['', Validators.required],
-      work_pattern: ['', Validators.required],
+      // work_pattern: ['', Validators.required],
       accountHolderName: [
         '',
         [Validators.required, Validators.pattern(/^[A-Za-z ]+$/)],
@@ -99,13 +110,26 @@ export class CreateEmployeeComponent {
         '',
         [
           Validators.required,
-          Validators.pattern('^[0-9]*$'),
-          Validators.minLength(12),
+          Validators.pattern(/^[0-9]+$/),
+          Validators.minLength(9),
+          Validators.maxLength(18),
         ],
+      ],
+      aadhaarNumber: [
+        '',
+        [Validators.required, Validators.pattern(/^[2-9]\d{3}\s?\d{4}\s?\d{4}\s*$/)],
+      ],
+      panNumber: [
+        '',
+        [Validators.required, Validators.pattern(/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/)],
       ],
       ifsc: [
         '',
         [Validators.required, Validators.pattern(/^[A-Z]{4}0[A-Z0-9]{6}$/)],
+      ],
+      transfer_type: [
+        '',
+        [Validators.required],
       ],
       // Enable_PF_Employee: [''],
       // Opt_for_EPS_entitled: [''],
@@ -124,7 +148,16 @@ export class CreateEmployeeComponent {
       pf_employee_applicable: [false],
       pf_employer_applicable: [false],
       esic_employee_applicable: [false],
-    });
+      password: [
+        '',
+        [
+          Validators.required,
+          Validators.minLength(6),
+          Validators.pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&]).+$/)
+        ]
+      ],
+      confirm_password: ['', Validators.required],
+    }, { validators: this.passwordMatchValidator });
     this.salaryStructureForm = this.fb.group({
       salaryComponents: this.fb.group({}),
     });
@@ -233,8 +266,6 @@ export class CreateEmployeeComponent {
       },
       (error) => {
         console.error('Error fetching department:', error);
-
-        // ✅ Check for 400 status code
         if (error.status == 400) {
           this.toastr.error('Department Not Available !');
           this.departmentNames = [];
@@ -306,12 +337,14 @@ export class CreateEmployeeComponent {
       case 1:
         return (
           this.multiStepForm.controls['title'].valid &&
-          this.multiStepForm.controls['fname'].valid &&
-          this.multiStepForm.controls['lname'].valid &&
+          this.multiStepForm.controls['emp_name'].valid &&
           this.multiStepForm.controls['email'].valid &&
           this.multiStepForm.controls['contact'].valid &&
           this.multiStepForm.controls['address'].valid &&
-          this.multiStepForm.controls['gender'].valid
+          this.multiStepForm.controls['gender'].valid &&
+          this.multiStepForm.controls['password'].valid &&
+          this.multiStepForm.controls['confirm_password'].valid &&
+          !this.multiStepForm.errors?.['mismatch']
         );
 
       case 2:
@@ -319,8 +352,8 @@ export class CreateEmployeeComponent {
           this.multiStepForm.controls['role'].valid &&
           this.multiStepForm.controls['department'].valid &&
           this.multiStepForm.controls['designation'].valid &&
-          this.multiStepForm.controls['join_date'].valid &&
-          this.multiStepForm.controls['work_pattern'].valid
+          this.multiStepForm.controls['join_date'].valid
+          // this.multiStepForm.controls['work_pattern'].valid
         );
 
       case 3:
@@ -328,7 +361,10 @@ export class CreateEmployeeComponent {
           this.multiStepForm.controls['accountHolderName'].valid &&
           this.multiStepForm.controls['bankName'].valid &&
           this.multiStepForm.controls['accountNumber'].valid &&
-          this.multiStepForm.controls['ifsc'].valid
+          this.multiStepForm.controls['aadhaarNumber'].valid &&
+          this.multiStepForm.controls['panNumber'].valid &&
+          this.multiStepForm.controls['ifsc'].valid &&
+          this.multiStepForm.controls['transfer_type'].valid
         );
 
       case 4:
@@ -363,82 +399,130 @@ export class CreateEmployeeComponent {
 
   onSubmit() {
     if (!this.multiStepForm.valid) {
-      console.log('Invalid controls:', this.multiStepForm.controls);
-      Object.keys(this.multiStepForm.controls).forEach(key => {
-        if (this.multiStepForm.controls[key].invalid) {
-          console.log('Invalid:', key, this.multiStepForm.controls[key].errors);
-        }
-      });
-      this.toastr.error('Please fill all required fields.');
+      const form = this.multiStepForm;
+
+      //password validation
+      if (form.get('password')?.hasError('required')) {
+        this.toastr.error('Password is required');
+      }
+      else if (form.get('password')?.hasError('minlength')) {
+        this.toastr.error('Password must be at least 6 characters');
+      }
+      else if (form.get('password')?.hasError('pattern')) {
+        this.toastr.error('Password must include uppercase, lowercase, number & special character');
+      }
+      else if (form.get('confirm_password')?.hasError('required')) {
+        this.toastr.error('Confirm Password is required');
+      }
+      else if (form.errors?.['mismatch']) {
+        this.toastr.error('Passwords do not match');
+      }
+
+      else {
+        Object.keys(this.multiStepForm.controls).forEach(key => {
+          if (this.multiStepForm.controls[key].invalid) {
+            this.toastr.error(`${key.replace(/_/g, ' ')} is invalid or required`);
+            console.log('Invalid:', key, this.multiStepForm.controls[key].errors);
+          }
+        });
+      }
+      form.markAllAsTouched();
       return;
     }
 
-    if (this.multiStepForm.valid) {
+    // if (this.multiStepForm.valid) {
+    let company_id_value: any = this.selectedCompanyId;
 
+    let current_data: any = {
 
-      let company_id_value: any = this.selectedCompanyId;
+      "company_id": this.selectedCompanyId,
+      "emp_title": this.multiStepForm.value.title,
+      "emp_name": this.multiStepForm.value.emp_name,
+      "emp_email": this.multiStepForm.value.email,
+      "emp_gender": this.multiStepForm.value.gender,
+      "department_id": this.multiStepForm.value.department,
+      "designation_id": this.multiStepForm.value.designation,
+      "bank_name": this.multiStepForm.value.bankName,
+      "account_holder_name": this.multiStepForm.value.accountHolderName,
+      "account_num": this.multiStepForm.value.accountNumber,
+      "transfer_type": this.multiStepForm.value.transfer_type,
+      "aadhaar_number": this.multiStepForm.value.aadhaarNumber.replace(/\s/g, ''),
+      "pan_number": this.multiStepForm.value.panNumber,
+      "ifsc_code": this.multiStepForm.value.ifsc,
+      "doj": this.multiStepForm.value.join_date,
+      "emp_contact": this.multiStepForm.value.contact,
+      "status": "Active",
+      "is_non_time_based": 0,
+      "emp_address": this.multiStepForm.value.address,
+      "role_id": this.multiStepForm.value.role,
 
-      let current_data: any = {
+      "basic_salary": this.multiStepForm.value.basic_salary,
+      "house_rent_allowances": this.multiStepForm.value.house_rent_allowances || 0,
+      "conveyance_allowances": this.multiStepForm.value.conveyance_allowances || 0,
+      "medical_allowances": this.multiStepForm.value.medical_allowances || 0,
+      "special_allowances": this.multiStepForm.value.special_allowances || 0,
 
-        "company_id": this.selectedCompanyId,
-        "emp_title": this.multiStepForm.value.title,
-        "emp_name": this.multiStepForm.value.fname + " " + this.multiStepForm.value.lname,
-        "emp_email": this.multiStepForm.value.email,
-        "emp_gender": this.multiStepForm.value.gender,
-        "department_id": this.multiStepForm.value.department,
-        "designation_id": this.multiStepForm.value.designation,
-        "statutory_list": JSON.stringify(this.statutoryInfo),
-        "bank_name": this.multiStepForm.value.bankName,
-        "account_num": this.multiStepForm.value.accountNumber,
-        "ifsc_code": this.multiStepForm.value.ifsc,
-        "doj": this.multiStepForm.value.join_date,
-        "emp_contact": this.multiStepForm.value.contact,
-        "status": "Active",
-        "emp_address": this.multiStepForm.value.address,
-        "role_id": this.multiStepForm.value.role,
+      "annual_gross_salary": parseFloat(this.annual_gross_salary.toFixed(2)),
+      "monthly_gross_salary": parseFloat(this.monthly_gross_salary.toFixed(2)),
 
-        "basic_salary": this.multiStepForm.value.basic_salary,
-        "house_rent_allowances": this.multiStepForm.value.house_rent_allowances || 0,
-        "conveyance_allowances": this.multiStepForm.value.conveyance_allowances || 0,
-        "medical_allowances": this.multiStepForm.value.medical_allowances || 0,
-        "special_allowances": this.multiStepForm.value.special_allowances || 0,
+      "pf_employee_applicable": this.multiStepForm.value.pf_employee_applicable || false,
+      "pf_employer_applicable": this.multiStepForm.value.pf_employer_applicable || false,
+      "esic_employee_applicable": this.multiStepForm.value.esic_employee_applicable || false,
 
-        "annual_gross_salary": parseFloat(this.annual_gross_salary.toFixed(2)),
-        "monthly_gross_salary": parseFloat(this.monthly_gross_salary.toFixed(2)),
+      // "department_name": this.multiStepForm.value.department,
+      // "designation_name": this.multiStepForm.value.designation
 
-        "pf_employee_applicable": this.multiStepForm.value.pf_employee_applicable || false,
-        "pf_employer_applicable": this.multiStepForm.value.pf_employer_applicable || false,
-        "esic_employee_applicable": this.multiStepForm.value.esic_employee_applicable || false,
-
-        // "department_name": this.multiStepForm.value.department,
-        // "designation_name": this.multiStepForm.value.designation
-      }
-
-      console.log('Form Submitted:', this.multiStepForm.value);
-
-      this.service.post("create/employee", current_data).subscribe({
-        next: (res: any) => {
-          if (res.status === 'success') {
-            this.toastr.success('Successfully Submitted!');
-          } else {
-            this.toastr.error('Submission failed!');
-          }
-        },
-        error: (err) => {
-          this.toastr.error(err.error?.message || 'Something went wrong!');
-        }
-      });
-
-      this.multiStepForm.reset();
-      this.currentStep = 1;
-      this.salaryAmount = 0;
-      this.annual_gross_salary = 0;
-
-    } else {
-      this.toastr.error('Please fill all required fields.');
-      this.multiStepForm.markAllAsTouched();
-      console.log(this.multiStepForm.value);
+      "password": this.multiStepForm.value.password,
     }
+
+    console.log('Form Submitted:', this.multiStepForm.value);
+
+    this.service.post("create/employee", current_data).subscribe({
+      next: (res: any) => {
+        if (res.status === 'success') {
+          const newEmpId = res.data.employe_id;
+
+          // Check if any docs were selected
+          const docTypes = Object.keys(this.docUploads).filter(t => this.docUploads[t].file !== null);
+
+          if (docTypes.length > 0) {
+            // Upload docs after employee created
+            const uploads = docTypes.map(t => this.uploadSingleDoc(newEmpId, t));
+            forkJoin(uploads).subscribe({
+              next: () => {
+                const allOk = docTypes.every(t => this.docUploads[t].uploaded);
+                if (allOk) {
+                  this.toastr.success('Employee and documents saved successfully!');
+                } else {
+                  this.toastr.success('Employee created!');
+                  this.toastr.warning('Some documents failed to upload. Retry from employee profile.', 'Doc Upload');
+                }
+                this.resetDocUploads();
+                this._resetForm();
+              }
+            });
+          } else {
+            this.toastr.success('Successfully Submitted!');
+            this._resetForm();
+          }
+
+          if (res.shopfloor_warning) this.toastr.warning(res.shopfloor_warning, 'Shopfloor Sync');
+          if (res.warning) this.toastr.warning(res.warning, 'Leave Setup');
+        }
+      },
+      error: (err) => {
+        this.toastr.error(err.error?.data || err.error?.message || 'Something went wrong!');
+      }
+    });
+  }
+
+  private _resetForm(): void {
+    this.multiStepForm.reset();
+    this.submitted = false;
+    this.multiStepForm.patchValue({ department: null, designation: null });
+    this.currentStep = 1;
+    this.salaryAmount = 0;
+    this.annual_gross_salary = 0;
   }
 
   calculateGrossSalary(values: any) {
@@ -478,10 +562,19 @@ export class CreateEmployeeComponent {
   //   control.setValue(num ? num.toLocaleString('en-IN') : '', { emitEvent: false });
   // }
 
-  
+
   allowOnlyLetters(event: KeyboardEvent) {
     const char = String.fromCharCode(event.keyCode);
     const pattern = /^[A-Za-z]+$/;
+
+    if (!pattern.test(char)) {
+      event.preventDefault();
+    }
+  }
+
+  allowOnlyLettersAndSpace(event: KeyboardEvent) {
+    const char = String.fromCharCode(event.keyCode);
+    const pattern = /^[A-Za-z\s]+$/;
 
     if (!pattern.test(char)) {
       event.preventDefault();
@@ -497,9 +590,18 @@ export class CreateEmployeeComponent {
     }
   }
 
+  allowOnlyNumbersAndSpace(event: KeyboardEvent) {
+    const char = String.fromCharCode(event.keyCode);
+    const pattern = /^[0-9 ]*$/;
+
+    if (!pattern.test(char)) {
+      event.preventDefault();
+    }
+  }
+
   allowNumbersCharacters(event: KeyboardEvent) {
     const char = event.key;
-    const pattern = /^[A-Za-z0-9]$/; 
+    const pattern = /^[A-Za-z0-9]$/;
 
     if (!pattern.test(char)) {
       event.preventDefault();
@@ -513,4 +615,178 @@ export class CreateEmployeeComponent {
     }
   }
 
+  formatAadhaar(event: any) {
+    let input = event.target.value;
+
+    let digits = input.replace(/\D/g, '');
+
+    if (digits.length > 12) {
+      digits = digits.substring(0, 12);
+    }
+
+    if (digits.length > 8) {
+      digits = digits.replace(/(\d{4})(\d{4})(\d+)/, '$1 $2 $3');
+    } else if (digits.length > 4) {
+      digits = digits.replace(/(\d{4})(\d+)/, '$1 $2');
+    }
+
+    this.multiStepForm.get('aadhaarNumber')?.setValue(digits, { emitEvent: false });
+  }
+
+  formatPAN(event: any) {
+    let value = event.target.value;
+
+    value = value.replace(/[^a-zA-Z0-9]/g, '');
+
+    value = value.toUpperCase();
+
+    if (value.length > 10) {
+      value = value.substring(0, 10);
+    }
+
+    this.multiStepForm.get('panNumber')?.setValue(value, { emitEvent: false });
+  }
+
+  formatIFSC(event: any) {
+    let value = event.target.value;
+
+    value = value.replace(/[^a-zA-Z0-9]/g, '');
+
+    value = value.toUpperCase();
+
+    if (value.length > 11) {
+      value = value.substring(0, 11);
+    }
+
+    if (value.length >= 4) {
+      const first4 = value.substring(0, 4);
+
+      if (value.length === 5 && value.charAt(4) !== '0') {
+        value = first4 + '0' + value.substring(4);
+      }
+    }
+
+    this.multiStepForm.get('ifsc')?.setValue(value, { emitEvent: false });
+  }
+
+  //password
+  passwordMatchValidator(group: FormGroup) {
+    const pass = group.get('password')?.value;
+    const confirm = group.get('confirm_password')?.value;
+
+    return pass === confirm ? null : { mismatch: true };
+  }
+
+  cleanEmployeeName(): void {
+    const control = this.multiStepForm.get('emp_name');
+    if (control) {
+      const cleaned = control.value?.trim().replace(/\s+/g, ' ') || '';
+      control.setValue(cleaned, { emitEvent: false });
+    }
+  }
+
+  onDocFileSelected(event: Event, docType: string): void {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    const slot = this.docUploads[docType];
+
+    slot.error = '';
+    slot.uploaded = false;
+    slot.doc_id = null;
+
+    if (!file) return;
+
+    const allowedTypes = ['image/jpeg', 'image/png', 'application/pdf'];
+    if (!allowedTypes.includes(file.type)) {
+      slot.error = 'Only JPG, PNG or PDF allowed.';
+      input.value = '';
+      return;
+    }
+    if (file.size > 2 * 1024 * 1024) {
+      slot.error = 'File must be under 2MB.';
+      input.value = '';
+      return;
+    }
+
+    slot.file = file;
+    slot.preview = file.type.startsWith('image/') ? URL.createObjectURL(file) : null;
+  }
+
+  removeDocFile(docType: string): void {
+    const slot = this.docUploads[docType];
+    if (slot.preview) URL.revokeObjectURL(slot.preview);
+    slot.file = null;
+    slot.preview = null;
+    slot.uploaded = false;
+    slot.error = '';
+    slot.doc_id = null;
+  }
+
+  uploadSingleDoc(empId: number, docType: string): Observable<any> {
+    const slot = this.docUploads[docType];
+    if (!slot.file) return of(null);
+
+    const fd = new FormData();
+    fd.append('employe_id', String(empId));
+    fd.append('doc_type', docType);
+    fd.append('document', slot.file, slot.file.name);
+
+    slot.uploading = true;
+
+    return new Observable(observer => {
+      const xhr = new XMLHttpRequest();
+      xhr.open('POST', this.service['url'] + 'upload/employee-document', true);
+
+      // Auth token — same one your service.post() uses
+      const token = sessionStorage.getItem('AUTH') || '';
+      if (token) {
+        xhr.setRequestHeader('Authorization', 'Bearer ' + token);
+      }
+
+      xhr.onload = () => {
+        slot.uploading = false;
+        try {
+          const res = JSON.parse(xhr.responseText);
+          if (res.status === 'success') {
+            slot.uploaded = true;
+            slot.doc_id = res.data.doc_id;
+            observer.next(res);
+          } else {
+            slot.error = res.data || 'Upload failed.';
+            observer.next(null);
+          }
+        } catch (e) {
+          slot.error = 'Invalid server response.';
+          observer.next(null);
+        }
+        observer.complete();
+      };
+
+      xhr.onerror = () => {
+        slot.uploading = false;
+        slot.error = 'Network error. Retry from employee profile.';
+        observer.next(null);
+        observer.complete();
+      };
+
+      xhr.send(fd);
+    });
+  }
+
+  resetDocUploads(): void {
+    Object.keys(this.docUploads).forEach(key => this.removeDocFile(key));
+  }
+
+  //show doc in new tab
+  openDocPreview(docType: string): void {
+    const slot = this.docUploads[docType];
+    if (!slot.file) return;
+
+    const url = URL.createObjectURL(slot.file);
+    window.open(url, '_blank');
+  }
+
+  goToStep(step: number): void {
+    this.currentStep = step;
+  }
 }

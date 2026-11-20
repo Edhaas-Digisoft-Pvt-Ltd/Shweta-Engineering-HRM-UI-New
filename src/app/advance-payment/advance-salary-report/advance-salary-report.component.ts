@@ -27,7 +27,19 @@ export class AdvanceSalaryReportComponent {
   selectedAdvpayid: number = 0;
   tabledata: any = [];
 
-  years = [2023, 2024, 2025];
+  years: number[] = [];
+
+  generateyears() {
+    const startYear = 2025;
+    const currentYear = new Date().getFullYear();
+
+    this.years = [];
+
+    for (let year = startYear; year <= currentYear; year++) {
+      this.years.push(year);
+    }
+  }
+
   months = [
     { id: 1, value: 'January' },
     { id: 2, value: 'February' },
@@ -65,6 +77,7 @@ export class AdvanceSalaryReportComponent {
       installmentAmount: [{ value: '', disabled: true }],
       remainingBalance: [{ value: '', disabled: true }],
     })
+    this.generateyears();
   }
 
   onYearMonthChange() {
@@ -78,17 +91,16 @@ export class AdvanceSalaryReportComponent {
 
   searchEmployeeAdvanceSalary() {
     this.rowData = [];
-    const code = this.searchValue?.trim();
-    if (!code) {
+    const search = this.searchValue?.trim();
+    if (!search) {
       this.rowData = [];
-      this.toastr.error('Please Enter Employee Code');
+      this.toastr.error('Please Enter Employee Code or Name');
       return;
     }
 
     const payload = {
-      employee_code: code,
+      search: search,     
       year: this.selectedYear,
-      // month: this.selectedMonth,
     };
 
     this.service.post('emp/advancesaraly/report', payload).subscribe(
@@ -102,13 +114,13 @@ export class AdvanceSalaryReportComponent {
           this.rowData = transformedData;
         } else {
           this.rowData = [];
-          this.toastr.warning('Data Not Found');
+          // this.toastr.warning('Data Not Found');
         }
       },
       (error) => {
         this.rowData = [];
         if (error.status === 404) {
-          this.toastr.warning('Data Not Found');
+          // this.toastr.warning('Data Not Found');
         } else {
           this.toastr.error(error);
         }
@@ -119,19 +131,6 @@ export class AdvanceSalaryReportComponent {
   onGridReady(params: any) {
     this.gridApi = params.api;
   }
-
-  // getemployees () {
-  //    this.service.post('all/employee', {}).subscribe((res: any) => {
-  //     console.log(res)
-  //     if (res.status == "success") {
-  //       this.employees = res.data
-  //     }
-  //   },
-  //     (error) => {
-  //       console.error('Error fetching companies:', error);
-  //     }
-  //   );
-  // }
 
   emptyInput() {
     this.searchValue = '';
@@ -197,12 +196,12 @@ export class AdvanceSalaryReportComponent {
     this.columnDefs = [
       { headerName: 'Emp Code', field: 'employee_code', sortable: true, filter: true, maxWidth: 150 },
       { headerName: 'Employee Name', field: 'emp_name', sortable: true, filter: true, maxWidth: 180 },
-      { headerName: 'Apply Date', field: 'apply_date', sortable: true, filter: true, maxWidth: 150 },
+      { headerName: 'Apply Date', field: 'apply_date', sortable: true, filter: true, maxWidth: 150, valueFormatter: this.service.dateFormatter },
       { headerName: 'Adv. Amount', field: 'advance_amount', sortable: true, filter: true, maxWidth: 150 },
       { headerName: 'Remaining Amount', field: 'remaining_balance', sortable: true, filter: true, maxWidth: 190 },
       { headerName: 'EMI', field: 'emi', sortable: true, filter: true, maxWidth: 100 },
       {
-        headerName: 'EMI Status', field: 'emi_status', sortable: true, filter: true, maxWidth: 150,
+        headerName: 'Status', field: 'status', sortable: true, filter: true, maxWidth: 150,
         cellRenderer: this.statusButtonRenderer,
       },
     ];
@@ -250,7 +249,7 @@ export class AdvanceSalaryReportComponent {
           company: advanceInfo?.company_name,
           department: advanceInfo?.department_name,
           role: advanceInfo?.designation_name,
-          requestDate: advanceInfo?.apply_date,
+          requestDate: this.service.formatToDDMMYYYY(advanceInfo?.apply_date),
           status: advanceInfo?.status,
           tenure: advanceInfo?.tenure,
           amount: advanceInfo?.advance_amount,

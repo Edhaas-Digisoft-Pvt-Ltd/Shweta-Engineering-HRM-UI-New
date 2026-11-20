@@ -42,5 +42,17 @@ export class EditLeaveRequestComponent implements ICellRendererAngularComp {
       this.modalService.openModal('leaveRequestModal')
     }
   }
+
+  ApproveID(params: any) {
+    if (this.params.editCallback) {
+      this.params.approveRequest(params.data.tbl_emp_leave_id);
+    }
+  }
+
+  RejectID(params: any) {
+    if (this.params.editCallback) {
+      this.params.rejectRequest(params.data.tbl_emp_leave_id);
+    }
+  }
 }
 

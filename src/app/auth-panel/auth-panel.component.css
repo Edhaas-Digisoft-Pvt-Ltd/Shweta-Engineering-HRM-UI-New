@@ -5,20 +5,13 @@ main {
 }
 
 .sideNav {
-  /* background-color: #f9f8fd; */
-  /* padding-top: 40px; */
-  /* background-color: #3674B5; */
-  /* background-color: #00ACC1; */
-  /* background-color: #0E9F6E; */
-
-  /* background: linear-gradient(360deg, #081494, #061494, #1e176b, #132455); */
-  /* background: linear-gradient(135deg, #2E8B57, #206040, #103820); */
-  /* background: linear-gradient(135deg, #3674B5, #285a8a, #1b3d5c); */
-
-  background-color: var(--role-color);
+  background-color: #3674B5;
   color: #fff;
   z-index: 999;
-  color: white;
+  height: 100vh;
+  overflow: hidden;          /* clip instead of leaking past viewport */
+  display: flex;
+  flex-direction: column;
 }
 
 .navigation-btn {
@@ -120,12 +113,12 @@ main {
 }
 
 .sideNav {
-  width: 250px; 
-  transition: width 0.3s ease;
+  width: 250px;
+  transition: width 0.3s linear;
 }
 
 .sideNav.closed {
-  width: 60px; 
+  width: 70px;
 }
 
 .toggle-btn {
@@ -133,6 +126,11 @@ main {
   border: none;
   color: white;
   font-size: 1.2rem;
+  background-color: #3674B5;
+  position: absolute;
+  right: -30px;
+  top: 0px;
+  border-radius: 0px 2px 2px 0px;
 }
 
 /* Media query */
@@ -202,13 +200,15 @@ main {
 
 }
 
+
+
 /*# sourceMappingURL=navigation.component.css.map */
 
 /* sidebar collpasible  */
 .sideNav.closed {
-  width: 04.45% !important;
-  transition: width 1s ease-in !important;
-  overflow: hidden;
+  /* width: 04.45% !important; */
+  transition: width 0.3s linear !important;
+  /* overflow: hidden; */
 
 }
 
@@ -218,7 +218,7 @@ main {
 
 .sideNav.open {
   width: 20%;
-  transition: width 1s ease-in !important;
+  transition: width 0.3s linear !important;
   height: 100% !important;
 }
 
@@ -244,7 +244,7 @@ main {
   margin-left: 20.5%;
 }
 
-@media(max-width:850px){
+@media(max-width:850px) {
   .sideNav.open {
     width: 63px !important;
     transition: width 1s ease-in !important;
@@ -331,7 +331,7 @@ main {
   .sideNav.closed {
     width: 95px !important;
     transition: width 1s ease-in !important;
-    overflow: hidden;
+    /* overflow: hidden; */
     position: absolute;
     /* background: white !important; */
     border-right: 1px solid lightgray;

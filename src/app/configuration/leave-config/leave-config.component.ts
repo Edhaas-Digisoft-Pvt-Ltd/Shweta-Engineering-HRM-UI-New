@@ -39,7 +39,13 @@ export class LeaveConfigComponent {
   singleleave: any;
   companyId: any;
   leaveId: any;
+  leaveTypes: any[] = [];
+  currentYear: any;
   isLoading: boolean = false;
+  lwpForm!: FormGroup;
+  financialYear: any = null;
+  financialYearCode: string = '';
+  financialYearId: number | null = null;
 
   public defaultColDef: ColDef = {
     editable: true,
@@ -49,22 +55,22 @@ export class LeaveConfigComponent {
 
   initializeColumns() {
     this.columnDefs = [
-      { headerName: 'Name', field: 'leave_name', sortable: true, filter: true, maxWidth: 250, },
-      { headerName: 'Leave Type', field: 'leave_type', sortable: true, filter: true, maxWidth: 220, },
+      { headerName: 'Leave Type', field: 'leave_name', sortable: true, filter: true, maxWidth: 250, },
+      { headerName: 'Year Code', field: 'year_code', sortable: true, filter: true, maxWidth: 220, },
       { headerName: 'No. of Leaves', field: 'leave_count', sortable: true, filter: true, maxWidth: 200 },
       { headerName: 'Is Carry Forward', field: 'leave_carryforwad', sortable: true, filter: true },
+      { headerName: 'Max Carry Forward', field: 'max_carry_forward', sortable: true, filter: true },
     ];
-    this.columnDefs.push({
-      headerName: 'Actions',
-      cellStyle: { border: '1px solid #ddd' },
-      cellRenderer: EditLeaveBtnComponent,
-      cellRendererParams: {
-        editCallback: (leaveId: string) => this.openEditModal(leaveId),
-        deleteCallback: (leaveId: string) => this.deleteLeaveRule(leaveId),
-      },
-    });
+    // this.columnDefs.push({
+    //   headerName: 'Actions',
+    //   cellStyle: { border: '1px solid #ddd' },
+    //   cellRenderer: EditLeaveBtnComponent,
+    //   cellRendererParams: {
+    //     editCallback: (leaveId: string) => this.openEditModal(leaveId),
+    //     deleteCallback: (leaveId: string) => this.deleteLeaveRule(leaveId),
+    //   },
+    // });
   }
-
 
   onGridReady(params: { api: any }) {
     this.gridApiActive = params.api;
@@ -108,48 +114,56 @@ export class LeaveConfigComponent {
     });
 
     this.LeaveRule = this.fb.group({
-      companyid: [null, [
-        Validators.required,
-        // Validators.pattern(/^\d+$/)  // only digits allowed (CompanyID is numeric)
-      ]],
-
+      companyid: [null, Validators.required],
+      leavetype: [null, Validators.required],
+      year: [{ value: this.currentYear, disabled: true }],
       leavenumber: ['', [
         Validators.required,
-        // Validators.max(20),
-        Validators.pattern(/^\d+$/)  // only digits
+        Validators.min(1),
+        Validators.max(365),
+        Validators.pattern(/^\d+$/)
       ]],
-      leavename: ['', [
+      carry_forward: ['FALSE', Validators.required],
+      max_carry_forward: ['', [
         Validators.required,
-        Validators.minLength(2),
-        Validators.pattern(/^[A-Za-z ]+$/),  // letters and spaces only
-        this.noWhitespaceValidator
-      ]],
-      leavetype: [null, [
-        Validators.required,
-        Validators.pattern(/^[A-Za-z ]+$/),
-        this.noWhitespaceValidator
+        Validators.min(0),
+        Validators.max(365)
       ]]
+    });
+
+    // Add this after LeaveRule is defined in constructor
+    const maxCarryControl = this.LeaveRule.get('max_carry_forward');
+
+    // Set default immediately
+    maxCarryControl?.setValue(0);
+    maxCarryControl?.disable();
+
+    this.LeaveRule.get('carry_forward')?.valueChanges.subscribe(value => {
+      if (value === 'FALSE') {
+        maxCarryControl?.setValue(0);
+        maxCarryControl?.disable();
+      } else {
+        maxCarryControl?.setValue('');
+        maxCarryControl?.enable();
+      }
     });
 
     this.EditLeaveRule = this.fb.group({
+      leavetype: ['', [Validators.required]],             // leave_type_id
+      year: [{ value: '', disabled: true }],
       leavenumber: ['', [
         Validators.required,
-        // Validators.max(30),
         Validators.min(1),
+        Validators.max(365),
         Validators.pattern(/^\d+$/)
       ]],
-      leavename: ['', [
-        Validators.required,
-        Validators.minLength(2),
-        Validators.pattern(/^[A-Za-z ]{2,}$/),
-        this.noWhitespaceValidator
-      ]],
-      leavetype: ['', [
-        Validators.required,
-        Validators.pattern(/^[A-Za-z ]+$/),
-        this.noWhitespaceValidator
-      ]]
+      carry_forward: ['FALSE', Validators.required]
     });
+
+    this.lwpForm = this.fb.group({
+      leave_without_pay: [null]
+    });
+
   }
 
   ngOnInit() {
@@ -158,24 +172,46 @@ export class LeaveConfigComponent {
     const currentDate = new Date();
     this.today = currentDate.toISOString().split('T')[0]; // Format YYYY-MM-DD
     this.getCompanyData();
-    this.getleaveData(this.selectedValue);
+    // this.getleaveData(this.selectedValue);
     this.getCompanyNames();
     this.getAllLeaves();
     this.initializeColumns();
-
-    if (sessionStorage.getItem('roleName') == 'admin') {
-      this.router.navigate(['/authPanal/LeaveSetup']);
-      return;
-    } else {
-      alert('Please Login To Proceed');
-      sessionStorage.clear();
-      this.router.navigate(['']);
-      return;
-    }
+    this.getLeaveTypes();
+    this.getRunningFinancialYear();
   }
 
   openModal() {
     this.modalService.openModal('addLeaveModal')
+  }
+
+  openModalLWP() {
+    this.modalService.openModal('LWPModal');
+    this.getLeaveWithoutPay();
+  }
+
+  getLeaveTypes() {
+    this.isLoading = true;
+    this.leaveTypes = [];
+
+    this.service.post('fetch/leavetypes', {}).subscribe(
+      (res: any) => {
+        if (res.status === 'success') {
+          this.leaveTypes = res.data.map((item: any) => ({
+            leave_type_id: item.leave_type_id,
+            leave_types: item.leave_types
+          }));
+        }
+        this.isLoading = false;
+      },
+      (error) => {
+        this.isLoading = false;
+        if (error.status === 400) {
+          this.toastr.warning('Data Not Found');
+        } else {
+          console.error(error);
+        }
+      }
+    );
   }
 
   getAllLeaves() {
@@ -185,10 +221,10 @@ export class LeaveConfigComponent {
       if (res.status === 'success') {
         this.rowData = res.data.map((item: any) => ({
           leave_name: item.leave_name,
-          leave_type: item.leave_type,
+          year_code: item.year_code,
           leave_count: item.leave_count,
           leave_carryforwad: item.leave_carryforwad,
-          leave_id: item.leave_id
+          max_carry_forward: item.max_carry_forward,
         }));
       }
       this.isLoading = false;
@@ -196,7 +232,7 @@ export class LeaveConfigComponent {
       (error) => {
         this.isLoading = false;
         if (error.status === 400) {
-          this.toastr.warning('Data Not Found');
+          // this.toastr.warning('Data Not Found');
           this.isLoading = false;
         } else {
           console.error(error);
@@ -228,10 +264,23 @@ export class LeaveConfigComponent {
   }
 
   // getting company name
+  // getting company name
   getCompanyNames() {
     this.service.post('fetch/company', {}).subscribe((res: any) => {
       if (res.status == "success") {
-        this.CompanyNames = res.data
+        this.CompanyNames = res.data;
+
+        if (this.CompanyNames.length > 0) {
+          // If no valid company selected yet (or it's "all"), pick the first one
+          const defaultCompany = (this.selectedCompanyId && this.selectedCompanyId !== 'all')
+            ? this.CompanyNames.find((c: any) => c.company_id == this.selectedCompanyId) ?? this.CompanyNames[0]
+            : this.CompanyNames[0];
+
+          this.selectedCompanyId = defaultCompany.company_id;
+          this.service.setCompanyId(this.selectedCompanyId);
+
+          this.getAllLeaves(); // fire only after we have a real company_id
+        }
       }
     },
       (error) => {
@@ -241,7 +290,6 @@ export class LeaveConfigComponent {
   }
 
   getleaveData(id: any) {
-
     this.service.post("/leavesetup", {}).subscribe((res: any) => {
       if (res.status == "success") {
         this.leaveData = res.data.filter((item: any) => item.CompanyID == id);
@@ -305,18 +353,26 @@ export class LeaveConfigComponent {
 
   addLeaveRule() {
     this.isSubmitted = true;
-    if (this.LeaveRule.valid) {
-      let current_data: any = {
-        "company_id": this.LeaveRule.value.companyid,
-        "leave_type": this.LeaveRule.value.leavetype,
-        "leave_name": this.LeaveRule.value.leavename,
-        "leave_count": this.LeaveRule.value.leavenumber,
-      }
+    this.LeaveRule.markAllAsTouched();
 
-      this.service.post("create/leave", current_data).subscribe(
+    if (this.LeaveRule.valid) {
+
+      const formData = this.LeaveRule.value;
+
+      const payload = {
+        company_id: formData.companyid,
+        leave_type_id: formData.leavetype,
+        leave_count: formData.leavenumber,
+        fy_id: this.financialYearId,
+        leave_carryforwad: formData.carry_forward,
+        // getRawValue() gets value even if control is disabled
+        max_carry_forward: this.LeaveRule.getRawValue().max_carry_forward
+      };
+
+      this.service.post('create/leave', payload).subscribe(
         (res: any) => {
           if (res.status === 'success') {
-            this.toastr.success('Leave Rule Added!');
+            this.toastr.success('Leave Rule Added Successfully!');
             this.LeaveRule.reset();
             this.isSubmitted = false;
             this.modalService.closeModal();
@@ -324,61 +380,70 @@ export class LeaveConfigComponent {
           }
         },
         (error) => {
-          console.error(error);
-          this.toastr.error('Something went wrong!');
+          if (error.status === 409) {
+            this.toastr.warning(error.error.message);
+          } else {
+            this.toastr.error('Something went wrong!');
+          }
         }
       );
-    } else {
-      this.toastr.error('Invalid Credentials!');
-      this.LeaveRule.markAllAsTouched();
     }
   }
 
   openEditModal(id: any) {
-    this.service.post("fetch/leave", { leave_id: id }).subscribe((res: any) => {
-      if (res.status === 'success') {
-        this.leaveId = res.data.leave_id
-        this.companyId = res.data.company_id
-        this.EditLeaveRule.patchValue({
-          leavetype: res.data.leave_type,
-          leavename: res.data.leave_name,
-          leavenumber: res.data.leave_count,
-        })
-      }
-    },
+    this.service.post("fetch/leave", { leave_id: id }).subscribe(
+      (res: any) => {
+        if (res.status === 'success') {
+          const data = res.data;
+
+          this.leaveId = data.leave_id;
+          this.companyId = data.company_id;
+
+          this.EditLeaveRule.patchValue({
+            leavetype: data.leave_type_id,                 // leave_type_id
+            year: data.year,
+            leavenumber: data.leave_count,
+            carry_forward: data.leave_carryforwad || 'FALSE'
+          });
+        }
+      },
       (error) => {
         console.error('Error fetching leave request:', error);
+        this.toastr.error('Failed to fetch leave details.');
       }
     );
   }
 
   editLeaveData() {
     this.isEditSubmitted = true;
-    if (this.EditLeaveRule.valid) {
 
-      let current_data: any = {
-        "leave_id": this.leaveId,
-        "company_id": this.companyId,
-        "leave_type": this.EditLeaveRule.value.leavetype,
-        "leave_name": this.EditLeaveRule.value.leavename,
-        "leave_count": this.EditLeaveRule.value.leavenumber,
+    if (this.EditLeaveRule.valid) {
+      const payload = {
+        leave_id: this.leaveId,
+        company_id: this.companyId,
+        leave_type_id: this.EditLeaveRule.value.leavetype,
+        leave_name: this.EditLeaveRule.value.leavename,
+        leave_count: this.EditLeaveRule.value.leavenumber,
+        leave_carryforwad: this.EditLeaveRule.value.carry_forward
       };
 
-      this.service.post("update/leave", current_data).subscribe(
+      this.service.post("update/leave", payload).subscribe(
         (res: any) => {
-          this.toastr.success(res.data);
+          this.toastr.success(res.message);
           this.modalService.closeModal();
-          this.getAllLeaves()
+          this.getAllLeaves();
         },
         (error) => {
-          console.error('Error:', error);
-          this.toastr.error('Something went wrong!');
+          if (error.status === 409) {
+            this.toastr.warning(error.error.message);
+          } else {
+            this.toastr.error('Something went wrong!');
+          }
         }
       );
     } else {
       this.EditLeaveRule.markAllAsTouched();
-      this.toastr.error('Invalid Credentials!');
-      this.isEditSubmitted = false;
+      this.toastr.error('Invalid inputs!');
     }
   }
 
@@ -394,4 +459,82 @@ export class LeaveConfigComponent {
       );
     }
   }
+
+  allowOnlyLetters(event: KeyboardEvent) {
+    const char = String.fromCharCode(event.keyCode);
+    const pattern = /^[A-Za-z ]+$/;
+
+    if (!pattern.test(char)) {
+      event.preventDefault();
+    }
+  }
+
+  addleaveWithoutPay() {
+    const value = this.lwpForm.value.leave_without_pay;
+
+    if (value === null) {
+      this.toastr.error('Please select Yes or No');
+      return;
+    }
+
+    const payload = {
+      leave_without_pay: value
+    };
+
+    this.service.post('leave/save_lwp', payload).subscribe({
+      next: (res: any) => {
+        if (res.status === 'success') {
+          this.toastr.success('LWP setting saved successfully');
+          this.modalService.closeModal();
+        }
+      }
+    });
+  }
+
+  getLeaveWithoutPay() {
+    this.service.post('leave/get_lwp', {}).subscribe({
+      next: (res: any) => {
+        if (res.status === 'success' && Array.isArray(res.data) && res.data.length > 0) {
+
+          const lwp = res.data.find(
+            (x: any) => x.lwp_type === 'leave_without_pay'
+          );
+
+          if (lwp) {
+            this.lwpForm.patchValue({
+              leave_without_pay: lwp.lwp_value === 1
+            });
+          }
+        }
+      },
+      error: () => {
+        this.toastr.error('Failed to load Leave Without Pay setting');
+      }
+    });
+  }
+
+  getRunningFinancialYear() {
+    this.service.post('fetch/financialyear', {}).subscribe(
+      (res: any) => {
+        if (res.status === 'success') {
+          this.financialYear = res.data;
+          this.financialYearCode = res.data.fy_code;
+          this.financialYearId = res.data.fy_id;
+
+          this.LeaveRule.patchValue({
+            year: this.financialYearCode
+          });
+
+          this.EditLeaveRule.patchValue({
+            year: this.financialYearCode
+          });
+        }
+      },
+      (error) => {
+        console.error('Failed to fetch financial year', error);
+        this.toastr.error('Unable to fetch financial year');
+      }
+    );
+  }
+
 }

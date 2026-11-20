@@ -15,7 +15,7 @@ export class AttendanceComponent {
   @ViewChild('agGrid', { static: false }) agGrid!: AgGridAngular;
 
   rowData: any[] = [];
-  activeTab: string = 'tab1';
+  activeTab: string = 'live';
   searchInputValue: string = '';
   gridApiActive: any;
   role: string = '';
@@ -26,6 +26,10 @@ export class AttendanceComponent {
   lastPage: number = 1;
   pagesToShow: (number | string)[] = [];
   paginationvalue: any;
+  currentFilter: string = '';
+
+  startDate: string = this.getFirstDayOfMonth();
+  endDate: string = this.getLastDayOfMonth();
 
   constructor(private toastr: ToastrService, private service: HrmserviceService, private router: Router,) { }
 
@@ -36,15 +40,11 @@ export class AttendanceComponent {
     // this.fetchAttendance();
     this.getPaginationValueAndFetchAttendance();
 
-    if (sessionStorage.getItem('roleName') == 'admin' || sessionStorage.getItem('roleName') == 'accountant') {
-      this.router.navigate(['/authPanal/Attendance']);
-      return;
-    } else {
-      alert('Please Login To Proceed');
-      sessionStorage.clear();
-      this.router.navigate(['']);
-      return;
-    }
+    this.activeTab = this.hasAccess('Live_attendance', 'view') ? 'live' : 'tab1';
+  }
+
+  hasAccess(module: string, permission: string): boolean {
+    return this.service.hasPermission(module, permission);
   }
 
   public defaultColDef: ColDef = {
@@ -56,12 +56,38 @@ export class AttendanceComponent {
   };
 
   columnDefs: ColDef[] = [
-    { headerName: 'Employee Code', field: 'employee_code', editable: true },
-    { headerName: 'Date', field: 'attendance_date' },
+    { headerName: 'Emp Code', field: 'employee_code', editable: true },
+    { headerName: 'Emp name', field: 'emp_name', editable: true },
+    { headerName: 'Date', field: 'attendance_date', valueFormatter: this.service.dateFormatter },
     { headerName: 'CheckIn', field: 'check_in' },
     { headerName: 'CheckOut', field: 'check_out' },
-    { headerName: 'ShiftId', field: 'shift_id' },
-    { headerName: 'Status', field: 'status' },
+    {
+      headerName: 'Shift',
+      field: 'shift_id',
+      valueFormatter: (params: any) => {
+        if (params.value == 1) return 'Morning';
+        if (params.value == 2) return 'Evening';
+        return params.value; // fallback
+      }
+    },
+    {
+      headerName: 'Status', field: 'status',
+      valueGetter: (params) => {
+        const row = params.data;
+
+        // If backend status exists → show it
+        if (row.status && row.status.trim() !== '') {
+          return row.status;
+        }
+
+        // If check-in & check-out exist → mark Present
+        if (row.check_in) {
+          return 'P';
+        }
+
+        return ''; // otherwise blank
+      }
+    },
   ];
 
   gridOptions = {
@@ -92,7 +118,9 @@ export class AttendanceComponent {
 
   selectedFile: File | null = null;
 
+  //import attendance
   onFileChange(event: any) {
+    this.isLoading = true;
     const file = event.target.files[0];
     if (!file) return;
 
@@ -102,29 +130,78 @@ export class AttendanceComponent {
     formData.append('upload_file', file);
 
     this.service.post('import-attendance', formData).subscribe((res: any) => {
+      this.isLoading = false;
       if (res.status === 'success') {
         this.toastr.success(res.data);
         this.fetchAttendance();
       } else {
-        console.log(res.error);
+        if (res.duplicates > 0)
+          this.toastr.error('Duplicates record found')
+        else
+          this.toastr.error(res.data)
+      }
+    });
+
+  }
+
+  applyFilter(status: string) {
+    this.currentFilter = status;
+    this.currentPage = 1;
+    this.fetchAttendance();
+  }
+
+  clearFilter() {
+    this.currentFilter = '';
+    this.searchInputValue = '';
+    this.startDate = this.getFirstDayOfMonth();
+    this.endDate = this.getLastDayOfMonth();
+    this.currentPage = 1;
+    this.fetchAttendance();
+  }
+
+  fetchAttendance() {
+    const body: any = {
+      page: this.currentPage,
+      limit: this.paginationvalue,
+      start_date: this.startDate,
+      end_date: this.endDate,
+    };
+
+    if (this.currentFilter) {
+      body.status = this.currentFilter;
+    }
+
+    if (this.searchInputValue && this.searchInputValue.trim() !== '') {
+      body.search = this.searchInputValue.trim();
+    }
+
+    this.isLoading = true;
+
+    this.service.post('fetch/attendance', body).subscribe({
+      next: (res: any) => {
+        this.isLoading = false;
+        if (res.status === 'success') {
+          this.rowData = res.data;
+          this.totalRows = res.pagination.total;
+          this.currentPage = res.pagination.page;
+          this.lastPage = res.pagination.last_page;
+          this.generatePageNumbers(this.paginationvalue);
+        } else {
+          this.rowData = [];
+          this.totalRows = 0;
+          this.pagesToShow = [];
+        }
+      },
+      error: (err) => {
+        this.isLoading = false;
+        console.error('Fetch Attendance Error:', err);
       }
     });
   }
 
-  fetchAttendance(page: number = 1): void {
-    this.isLoading = true;
-    this.service.post('fetch/attendance', { page }).subscribe((res: any) => {
-      if (res.status === 'success') {
-        this.rowData = res.data;
-        this.totalRows = res.pagination.total;
-        this.currentPage = res.pagination.page;
-        this.lastPage = res.pagination.last_page;
-        this.generatePageNumbers(this.paginationvalue);
-      } else {
-        console.log(res.error);
-      }
-      this.isLoading = false;
-    });
+  onDateRangeChange(): void {
+    this.currentPage = 1;
+    this.fetchAttendance();
   }
 
   downloadTemplate(): void {
@@ -133,9 +210,9 @@ export class AttendanceComponent {
       const headers = ['employee_code', 'attendance_date', 'check_in', 'check_out', 'shift_id'];
       const exampleRow = [
         'SEE20250501',
-        'mm-dd-yyyy',
-        '7:00',
-        '19:00',
+        'dd-mm-yyyy',
+        '7:00:00 AM',
+        '7:00:00 PM',
         '1',
       ];
 
@@ -213,22 +290,70 @@ export class AttendanceComponent {
   }
 
   exportAttendance() {
-    this.service.post('export-attendance', {}).subscribe((res: any) => {
+    const today = new Date();
+    const firstDayLastMonth = new Date(today.getFullYear(), today.getMonth() - 1, 1);
+    const lastDayLastMonth = new Date(today.getFullYear(), today.getMonth(), 0);
+
+    //  const from_date = '2025-08-01';
+    //  const to_date = '2025-08-30';
+
+    const formatDate = (date: Date): string => {
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    };
+
+    const from_date = formatDate(firstDayLastMonth);
+    const to_date = formatDate(lastDayLastMonth);
+
+    console.log({ from_date, to_date });
+
+    this.service.post('export-attendance', { from_date, to_date }).subscribe((res: any) => {
       if (res.status === 'success') {
+        console.log(res);
+
         const data = res.data.map((i: any) => ({
-          employee_code: i.login_id,
-          attendance_date: this.formatDate(i.currentdate),
-          check_in: this.formatTime(i.logged_in_time),
-          check_out: this.formatTime(i.logged_out_time),
+          employee_code: i.employee_code,
+          emp_name: i.emp_name,
+          attendance_date: this.formatToDDMMYYYY(i.currentdate),
+          check_in: i.logged_in_time,
+          check_out: i.logged_out_time,
           shift_id: i.shift_details
         }));
 
         const ws = XLSX.utils.json_to_sheet(data);
         const wb = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(wb, ws, 'Attendance');
-        XLSX.writeFile(wb, 'Attendance.xlsx');
+
+        const monthName = firstDayLastMonth.toLocaleString('en-US', { month: 'short' });
+        XLSX.writeFile(wb, `Attendance_${monthName}_${firstDayLastMonth.getFullYear()}.xlsx`);
+
+        this.toastr.success('Attendance exported successfully!');
+      } else {
+        this.toastr.error('Failed to export attendance.');
       }
     });
+  }
+
+  // check_in: this.removeAMPM(i.logged_in_time),
+  // check_out: this.removeAMPM(i.logged_out_time),
+
+  // Convert date (yyyy-mm-dd) → mm-dd-yyyy
+  formatToDDMMYYYY(dateStr: string): string {
+    if (!dateStr) return '';
+    const d = new Date(dateStr);
+    const day = String(d.getDate()).padStart(2, '0');
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const year = d.getFullYear();
+    return `${day}-${month}-${year}`;
+  }
+
+  // Convert time to 07:00, 19:00 format
+  formatToHHMM(timeStr: string): string {
+    if (!timeStr) return '';
+    const [hours, minutes] = timeStr.split(':');
+    return `${hours.padStart(2, '0')}:${minutes.padStart(2, '0')}`;
   }
 
   formatDate(dateStr: string): string {
@@ -240,6 +365,49 @@ export class AttendanceComponent {
     if (!timeStr) return '';
     const date = new Date(`1970-01-01 ${timeStr}`);
     return date.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+  }
+
+  normalizeTimeToHHMM(timeStr: string | null): string {
+    if (!timeStr) return '';
+
+    timeStr = timeStr.trim();
+
+    // Check if time has AM/PM
+    const is12Hour = /AM|PM/i.test(timeStr);
+
+    let hours = 0;
+    let minutes = 0;
+
+    if (is12Hour) {
+      const [time, meridian] = timeStr.split(' ');
+      const [h, m] = time.split(':').map(Number);
+      hours = h % 12; // 12 AM/PM edge case
+      if (/PM/i.test(meridian)) hours += 12;
+      minutes = m || 0;
+    } else {
+      const [h, m] = timeStr.split(':').map(Number);
+      hours = h || 0;
+      minutes = m || 0;
+    }
+
+    return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
+  }
+
+  // Remove AM/PM from time string
+  removeAMPM(timeStr: string | null): string {
+    if (!timeStr) return '';
+    return timeStr.replace(/\s?(AM|PM)/i, '').trim();
+  }
+
+  searchTimeout: any;
+
+  onSearchChange(): void {
+    // Debounce search to avoid too many API calls
+    clearTimeout(this.searchTimeout);
+    this.searchTimeout = setTimeout(() => {
+      this.currentPage = 1;
+      this.fetchAttendance();
+    }, 500);
   }
 
   getPaginationValueAndFetchAttendance() {
@@ -312,22 +480,94 @@ export class AttendanceComponent {
     if (page === '...') return;
     if (page !== this.currentPage) {
       this.currentPage = page as number;
-      this.fetchAttendance(this.currentPage);
-    }
-  }
-
-  prevPage() {
-    if (this.currentPage > 1) {
-      this.currentPage--;
-      this.fetchAttendance(this.currentPage);
+      this.fetchAttendance();
     }
   }
 
   nextPage() {
     if (this.currentPage < this.lastPage) {
       this.currentPage++;
-      this.fetchAttendance(this.currentPage);
+      this.fetchAttendance();
     }
   }
 
+  prevPage() {
+    if (this.currentPage > 1) {
+      this.currentPage--;
+      this.fetchAttendance();
+    }
+  }
+
+  getFirstDayOfMonth(): string {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    return `${year}-${month}-01`;
+  }
+
+  getLastDayOfMonth(): string {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = now.getMonth() + 1;
+    const lastDay = new Date(year, month, 0).getDate();
+    return `${year}-${String(month).padStart(2, '0')}-${String(lastDay).padStart(2, '0')}`;
+  }
+
+  exportVerifiedOrImportedAttendnace(): void {
+    const body: any = {
+      isexport: true,
+      start_date: this.startDate,
+      end_date: this.endDate,
+    };
+
+    if (this.currentFilter) {
+      body.status = this.currentFilter;
+    }
+
+    if (this.searchInputValue && this.searchInputValue.trim() !== '') {
+      body.search = this.searchInputValue.trim();
+    }
+
+    this.isLoading = true;
+
+    this.service.post('fetch/attendance', body).subscribe({
+      next: (res: any) => {
+        this.isLoading = false;
+        if (res.status === 'success' && res.data.length) {
+          const data = res.data.map((i: any) => ({
+            employee_code: i.employee_code,
+            emp_name: i.emp_name,
+            attendance_date: this.formatToDDMMYYYY(i.attendance_date),
+            check_in: i.check_in,
+            check_out: i.check_out,
+            shift_id: i.shift_id,
+          }));
+
+          const ws = XLSX.utils.json_to_sheet(data, {
+            header: ['employee_code', 'emp_name', 'attendance_date', 'check_in', 'check_out', 'shift_id'],
+          });
+          ws['!cols'] = [
+            { wch: 15 }, { wch: 20 }, { wch: 15 },
+            { wch: 12 }, { wch: 12 }, { wch: 10 },
+          ];
+
+          const wb = XLSX.utils.book_new();
+          XLSX.utils.book_append_sheet(wb, ws, 'Attendance');
+          XLSX.writeFile(wb, `Attendance_${this.startDate}_to_${this.endDate}.xlsx`);
+
+          this.toastr.success('Attendance exported successfully!');
+        } else {
+          this.toastr.warning('No data found to export.');
+        }
+      },
+      error: (err) => {
+        this.isLoading = false;
+        if (err.status === 404) {
+          this.toastr.warning('No data found to export.');
+        } else {
+          this.toastr.error('Error while exporting data.');
+        }
+      }
+    });
+  }
 }

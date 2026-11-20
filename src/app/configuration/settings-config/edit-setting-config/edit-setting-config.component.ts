@@ -6,7 +6,7 @@ import { Component } from '@angular/core';
     template: `
     <div class="d-flex w-100">
       <button (click)="editID()" class="btn btn-sm mb-1" title="Edit" style="background-color:#C8E3FF">
-        <i class="bi bi-eye"></i>
+        <i class="bi bi-pencil"></i>
       </button>
     </div>
   `,

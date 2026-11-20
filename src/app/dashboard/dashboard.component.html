@@ -8,164 +8,250 @@
       <div class="container-fluid ">
         <!-- Dashboard heading -->
         <div class="row gx-3 mb-3 align-items-center ">
-          <div class="col-md-8">
+          <div class="col-md-10">
             <h2><span><i class="bi bi-house-door me-3"></i></span>Dashboard</h2>
           </div>
-        </div>
+          <!-- Bell Icon + Dropdown -->
+          <div class="col-md-2 position-relative">
+            <div class="position-relative d-inline-block float-end me-2">
+              <!-- Bell Icon -->
+              <i class="bi bi-bell-fill fs-4 position-relative" (click)="toggleNotificationDropdown()"
+                style="cursor: pointer;">
+                <span *ngIf="notificationCount > 0"
+                  class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
+                  [class.blink-badge]="shouldBlink">
+                  {{ notificationCount }}
+                </span>
+              </i>
 
-        <div class="row justify-content-between gap-3 mb-3 ">
-          <div class="col border p-3 companyCard" *ngFor="let stat of CompanyNames"
-            [ngClass]="{'highlighted': selectedCompanyId === stat.company_id }"
-            style="border-radius: 10px; cursor: pointer;" (click)="selectCompany(stat)">
-            <div class="d-flex justify-content-center gap-3">
-              <div>
-                <i class="bi" [ngClass]="stat.icon + ' text-primary'" style="font-size: 22px;"></i>
+              <!-- Notification Dropdown -->
+              <div *ngIf="showNotifications"
+                class="notification-dropdown shadow-lg p-3 bg-white rounded position-absolute end-0 mt-2"
+                style="width: 320px; z-index: 1050; background-color: #93afce; border: 1px solid #8cbaf3;">
+                <h6 class="border-bottom pb-2 mb-2">Notifications</h6>
+
+                <!-- Salary Increment Due -->
+                <div *ngIf="incrementNotification.length > 0" class="mb-3">
+                  <div class="d-flex justify-content-between align-items-center mb-2">
+                    <strong>Salary Increment Due</strong>
+                    <button class="btn btn-sm btn-outline-primary py-0 px-2"
+                      (click)="viewSalaryIncrement()">View</button>
+                  </div>
+                  <ul class="list-unstyled mb-0">
+                    <li *ngFor="let emp of incrementNotification" class="small mb-1">
+                      <i class="bi bi-person-circle text-warning me-1"></i>
+                      {{ emp.employee_name }} completed {{ emp.cycle_year }} years
+                    </li>
+                  </ul>
+                </div>
+
+                <!-- Leave Requests -->
+                <div *ngIf="leavesNotification.length > 0" class="mb-3">
+                  <div class="d-flex justify-content-between align-items-center mb-2">
+                    <strong>Leave Requests</strong>
+                    <button class="btn btn-sm btn-outline-primary py-0 px-2" (click)="leaveRequest()">View</button>
+                  </div>
+                  <ul class="list-unstyled mb-0">
+                    <li *ngFor="let leave of leavesNotification" class="small mb-1">
+                      <i class="bi bi-person-circle text-primary me-1"></i>
+                      {{ leave.employee_name }} sent a leave request
+                    </li>
+                  </ul>
+                </div>
+
+                <!-- Advance Salary Requests -->
+                <div *ngIf="advSalaryNotification.length > 0">
+                  <div class="d-flex justify-content-between align-items-center mb-2">
+                    <strong>Advance Salary Requests</strong>
+                    <button class="btn btn-sm btn-outline-primary py-0 px-2"
+                      (click)="viewAdvanceRequests()">View</button>
+                  </div>
+                  <ul class="list-unstyled mb-0">
+                    <li *ngFor="let adv of advSalaryNotification" class="small mb-1">
+                      <i class="bi bi-person-circle text-success me-1"></i>
+                      {{ adv.employee_name }} requested advance salary
+                    </li>
+                  </ul>
+                </div>
+
+                <!-- No Notifications -->
+                <div
+                  *ngIf="leavesNotification.length === 0 && advSalaryNotification.length === 0 && incrementNotification.length === 0"
+                  class="text-center text-muted small">
+                  No new notifications
+                </div>
               </div>
-              <div>
-                <h6 class="companyTitle">{{ stat.company_name }}</h6>
-                <p class="mb-0 companyCount">{{ stat.company_desc }}</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="row mb-3">
+          <!-- All Companies Card -->
+          <div class="col-6 col-sm-4 col-md-3 col-lg-2 mb-2">
+            <div class="border p-2 companyCard h-100" [ngClass]="{'highlighted': isAllSelected()}"
+              style="border-radius: 10px; cursor: pointer;" (click)="selectCompany('all')">
+              <div class="d-flex flex-row align-items-center gap-2">
+                <i class="bi bi-buildings fs-3 text-primary flex-shrink-0"></i>
+                <div class="overflow-hidden">
+                  <h6 class="companyTitle mb-0 text-truncate" style="font-size: 13px;">All Companies</h6>
+                  <p class="mb-0 companyCount text-truncate" style="font-size: 11px;">View all records</p>
+                </div>
               </div>
             </div>
           </div>
-        </div>
 
-        <div class="row my-4">
-          <div class="col-6">
-            <h2 style="color : #3674B5">{{ selectedCompany }}</h2>
-          </div>
-
-          <div class="col-6 text-end ">
-            <button class="btn " style="border-radius:5px;background-color: #578FCA;color:white"
-              (click)="viewEmployee()">
-              View Employee
-            </button>
-          </div>
-        </div>
-
-        <div class="row mb-4">
-          <div class="col attendaceWrapper">
-            <div class=" attendenceCard p-3 border text-center" style="border-radius: 10px;">
-
-              <h6> <i class="bi bi-person-circle me-2 " style="color:#3674B5"></i>Total Employee</h6>
-              <h5 class="pb-0 text-center">{{totalEmployee}}</h5>
-            </div>
-            <div class=" attendenceCard p-3 border text-center" style="border-radius: 10px;">
-              <h6> <i class="bi bi-coin me-2" style="color:#3674B5"></i>Last Month Salary Expense</h6>
-              <h5 class="pb-0 text-center">{{lastMonthSalaryExpense}}</h5>
-            </div>
-            <div class=" attendenceCard p-3 border text-center" style="border-radius: 10px;">
-              <h6> <i class="bi bi-exclamation-circle me-2" style="color:#3674B5"></i>Pending Payroll Approvals</h6>
-              <h5 class="pb-0 text-center">{{pendingPayrollApprovals}}</h5>
-            </div>
-            <div class=" attendenceCard p-3 border text-center" style="border-radius: 10px;">
-              <h6> <i class="bi bi-hourglass-split me-2" style="color:#3674B5"></i>Pending leaves</h6>
-              <h5 class="pb-0 text-center">{{pendingLeaves}}</h5>
+          <!-- Individual Company Cards -->
+          <div class="col-6 col-sm-4 col-md-3 col-lg-2 mb-2" *ngFor="let stat of CompanyNames">
+            <div class="border p-2 companyCard h-100" [ngClass]="{'highlighted': isCompanySelected(stat.company_id)}"
+              style="border-radius: 10px; cursor: pointer;" (click)="selectCompany(stat)">
+              <div class="d-flex flex-row align-items-center gap-2">
+                <div class="logo-container flex-shrink-0">
+                  <img [src]="stat.company_logo_url" alt="Company Logo" class="company-logo" />
+                </div>
+                <div class="overflow-hidden">
+                  <h6 class="companyTitle mb-0 text-truncate" style="font-size: 13px;">{{ stat.company_name }}</h6>
+                  <p class="mb-0 companyCount text-truncate" style="font-size: 11px;">{{ stat.company_desc }}</p>
+                </div>
+              </div>
             </div>
           </div>
-        </div>
 
-        <!-- Payment Statistics  -->
-        <div class="row gx-5 flex-wrap justify-content-between mb-2 ">
-          <div class="col-lg-8">
-            <div class=" row border align-items-center p-3 " style="border-radius: 10px;">
-              <div class="col-12">
+          <div class="row my-4">
+            <div class="col-6">
+              <h2 style="color : #3674B5">{{ selectedCompany }}</h2>
+            </div>
+
+            <div class="col-6 text-end ">
+              <button class="btn " style="border-radius:5px;background-color: #578FCA;color:white"
+                (click)="viewEmployee()">
+                View Employee
+              </button>
+            </div>
+          </div>
+
+          <div class="row mb-4">
+            <div class="col attendaceWrapper">
+              <div class=" attendenceCard p-3 border text-center" style="border-radius: 10px;">
+
+                <h6> <i class="bi bi-person-circle me-2 " style="color:#3674B5"></i>Total Employee</h6>
+                <h5 class="pb-0 text-center">{{totalEmployee}}</h5>
+              </div>
+              <div class=" attendenceCard p-3 border text-center" style="border-radius: 10px;">
+                <h6> <i class="bi bi-coin me-2" style="color:#3674B5"></i>Last Month Salary Expense</h6>
+                <h5 class="pb-0 text-center">{{lastMonthSalaryExpense}}</h5>
+              </div>
+              <div class=" attendenceCard p-3 border text-center" style="border-radius: 10px;">
+                <h6> <i class="bi bi-exclamation-circle me-2" style="color:#3674B5"></i>Pending Payroll Approvals</h6>
+                <h5 class="pb-0 text-center">{{pendingPayrollApprovals}}</h5>
+              </div>
+              <div class=" attendenceCard p-3 border text-center" style="border-radius: 10px;">
+                <h6> <i class="bi bi-hourglass-split me-2" style="color:#3674B5"></i>Pending leaves</h6>
+                <h5 class="pb-0 text-center">{{pendingLeaves}}</h5>
+              </div>
+            </div>
+          </div>
+
+          <!-- Payment Statistics  -->
+          <div class="row gx-4 mb-2">
+            <!-- Payroll Statistics (Left Side) -->
+            <div class="col-lg-8">
+              <div class="border align-items-center p-3" style="border-radius: 10px;">
                 <div class="row">
                   <div class="col-md-9">
-                    <h5><span class="pe-2"><i class="bi bi-currency-rupee"></i></span> Payroll Statistics</h5>
+                    <h5>
+                      <span class="pe-2"><i class="bi bi-currency-rupee"></i></span>
+                      Payroll Statistics
+                    </h5>
                   </div>
                   <div class="col-md-3">
                     <div class="mb-3 d-flex gap-2">
-                      <!-- <label for="financialYear" class="form-label">Select Financial Year</label> -->
                       <select class="form-select" [(ngModel)]="selectedYear" (change)="onYearChange()"
                         id="financialYear">
-                        <option *ngFor="let year of financialYears" [value]="year">{{ year }}</option>
+                        <option *ngFor="let year of financialYears" [value]="year">
+                          {{ year }}
+                        </option>
                       </select>
-                      <!-- <button class="btn " style="border-radius:5px;background-color: #578FCA;color:white"
-                    (click)="paymentStatistics()">
-                    <i class="bi bi-eye-fill"></i>
-                  </button> -->
                     </div>
-
+                  </div>
+                </div>
+                <div class="border-top border-2 border-primary m-2 pt-3">
+                  <div style="display: block;">
+                    <canvas baseChart [data]="barChartData" [options]="barChartOptions" [type]="'bar'">
+                    </canvas>
                   </div>
                 </div>
               </div>
-              <div class="col-12 border-top border-2 border-primary m-2 pt-3">
-                <div style="display: block;">
-                  <canvas baseChart [data]="barChartData" [options]="barChartOptions" [type]="'bar'">
-                  </canvas>
-                </div>
-              </div>
-              <div class="col-12"></div>
-
             </div>
-            <!-- Leave Request Details -->
-            <div class="row mt-3">
-              <div class="col leaveAttendanceWrapper p-0">
-                <!-- leave requestdashboard -->
-                <div class="border p-3" style="border-radius: 10px;">
-                  <div class="row align-items-center">
-                    <div class="col-8">
-                      <h5><span class="ps-2"><i class="bi bi-calendar-event ps-2 pe-2"></i></span> Leave Request</h5>
-                    </div>
-                    <div class="col-4 text-end pe-4">
-                      <button class="btn " style="border-radius:5px;background-color: #578FCA;color:white"
-                        (click)="leaveRequest()">
-                        <i class="bi bi-eye-fill"></i>
+
+            <!-- Leave Request + Attendance (Right Side) -->
+            <div class="col-lg-4">
+              <!-- Leave Request -->
+              <div class="border p-3 mb-3" style="border-radius: 10px;">
+                <div class="row align-items-center">
+                  <div class="col-8">
+                    <h5>
+                      <span class="ps-2"><i class="bi bi-calendar-event ps-2 pe-2"></i></span>
+                      Leave Request
+                    </h5>
+                  </div>
+                  <div class="col-4 text-end pe-4">
+                    <button class="btn" style="border-radius:5px;background-color:#578FCA;color:white"
+                      (click)="leaveRequest()">
+                      <i class="bi bi-eye-fill"></i>
+                    </button>
+                  </div>
+                </div>
+
+                <div class="row border-top border-2 border-primary m-2 pt-3">
+                  <div class="col-12 mb-2 d-flex leaveDetails border align-items-center justify-content-between p-0"
+                    *ngFor="let card of leaveCards" style="border-radius: 10px;">
+                    <div>
+                      <button class="btn px-3 py-2 me-2" style="border-radius:10px;height: 50px;width:50px"
+                        [ngStyle]="{ 'background-color': card.bgColor, color: 'white' }">
+                        <i class="bi" [ngClass]="card.icon"></i>
                       </button>
+                      {{ card.title }}
+                    </div>
+                    <div class="pe-3">
+                      <h5 class="mb-0">{{ card.count }}</h5>
                     </div>
                   </div>
-                  <div class="row border-top border-2 border-primary m-2 pt-3">
-                    <div class="col-12 mb-2 d-flex leaveDetails border align-items-center justify-content-between p-0"
-                      *ngFor="let card of leaveCards" style="border-radius: 10px;">
-                      <div>
-                        <button class="btn px-3 py-2 me-2" style="border-radius:10px;height: 50px;width:50px"
-                          [ngStyle]="{ 'background-color': card.bgColor, color: 'white' }">
-                          <i class="bi" [ngClass]="card.icon"></i>
-                        </button>
-                        {{ card.title }}
-                      </div>
-                      <div class="pe-3">
-                        <h5 class="mb-0"> {{ card.count }}</h5>
+                </div>
+              </div>
+
+              <!-- Attendance Block -->
+              <div class="border p-3" style="border-radius: 10px;">
+                <div class="row align-items-center">
+                  <div class="col-9">
+                    <h5>
+                      <span class="ps-2"><i class="bi bi-person-fill-check ps-2 pe-3"></i></span>
+                      Last Week Attendances
+                    </h5>
+                  </div>
+                  <div class="col-3 text-end pe-4">
+                    <button class="btn" style="border-radius:5px;background-color:#578FCA;color:white"
+                      (click)="totalAttendance()">
+                      <i class="bi bi-eye-fill"></i>
+                    </button>
+                  </div>
+                </div>
+
+                <div class="row border-top border-2 border-primary m-2 pt-3">
+                  <div class="col">
+                    <div style="position: relative; width: 250px; margin: auto;">
+                      <canvas baseChart [data]="doughnutChartData" [options]="doughnutChartOptions" [type]="'doughnut'">
+                      </canvas>
+
+                      <!-- Centered Text -->
+                      <div style="position:absolute;top:42%;left:50%;transform:translate(-50%,-50%);
+              font-size:20px;font-weight:bold;text-align:center">
+                        <div>Attendance</div>
+                        <!-- <div>{{ totalAttendanceValue }}</div> -->
                       </div>
                     </div>
 
                   </div>
                 </div>
-
-                <!--  Total Attendance Details  -->
-                <div class="border p-3" style="border-radius: 10px;">
-                  <div class="row align-items-center ">
-                    <div class="col-9">
-                      <h5><span class="ps-2"><i class="bi bi-person-fill-check ps-2 pe-3"></i></span> Last Week
-                        Attendances
-                      </h5>
-                    </div>
-                    <div class="col-3 text-end pe-4">
-                      <button class="btn " style="border-radius:5px;background-color: #578FCA;color:white"
-                        (click)="totalAttendance()">
-                        <i class="bi bi-eye-fill"></i>
-                      </button>
-                    </div>
-                  </div>
-                  <div class="row border-top border-2 border-primary m-2 pt-3">
-                    <div class="col">
-                      <div style="position: relative; width: 250px; margin: auto;">
-                        <canvas baseChart [data]="doughnutChartData" [type]="'doughnut'"
-                          [options]="doughnutChartOptions">
-                        </canvas>
-                        <!-- Centered Text -->
-                        <div
-                          style="position:absolute;top:42%;left:50%;transform:translate(-50%,-50%);font-size:20px;font-weight:bold;text-align:center">
-                          <div>Total Attendance</div>
-                          <div>{{ totalAttendanceValue }}</div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-
-                </div>
-
               </div>
             </div>
           </div>
@@ -178,9 +264,8 @@
               </div>
             </div>
           </div>
-        </div>
 
+        </div>
       </div>
     </div>
   </div>
-</div>

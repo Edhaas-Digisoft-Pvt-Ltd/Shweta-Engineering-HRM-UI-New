@@ -197,3 +197,19 @@ label{
     }
    
 }
+
+.tabs-container .nav-tabs {
+  flex-wrap: nowrap;           /* Prevent tabs from wrapping to next line */
+  gap: 0;                      /* Remove any gap between tabs */
+  padding-left: 0;             /* Remove left padding/margin */
+  margin-left: 0;
+}
+
+.tabs-container .nav-tabs .nav-item {
+  white-space: nowrap;         /* Prevent tab text from breaking */
+}
+
+.tabs-container .nav-tabs .nav-link {
+  padding: 8px 12px;           /* Reduce horizontal padding (default is usually 16px) */
+  font-size: 0.9rem;           /* Slightly smaller font if needed */
+}

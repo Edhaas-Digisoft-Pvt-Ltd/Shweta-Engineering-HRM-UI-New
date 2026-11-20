@@ -31,6 +31,15 @@ import { EmployeeDashboardComponent } from './employee/employee-dashboard/employ
 
 import { BonusAndIncentiveComponent } from './compnay-setup/bonus-and-incentive/bonus-and-incentive.component';
 import { ConfigurationComponent } from './configuration/configuration.component';
+
+import { PermissionGuard } from './permission.guard';
+import { PermissionsResolver } from './permissions.resolver';
+import { EmpLeaveAdvsalaryReportComponent } from './emp-leave-advsalary-report/emp-leave-advsalary-report.component';
+import { LeaveRequestComponent } from './leave/leave-request/leave-request.component';
+import { UpdateEmployeeComponent } from './employee/update-employee/update-employee.component';
+import { SalaryIncrementComponent } from './salary-increment/salary-increment.component';
+import { EmployeeVerifiedAttendanceComponent } from './employee-verified-attendance/employee-verified-attendance.component';
+
 const routes: Routes = [
   {
     path: '',
@@ -49,14 +58,23 @@ const routes: Routes = [
       {
         path: 'Dashboard',
         component: DashboardComponent,
+        canActivate: [PermissionGuard],
+        resolve: { permissions: PermissionsResolver },
+        data: { module: 'Dashboard', permission: 'view' } 
       },
       {
         path: 'CompanySetup',
         component: CompnaySetupComponent,
+        canActivate: [PermissionGuard],
+        resolve: { permissions: PermissionsResolver },
+        data: { module: 'Company Settings', permission: 'view' }
       },
       {
         path: 'BonusAndIncentive',
         component: BonusAndIncentiveComponent ,
+        canActivate: [PermissionGuard],
+        resolve: { permissions: PermissionsResolver },
+        data: { module: 'Configuration', permission: 'view' }
       },
       {
         path: 'demo',
@@ -69,42 +87,79 @@ const routes: Routes = [
       {
         path: 'Employee',
         component: EmployeeComponent,
+        canActivate: [PermissionGuard],
+        resolve: { permissions: PermissionsResolver },
+        data: { module: 'Employee', permission: 'view' }
       },
       {
         path: 'CreateEmployee',
         component: CreateEmployeeComponent,
+        canActivate: [PermissionGuard],
+        resolve: { permissions: PermissionsResolver },
+        data: { module: 'Employee', permission: 'view' }
+      },
+      {
+        path: 'UpdateEmployee',
+        component: UpdateEmployeeComponent,
+        canActivate: [PermissionGuard],
+        resolve: { permissions: PermissionsResolver },
+        data: { module: 'Employee', permission: 'update' }
       },
       {
         path: 'EmployeeInDetail',
         component: EmployeeDashboardComponent,
+        canActivate: [PermissionGuard],
+        resolve: { permissions: PermissionsResolver },
+        data: { module: 'Employee Dashboard', permission: 'view' }
       },
       {
         path: 'Attendance',
         component: AttendanceComponent,
+        canActivate: [PermissionGuard],
+        resolve: { permissions: PermissionsResolver },
+        data: { module: 'Attendance', permission: 'view' }
       },
       {
         path: 'Calender',
         component: CalenderComponent,
+        canActivate: [PermissionGuard],
+        resolve: { permissions: PermissionsResolver },
+        data: { module: 'calender', permission: 'view' }
       },
       {
         path: 'Calender2',
         component: NewcalenderComponent,
+        canActivate: [PermissionGuard],
+        resolve: { permissions: PermissionsResolver },
+        data: { module: 'calender', permission: 'view' }
       },
       {
         path: 'Leave',
-        component: LeaveComponent,
+        component: LeaveRequestComponent,
+        canActivate: [PermissionGuard],
+        resolve: { permissions: PermissionsResolver },
+        data: { module: 'Leave', permission: 'view' }
       },
       {
         path: 'payrollList',
         component: PayrollListComponent,
+        canActivate: [PermissionGuard],
+        resolve: { permissions: PermissionsResolver },
+        data: { module: 'Payroll List', permission: 'view' }
       },
       {
         path: 'payrollProcess',
         component: PayrollProcessComponent,
+        canActivate: [PermissionGuard],
+        resolve: { permissions: PermissionsResolver },
+        data: { module: 'Payroll Manage', permission: 'view' }
       },
       {
         path: 'payrollSummary',
         component: PayrollSummariesComponent,
+        canActivate: [PermissionGuard],
+        resolve: { permissions: PermissionsResolver },
+        data: { module: 'Payroll', permission: 'view' }
       },
       {
         path: 'salaryRevision',
@@ -113,22 +168,30 @@ const routes: Routes = [
       {
         path: 'AdvancePayment',
         component: AdvancePaymentComponent,
-
+        canActivate: [PermissionGuard],
+        resolve: { permissions: PermissionsResolver },
+        data: { module: 'Advance Payment', permission: 'view' }
       },
       {
         path: 'companyList',
         component: CompanyListComponent,
-
+        canActivate: [PermissionGuard],
+        resolve: { permissions: PermissionsResolver },
+        data: { module: 'Company List', permission: 'view' }
       },
       {
         path: 'CompanyDashboard',
         component: CompanyDashboardComponent,
-
+        canActivate: [PermissionGuard],
+        resolve: { permissions: PermissionsResolver },
+        data: { module: 'Company List', permission: 'view' }
       },
       {
         path: 'comMange&Plolicies',
         component: ComMangeAndPoliciesComponent,
-
+        canActivate: [PermissionGuard],
+        resolve: { permissions: PermissionsResolver },
+        data: { module: 'Manage and Policies', permission: 'view' }
       },
       // {
       //   path: 'LeaveSetup',
@@ -138,7 +201,30 @@ const routes: Routes = [
       {
         path: 'configuration',
         component: ConfigurationComponent,
-
+        canActivate: [PermissionGuard],
+        resolve: { permissions: PermissionsResolver },
+        data: { module: 'Configuration', permission: 'view' }
+      },
+      {
+        path: 'employee-report',
+        component: EmpLeaveAdvsalaryReportComponent,
+        canActivate: [PermissionGuard],
+        resolve: { permissions: PermissionsResolver },
+        data: { module: 'Employee Dashboard', permission: 'view' }
+      },
+      {
+        path: 'salary_increment',
+        component: SalaryIncrementComponent,
+        canActivate: [PermissionGuard],
+        resolve: { permissions: PermissionsResolver },
+        data: { module: 'Salary_increment', permission: 'view' }
+      },
+      {
+        path: 'employee-verified-attendance',
+        component: EmployeeVerifiedAttendanceComponent,
+        canActivate: [PermissionGuard],
+        resolve: { permissions: PermissionsResolver },
+        data: { module: 'Employee Dashboard', permission: 'view' }
       },
     ]
   },

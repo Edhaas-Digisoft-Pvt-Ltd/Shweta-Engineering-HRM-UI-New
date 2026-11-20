@@ -16,7 +16,10 @@ import {
 import { PayrollSummariesBtnComponent } from './Payroll-summaries-btn/Payroll-summaries-btn.component';
 import { ToastrService } from 'ngx-toastr';
 import { HrmserviceService } from 'src/app/hrmservice.service';
+import { ModalServiceService } from 'src/app/modal-service.service';
 declare var bootstrap: any;
+declare const html2canvas: any;
+declare const jspdf: any;
 
 @Component({
   selector: 'app-payroll-summaries',
@@ -40,25 +43,82 @@ export class PayrollSummariesComponent {
   deduct: any[] = [];
   today: string = new Date().toISOString().split('T')[0];
   rejectreasons: any;
-
-  // rejectreasons=[
-  //   {value:1, name:'leaves'},
-  //   {value:2, name:'OverTime'},
-  // ];
-  selectedRejectedReason: string = '';
+  selectedRejectedReason: any = '';
   otherReason: string = '';
+  expenseForm: FormGroup;
+  isSubmitted: boolean = false;
+  expensesList: any[] = [];
 
   showReasonError: boolean = false;
   showOtherReasonError: boolean = false;
   isLoading: boolean = false;
+  isConfirmingExpense: boolean = false;
+  expenseAmountInWords: string = '';
+  pendingExpensePayload: any = null;
+  source: string = 'list';
+  isJobBased: boolean = false;   // job (die rate) based operator
+  dieDetails: any[] = [];
 
-  constructor(private route: ActivatedRoute, private router: Router, private formBuilder: FormBuilder, private service: HrmserviceService, private toastr: ToastrService) {
+  // Miscellaneous Overtime (manually added OT, time based operators only)
+  miscOtForm: FormGroup;
+  miscOtList: any[] = [];
+  isMiscOtSubmitted: boolean = false;
+  isSavingMiscOt: boolean = false;
+
+  constructor(private route: ActivatedRoute, private router: Router, private formBuilder: FormBuilder, private modalService: ModalServiceService, private service: HrmserviceService, private toastr: ToastrService) {
     this.payrollDetails = this.formBuilder.group({
       id: ['', [Validators.required]],
       employeeName: ['', [Validators.required]],
       companyName: ['', [Validators.required]],
       date: ['', [Validators.required]],
     });
+
+    this.expenseForm = this.formBuilder.group({
+      expenseType: ['add', [Validators.required]], // 'add' | 'deduct'
+      expenseDescription: ['', [Validators.required, Validators.pattern(/^[A-Za-z0-9\s]+$/)]],
+      expenseAmount: ['', [Validators.required, Validators.pattern(/^\d+(\.\d{1,2})?$/), Validators.min(0.01)]]
+    });
+
+    this.miscOtForm = this.formBuilder.group({
+      otDate: ['', [Validators.required]],
+      reason: ['', [Validators.required, Validators.maxLength(200)]],
+      otHours: ['', [Validators.required, Validators.pattern(/^\d+(\.\d{1,2})?$/), Validators.min(0.01), Validators.max(24)]]
+    });
+  }
+
+  // payroll month as YYYY-MM
+  get payrollYearMonth(): string {
+    return `${this.selectedYear}-${String(this.selectedMonth).padStart(2, '0')}`;
+  }
+
+  // misc overtime only for time based operators (role 2), not for die rate / job based operators
+  get showMiscOvertime(): boolean {
+    return !this.isJobBased && Number(this.employeeDetails?.role_id) === 2;
+  }
+
+  // date limits of the payroll month for the date picker
+  get otMinDate(): string {
+    return `${this.payrollYearMonth}-01`;
+  }
+
+  get otMaxDate(): string {
+    const lastDay = new Date(Number(this.selectedYear), Number(this.selectedMonth), 0).getDate();
+    return `${this.payrollYearMonth}-${String(lastDay).padStart(2, '0')}`;
+  }
+
+  // amount for the entered hours = hours * per hour rate
+  get miscOtPreviewAmount(): number {
+    const hours = Number(this.miscOtForm.value.otHours);
+    const rate = Number(this.calculationData?.per_hours_amount ?? 0);
+    if (!hours || !rate) return 0;
+    return Math.round(hours * rate * 100) / 100;
+  }
+
+  // final overtime hours = attendance overtime + manually added overtime
+  get finalOvertimeHrs(): number {
+    const attendanceOt = Number(this.employeeDetails?.total_overtime ?? 0);
+    const miscOt = Number(this.calculationData?.misc_ot_hours ?? 0);
+    return Math.round((attendanceOt + miscOt) * 100) / 100;
   }
 
   months = [
@@ -76,7 +136,6 @@ export class PayrollSummariesComponent {
     { id: 12, value: 'December' }
   ];
 
-
   closeAllModals(): void {
     const modals = document.querySelectorAll('.modal.show');
     modals.forEach((modalElement: any) => {
@@ -88,20 +147,37 @@ export class PayrollSummariesComponent {
   }
 
   ngOnInit() {
-    this.selectedYear = new Date().getFullYear();
-    this.selectedMonth = new Date().getMonth();
-    const currentDate = new Date();
-    this.today = currentDate.toISOString().split('T')[0];
+    // this.selectedYear = new Date().getFullYear();
+    // this.selectedMonth = new Date().getMonth();
+    // const currentDate = new Date();
+    // this.today = currentDate.toISOString().split('T')[0];
+    const today = new Date();
+    const lastMonthDate = new Date(today.getFullYear(), today.getMonth() - 1, 1);
+
+    this.selectedYear = lastMonthDate.getFullYear();
+    this.selectedMonth = lastMonthDate.getMonth() + 1;
+
+    this.today = today.toISOString().split('T')[0];
 
     this.route.queryParams.subscribe(params => {
+      this.source = params['source'] || 'list';
       this.employee_id = params['id'];
       this.tempPayrollId = params['temp_payroll_id']
-      console.log('Received employee  payroll:', this.employee_id);
-      console.log('tempPayrollId:', this.tempPayrollId);
+      // console.log('Received employee  payroll:', this.employee_id);
+      // console.log('tempPayrollId:', this.tempPayrollId);
     });
     this.getSinglePayroll()
     this.setMonthGroupHeader();
     // this.columnDefs2= this.generateColumns(['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep','oct','nov','dec']);
+  }
+
+  hasAccess(module: string, permission: string): boolean {
+    return this.service.hasPermission(module, permission);
+  }
+
+  openModal() {
+    this.modalService.openModal('RejectPayrollModal')
+    this.getRejectReasons();
   }
 
   getMonthName(monthId: number): string {
@@ -122,11 +198,15 @@ export class PayrollSummariesComponent {
     this.service.post('get/single/payroll_list', { employee_id: this.employee_id }).subscribe((res: any) => {
       if (res.status == 'success') {
         this.employeeDetails = res.data.payroll_summary[0];
-        const attendanceData = res.data.attendance_summary[0];
+        // job based operators may have no attendance rows
+        const attendanceData = res.data.attendance_summary[0] ?? {};
+        this.isJobBased = Number(this.employeeDetails?.is_non_time_based) === 1;
+        this.dieDetails = res.data.die_details || [];
         this.AdvanceSalaryDetails = res.data.advance_salary || [];;
         this.hasAdvanceSalary = this.AdvanceSalaryDetails.length > 0;;
         this.calculationData = res.data.calculation;
-        console.log(this.calculationData);
+        this.expensesList = res.data.expenses || [];
+        this.miscOtList = res.data.misc_overtime || [];
 
 
         this.payrollDetails.patchValue({
@@ -141,9 +221,10 @@ export class PayrollSummariesComponent {
             A: (attendanceData.absent_days),
             H: (attendanceData.holiday_days),
             HD: (attendanceData.half_day),
-            OT: (attendanceData.total_overtime),
+            OT: this.finalOvertimeHrs,
             LT: (attendanceData.late_mark),
             TD: (attendanceData.total_days),
+            W: (attendanceData.weekend),
           }
         ]
 
@@ -162,40 +243,221 @@ export class PayrollSummariesComponent {
 
         this.deduct = [
           {
-            Compound: 'Provident Fund (PF)',
+            Compound: 'Employee PF Contribution',
             deduction: 'PF',
-            amount: `₹. ${this.calculationData.pf_employee_deduction ?? 0}`
+            amount: this.calculationData.pf_employee_deduction ?? 0
           },
-
+          {
+            Compound: 'Employer PF Contribution',
+            deduction: 'PF',
+            amount: this.calculationData.pf_employer_contribution ?? 0
+          },
           {
             Compound: 'Professional Tax (PT)',
             deduction: 'Tax Deduction',
-            amount: `₹. ${this.calculationData.total_tax_deduction ?? 0}`
+            amount: this.calculationData.total_tax_deduction ?? 0
           },
-
           {
             Compound: 'ESIC',
             deduction: 'ESIC',
-            amount: `₹. ${this.calculationData.esic_deduction ?? 0}`
+            amount: this.calculationData.esic_deduction ?? 0
           },
           {
             Compound: 'Advance Salary',
             deduction: 'Advance Deduction',
-            amount: `₹. ${this.calculationData.advance_amount ?? 0}`
+            amount: this.calculationData.advance_amount ?? 0
           },
-          {
-            Compound: 'Other',
-            deduction: '-',
-            amount: '₹. 0',
-          },
+          // {
+          //   Compound: 'Other',
+          //   deduction: '-',
+          //   amount:0,
+          // },
         ];
+        if (this.calculationData.leave_without_pay_days != 'Null' && this.calculationData.leave_without_pay_days > 0) {
+          this.deduct.push(
+            {
+              Compound: 'Leave w/o Pay',
+              deduction: this.calculationData.leave_without_pay_days + ' - days',
+              amount: this.calculationData.leave_without_pay_amount
+            }
+          )
+        }
         this.isLoading = false;
       }
     })
   }
 
-  formatted(value: number): string {
-    return value.toLocaleString('en-IN');
+  addExpenseInSalary() {
+    this.isSubmitted = true;
+    if (this.expenseForm.invalid) {
+      this.toastr.error("Please enter required fields");
+      return;
+    }
+
+    const type = this.expenseForm.value.expenseType; // 'add' | 'deduct'
+    const rawAmount = Number(this.expenseForm.value.expenseAmount);
+    const signedAmount = type === 'deduct' ? -rawAmount : rawAmount;
+
+    // Words always shown for the positive/absolute value
+    this.expenseAmountInWords = this.numberToWords(Math.abs(rawAmount));
+
+    this.pendingExpensePayload = {
+      employee_id: this.employee_id,
+      year_month: `${this.selectedYear}-${(this.selectedMonth)
+        .toString().padStart(2, '0')}`,
+      expense_description: this.expenseForm.value.expenseDescription,
+      expense_amount: signedAmount // stored with sign in DB
+    };
+
+    this.modalService.openModal('ConfirmExpenseModal');
+  }
+
+  confirmAddExpense() {
+    if (!this.pendingExpensePayload || this.isConfirmingExpense) return;   // guard added
+
+    this.isConfirmingExpense = true;   // ADD
+    this.isLoading = true;
+    this.service.post('add/expense-in-salary', this.pendingExpensePayload).subscribe({
+      next: (res: any) => {
+        if (res.status === 'success') {
+          this.toastr.success("Expense added successfully");
+          this.getSinglePayroll();
+          this.expenseForm.reset({ expenseType: 'add' });
+          this.isSubmitted = false;
+        } else {
+          this.toastr.error("Something went wrong");
+        }
+        this.isLoading = false;
+        this.isConfirmingExpense = false;   // ADD
+        this.cancelAddExpense();
+      },
+      error: () => {
+        this.isLoading = false;
+        this.isConfirmingExpense = false;   // ADD — reset on error too
+        this.toastr.error("Something went wrong");
+      }
+    });
+  }
+
+  cancelAddExpense() {
+    this.pendingExpensePayload = null;
+    this.expenseAmountInWords = '';
+    this.modalService.closeModal();
+  }
+
+  deleteExpense(expense_id: number) {
+    if (!confirm("Are you sure you want to delete this expense?")) {
+      return;
+    }
+    this.isLoading = true;
+    const payload = {
+      expense_id: expense_id
+    };
+    this.service.post('delete/expense', payload).subscribe((res: any) => {
+      if (res.status === 'success') {
+        this.toastr.success("Expense deleted successfully");
+        this.getSinglePayroll();
+        this.isLoading = false;
+      } else {
+        this.toastr.error("Something went wrong");
+        this.isLoading = false;
+      }
+    });
+  }
+
+  // ---- Miscellaneous Overtime ----
+  addMiscOvertime() {
+    this.isMiscOtSubmitted = true;
+    if (this.miscOtForm.invalid || !String(this.miscOtForm.value.reason ?? '').trim()) {
+      this.toastr.error('Please enter required fields');
+      return;
+    }
+    if (this.isSavingMiscOt) return;
+
+    // same date already has overtime: ask before adding one more entry
+    const selectedDate = this.miscOtForm.value.otDate;
+    const sameDateExists = this.miscOtList.some((x: any) => String(x.ot_date).substring(0, 10) === selectedDate);
+    if (sameDateExists && !confirm('Overtime is already added for this date. Do you want to add one more entry for the same date?')) {
+      return;
+    }
+
+    this.isSavingMiscOt = true;
+    this.isLoading = true;
+    this.service.post('add/misc-overtime', {
+      employee_id: this.employee_id,
+      year_month: this.payrollYearMonth,
+      ot_date: this.miscOtForm.value.otDate,
+      reason: String(this.miscOtForm.value.reason).trim(),
+      ot_hours: this.miscOtForm.value.otHours
+    }).subscribe({
+      next: (res: any) => {
+        if (res.status === 'success') {
+          this.toastr.success('Overtime added successfully');
+          this.miscOtForm.reset({ otDate: '', reason: '', otHours: '' });
+          this.isMiscOtSubmitted = false;
+          this.getSinglePayroll();
+        } else {
+          this.isLoading = false;
+          this.toastr.error(res.message || 'Something went wrong');
+        }
+        this.isSavingMiscOt = false;
+      },
+      error: () => {
+        this.isLoading = false;
+        this.isSavingMiscOt = false;
+        this.toastr.error('Something went wrong');
+      }
+    });
+  }
+
+  deleteMiscOvertime(misc_ot_id: number) {
+    if (!confirm('Are you sure you want to delete this overtime?')) {
+      return;
+    }
+    this.isLoading = true;
+    this.service.post('delete/misc-overtime', { misc_ot_id }).subscribe({
+      next: (res: any) => {
+        if (res.status === 'success') {
+          this.toastr.success('Overtime deleted successfully');
+          this.getSinglePayroll();
+        } else {
+          this.isLoading = false;
+          this.toastr.error(res.message || 'Something went wrong');
+        }
+      },
+      error: () => {
+        this.isLoading = false;
+        this.toastr.error('Something went wrong');
+      }
+    });
+  }
+
+  formatted(value: number | null | undefined): string {
+    if (value == null) return '0';
+
+    const parts = value.toString().split('.');
+    const intPart = Number(parts[0]).toLocaleString('en-IN');
+    const decPart = parts[1] ? '.' + parts[1] : '';
+
+    return intPart + decPart;
+  }
+
+  formattedMoney(value: number | string | null | undefined): string {
+    if (value == null || value === '') return '0.00';
+    const num = Number(value);
+    if (isNaN(num)) return '0.00';
+    return num.toLocaleString('en-IN', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    });
+  }
+
+  getExpenseType(amount: number): string {
+    return amount < 0 ? 'Deduct' : 'Add';
+  }
+
+  getAbsAmount(amount: number): number {
+    return Math.abs(amount ?? 0);
   }
 
   // calculateProgress(): number {
@@ -211,41 +473,12 @@ export class PayrollSummariesComponent {
   }
 
   backtoPayroll() {
-    this.router.navigate(['/authPanal/payrollList']);
+    if (this.source === 'process') {
+      this.router.navigate(['/authPanal/payrollProcess']);
+    } else {
+      this.router.navigate(['/authPanal/payrollList']);
+    }
   }
-  // deduct = [
-  //   {
-  //     Compound: 'provident found (PF)',
-  //     deduction: 'lorem',
-  //     amount: 'Rs. 1000',
-  //   },
-  //   {
-  //     Compound: 'Professional Tax (PT)',
-  //     deduction: 'lorem',
-  //     amount: 'Rs. 1000',
-  //   },
-
-  //   {
-  //     Compound: 'ESIC Employee 0.75%',
-  //     deduction: 'lorem',
-  //     amount: 'Rs.0',
-  //   },
-  //   {
-  //     Compound: 'Provident Fund(Employer) (EPF)',
-  //     deduction: 'lorem',
-  //     amount: 'Rs. 1000',
-  //   },
-  //   {
-  //     Compound: 'Advance Salary',
-  //     deduction: 'lorem',
-  //     amount: 'Rs. 0',
-  //   },
-  //   {
-  //     Compound: 'Other',
-  //     deduction: 'lorem',
-  //     amount: 'Rs. 0',
-  //   },
-  // ];
 
   columnDefs: ColDef[] = [
     {
@@ -294,7 +527,7 @@ export class PayrollSummariesComponent {
           { headerName: 'P', field: 'P' },
           { headerName: 'A', field: 'A' },
           { headerName: 'H', field: 'H' },
-          // { headerName: 'HD', field: 'HD' },
+          { headerName: 'W/O', field: 'W' },
           { headerName: 'OT(hrs)', field: 'OT' },
           { headerName: 'LT', field: 'LT' },
           { headerName: 'TD', field: 'TD' },
@@ -360,24 +593,69 @@ export class PayrollSummariesComponent {
     }
   }
 
-  rejectPayroll() {
-    this.showReasonError = false;
+  // job (die rate) based: user types the reason, backend treats it like reason "Other"
+  private rejectJobPayroll() {
     this.showOtherReasonError = false;
 
-    if (!this.selectedRejectedReason) {
-      this.showReasonError = true;
-      return;
-    }
-
-    if (this.selectedRejectedReason === 'Other' && (!this.otherReason || this.otherReason.trim() === '')) {
+    if (!this.otherReason || this.otherReason.trim() === '') {
       this.showOtherReasonError = true;
       return;
     }
 
-    this.service.post('rejected/payroll', { temp_payroll_id: this.tempPayrollId, rejection_id: this.selectedRejectedReason }).subscribe((res: any) => {
+    const otherReasonId = this.rejectreasons?.find((r: any) => r.rejection_reason === 'Other')?.rejection_id ?? 3;
+
+    const payload = {
+      temp_payroll_id: Array.isArray(this.tempPayrollId) ? this.tempPayrollId : [this.tempPayrollId],
+      rejection_id: otherReasonId,
+      other_reason: this.otherReason.trim(),
+    };
+
+    this.service.post('rejected/payroll', payload).subscribe((res: any) => {
+      const failed = (res?.results ?? []).filter((r: any) => r.status !== 'success');
+      if (res.status == 'success' && failed.length === 0) {
+        this.toastr.success('Payroll rejected successfully');
+        this.modalService.closeModal();
+        this.router.navigate(['/authPanal/payrollList']);
+      } else {
+        this.toastr.error(failed[0]?.message ?? 'Something went wrong');
+      }
+    });
+  }
+
+  rejectPayroll() {
+    if (this.isJobBased) {
+      this.rejectJobPayroll();
+      return;
+    }
+
+    this.showReasonError = false;
+    this.showOtherReasonError = false;
+
+    if (!this.selectedRejectedReason?.rejection_id) {
+      this.showReasonError = true;
+      return;
+    }
+
+    if (this.selectedRejectedReason?.rejection_reason === 'Other' && (!this.otherReason || this.otherReason.trim() === '')) {
+      this.showOtherReasonError = true;
+      return;
+    }
+
+    const payload: any = {
+      temp_payroll_id: Array.isArray(this.tempPayrollId)
+        ? this.tempPayrollId
+        : [this.tempPayrollId],
+      rejection_id: this.selectedRejectedReason?.rejection_id,
+    };
+
+    if (this.selectedRejectedReason?.rejection_reason === 'Other') {
+      payload.other_reason = this.otherReason.trim();
+    }
+
+    this.service.post('rejected/payroll', payload).subscribe((res: any) => {
       if (res.status == 'success') {
         this.toastr.success('Payroll rejected successfully');
-        this.closeAllModals();
+        this.modalService.closeModal();
         this.router.navigate(['/authPanal/payrollList']);
       }
       else {
@@ -401,4 +679,204 @@ export class PayrollSummariesComponent {
     paginationPageSize: 10,
     paginationPageSizeSelector: [10, 50, 100],
   };
+
+  numberToWords(amount: number): string {
+    if (amount == null || isNaN(amount)) return '';
+
+    const rupees = Math.floor(amount);
+    const paise = Math.round((amount - rupees) * 100);
+
+    const ones = ['', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine',
+      'Ten', 'Eleven', 'Twelve', 'Thirteen', 'Fourteen', 'Fifteen', 'Sixteen', 'Seventeen', 'Eighteen', 'Nineteen'];
+    const tens = ['', '', 'Twenty', 'Thirty', 'Forty', 'Fifty', 'Sixty', 'Seventy', 'Eighty', 'Ninety'];
+
+    const twoDigits = (n: number): string => {
+      if (n === 0) return '';
+      if (n < 20) return ones[n] + ' ';
+      return tens[Math.floor(n / 10)] + ' ' + (n % 10 !== 0 ? ones[n % 10] + ' ' : '');
+    };
+
+    const threeDigits = (n: number): string => {
+      let str = '';
+      if (n >= 100) {
+        str += ones[Math.floor(n / 100)] + ' Hundred ';
+        n %= 100;
+      }
+      return str + twoDigits(n);
+    };
+
+    const convert = (n: number): string => {
+      let result = '';
+      const crore = Math.floor(n / 10000000); n %= 10000000;
+      const lakh = Math.floor(n / 100000); n %= 100000;
+      const thousand = Math.floor(n / 1000); n %= 1000;
+
+      if (crore > 0) result += threeDigits(crore) + 'Crore ';
+      if (lakh > 0) result += threeDigits(lakh) + 'Lakh ';
+      if (thousand > 0) result += threeDigits(thousand) + 'Thousand ';
+      if (n > 0) result += threeDigits(n);
+      return result.trim();
+    };
+
+    const rupeesWords = rupees > 0 ? convert(rupees) + ' Rupees' : '';
+    const paiseWords = paise > 0 ? convert(paise) + ' Paise' : '';
+
+    if (!rupeesWords && !paiseWords) return 'Zero Rupees';
+
+    return [rupeesWords, paiseWords].filter(Boolean).join(' and ') + ' Only';
+  }
+
+  downloadPayslip() {
+    if (!this.employeeDetails || !this.calculationData || !this.attendanceDetails) {
+      this.toastr.error('Missing payslip data.');
+      return;
+    }
+
+    const temp = document.createElement('div');
+    temp.style.position = 'fixed';
+    temp.style.top = '-9999px';
+    temp.style.left = '-9999px';
+    temp.style.width = '210mm';
+    temp.style.background = '#fff';
+    temp.style.padding = '20px';
+    temp.style.fontFamily = 'Arial, sans-serif';
+
+    temp.innerHTML = `
+    <div style="font-family: Arial, sans-serif; width: 100%; padding: 20px;">
+      <h3 style="text-align:center; margin-bottom: 10px;">
+        ${this.employeeDetails.company_name || ''}
+      </h3>
+      <p style="text-align:center; margin-top: -5px;">
+        <strong>Payslip for ${this.getMonthName(this.selectedMonth)} ${this.selectedYear}</strong>
+      </p>
+      <hr />
+
+      <p><strong>Employee Name:</strong> ${this.employeeDetails.emp_name}</p>
+      <p><strong>Employee Code:</strong> ${this.employeeDetails.employee_code}</p>
+      <p><strong>Worked Days:</strong> ${this.attendanceDetails[0]?.P ?? 0}</p>
+      <p><strong>Absent Days:</strong> ${this.attendanceDetails[0]?.A ?? 0}</p>
+
+      <table border="1" cellspacing="0" cellpadding="6"
+        style="width:100%; margin-top:15px; text-align:left; border-collapse:collapse;">
+        <thead style="background:#efefef;">
+          <tr>
+            <th style="width:25%; border-right:none;">Earnings</th>
+            <th style="width:25%; border-left:none; border-right:none;">Amount</th>
+            <th style="width:25%; border-left:none; border-right:none;">Deductions</th>
+            <th style="width:25%; border-left:none;">Amount</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td style="border-right:none;">Basic Pay</td>
+            <td style="border-left:none; border-right:none;">${this.calculationData?.basic_salary ?? 0}</td>
+            <td style="border-left:1px solid #000; border-right:none;">Tax</td>
+            <td style="border-left:none;">${this.calculationData?.total_tax_deduction ?? 0}</td>
+          </tr>
+          <tr>
+            <td style="border-right:none;">${this.isJobBased ? 'Job Amount' : 'Present Day Hours Salary'}</td>
+            <td style="border-left:none; border-right:none;">${this.isJobBased ? (this.calculationData?.job_amount ?? 0) : (this.calculationData?.present_day_hrs_salary ?? 0)}</td>
+            <td style="border-left:1px solid #000; border-right:none;">PF Employee</td>
+            <td style="border-left:none;">${this.calculationData?.pf_employee_deduction ?? 0}</td>
+          </tr>
+          <tr>
+            <td style="border-right:none;">Overtime</td>
+            <td style="border-left:none; border-right:none;">${this.calculationData?.overtime_amount ?? 0}</td>
+            <td style="border-left:1px solid #000; border-right:none;">PF Employer</td>
+            <td style="border-left:none;">${this.calculationData?.pf_employer_contribution ?? 0}</td>
+          </tr>
+          <tr>
+            <td style="border-right:none;">Incentive</td>
+            <td style="border-left:none; border-right:none;">${this.calculationData?.incentive_amount ?? 0}</td>
+            <td style="border-left:1px solid #000; border-right:none;">ESIC</td>
+            <td style="border-left:none;">${this.calculationData?.esic_deduction ?? 0}</td>
+          </tr>
+          <tr>
+            <td style="border-right:none;">Total Miscellaneous Expenses</td>
+            <td style="border-left:none; border-right:none;">${this.calculationData?.extra_expenses ?? 0}</td>
+            <td style="border-left:1px solid #000; border-right:none;">Advance EMI</td>
+            <td style="border-left:none;">${this.calculationData?.advance_amount ?? 0}</td>
+          </tr>
+          <tr>
+            <td style="border-right:none;"></td>
+            <td style="border-left:none; border-right:none;"></td>
+            <td style="border-left:1px solid #000; border-right:none;">Total Miscellaneous Deductions</td>
+            <td style="border-left:none;">${this.calculationData?.extra_deductions ?? 0}</td>
+          </tr>
+          <tr style="font-weight:bold; background:#f5f5f5;">
+            <td colspan="2" style="border-right:none;">Net Salary</td>
+            <td colspan="2" style="border-left:none;">₹${this.calculationData?.net_salary ?? 0}</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <p style="margin-top: 20px; font-size: 12px;">This salary statement is issued for information purposes only and shall not be treated as an official document or legal proof of employment, income, or eligibility for any financial facility.</p>
+    </div>
+  `;
+
+    document.body.appendChild(temp);
+
+    html2canvas(temp, { scale: 2, backgroundColor: '#ffffff', useCORS: true })
+      .then((canvas: any) => {
+        const imgData = canvas.toDataURL('image/png');
+        const pdf = new jspdf.jsPDF('p', 'mm', 'a4');
+
+        const pageWidth = 210;
+        const margin = 15;
+        const contentWidth = pageWidth - margin * 2;
+        const imgHeight = (canvas.height * contentWidth) / canvas.width;
+
+        pdf.addImage(imgData, 'PNG', margin, margin, contentWidth, imgHeight);
+
+        const signatureY = margin + imgHeight + 12;
+        pdf.setFontSize(12);
+        pdf.text('Employer Signature:', margin, signatureY);
+        pdf.text('Employee Signature:', pageWidth / 2 + 10, signatureY);
+
+        pdf.setLineWidth(0.5);
+        pdf.line(margin, signatureY + 6, margin + 60, signatureY + 6);
+        pdf.line(pageWidth / 2 + 10, signatureY + 6, pageWidth / 2 + 70, signatureY + 6);
+
+        const employeeName = this.employeeDetails.emp_name || 'Employee';
+        pdf.save(`${employeeName}_Payslip.pdf`);
+
+        document.body.removeChild(temp);
+      })
+      .catch((err: any) => {
+        console.error('Error generating payslip:', err);
+        document.body.removeChild(temp);
+      });
+  }
+
+  allowOnlyNumbers(event: KeyboardEvent) {
+    const input = event.target as HTMLInputElement;
+    const char = event.key;
+
+    // allow control keys
+    if (event.ctrlKey || event.metaKey || char.length > 1) return;
+
+    // only digits and dot
+    if (!/^[0-9.]$/.test(char)) {
+      event.preventDefault();
+      return;
+    }
+
+    // build what the value would be after this key
+    const start = input.selectionStart ?? input.value.length;
+    const end = input.selectionEnd ?? input.value.length;
+    const next = input.value.slice(0, start) + char + input.value.slice(end);
+
+    // allow digits with optional single dot and max 2 decimals
+    if (!/^\d*\.?\d{0,2}$/.test(next)) {
+      event.preventDefault();
+    }
+  }
+
+  onAmountPaste(event: ClipboardEvent) {
+    const text = event.clipboardData?.getData('text') ?? '';
+    if (!/^\d+(\.\d{1,2})?$/.test(text.trim())) {
+      event.preventDefault();
+    }
+  }
+
 }
